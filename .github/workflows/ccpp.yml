@@ -45,6 +45,6 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        autobuild build -A 64 -c ReleaseFS_open --no-configure
+        autobuild build -A 64 -c ReleaseFS_open --no-configure -- -target llpackage
 
     
