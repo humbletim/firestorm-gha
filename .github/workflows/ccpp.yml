@@ -39,16 +39,12 @@ jobs:
     - name: Try to configure autobuild
       shell: cmd
       run: |
-        set
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        set
-        autobuild configure -c ReleaseFS_open -- --package --chan GHA -DLL_TESTS:BOOL=TRUE
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --chan GHA -DLL_TESTS:BOOL=TRUE
     - name: Try to configure autobuild
       shell: cmd
       run: |
-        set
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        set
         autobuild build -A 64 -c ReleaseFS_open --no-configure
 
     
