@@ -20,9 +20,9 @@ jobs:
       run: echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
     - name: Cache VS2013
       id: cache-vs2013
-      uses: actions/cache@v1
+      uses: pat-s/always-upload-cache@v1.2.0
       with:
-        path: /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 12.0/VC/
+        path: /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 12.0
         key: cache-vs2013
     - name: Download VS2013 Community
       if: steps.cache-vs2013.outputs.cache-hit != 'true'
@@ -52,6 +52,6 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        msbuild build-vc120-60/Firestorm.sln -target:llpackage
+        msbuild build-vc120-64/Firestorm.sln -target:llpackage
 
     
