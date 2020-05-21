@@ -43,12 +43,12 @@ jobs:
       run: autobuild --version
     - name: Clone build variables
       run: git clone https://vcs.firestormviewer.org/fs-build-variables
-    - name: Try to configure autobuild
+    - name: Configure autobuild
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
         autobuild configure -A 64 -c ReleaseFS_open -- --package --chan GHA -DLL_TESTS:BOOL=TRUE
-    - name: Try to configure autobuild
+    - name: Build & Package
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
