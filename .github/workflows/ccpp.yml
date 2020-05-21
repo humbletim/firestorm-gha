@@ -29,16 +29,14 @@ jobs:
       run: autobuild --version
     - name: Clone build variables
       run: git clone https://vcs.firestormviewer.org/fs-build-variables
+    - name: Set env
+      run: echo ::set-env name=AUTOBUILD_VARIABLES_FILE::$(pwd)/fs-build-variables/variables
     - name: Try to configure autobuild
-      env:
-        AUTOBUILD_VARIABLES_FILE: ./fs-build-variables/variables
       run: |
         ls
-        echo $AUTOBUILD_VARIABLES_FILE
+        echo AUTOBUILD_VARIABLES_FILE = ${AUTOBUILD_VARIABLES_FILE}
         autobuild configure -c ReleaseFS_open -- --fmodstudio --package --chan GHA -DLL_TESTS:BOOL=TRUE
     - name: Try to configure autobuild
-      env:
-        AUTOBUILD_VARIABLES_FILE: ./fs-build-variables/variables
       run: |
         autobuild build -A 64 -c ReleaseFS_open --no-configure
 
