@@ -11,7 +11,7 @@ defaults:
 jobs:
   build:
     env:
-      AUTOBUILD_VARIABLES_FILE: ${GITHUB_WORKSPACE}/fs-build-variables/variables
+      AUTOBUILD_VARIABLES_FILE: ${{ env.GITHUB_WORKSPACE }}/fs-build-variables/variables
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +35,6 @@ jobs:
       run: |
         ls
         echo $AUTOBUILD_VARIABLES_FILE
-        tree .
         autobuild configure -c ReleaseFS_open -- --fmodstudio --package --chan GHA -DLL_TESTS:BOOL=TRUE
     - name: Try to configure autobuild
       run: |
