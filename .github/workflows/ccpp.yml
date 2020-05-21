@@ -10,6 +10,8 @@ defaults:
     shell: bash
 jobs:
   build:
+    env:
+      AUTOBUILD_VSVER: 120
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +37,7 @@ jobs:
       run: |
         ls
         echo AUTOBUILD_VARIABLES_FILE = ${AUTOBUILD_VARIABLES_FILE}
-        autobuild configure -c ReleaseFS_open -- --fmodstudio --package --chan GHA -DLL_TESTS:BOOL=TRUE
+        autobuild configure -c ReleaseFS_open -- --package --chan GHA -DLL_TESTS:BOOL=TRUE
     - name: Try to configure autobuild
       run: |
         autobuild build -A 64 -c ReleaseFS_open --no-configure
