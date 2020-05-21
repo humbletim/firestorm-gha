@@ -11,7 +11,7 @@ defaults:
 jobs:
   build:
     env:
-      AUTOBUILD_VARIABLES_FILE: ${{ GITHUB_WORKSPACE }}/fs-build-variables/variables
+      AUTOBUILD_VARIABLES_FILE: ${GITHUB_WORKSPACE}/fs-build-variables/variables
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
