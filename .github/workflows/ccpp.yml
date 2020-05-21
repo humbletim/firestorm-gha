@@ -22,7 +22,7 @@ jobs:
       id: cache-vs2013
       uses: pat-s/always-upload-cache@v1.2.0
       with:
-        path: /c/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 12.0
+        path: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 12.0
         key: cache-vs2013
     - name: Download VS2013 Community
       if: steps.cache-vs2013.outputs.cache-hit != 'true'
