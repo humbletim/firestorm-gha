@@ -31,14 +31,14 @@ jobs:
       run: git clone https://vcs.firestormviewer.org/fs-build-variables
     - name: Try to configure autobuild
       env:
-        AUTOBUILD_VARIABLES_FILE: ${{ env.GITHUB_WORKSPACE }}/fs-build-variables/variables
+        AUTOBUILD_VARIABLES_FILE: ./fs-build-variables/variables
       run: |
         ls
         echo $AUTOBUILD_VARIABLES_FILE
         autobuild configure -c ReleaseFS_open -- --fmodstudio --package --chan GHA -DLL_TESTS:BOOL=TRUE
     - name: Try to configure autobuild
       env:
-        AUTOBUILD_VARIABLES_FILE: ${{ env.GITHUB_WORKSPACE }}/fs-build-variables/variables
+        AUTOBUILD_VARIABLES_FILE: ${{ GITHUB_WORKSPACE }}/fs-build-variables/variables
       run: |
         autobuild build -A 64 -c ReleaseFS_open --no-configure
 
