@@ -5,12 +5,12 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+defaults:
+  run:
+    shell: bash
 jobs:
   build:
-
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Setup python
@@ -18,9 +18,15 @@ jobs:
       with:
         python-version: 2.7
         architecture: x64
-    - name: configure
-      shell: bash
+    - name: Get software versions please
       run: |
         cmake --version
         git --version
         python --version
+    - name: Install autobuild through PIP
+      run: pip install git+https://vcs.firestormviewer.org/autobuild-1.1#egg=autobuild
+    - name: Get autobuild version
+      run: autobuild --version
+    - name: Clone build variables
+      run: git clone https://vcs.firestormviewer.org/fs-build-variables
+    
