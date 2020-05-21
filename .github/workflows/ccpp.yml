@@ -10,6 +10,8 @@ defaults:
     shell: bash
 jobs:
   build:
+    env:
+      AUTOBUILD_VARIABLES_FILE: ${{ GITHUB_WORKSPACE }}/fs-build-variables/variables
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -29,4 +31,14 @@ jobs:
       run: autobuild --version
     - name: Clone build variables
       run: git clone https://vcs.firestormviewer.org/fs-build-variables
+    - name: Try to configure autobuild
+      run: |
+        ls
+        echo $AUTOBUILD_VARIABLES_FILE
+        tree .
+        autobuild configure -c ReleaseFS_open -- --fmodstudio --package --chan GHA -DLL_TESTS:BOOL=TRUE
+    - name: Try to configure autobuild
+      run: |
+        autobuild build -A 64 -c ReleaseFS_open --no-configure
+
     
