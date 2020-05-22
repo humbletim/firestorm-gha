@@ -45,7 +45,7 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        msbuild build-vc120-64/Firestorm.sln -target:llpackage /p:Configuration=Release /p:Platform=x64
+        msbuild build-vc120-64/Firestorm.sln -target:llpackage /p:Configuration=Release /p:Platform=x64 -maxcpucount:3
     - uses: actions/upload-artifact@v2
       with:
         name: fs-gha-artifact
