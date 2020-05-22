@@ -18,14 +18,7 @@ jobs:
     - name: Set env
       shell: cmd
       run: echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
-    - name: Cache VS2013
-      id: cache-vs2013
-      uses: pat-s/always-upload-cache@v1.2.0
-      with:
-        path: C:/Program\ Files\ \(x86\)/Microsoft\ Visual\ Studio\ 12.0
-        key: cache-vs2013
     - name: Download VS2013 Community
-      if: steps.cache-vs2013.outputs.cache-hit != 'true'
       run: choco install visualstudiocommunity2013
     - name: Setup python
       uses: actions/setup-python@v2
@@ -52,6 +45,6 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        msbuild build-vc120-64/Firestorm.sln -target:llpackage
+        msbuild build-vc120-64/Firestorm.sln -target:llpackage /p:Configuration=Release /p:Platform=x64
 
     
