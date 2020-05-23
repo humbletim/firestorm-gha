@@ -12,6 +12,7 @@ jobs:
   build:
     env:
       AUTOBUILD_VSVER: 120
+      PreferredToolArchitecture: x64
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -45,7 +46,7 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        msbuild build-vc120-64/Firestorm.sln -target:llpackage /p:Configuration=Release /p:Platform=x64 -maxcpucount:3
+        msbuild build-vc120-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount /detailedsummary
     - uses: actions/upload-artifact@v2
       with:
         name: fs-gha-artifact
