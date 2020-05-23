@@ -1,13 +1,17 @@
 ﻿#include "llviewerprecompiledheaders.h"
 #include "llviewerVR.h"
 #include "llviewerwindow.h"
+#ifdef _WIN32
 #include "llwindowwin32.h"
+#endif
 #include "llviewercontrol.h"
 #include "llviewercamera.h"
 #include "llagentcamera.h"
 #include "pipeline.h"
 #include "llagent.h"
+#ifdef _WIN32
 #include "llkeyboardwin32.h"
+#endif
 #include "llui.h"
 
 #include "llfloaterreg.h"
@@ -16,14 +20,22 @@
 #include <vector>
 //#include "llrender.h"
 
+#ifdef _WIN32
+#pragma comment(lib, "../../openvr/lib/win64/openvr_api.lib")
+#endif
+
+#ifndef _WIN32
+#define sprintf_s(buffer, buffer_size, stringbuffer, ...) (sprintf(buffer, stringbuffer, __VA_ARGS__))
+#endif
+
 //#include <time.h>
 //#include <sys/time.h>
 llviewerVR::llviewerVR()
 {
 	gHMD = NULL;
 	gRenderModels = NULL;
-	leftEyeDesc.m_nResolveTextureId = NULL;
-	rightEyeDesc.m_nResolveTextureId = NULL;
+	leftEyeDesc.m_nResolveTextureId = 0;
+	rightEyeDesc.m_nResolveTextureId = 0;
 	hud_textp = NULL;
 	m_kEditKey = KEY_F4;
 	m_kDebugKey = KEY_F3;
@@ -716,9 +728,13 @@ bool llviewerVR::ProcessVRCamera()
 			
 			
 			//Set the windows max size and aspect ratio to fit with the HMD.
+#ifdef _WIN32
 			int scrsize = GetSystemMetrics(SM_CYSCREEN);
 			if (GetSystemMetrics(SM_CXSCREEN) < scrsize)
 				scrsize = GetSystemMetrics(SM_CXSCREEN);
+#else
+    int scrsize = 1080;
+#endif
 			LLWindow * WI;
 			WI = gViewerWindow->getWindow();
 			WI->getCursorPosition(&m_MousePos);
@@ -1649,22 +1665,26 @@ void llviewerVR::RenderControllerAxes()
 					//gViewerWindow->handleAnyMouseClick(WI, gCtrlscreen[unTrackedDevice], mask, LLMouseHandler::CLICK_RIGHT, TRUE);
 
 
+#ifdef _WIN32
 					INPUT Inputs[1] { 0 };
 					Inputs[0].type = INPUT_MOUSE;
 					Inputs[0].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
 					SendInput(1, Inputs, sizeof(INPUT));
+#else
+#endif
 				}
 				else if (gRightClick[unTrackedDevice] && !(state.ulButtonPressed &  vr::ButtonMaskFromId(vr::k_EButton_Grip)))
 				{
 					gRightClick[unTrackedDevice] = FALSE;
 
 					//gViewerWindow->handleAnyMouseClick(WI, gCtrlscreen[unTrackedDevice], mask, LLMouseHandler::CLICK_RIGHT, FALSE);
+#ifdef _WIN32
 					INPUT Inputs[1] = { 0 };
 					Inputs[0].type = INPUT_MOUSE;
 					Inputs[0].mi.dwFlags = MOUSEEVENTF_RIGHTUP;
 					SendInput(1, Inputs, sizeof(INPUT));
-
-
+#else
+#endif
 				}
 
 
@@ -1683,18 +1703,24 @@ void llviewerVR::RenderControllerAxes()
 						//size.mY = height - gCtrlscreen[0].mY;
 						WI->setCursorPosition(cpos);
 					}
+#ifdef _WIN32
 					INPUT Inputs[1] = { 0 };
 					Inputs[0].type = INPUT_MOUSE;
 					Inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
 					SendInput(1, Inputs, sizeof(INPUT));
+#else
+#endif
 				}
 				else if (gLeftClick[unTrackedDevice] && !(state.ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Trigger)))
 				{
 					gLeftClick[unTrackedDevice] = FALSE;
+#ifdef _WIN32
 					INPUT Inputs[1] = { 0 };
 					Inputs[0].type = INPUT_MOUSE;
 					Inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTUP;
 					SendInput(1, Inputs, sizeof(INPUT));
+#else
+#endif
 				}
 
 				if(gAgentCamera.getCameraMode() != CAMERA_MODE_MOUSELOOK && gLeftClick[unTrackedDevice] && cpos.mX>-1 && cpos.mX < width  && cpos.mY >-1 && cpos.mY < height)

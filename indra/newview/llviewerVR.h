@@ -1,4 +1,6 @@
-#include "openvr.h"
+#pragma once
+
+#include "../../openvr/headers/openvr.h"
 #include "llhudtext.h"
 #include "llgl.h"
 #include "string.h"
@@ -11,7 +13,6 @@
 //#include "llagent.h"
 //#include "llviewerwindow.h"
 
-#pragma once
 
 class llviewerVR
 {
