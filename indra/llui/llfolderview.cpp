@@ -343,9 +343,9 @@ void LLFolderView::filter( LLFolderViewFilter& filter )
 {
 	LL_RECORD_BLOCK_TIME(FTM_FILTER);
 	// <FS:Ansariel> Replace frequently called gSavedSettings
-    //filter.resetTime(llclamp(LLUI::sSettingGroups["config"]->getS32(mParentPanel.get()->getVisible() ? "FilterItemsMaxTimePerFrameVisible" : "FilterItemsMaxTimePerFrameUnvisible"), 1, 100));
-	static LLCachedControl<S32> sFilterItemsMaxTimePerFrameVisible(*LLUI::sSettingGroups["config"], "FilterItemsMaxTimePerFrameVisible");
-	static LLCachedControl<S32> sFilterItemsMaxTimePerFrameUnvisible(*LLUI::sSettingGroups["config"], "FilterItemsMaxTimePerFrameUnvisible");
+    //filter.resetTime(llclamp(LLUI::getInstance()->mSettingGroups["config"]->getS32(mParentPanel.get()->getVisible() ? "FilterItemsMaxTimePerFrameVisible" : "FilterItemsMaxTimePerFrameUnvisible"), 1, 100));
+	static LLCachedControl<S32> sFilterItemsMaxTimePerFrameVisible(*LLUI::getInstance()->mSettingGroups["config"], "FilterItemsMaxTimePerFrameVisible");
+	static LLCachedControl<S32> sFilterItemsMaxTimePerFrameUnvisible(*LLUI::getInstance()->mSettingGroups["config"], "FilterItemsMaxTimePerFrameUnvisible");
 	filter.resetTime(llclamp((mParentPanel.get()->getVisible() ? sFilterItemsMaxTimePerFrameVisible() : sFilterItemsMaxTimePerFrameUnvisible()), 1, 100));
 	// </FS:Ansariel>
 
@@ -640,7 +640,7 @@ void LLFolderView::setDragStart(S32 screen_x, S32 screen_y)
 
 bool LLFolderView::isOverDragThreshold(S32 screen_x, S32 screen_y)
 {
-	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::sSettingGroups["config"], "DragAndDropDistanceThreshold", 3);
+	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::getInstance()->mSettingGroups["config"], "DragAndDropDistanceThreshold", 3);
 	
 	S32 dX = screen_x - mDragStartX;
 	S32 dY = screen_y - mDragStartY;
@@ -685,8 +685,8 @@ void LLFolderView::draw()
 	}
 
 	// <FS:Ansariel> Performance improvement
-	//if (mSearchTimer.getElapsedTimeF32() > LLUI::sSettingGroups["config"]->getF32("TypeAheadTimeout") || !mSearchString.size())
-	static LLCachedControl<F32> typeAheadTimeout(*LLUI::sSettingGroups["config"], "TypeAheadTimeout");
+	//if (mSearchTimer.getElapsedTimeF32() > LLUI::getInstance()->mSettingGroups["config"]->getF32("TypeAheadTimeout") || !mSearchString.size())
+	static LLCachedControl<F32> typeAheadTimeout(*LLUI::getInstance()->mSettingGroups["config"], "TypeAheadTimeout");
 	if (mSearchTimer.getElapsedTimeF32() > typeAheadTimeout || !mSearchString.size())
 	// </FS:Ansariel>
 	{
@@ -764,7 +764,7 @@ void LLFolderView::closeRenamer( void )
 	if (mRenamer && mRenamer->getVisible())
 	{
 		// Triggers onRenamerLost() that actually closes the renamer.
-		LLUI::removePopup(mRenamer);
+		LLUI::getInstance()->removePopup(mRenamer);
 	}
 }
 
@@ -1112,7 +1112,7 @@ void LLFolderView::startRenamingSelectedItem( void )
 		// set focus will fail unless item is visible
 		mRenamer->setFocus( TRUE );
 		mRenamer->setTopLostCallback(boost::bind(&LLFolderView::onRenamerLost, this));
-		LLUI::addPopup(mRenamer);
+		LLUI::getInstance()->addPopup(mRenamer);
 	}
 }
 
@@ -1338,7 +1338,47 @@ BOOL LLFolderView::handleKeyHere( KEY key, MASK mask )
 			handled = TRUE;
 		}
 		break;
+
+	// <FS:Ansariel> FIRE-19933: Open context menu on context menu key press
+	case KEY_CONTEXT_MENU:
+		S32 count = mSelectedItems.size();
+		LLMenuGL* menu = (LLMenuGL*)mPopupMenuHandle.get();
+		if (( count > 0 && (hasVisibleChildren()) ) // show menu only if selected items are visible
+			&& menu )
+		{
+			if (mCallbackRegistrar)
+			{
+				mCallbackRegistrar->pushScope();
+			}
+
+			updateMenuOptions(menu);
+			menu->updateParent(LLMenuGL::sMenuContainer);
+
+			LLView* spawning_view = getParentByType<LLFolderViewScrollContainer>();
+			if (!spawning_view)
+			{
+				spawning_view = this;
+			}
+
+			LLMenuGL::showPopup(spawning_view, menu, spawning_view->getRect().getCenterX(), spawning_view->getRect().getCenterY());
+
+			if (mCallbackRegistrar)
+			{
+				mCallbackRegistrar->popScope();
+			}
+		}
+		else
+		{
+			if (menu && menu->getVisible())
+			{
+				menu->setVisible(FALSE);
+			}
+			setSelection(NULL, FALSE, TRUE);
+		}
+		handled = TRUE;
+		break;
 	}
+	// </FS:Ansariel>
 
 	return handled;
 }
@@ -1369,7 +1409,7 @@ BOOL LLFolderView::handleUnicodeCharHere(llwchar uni_char)
 		}
 
 		//do text search
-		if (mSearchTimer.getElapsedTimeF32() > LLUI::sSettingGroups["config"]->getF32("TypeAheadTimeout"))
+		if (mSearchTimer.getElapsedTimeF32() > LLUI::getInstance()->mSettingGroups["config"]->getF32("TypeAheadTimeout"))
 		{
 			mSearchString.clear();
 		}
@@ -1868,7 +1908,7 @@ void LLFolderView::updateRenamerPosition()
 		screenPointToLocal( x, y, &x, &y );
 		mRenamer->setOrigin( x, y );
 
-		LLRect scroller_rect(0, 0, (S32)LLUI::getWindowSize().mV[VX], 0);
+		LLRect scroller_rect(0, 0, (S32)LLUI::getInstance()->getWindowSize().mV[VX], 0);
 		if (mScrollContainer)
 		{
 			scroller_rect = mScrollContainer->getContentWindowRect();

@@ -134,6 +134,7 @@ class FSViewerManifest:
                                                                                     self.address_size),
                                                                                     'w')
         symbolTar.add( "%s/Firestorm-bin.exe" % self.args['configuration'].lower(), "firestorm-bin.exe" )
+        symbolTar.add( "%s/build_data.json" % self.args['configuration'].lower(), "build_data.json" )
         symbolTar.add( "%s/%s" % (self.args['configuration'].lower(),pdbName), pdbName )
         symbolTar.close()
 
@@ -184,3 +185,11 @@ class FSViewerManifest:
                 os.unlink( sName )
 
             os.rename("%s/firestorm-symbols-%s-%d.tar.bz2" % (self.args['configuration'].lower(), osname, self.address_size), sName)
+
+
+    # New llmanifest is braindead and does not allow any optional files. for some files.
+    # For some files likes jemalloc or openjpeg it makes sense to allow them to be abesent
+    def fs_try_path( self, src, dst=None ):
+        if self.path( src,dst ) == 0:
+            self.missing.pop()
+

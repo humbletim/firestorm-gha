@@ -129,6 +129,7 @@ bool move_task_inventory_callback(const LLSD& notification, const LLSD& response
 bool confirm_attachment_rez(const LLSD& notification, const LLSD& response);
 void teleport_via_landmark(const LLUUID& asset_id);
 static BOOL can_move_to_outfit(LLInventoryItem* inv_item, BOOL move_is_into_current_outfit);
+static bool can_move_to_my_outfits(LLInventoryModel* model, LLInventoryCategory* inv_cat, U32 wear_limit);
 static BOOL can_move_to_landmarks(LLInventoryItem* inv_item);
 // <FS:CR> Function left unused from FIRE-7219
 //static bool check_category(LLInventoryModel* model,
@@ -336,6 +337,14 @@ BOOL LLInvFVBridge::isItemRemovable() const
 // Can be moved to another folder
 BOOL LLInvFVBridge::isItemMovable() const
 {
+	// <FS:Ansariel> FIRE-28977: Lock special and locked folders from being DaD'ed
+	if (isLockedFolder())
+	{
+		// Child of a protected folder -> not movable
+		return FALSE;
+	}
+	// </FS:Ansariel
+
 	return TRUE;
 }
 
@@ -859,9 +868,9 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 			if (!isInboxFolder())
 			{
 				items.push_back(std::string("Rename"));
-				// <FS> Protected folder
+				// <FS> Locked folder
 				//if (!isItemRenameable() || ((flags & FIRST_SELECTED_ITEM) == 0))
-				if (!isItemRenameable() || ((flags & FIRST_SELECTED_ITEM) == 0) || isProtectedFolder())
+				if (!isItemRenameable() || ((flags & FIRST_SELECTED_ITEM) == 0) || isLockedFolder())
 				// </FS>
 				{
 					disabled_items.push_back(std::string("Rename"));
@@ -919,7 +928,7 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 	//if (!isCOFFolder() && !isInboxFolder()
 	if (!isCOFFolder()
 		// <FS:TT> Client LSL Bridge (also for #AO)
-		&& !isProtectedFolder())
+		&& !isLockedFolder())
 		// </FS:TT>
 	{
 		items.push_back(std::string("Paste"));
@@ -931,7 +940,7 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 
 	if (gSavedSettings.getBOOL("InventoryLinking")
 		// <FS:TT> Client LSL Bridge (also for #AO)
-		&& !isProtectedFolder()
+		&& !isLockedFolder()
 		// </FS:TT>
 		)
 	{
@@ -1222,7 +1231,7 @@ void LLInvFVBridge::addMoveToDefaultFolderMenuOption(menuentry_vec_t& items)
 {
 	const LLInventoryObject* obj = getInventoryObject();
 
-	if (isAgentInventory() && !isProtectedFolder(true) && obj &&
+	if (isAgentInventory() && !isLockedFolder(true) && obj &&
 		obj->getActualType() != LLAssetType::AT_CATEGORY &&
 		obj->getActualType() != LLAssetType::AT_LINK_FOLDER &&
 		obj->getActualType() != LLAssetType::AT_LINK &&
@@ -1353,7 +1362,7 @@ BOOL LLInvFVBridge::isCOFFolder() const
 }
 
 // <FS:TT> Client LSL Bridge (also for #AO)
-BOOL LLInvFVBridge::isProtectedFolder(bool ignore_setting /*= false*/) const
+BOOL LLInvFVBridge::isLockedFolder(bool ignore_setting /*= false*/) const
 {
 	const LLInventoryModel* model = getInventoryModel();
 	if (!model)
@@ -1363,21 +1372,21 @@ BOOL LLInvFVBridge::isProtectedFolder(bool ignore_setting /*= false*/) const
 
 	if ((mUUID == FSLSLBridge::instance().getBridgeFolder()
 		|| model->isObjectDescendentOf(mUUID, FSLSLBridge::instance().getBridgeFolder()))
-		&& (gSavedPerAccountSettings.getBOOL("ProtectBridgeFolder") || ignore_setting))
+		&& (gSavedPerAccountSettings.getBOOL("LockBridgeFolder") || ignore_setting))
 	{
 		return TRUE;
 	}
 
 	if ((mUUID == AOEngine::instance().getAOFolder()
 		|| model->isObjectDescendentOf(mUUID, AOEngine::instance().getAOFolder()))
-		&& (gSavedPerAccountSettings.getBOOL("ProtectAOFolders") || ignore_setting))
+		&& (gSavedPerAccountSettings.getBOOL("LockAOFolders") || ignore_setting))
 	{
 		return TRUE;
 	}
 
 	if ((mUUID == FSFloaterWearableFavorites::getFavoritesFolder()
 		|| model->isObjectDescendentOf(mUUID, FSFloaterWearableFavorites::getFavoritesFolder()))
-		&& gSavedPerAccountSettings.getBOOL("ProtectWearableFavoritesFolders"))
+		&& gSavedPerAccountSettings.getBOOL("LockWearableFavoritesFolders"))
 	{
 		return TRUE;
 	}
@@ -1999,7 +2008,7 @@ void LLItemBridge::restoreToWorld()
 
 		msg->nextBlockFast(_PREHASH_InventoryData);
 		itemp->packMessage(msg);
-		msg->sendReliable(gAgent.getRegion()->getHost());
+		msg->sendReliable(gAgent.getRegionHost());
 		//remove local inventory copy, sim will deal with permissions and removing the item
 		//from the actual inventory if its a no-copy etc
 		if(!itemp->getPermissions().allowCopyBy(gAgent.getID()))
@@ -2383,6 +2392,21 @@ BOOL LLFolderBridge::isItemMovable() const
 		// If it's a protected type folder, we can't move it
 		if (LLFolderType::lookupIsProtectedType(((LLInventoryCategory*)obj)->getPreferredType()))
 			return FALSE;
+
+		// <FS:Ansariel> FIRE-28977: Lock special and locked folders from being DaD'ed
+		if (obj->getName() == ROOT_FIRESTORM_FOLDER || obj->getName() == RLV_ROOT_FOLDER || isLockedFolder())
+		{
+			return FALSE;
+		}
+		// </FS:Ansariel>
+
+		// <FS:Ansariel> FIRE-29342: Protect folder option
+		if (isProtected())
+		{
+			return FALSE;
+		}
+		// </FS:Ansariel>
+
 		return TRUE;
 	}
 	return FALSE;
@@ -2527,6 +2551,13 @@ BOOL LLFolderBridge::isItemRemovable() const
 		return FALSE;
 	}
 
+	// <FS:Ansariel> FIRE-29342: Protected folder option
+	if (isProtected())
+	{
+		return FALSE;
+	}
+	// </FS:Ansariel>
+
 	LLInventoryPanel* panel = mInventoryPanel.get();
 	LLFolderViewFolder* folderp = dynamic_cast<LLFolderViewFolder*>(panel ?   panel->getItemByID(mUUID) : NULL);
 	if (folderp)
@@ -2538,11 +2569,11 @@ BOOL LLFolderBridge::isItemRemovable() const
 			return FALSE;
 		}
 	}
-    
-    if (isMarketplaceListingsFolder() && LLMarketplaceData::instance().getActivationState(mUUID))
-    {
-        return FALSE;
-    }
+
+	if (isMarketplaceListingsFolder() && (!LLMarketplaceData::instance().isSLMDataFetched() || LLMarketplaceData::instance().getActivationState(mUUID)))
+	{
+		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -2701,7 +2732,7 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 	if (!isAgentAvatarValid()) return FALSE;
 	if (!isAgentInventory()) return FALSE; // cannot drag categories into library
 	// <FS:TT> Client LSL Bridge (also for #AO)
-	if (isProtectedFolder()) return FALSE;
+	if (isLockedFolder()) return FALSE;
 	// </FS:TT>
 
 	LLInventoryPanel* destination_panel = mInventoryPanel.get();
@@ -2777,9 +2808,28 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 			is_movable = FALSE;
 			// tooltip?
 		}
+
+		U32 max_items_to_wear = gSavedSettings.getU32("WearFolderLimit");
 		if (is_movable && move_is_into_outfit)
 		{
-			if((mUUID == my_outifts_id) || (getCategory() && getCategory()->getPreferredType() == LLFolderType::FT_NONE))
+			if (mUUID == my_outifts_id)
+			{
+				if (source != LLToolDragAndDrop::SOURCE_AGENT || move_is_from_marketplacelistings)
+				{
+					tooltip_msg = LLTrans::getString("TooltipOutfitNotInInventory");
+					is_movable = false;
+				}
+				else if (can_move_to_my_outfits(model, inv_cat, max_items_to_wear))
+				{
+					is_movable = true;
+				}
+				else
+				{
+					tooltip_msg = LLTrans::getString("TooltipCantCreateOutfit");
+					is_movable = false;
+				}
+			}
+			else if(getCategory() && getCategory()->getPreferredType() == LLFolderType::FT_NONE)
 			{
 				is_movable = ((inv_cat->getPreferredType() == LLFolderType::FT_NONE) || (inv_cat->getPreferredType() == LLFolderType::FT_OUTFIT));
 			}
@@ -2824,7 +2874,6 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 				}
 			}
 		}
-		U32 max_items_to_wear = gSavedSettings.getU32("WearFolderLimit");
 		if (is_movable
 			&& move_is_into_current_outfit
 			&& descendent_items.size() > max_items_to_wear)
@@ -2990,8 +3039,14 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 				}
 			}
 
+			if (mUUID == my_outifts_id)
+			{
+				// Category can contains objects,
+				// create a new folder and populate it with links to original objects
+				dropToMyOutfits(inv_cat);
+			}
 			// if target is current outfit folder we use link
-			if (move_is_into_current_outfit &&
+			else if (move_is_into_current_outfit &&
 				(inv_cat->getPreferredType() == LLFolderType::FT_NONE ||
 				inv_cat->getPreferredType() == LLFolderType::FT_OUTFIT))
 			{
@@ -3648,6 +3703,27 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
         const LLUUID &marketplacelistings_id = model->findCategoryUUIDForType(LLFolderType::FT_MARKETPLACE_LISTINGS, false);
         move_folder_to_marketplacelistings(cat, marketplacelistings_id, ("move_to_marketplace_listings" != action), (("copy_or_move_to_marketplace_listings" == action)));
     }
+	// <FS:Ansariel> FIRE-29342: Protect folder option
+	else if ("protect_folder" == action)
+	{
+		LLSD protected_folders = gSavedPerAccountSettings.getLLSD("FSProtectedFolders");
+		protected_folders.append(mUUID);
+		gSavedPerAccountSettings.setLLSD("FSProtectedFolders", protected_folders);
+	}
+	else if ("unprotect_folder" == action)
+	{
+		LLSD protected_folders = gSavedPerAccountSettings.getLLSD("FSProtectedFolders");
+		LLSD new_protected_folders;
+		for (LLSD::array_const_iterator it = protected_folders.beginArray(); it != protected_folders.endArray(); ++it)
+		{
+			if ((*it).asUUID() != mUUID)
+			{
+				new_protected_folders.append(*it);
+			}
+		}
+		gSavedPerAccountSettings.setLLSD("FSProtectedFolders", new_protected_folders);
+	}
+	// </FS:Ansariel>
 }
 
 void LLFolderBridge::gatherMessage(std::string& message, S32 depth, LLError::ELevel log_level)
@@ -3958,7 +4034,7 @@ void LLFolderBridge::perform_pasteFromClipboard()
 
 		const BOOL move_is_into_current_outfit = (mUUID == current_outfit_id);
 		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
-		const BOOL move_is_into_outfit = move_is_into_my_outfits || (getCategory() && getCategory()->getPreferredType()==LLFolderType::FT_OUTFIT);
+		const BOOL move_is_into_outfit = /*move_is_into_my_outfits ||*/ (getCategory() && getCategory()->getPreferredType()==LLFolderType::FT_OUTFIT); // <FS:Ansariel> Unable to copy&paste into outfits anymore
         const BOOL move_is_into_marketplacelistings = model->isObjectDescendentOf(mUUID, marketplacelistings_id);
 		const BOOL move_is_into_favorites = (mUUID == favorites_id);
 		const BOOL move_is_into_lost_and_found = model->isObjectDescendentOf(mUUID, lost_and_found_id);
@@ -4044,11 +4120,45 @@ void LLFolderBridge::perform_pasteFromClipboard()
 						return;
 					}
 				}
-				if (move_is_into_current_outfit || move_is_into_outfit)
+				// <FS:Ansariel> Unable to copy&paste into outfits anymore
+				//if (move_is_into_outfit)
+				if (move_is_into_my_outfits)
+				// </FS:Ansariel>
+				{
+					// <FS:Ansariel> Unable to copy&paste into outfits anymore
+					//if (!move_is_into_my_outfits && item && can_move_to_outfit(item, move_is_into_current_outfit))
+					if (move_is_into_outfit && item && can_move_to_outfit(item, move_is_into_current_outfit))
+					// </FS:Ansariel>
+					{
+						dropToOutfit(item, move_is_into_current_outfit);
+					}
+					else if (/*move_is_into_my_outfits &&*/ LLAssetType::AT_CATEGORY == obj->getType()) // <FS:Ansariel> Unable to copy&paste into outfits anymore
+					{
+						LLInventoryCategory* cat = model->getCategory(item_id);
+						U32 max_items_to_wear = gSavedSettings.getU32("WearFolderLimit");
+						if (cat && can_move_to_my_outfits(model, cat, max_items_to_wear))
+						{
+							dropToMyOutfits(cat);
+						}
+						else
+						{
+							LLNotificationsUtil::add("MyOutfitsPasteFailed");
+						}
+					}
+					else
+					{
+						LLNotificationsUtil::add("MyOutfitsPasteFailed");
+					}
+				}
+				else if (move_is_into_current_outfit)
 				{
 					if (item && can_move_to_outfit(item, move_is_into_current_outfit))
 					{
 						dropToOutfit(item, move_is_into_current_outfit);
+					}
+					else
+					{
+						LLNotificationsUtil::add("MyOutfitsPasteFailed");
 					}
 				}
 				else if (move_is_into_favorites)
@@ -4357,7 +4467,7 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 	}
 	else if(isAgentInventory()
 			// <FS:ND> moved from buildContextMenu after merge
-			&& !isProtectedFolder()
+			&& !isLockedFolder()
 			// </FS:ND>
 			) // do not allow creating in library
 	{
@@ -4492,7 +4602,26 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 		}
 	}
 
-	
+	// <FS:Ansariel> FIRE-29342: Protect folder option
+	if (isAgentInventory())
+	{
+		LLInventoryObject* obj = getInventoryObject();
+		if (obj)
+		{
+			if (!LLFolderType::lookupIsProtectedType(((LLInventoryCategory*)obj)->getPreferredType()))
+			{
+				if (isProtected())
+				{
+					items.push_back((std::string("UnprotectFolder")));
+				}
+				else
+				{
+					items.push_back((std::string("ProtectFolder")));
+				}
+			}
+		}
+	}
+	// </FS:Ansariel>
 
 	// Add menu items that are dependent on the contents of the folder.
 	LLViewerInventoryCategory* category = (LLViewerInventoryCategory *) model->getCategory(mUUID);
@@ -4890,6 +5019,19 @@ void LLFolderBridge::modifyOutfit(BOOL append)
 	}
 }
 
+// <FS:Ansariel> FIRE-29342: Protect folder option
+bool LLFolderBridge::isProtected() const
+{
+	LLInventoryModel* model = getInventoryModel();
+	if (model)
+	{
+		const uuid_set_t& categories = model->getProtectedCategories();
+		return categories.find(mUUID) != categories.end();
+	}
+
+	return false;
+}
+// </FS:Ansariel>
 
 // +=================================================+
 // |        LLMarketplaceFolderBridge                |
@@ -5019,7 +5161,7 @@ bool move_task_inventory_callback(const LLSD& notification, const LLSD& response
 		{
 			LLInventoryObject::object_list_t inventory_objects;
 			object->getInventoryContents(inventory_objects);
-			int contents_count = inventory_objects.size()-1; //subtract one for containing folder
+			int contents_count = inventory_objects.size();
 			LLInventoryCopyAndWearObserver* inventoryObserver = new LLInventoryCopyAndWearObserver(cat_and_wear->mCatID, contents_count, cat_and_wear->mFolderResponded,
 																									cat_and_wear->mReplace);
 			
@@ -5083,6 +5225,46 @@ static BOOL can_move_to_outfit(LLInventoryItem* inv_item, BOOL move_is_into_curr
 	}
 
 	return TRUE;
+}
+
+// Returns true if folder's content can be moved to Current Outfit or any outfit folder.
+static bool can_move_to_my_outfits(LLInventoryModel* model, LLInventoryCategory* inv_cat, U32 wear_limit)
+{
+    LLInventoryModel::cat_array_t *cats;
+    LLInventoryModel::item_array_t *items;
+    model->getDirectDescendentsOf(inv_cat->getUUID(), cats, items);
+
+    if (items->size() > wear_limit)
+    {
+        return false;
+    }
+
+    if (items->size() == 0)
+    {
+        // Nothing to move(create)
+        return false;
+    }
+
+    if (cats->size() > 0)
+    {
+        // We do not allow subfolders in outfits of "My Outfits" yet
+        return false;
+    }
+
+    LLInventoryModel::item_array_t::iterator iter = items->begin();
+    LLInventoryModel::item_array_t::iterator end = items->end();
+
+    while (iter != end)
+    {
+        LLViewerInventoryItem *item = *iter;
+        if (!can_move_to_outfit(item, false))
+        {
+            return false;
+        }
+        iter++;
+    }
+
+    return true;
 }
 
 // Returns TRUE if item is a landmark or a link to a landmark
@@ -5153,6 +5335,56 @@ void LLFolderBridge::dropToOutfit(LLInventoryItem* inv_item, BOOL move_is_into_c
 	}
 }
 
+void LLFolderBridge::dropToMyOutfits(LLInventoryCategory* inv_cat)
+{
+    // make a folder in the My Outfits directory.
+    const LLUUID dest_id = getInventoryModel()->findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS);
+
+    // Note: creation will take time, so passing folder id to callback is slightly unreliable,
+    // but so is collecting and passing descendants' ids
+    inventory_func_type func = boost::bind(&LLFolderBridge::outfitFolderCreatedCallback, this, inv_cat->getUUID(), _1);
+    gInventory.createNewCategory(dest_id,
+                                 LLFolderType::FT_OUTFIT,
+                                 inv_cat->getName(),
+                                 func);
+}
+
+void LLFolderBridge::outfitFolderCreatedCallback(LLUUID cat_source_id, LLUUID cat_dest_id)
+{
+    LLInventoryModel::cat_array_t* categories;
+    LLInventoryModel::item_array_t* items;
+    getInventoryModel()->getDirectDescendentsOf(cat_source_id, categories, items);
+
+    LLInventoryObject::const_object_list_t link_array;
+
+
+    LLInventoryModel::item_array_t::iterator iter = items->begin();
+    LLInventoryModel::item_array_t::iterator end = items->end();
+    while (iter!=end)
+    {
+        const LLViewerInventoryItem* item = (*iter);
+        // By this point everything is supposed to be filtered,
+        // but there was a delay to create folder so something could have changed
+        LLInventoryType::EType inv_type = item->getInventoryType();
+        if ((inv_type == LLInventoryType::IT_WEARABLE) ||
+            (inv_type == LLInventoryType::IT_GESTURE) ||
+            (inv_type == LLInventoryType::IT_ATTACHMENT) ||
+            (inv_type == LLInventoryType::IT_OBJECT) ||
+            (inv_type == LLInventoryType::IT_SNAPSHOT) ||
+            (inv_type == LLInventoryType::IT_TEXTURE))
+        {
+            link_array.push_back(LLConstPointer<LLInventoryObject>(item));
+        }
+        iter++;
+    }
+
+    if (!link_array.empty())
+    {
+        LLPointer<LLInventoryCallback> cb = NULL;
+        link_inventory_array(cat_dest_id, link_array, cb);
+    }
+}
+
 // Callback for drop item if DAMA required...
 void LLFolderBridge::callback_dropItemIntoFolder(const LLSD& notification, const LLSD& response, LLInventoryItem* inv_item)
 {
@@ -5189,7 +5421,7 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 	if (!isAgentInventory()) return FALSE; // cannot drag into library
 	if (!isAgentAvatarValid()) return FALSE;
 	// <FS:TT> Client LSL Bridge (also for #AO)
-	if (isProtectedFolder()) return FALSE;
+	if (isLockedFolder()) return FALSE;
 	// </FS:TT>
 
 	LLInventoryPanel* destination_panel = mInventoryPanel.get();
@@ -5694,16 +5926,16 @@ bool check_item(const LLUUID& item_id,
 #endif // 0
 // <FS:CR> Unused 2013.10.12
 
-// <FS:Ansariel> Special for protected folders
-bool LLFolderBridge::isProtected() const
+// <FS:Ansariel> Special for locked folders
+bool LLFolderBridge::isLocked() const
 {
-	static LLCachedControl<bool> protectAOFolders(gSavedPerAccountSettings, "ProtectAOFolders");
-	static LLCachedControl<bool> protectBridgeFolder(gSavedPerAccountSettings, "ProtectBridgeFolder");
-	static LLCachedControl<bool> WearableFavoritesprotectBridgeFolder(gSavedPerAccountSettings, "ProtectWearableFavoritesFolders");
+	static LLCachedControl<bool> LockAOFolders(gSavedPerAccountSettings, "LockAOFolders");
+	static LLCachedControl<bool> LockBridgeFolder(gSavedPerAccountSettings, "LockBridgeFolder");
+	static LLCachedControl<bool> LockWearableFavoritesFolders(gSavedPerAccountSettings, "LockWearableFavoritesFolders");
 
-	return ((mUUID == AOEngine::instance().getAOFolder() && protectAOFolders) ||
-		(mUUID == FSLSLBridge::instance().getBridgeFolder() && protectBridgeFolder) ||
-		(mUUID == FSFloaterWearableFavorites::getFavoritesFolder() && WearableFavoritesprotectBridgeFolder));
+	return ((mUUID == AOEngine::instance().getAOFolder() && LockAOFolders) ||
+		(mUUID == FSLSLBridge::instance().getBridgeFolder() && LockBridgeFolder) ||
+		(mUUID == FSFloaterWearableFavorites::getFavoritesFolder() && LockWearableFavoritesFolders));
 }
 // </FS:Ansariel>
 

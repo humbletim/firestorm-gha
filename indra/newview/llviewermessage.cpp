@@ -32,7 +32,6 @@
 #include "llaudioengine.h" 
 #include "llavataractions.h"
 #include "llavatarnamecache.h"		// IDEVO HACK
-#include "lleconomy.h"
 #include "lleventtimer.h"
 #include "llfloaterreg.h"
 #include "llfolderview.h"
@@ -51,6 +50,7 @@
 #include "mean_collision_data.h"
 
 #include "llagent.h"
+#include "llagentbenefits.h"
 #include "llagentcamera.h"
 #include "llcallingcard.h"
 #include "llbuycurrencyhtml.h"
@@ -148,6 +148,7 @@
 #include "fslslbridge.h"
 #include "fsmoneytracker.h"
 #include "llattachmentsmgr.h"
+#include "lleconomy.h"
 #include "llfloaterbump.h"
 #include "llfloaterreg.h"
 #include "llfriendcard.h"
@@ -456,6 +457,11 @@ void give_money(const LLUUID& uuid, LLViewerRegion* region, S32 amount, BOOL is_
 	LL_INFOS("Messaging") << "give_money(" << uuid << "," << amount << ")"<< LL_ENDL;
 	if(can_afford_transaction(amount))
 	{
+		if (uuid.isNull())
+		{
+			LL_WARNS() << "Failed to send L$ gift to to Null UUID." << LL_ENDL;
+			return;
+		}
 //		gStatusBar->debitBalance(amount);
 		LLMessageSystem* msg = gMessageSystem;
 		msg->newMessageFast(_PREHASH_MoneyTransferRequest);
@@ -998,7 +1004,7 @@ bool join_group_response(const LLSD& notification, const LLSD& response)
 	if(option == 0 && !group_id.isNull())
 	{
 		// check for promotion or demotion.
-		S32 max_groups = gMaxAgentGroups;
+		S32 max_groups = LLAgentBenefitsMgr::current().getGroupMembershipLimit();
 		if(gAgent.isInGroup(group_id)) ++max_groups;
 
 		// [CR] FIRE-12229
@@ -1838,8 +1844,27 @@ void LLOfferInfo::fromLLSD(const LLSD& params)
 	*this = params;
 }
 
-void LLOfferInfo::send_auto_receive_response(void)
-{	
+void LLOfferInfo::sendReceiveResponse(bool accept, const LLUUID &destination_folder_id)
+{
+	if(IM_INVENTORY_OFFERED == mIM)
+	{
+		// add buddy to recent people list
+//		LLRecentPeople::instance().add(mFromID);
+// [RLVa:KB] - Checked: RLVa-2.0.1
+		// RELEASE-RLVa: [RLVa-2.0.1] Make sure this stays in sync with the condition in inventory_offer_handler()
+		bool fRlvCanShowName = (!RlvActions::isRlvEnabled()) ||
+			(RlvActions::canShowName(RlvActions::SNC_DEFAULT, mFromID)) || (!RlvUtil::isNearbyAgent(mFromID)) || (RlvUIEnabler::hasOpenIM(mFromID)) || (RlvUIEnabler::hasOpenProfile(mFromID));
+		if (fRlvCanShowName)
+			LLRecentPeople::instance().add(mFromID);
+// [/RLVa:KB]
+	}
+
+	if (mTransactionID.isNull())
+	{
+		// Not provided, message won't work
+		return;
+	}
+
 	LLMessageSystem* msg = gMessageSystem;
 	msg->newMessageFast(_PREHASH_ImprovedInstantMessage);
 	msg->nextBlockFast(_PREHASH_AgentData);
@@ -1858,35 +1883,49 @@ void LLOfferInfo::send_auto_receive_response(void)
 	msg->addU32Fast(_PREHASH_ParentEstateID, 0);
 	msg->addUUIDFast(_PREHASH_RegionID, LLUUID::null);
 	msg->addVector3Fast(_PREHASH_Position, gAgent.getPositionAgent());
-	
-	// Auto Receive Message. The math for the dialog works, because the accept
+
+	// ACCEPT. The math for the dialog works, because the accept
 	// for inventory_offered, task_inventory_offer or
 	// group_notice_inventory is 1 greater than the offer integer value.
 	// Generates IM_INVENTORY_ACCEPTED, IM_TASK_INVENTORY_ACCEPTED, 
 	// or IM_GROUP_NOTICE_INVENTORY_ACCEPTED
-	msg->addU8Fast(_PREHASH_Dialog, (U8)(mIM + 1));
-	msg->addBinaryDataFast(_PREHASH_BinaryBucket, &(mFolderID.mData),
-						   sizeof(mFolderID.mData));
+	// Decline for inventory_offered, task_inventory_offer or
+	// group_notice_inventory is 2 greater than the offer integer value.
+
+	EInstantMessage im = mIM;
+	if (mIM == IM_GROUP_NOTICE_REQUESTED)
+	{
+		// Request has no responder dialogs
+		im = IM_GROUP_NOTICE;
+	}
+
+	if (accept)
+	{
+		msg->addU8Fast(_PREHASH_Dialog, (U8)(im + 1));
+		msg->addBinaryDataFast(_PREHASH_BinaryBucket, &(destination_folder_id.mData),
+								sizeof(destination_folder_id.mData));
+	}
+	else
+	{
+		msg->addU8Fast(_PREHASH_Dialog, (U8)(im + 2));
+		msg->addBinaryDataFast(_PREHASH_BinaryBucket, EMPTY_BINARY_BUCKET, EMPTY_BINARY_BUCKET_SIZE);
+	}
 	// send the message
 	msg->sendReliable(mHost);
-	
-	if(IM_INVENTORY_OFFERED == mIM)
-	{
-		// add buddy to recent people list
-//		LLRecentPeople::instance().add(mFromID);
-// [RLVa:KB] - Checked: RLVa-2.0.1
-		// RELEASE-RLVa: [RLVa-2.0.1] Make sure this stays in sync with the condition in inventory_offer_handler()
-		bool fRlvCanShowName = (!RlvActions::isRlvEnabled()) ||
-			(RlvActions::canShowName(RlvActions::SNC_DEFAULT, mFromID)) || (!RlvUtil::isNearbyAgent(mFromID)) || (RlvUIEnabler::hasOpenIM(mFromID)) || (RlvUIEnabler::hasOpenProfile(mFromID));
-		if (fRlvCanShowName)
-			LLRecentPeople::instance().add(mFromID);
-// [/RLVa:KB]
-	}
+
+	// transaction id is usable only once
+	// Note: a bit of a hack, clicking group notice attachment will not close notice
+	// so we reset no longer usable transaction id to know not to send message again
+	// Once capabilities for responses will be implemented LLOfferInfo will have to
+	// remember that it already responded in another way and ignore IOR_DECLINE
+	mTransactionID.setNull();
 }
 
 // <FS:Ansariel> Optional V1-like inventory accept messages
 void LLOfferInfo::send_decline_response(void)
-{	
+{
+	LLUUID destination_folder_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+
 	LLMessageSystem* msg = gMessageSystem;
 	msg->newMessageFast(_PREHASH_ImprovedInstantMessage);
 	msg->nextBlockFast(_PREHASH_AgentData);
@@ -1906,7 +1945,7 @@ void LLOfferInfo::send_decline_response(void)
 	msg->addUUIDFast(_PREHASH_RegionID, LLUUID::null);
 	msg->addVector3Fast(_PREHASH_Position, gAgent.getPositionAgent());
 	msg->addU8Fast(_PREHASH_Dialog, (U8)(mIM + 2));
-	msg->addBinaryDataFast(_PREHASH_BinaryBucket, EMPTY_BINARY_BUCKET, EMPTY_BINARY_BUCKET_SIZE);
+	msg->addBinaryDataFast(_PREHASH_BinaryBucket, &(destination_folder_id.mData), sizeof(destination_folder_id.mData));
 	msg->sendReliable(mHost);
 }
 // </FS:Ansariel> Optional V1-like inventory accept messages
@@ -1968,7 +2007,10 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 	
 	// TODO: when task inventory offers can also be handled the new way, migrate the code that sets these strings here:
 	from_string = chatHistory_string = mFromName;
-	
+
+	// accept goes to proper folder, decline gets accepted to trash, muted gets declined
+	bool accept_to_trash = true;
+
 	LLNotificationFormPtr modified_form(notification_ptr ? new LLNotificationForm(*notification_ptr->getForm()) : new LLNotificationForm());
 
 	switch(button)
@@ -2026,11 +2068,11 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 			}
 			break;
 		case IM_GROUP_NOTICE:
+		case IM_GROUP_NOTICE_REQUESTED:
 			opener = new LLOpenTaskGroupOffer;
-			send_auto_receive_response();
+			sendReceiveResponse(true, mFolderID);
 			break;
 		case IM_TASK_INVENTORY_OFFERED:
-		case IM_GROUP_NOTICE_REQUESTED:
 			// This is an offer from a task or group.
 			// We don't use a new instance of an opener
 			// We instead use the singular observer gOpenTaskOffer
@@ -2063,10 +2105,10 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 		}
 
 		// <FS:Ansariel> FIRE-3832: Silent accept/decline of inventory offers
-		if (mIM == IM_GROUP_NOTICE)
+		if (mIM == IM_GROUP_NOTICE || mIM == IM_GROUP_NOTICE_REQUESTED)
 		{
 			opener = new LLOpenTaskGroupOffer;
-			send_auto_receive_response();
+			sendReceiveResponse(true, mFolderID);
 		}
 		else if (mIM == IM_INVENTORY_OFFERED)
 		{
@@ -2100,6 +2142,7 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 		{
 			modified_form->setElementEnabled("Mute", false);
 		}
+		accept_to_trash = false; // for notices, but IOR_MUTE normally doesn't happen for notices
 		// MUTE falls through to decline
 	case IOR_DECLINE:
 	case IOR_DECLINE_SILENT: // <FS:Ansariel> FIRE-3832: Silent accept/decline of inventory offers
@@ -2114,21 +2157,35 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 			if( LLMuteList::getInstance()->isMuted(mFromID ) && ! LLMuteList::getInstance()->isLinden(mFromName) )  // muting for SL-42269
 			{
 				chat.mMuted = TRUE;
+				accept_to_trash = false; // will send decline message
 			}
 
 			// *NOTE dzaporozhan
 			// Disabled logging to old chat floater to fix crash in group notices - EXT-4149
 			// LLFloaterChat::addChatHistory(chat);
 			
-			LLDiscardAgentOffer* discard_agent_offer = new LLDiscardAgentOffer(mFolderID, mObjectID);
-			discard_agent_offer->startFetch();
-			if ((catp && gInventory.isCategoryComplete(mObjectID)) || (itemp && itemp->isFinished()))
+			if (mObjectID.notNull()) //make sure we can discard
 			{
-				discard_agent_offer->done();
+				LLDiscardAgentOffer* discard_agent_offer = new LLDiscardAgentOffer(mFolderID, mObjectID);
+				discard_agent_offer->startFetch();
+				if ((catp && gInventory.isCategoryComplete(mObjectID)) || (itemp && itemp->isFinished()))
+				{
+					discard_agent_offer->done();
+				}
+				else
+				{
+					opener = discard_agent_offer;
+				}
 			}
-			else
+			// <FS:Ansariel> Make group notice attachment move to trash optional
+			//else if (mIM == IM_GROUP_NOTICE)
+			else if (mIM == IM_GROUP_NOTICE && gSavedSettings.getBOOL("FSDismissGroupNoticeAttachmentsToTrash"))
+			// </FS:Ansariel>
 			{
-				opener = discard_agent_offer;
+				// group notice needs to request object to trash so that user will see it later
+				// Note: muted agent offers go to trash, not sure if we should do same for notices
+				LLUUID trash = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+				sendReceiveResponse(accept_to_trash, trash);
 			}
 
 			// <FS:Ansariel> Optional V1-like inventory accept messages
@@ -2147,9 +2204,17 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 		}
 	default:
 		// close button probably
-		// The item has already been fetched and is in your inventory, we simply won't highlight it
+		// In case of agent offers item has already been fetched and is in your inventory, we simply won't highlight it
 		// OR delete it if the notification gets killed, since we don't want that to be a vector for 
 		// losing inventory offers.
+		// <FS:Ansariel> Make group notice attachment move to trash optional
+		//if (mIM == IM_GROUP_NOTICE)
+		if (mIM == IM_GROUP_NOTICE && gSavedSettings.getBOOL("FSDismissGroupNoticeAttachmentsToTrash"))
+		// </FS:Ansariel>
+		{
+			LLUUID trash = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+			sendReceiveResponse(true, trash);
+		}
 		break;
 	}
 
@@ -2194,29 +2259,10 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			}
 		}
 	}
-	
-	LLMessageSystem* msg = gMessageSystem;
-	msg->newMessageFast(_PREHASH_ImprovedInstantMessage);
-	msg->nextBlockFast(_PREHASH_AgentData);
-	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
-	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-	msg->nextBlockFast(_PREHASH_MessageBlock);
-	msg->addBOOLFast(_PREHASH_FromGroup, FALSE);
-	msg->addUUIDFast(_PREHASH_ToAgentID, mFromID);
-	msg->addU8Fast(_PREHASH_Offline, IM_ONLINE);
-	msg->addUUIDFast(_PREHASH_ID, mTransactionID);
-	msg->addU32Fast(_PREHASH_Timestamp, NO_TIMESTAMP); // no timestamp necessary
-	std::string name;
-	LLAgentUI::buildFullname(name);
-	msg->addStringFast(_PREHASH_FromAgentName, name);
-	msg->addStringFast(_PREHASH_Message, ""); 
-	msg->addU32Fast(_PREHASH_ParentEstateID, 0);
-	msg->addUUIDFast(_PREHASH_RegionID, LLUUID::null);
-	msg->addVector3Fast(_PREHASH_Position, gAgent.getPositionAgent());
-	LLInventoryObserver* opener = NULL;
-	
+
 	std::string from_string; // Used in the pop-up.
 	std::string chatHistory_string;  // Used in chat history.
+
 	if (mFromObject == TRUE)
 	{
 		if (mFromGroup)
@@ -2277,17 +2323,17 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 		from_string = chatHistory_string = mFromName;
 	}
 	
-	bool is_do_not_disturb = gAgent.isDoNotDisturb();
-	
+	LLUUID destination;
+	bool accept = true;
+
 // [RLVa:KB] - Checked: 2010-09-23 (RLVa-1.2.1)
 	bool fRlvNotifyAccepted = false;
 // [/RLVa:KB]
+	// If user accepted, accept to proper folder, if user discarded, accept to trash.
 	switch(button)
 	{
 		case IOR_ACCEPT:
-			// ACCEPT. The math for the dialog works, because the accept
-			// for inventory_offered, task_inventory_offer or
-			// group_notice_inventory is 1 greater than the offer integer value.
+			destination = mFolderID;
 
 // [RLVa:KB] - Checked: 2010-09-23 (RLVa-1.2.1)
 			// Only treat the offer as 'Give to #RLV' if:
@@ -2309,17 +2355,7 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 					gInventory.addObserver(pOfferObserver);
 				}
 			}
-// [/RLVa:KB]
 
-			// Generates IM_INVENTORY_ACCEPTED, IM_TASK_INVENTORY_ACCEPTED, 
-			// or IM_GROUP_NOTICE_INVENTORY_ACCEPTED
-			msg->addU8Fast(_PREHASH_Dialog, (U8)(mIM + 1));
-			msg->addBinaryDataFast(_PREHASH_BinaryBucket, &(mFolderID.mData),
-								   sizeof(mFolderID.mData));
-			// send the message
-			msg->sendReliable(mHost);
-			
-// [RLVa:KB] - Checked: 2010-09-23 (RLVa-1.2.1)
 			if (fRlvNotifyAccepted)
 			{
 				std::string::size_type idxToken = mDesc.find("'  ( http://");
@@ -2328,7 +2364,7 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			}
 // [/RLVa:KB]
 
-			//don't spam them if they are getting flooded
+			//don't spam user if flooded
 			if (check_offer_throttle(mFromName, true))
 			{
 				// <FS:Ansariel> This breaks object owner name parsing
@@ -2339,43 +2375,14 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 				args["MESSAGE"] = log_message;
 				LLNotificationsUtil::add("SystemMessageTip", args);
 			}
-			
-			// we will want to open this item when it comes back.
-			LL_DEBUGS("Messaging") << "Initializing an opener for tid: " << mTransactionID
-			<< LL_ENDL;
-			switch (mIM)
-		{
-			case IM_TASK_INVENTORY_OFFERED:
-			case IM_GROUP_NOTICE:
-			case IM_GROUP_NOTICE_REQUESTED:
-			{
-				// This is an offer from a task or group.
-				// We don't use a new instance of an opener
-				// We instead use the singular observer gOpenTaskOffer
-				// Since it already exists, we don't need to actually do anything
-			}
-				break;
-			default:
-				LL_WARNS("Messaging") << "inventory_offer_callback: unknown offer type" << LL_ENDL;
-				break;
-		}	// end switch (mIM)
 			break;
-			
 		case IOR_MUTE:
 			// MUTE falls through to decline
+			accept = false;
 		case IOR_DECLINE:
-			// DECLINE. The math for the dialog works, because the decline
-			// for inventory_offered, task_inventory_offer or
-			// group_notice_inventory is 2 greater than the offer integer value.
-			// Generates IM_INVENTORY_DECLINED, IM_TASK_INVENTORY_DECLINED,
-			// or IM_GROUP_NOTICE_INVENTORY_DECLINED
 		default:
 			// close button probably (or any of the fall-throughs from above)
-			msg->addU8Fast(_PREHASH_Dialog, (U8)(mIM + 2));
-			msg->addBinaryDataFast(_PREHASH_BinaryBucket, EMPTY_BINARY_BUCKET, EMPTY_BINARY_BUCKET_SIZE);
-			// send the message
-			msg->sendReliable(mHost);
-			
+			destination = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
 // [RLVa:KB] - Checked: 2010-09-23 (RLVa-1.2.1e) | Added: RLVa-1.2.1e
 			if ( (rlv_handler_t::isEnabled()) && 
 				 (IM_TASK_INVENTORY_OFFERED == mIM) && (LLAssetType::AT_CATEGORY == mType) && (mDesc.find(RLV_PUTINV_PREFIX) == 1) )
@@ -2385,7 +2392,7 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 					RlvBehaviourNotifyHandler::sendNotification("declined inv_offer " + mDesc.substr(1, idxToken - 1));
 			}
 // [/RLVa:KB]
-
+			// <FS:Ansariel> Leave this notification in
 			if (gSavedSettings.getBOOL("LogInventoryDecline"))
 			{
 				LLStringUtil::format_map_t log_message_args;
@@ -2398,18 +2405,17 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 				args["MESSAGE"] = log_message;
 				LLNotificationsUtil::add("SystemMessageTip", args);
 			}
-			
-			if (is_do_not_disturb &&	(!mFromGroup && !mFromObject))
+			// </FS:Ansariel>
+			if (accept && LLMuteList::getInstance()->isMuted(mFromID, mFromName))
 			{
-				send_do_not_disturb_message(msg,mFromID);
+				// Note: muted offers are usually declined automatically,
+				// but user can mute object after receiving message
+				accept = false;
 			}
 			break;
 	}
-	
-	if(opener)
-	{
-		gInventory.addObserver(opener);
-	}
+
+	sendReceiveResponse(accept, destination);
 
 	if(!mPersist)
 	{
@@ -2426,7 +2432,10 @@ std::string LLOfferInfo::getSanitizedDescription()
 
 	std::size_t start = mDesc.find_first_of("'");
 	std::size_t end = mDesc.find_last_of("'");
-	if ((start != std::string::npos) && (end != std::string::npos))
+	// <FS:Ansariel> FIRE-29194: <nolink> tags showing in offline inventory offer log
+	//if ((start != std::string::npos) && (end != std::string::npos))
+	if ((start != std::string::npos) && (end != std::string::npos) && start != end)
+	// </FS:Ansariel>
 	{
 		description.insert(start, "<nolink>");
 		description.insert(end + 8, "</nolink>");
@@ -5085,6 +5094,8 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 	S32 num_blocks = mesgsys->getNumberOfBlocksFast(_PREHASH_AnimationList);
 	S32 num_source_blocks = mesgsys->getNumberOfBlocksFast(_PREHASH_AnimationSourceList);
 
+	LL_DEBUGS("Messaging", "Motion") << "Processing " << num_blocks << " Animations" << LL_ENDL;
+
 	//clear animation flags
 	avatarp->mSignaledAnimations.clear();
 	
@@ -5096,8 +5107,6 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 		{
 			mesgsys->getUUIDFast(_PREHASH_AnimationList, _PREHASH_AnimID, animation_id, i);
 			mesgsys->getS32Fast(_PREHASH_AnimationList, _PREHASH_AnimSequenceID, anim_sequence_id, i);
-
-			LL_DEBUGS("Messaging") << "Anim sequence ID: " << anim_sequence_id << LL_ENDL;
 
 			avatarp->mSignaledAnimations[animation_id] = anim_sequence_id;
 
@@ -5143,6 +5152,14 @@ void process_avatar_animation(LLMessageSystem *mesgsys, void **user_data)
 						// </FS:Zi>
 					}
 				}
+				LL_DEBUGS("Messaging", "Motion") << "Anim sequence ID: " << anim_sequence_id
+									<< " Animation id: " << animation_id
+									<< " From block: " << object_id << LL_ENDL;
+			}
+			else
+			{
+				LL_DEBUGS("Messaging", "Motion") << "Anim sequence ID: " << anim_sequence_id
+									<< " Animation id: " << animation_id << LL_ENDL;
 			}
 		}
 	}
@@ -5320,7 +5337,7 @@ void process_clear_follow_cam_properties(LLMessageSystem *mesgsys, void **user_d
 
 	mesgsys->getUUIDFast(_PREHASH_ObjectData, _PREHASH_ObjectID, source_id);
 
-	LLFollowCamMgr::removeFollowCamParams(source_id);
+	LLFollowCamMgr::getInstance()->removeFollowCamParams(source_id);
 }
 
 void process_set_follow_cam_properties(LLMessageSystem *mesgsys, void **user_data)
@@ -5352,7 +5369,7 @@ void process_set_follow_cam_properties(LLMessageSystem *mesgsys, void **user_dat
 		switch(type)
 		{
 		case FOLLOWCAM_PITCH:
-			LLFollowCamMgr::setPitch(source_id, value);
+			LLFollowCamMgr::getInstance()->setPitch(source_id, value);
 			break;
 		case FOLLOWCAM_FOCUS_OFFSET_X:
 			focus_offset.mV[VX] = value;
@@ -5367,29 +5384,29 @@ void process_set_follow_cam_properties(LLMessageSystem *mesgsys, void **user_dat
 			settingFocusOffset = true;
 			break;
 		case FOLLOWCAM_POSITION_LAG:
-			LLFollowCamMgr::setPositionLag(source_id, value);
+			LLFollowCamMgr::getInstance()->setPositionLag(source_id, value);
 			break;
 		case FOLLOWCAM_FOCUS_LAG:
-			LLFollowCamMgr::setFocusLag(source_id, value);
+			LLFollowCamMgr::getInstance()->setFocusLag(source_id, value);
 			break;
 		case FOLLOWCAM_DISTANCE:
-			LLFollowCamMgr::setDistance(source_id, value);
+			LLFollowCamMgr::getInstance()->setDistance(source_id, value);
 			break;
 		case FOLLOWCAM_BEHINDNESS_ANGLE:
-			LLFollowCamMgr::setBehindnessAngle(source_id, value);
+			LLFollowCamMgr::getInstance()->setBehindnessAngle(source_id, value);
 			break;
 		case FOLLOWCAM_BEHINDNESS_LAG:
-			LLFollowCamMgr::setBehindnessLag(source_id, value);
+			LLFollowCamMgr::getInstance()->setBehindnessLag(source_id, value);
 			break;
 		case FOLLOWCAM_POSITION_THRESHOLD:
-			LLFollowCamMgr::setPositionThreshold(source_id, value);
+			LLFollowCamMgr::getInstance()->setPositionThreshold(source_id, value);
 			break;
 		case FOLLOWCAM_FOCUS_THRESHOLD:
-			LLFollowCamMgr::setFocusThreshold(source_id, value);
+			LLFollowCamMgr::getInstance()->setFocusThreshold(source_id, value);
 			break;
 		case FOLLOWCAM_ACTIVE:
 			//if 1, set using followcam,. 
-			LLFollowCamMgr::setCameraActive(source_id, value != 0.f);
+			LLFollowCamMgr::getInstance()->setCameraActive(source_id, value != 0.f);
 			break;
 		case FOLLOWCAM_POSITION_X:
 			settingPosition = true;
@@ -5416,10 +5433,10 @@ void process_set_follow_cam_properties(LLMessageSystem *mesgsys, void **user_dat
 			focus.mV[ 2 ] = value;
 			break;
 		case FOLLOWCAM_POSITION_LOCKED:
-			LLFollowCamMgr::setPositionLocked(source_id, value != 0.f);
+			LLFollowCamMgr::getInstance()->setPositionLocked(source_id, value != 0.f);
 			break;
 		case FOLLOWCAM_FOCUS_LOCKED:
-			LLFollowCamMgr::setFocusLocked(source_id, value != 0.f);
+			LLFollowCamMgr::getInstance()->setFocusLocked(source_id, value != 0.f);
 			break;
 
 		default:
@@ -5429,15 +5446,15 @@ void process_set_follow_cam_properties(LLMessageSystem *mesgsys, void **user_dat
 
 	if ( settingPosition )
 	{
-		LLFollowCamMgr::setPosition(source_id, position);
+		LLFollowCamMgr::getInstance()->setPosition(source_id, position);
 	}
 	if ( settingFocus )
 	{
-		LLFollowCamMgr::setFocus(source_id, focus);
+		LLFollowCamMgr::getInstance()->setFocus(source_id, focus);
 	}
 	if ( settingFocusOffset )
 	{
-		LLFollowCamMgr::setFocusOffset(source_id, focus_offset);
+		LLFollowCamMgr::getInstance()->setFocusOffset(source_id, focus_offset);
 	}
 }
 //end Ventrella 
@@ -6322,8 +6339,8 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
 			// save the home location image to disk
 			std::string snap_filename = gDirUtilp->getLindenUserDir();
 			snap_filename += gDirUtilp->getDirDelimiter();
-			snap_filename += SCREEN_HOME_FILENAME;
-			gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE);
+			snap_filename += LLStartUp::getScreenHomeFilename();
+			gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE, LLSnapshotModel::SNAPSHOT_TYPE_COLOR, LLSnapshotModel::SNAPSHOT_FORMAT_PNG);
 		}
 		
 		if (notificationID == "RegionRestartMinutes" ||
@@ -6384,14 +6401,14 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
 			// save the home location image to disk
 			std::string snap_filename = gDirUtilp->getLindenUserDir();
 			snap_filename += gDirUtilp->getDirDelimiter();
-			snap_filename += SCREEN_HOME_FILENAME;
-			if (gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE))
+			snap_filename += LLStartUp::getScreenHomeFilename();
+			if (gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE, LLSnapshotModel::SNAPSHOT_TYPE_COLOR, LLSnapshotModel::SNAPSHOT_FORMAT_PNG))
 			{
-				LL_INFOS() << SCREEN_HOME_FILENAME << " saved successfully." << LL_ENDL;
+				LL_INFOS() << LLStartUp::getScreenHomeFilename() << " saved successfully." << LL_ENDL;
 			}
 			else
 			{
-				LL_WARNS() << SCREEN_HOME_FILENAME << " could not be saved." << LL_ENDL;
+				LL_WARNS() << LLStartUp::getScreenHomeFilename() << " could not be saved." << LL_ENDL;
 			}
 		}
 // </FS:CR>
@@ -6414,12 +6431,27 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
             }
         }
 
-		// Error Notification can come with and without reason
-		if (notificationID == "JoinGroupError" && llsdBlock.has("reason"))
-		{
-			LLNotificationsUtil::add("JoinGroupErrorReason", llsdBlock);
-			return true;
-		}
+        // Error Notification can come with and without reason
+        if (notificationID == "JoinGroupError")
+        {
+            if (llsdBlock.has("reason"))
+            {
+                LLNotificationsUtil::add("JoinGroupErrorReason", llsdBlock);
+                return true;
+            }
+            if (llsdBlock.has("group_id"))
+            {
+                LLGroupData agent_gdatap;
+                bool is_member = gAgent.getGroupData(llsdBlock["group_id"].asUUID(), agent_gdatap);
+                if (is_member)
+                {
+                    LLSD args;
+                    args["reason"] = LLTrans::getString("AlreadyInGroup");
+                    LLNotificationsUtil::add("JoinGroupErrorReason", args);
+                    return true;
+                }
+            }
+        }
 
 		LLNotificationsUtil::add(notificationID, llsdBlock);
 		return true;
@@ -6441,8 +6473,8 @@ static void process_special_alert_messages(const std::string & message)
 		// save the home location image to disk
 		std::string snap_filename = gDirUtilp->getLindenUserDir();
 		snap_filename += gDirUtilp->getDirDelimiter();
-		snap_filename += SCREEN_HOME_FILENAME;
-		gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE);
+		snap_filename += LLStartUp::getScreenHomeFilename();
+		gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE, LLSnapshotModel::SNAPSHOT_TYPE_COLOR, LLSnapshotModel::SNAPSHOT_FORMAT_PNG);
 	}
 }
 
@@ -6850,33 +6882,32 @@ void process_frozen_message(LLMessageSystem *msgsystem, void **user_data)
 // do some extra stuff once we get our economy data
 void process_economy_data(LLMessageSystem *msg, void** /*user_data*/)
 {
-	LLGlobalEconomy::processEconomyData(msg, LLGlobalEconomy::getInstance());
-	S32 upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload();
-// <FS:AW opensim currency support> 
-// AW: from this point anything is bogus because it's all replaced by the LLUploadCostCalculator in llviewermenu
-//	LL_INFOS_ONCE("Messaging") << "EconomyData message arrived; upload cost is L$" << upload_cost << LL_ENDL;
-// 	gMenuHolder->getChild<LLUICtrl>("Upload Image")->setLabelArg("[COST]", llformat("%d", upload_cost));
-// 	gMenuHolder->getChild<LLUICtrl>("Upload Sound")->setLabelArg("[COST]", llformat("%d", upload_cost));
-// 	gMenuHolder->getChild<LLUICtrl>("Upload Animation")->setLabelArg("[COST]", llformat("%d", upload_cost));
-// 	gMenuHolder->getChild<LLUICtrl>("Bulk Upload")->setLabelArg("[COST]", llformat("%d", upload_cost));
-	std::string cost_str;
+	// <FS:AW opensim currency support> 
+	//LL_DEBUGS("Benefits") << "Received economy data, not currently used" << LL_ENDL;
 #ifdef OPENSIM
 	if (LLGridManager::getInstance()->isInOpenSim())
 	{
-		cost_str = upload_cost > 0 ? llformat("%s%d", "L$", upload_cost) : LLTrans::getString("free");
+		LLGlobalEconomy::processEconomyData(msg, LLGlobalEconomy::getInstance());
+
+		S32 texture_upload_cost = LLAgentBenefitsMgr::current().getTextureUploadCost();
+		S32 sound_upload_cost = LLAgentBenefitsMgr::current().getSoundUploadCost();
+		S32 animation_upload_cost = LLAgentBenefitsMgr::current().getAnimationUploadCost();
+		std::string texture_upload_cost_str;
+		std::string sound_upload_cost_str;
+		std::string animation_upload_cost_str;
+
+		texture_upload_cost_str = texture_upload_cost > 0 ? llformat("%s%d", "L$", texture_upload_cost) : LLTrans::getString("free");
+		sound_upload_cost_str = sound_upload_cost > 0 ? llformat("%s%d", "L$", sound_upload_cost) : LLTrans::getString("free");
+		animation_upload_cost_str = animation_upload_cost > 0 ? llformat("%s%d", "L$", animation_upload_cost) : LLTrans::getString("free");
+		gMenuHolder->getChild<LLUICtrl>("Upload Image")->setLabelArg("[COST]",  texture_upload_cost_str);
+		gMenuHolder->getChild<LLUICtrl>("Upload Sound")->setLabelArg("[COST]",  sound_upload_cost_str);
+		gMenuHolder->getChild<LLUICtrl>("Upload Animation")->setLabelArg("[COST]", animation_upload_cost_str);
 	}
 	else
 #endif
 	{
-		cost_str = "L$" + (upload_cost > 0 ? llformat("%d", upload_cost) : llformat("%d", gSavedSettings.getU32("DefaultUploadCost")));
+		LL_DEBUGS("Benefits") << "Received economy data, not currently used" << LL_ENDL;
 	}
-
-	LL_INFOS_ONCE("Messaging") << Tea::wrapCurrency("EconomyData message arrived; upload cost is L$") << cost_str << LL_ENDL;
-
-	gMenuHolder->getChild<LLUICtrl>("Upload Image")->setLabelArg("[COST]",  cost_str);
-	gMenuHolder->getChild<LLUICtrl>("Upload Sound")->setLabelArg("[COST]",  cost_str);
-	gMenuHolder->getChild<LLUICtrl>("Upload Animation")->setLabelArg("[COST]", cost_str);
-	gMenuHolder->getChild<LLUICtrl>("Bulk Upload")->setLabelArg("[COST]", cost_str);
 // <FS:AW opensim currency support>
 
 	// update L$ substitution for "Buy and Sell L$", it was set before we knew the currency

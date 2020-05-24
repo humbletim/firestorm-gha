@@ -9,15 +9,14 @@ if (NOT DEFINED VIEWER_SHORT_VERSION) # will be true in indra/, false in indra/n
         string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" VIEWER_VERSION_MAJOR ${VIEWER_SHORT_VERSION})
         string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+" "\\1" VIEWER_VERSION_MINOR ${VIEWER_SHORT_VERSION})
         string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" VIEWER_VERSION_PATCH ${VIEWER_SHORT_VERSION})
-
+        
         if (DEFINED ENV{revision})
            set(VIEWER_VERSION_REVISION $ENV{revision})
            message("Revision (from environment): ${VIEWER_VERSION_REVISION}")
 
-        # <FS:Ansariel> Don't use Autobuild build ID - make sure we use the Mercurial revision
-        #elseif (DEFINED ENV{AUTOBUILD_BUILD_ID})
-        #   set(VIEWER_VERSION_REVISION $ENV{AUTOBUILD_BUILD_ID})
-        #   message(STATUS "Revision (from autobuild environment): ${VIEWER_VERSION_REVISION}")
+        elseif (DEFINED ENV{AUTOBUILD_BUILD_ID})
+           set(VIEWER_VERSION_REVISION $ENV{AUTOBUILD_BUILD_ID})
+           message(STATUS "Revision (from autobuild environment): ${VIEWER_VERSION_REVISION}")
 
         else (DEFINED ENV{revision})
            find_program(MERCURIAL hg)
@@ -65,6 +64,7 @@ if (NOT DEFINED VIEWER_SHORT_VERSION) # will be true in indra/, false in indra/n
         "LL_VIEWER_VERSION_MINOR=${VIEWER_VERSION_MINOR}"
         "LL_VIEWER_VERSION_PATCH=${VIEWER_VERSION_PATCH}"
         "LL_VIEWER_VERSION_BUILD=${VIEWER_VERSION_REVISION}"
+        "FS_VIEWER_VERSION_GITHASH=${VIEWER_VERSION_GITHASH}"
         "LLBUILD_CONFIG=\"${CMAKE_BUILD_TYPE}\""
         )
 endif (NOT DEFINED VIEWER_SHORT_VERSION)

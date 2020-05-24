@@ -139,6 +139,10 @@ Marktplatzinitialisierung aufgrund eines System- oder Netzwerkfehlers fehlgeschl
         „[ERROR_CODE]“
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
+	<notification name="MyOutfitsPasteFailed">
+		Ein oder mehrere Objekte können nicht innerhalb von „Outfits“ verwendet werden.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
 	<notification name="MerchantPasteFailed">
 		Kopieren oder Verschieben von Marktplatz-Auflistungen fehlgeschlagen mit Fehler:
         
@@ -265,6 +269,10 @@ Möchten Sie den ausgewählten Einwohnern Änderungsrechte gewähren?
 	<notification name="RevokeModifyRightsMultiple">
 		Möchten Sie den ausgewählten Einwohnern die Änderungsrechte entziehen?
 		<usetemplate name="okcancelbuttons" notext="Nein" yestext="Ja"/>
+	</notification>
+	<notification name="GroupNameLengthWarning">
+		Ein Gruppenname muss zwischen [MIN_LEN] und [MAX_LEN] Zeichen lang sein.
+		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="UnableToCreateGroup">
 		Gruppe konnte nicht erstellt werden.
@@ -506,6 +514,9 @@ Um Medien nur auf einer Fläche einzufügen, wählen Sie „Oberfläche auswähl
 	</notification>
 	<notification name="ErrorPhotoCannotAfford">
 		Es kostet L$[COST], um ein Foto in Ihrem Inventar zu speichern. Sie können entweder L$ kaufen oder das Foto auf Ihrem Computer speichern.
+	</notification>
+	<notification name="ErrorCannotAffordUpload">
+		Es kostet L$[COST], um diesen Gegenstand hochzuladen.
 	</notification>
 	<notification name="ErrorTextureCannotAfford">
 		Es kostet L$[COST], um eine Textur in Ihrem Inventar zu speichern. Sie können entweder L$ kaufen oder das Foto auf Ihrem Computer speichern.
@@ -1007,6 +1018,9 @@ Ihre Teleport-Anfrage kann nicht sofort bearbeitet werden. Versuchen Sie es in e
 	<notification name="expired_region_handoff">
 		Das System konnte Ihre Anfrage zum Regionswechsel nicht rechtzeitig bearbeiten. Versuchen Sie es in einigen Minuten erneut.
 	</notification>
+	<notification name="preexisting_tport">
+		Das System konnte Ihre Teleport-Anfrage nicht ausführen. Versuchen Sie es in einigen Minuten erneut.
+	</notification>
 	<notification name="no_host">
 		Teleport-Ziel wurde nicht gefunden. Das Ziel ist entweder im Moment nicht verfügbar oder existiert nicht mehr. Versuchen Sie es in einigen Minuten erneut.
 	</notification>
@@ -1278,6 +1292,13 @@ nach
 			<button name="Cancel" text="Abbrechen"/>
 		</form>
 	</notification>
+	<notification label="Geste umbenennen" name="RenameGesture">
+		Neuer Gesten-Name:
+		<form name="form">
+			<button name="OK" text="OK"/>
+			<button name="Cancel" text="Abbrechen"/>
+		</form>
+	</notification>
 	<notification name="RemoveFromFriends">
 		Möchten Sie &lt;nolink&gt;[NAME]&lt;/nolink&gt; aus Ihrer Freundesliste entfernen?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
@@ -1474,6 +1495,18 @@ Falls Sie [CURRENT_GRID] zum ersten Mal verwenden, müssen Sie zuerst ein Konto 
 			<button name="Teleport" text="Teleportieren"/>
 		</form>
 	</notification>
+	<notification name="LoginPacketNeverReceivedNoTP">
+		Es gibt Probleme mit der Verbindung. Möglicherweise besteht ein Problem mit Ihrer Internetverbindung oder dem [SECOND_LIFE_GRID].
+
+Überprüfen Sie Ihre Internetverbindung und versuchen Sie es dann erneut, oder klicken Sie auf Hilfe, um zu [SUPPORT_SITE] zu gelangen.
+		<url name="url">
+			http://de.secondlife.com/support/
+		</url>
+		<form name="form">
+			<button name="OK" text="OK"/>
+			<button name="Help" text="Hilfe"/>
+		</form>
+	</notification>
 	<notification name="WelcomeChooseSex">
 		Ihr Avatar erscheint jeden Moment.
 
@@ -1619,7 +1652,7 @@ Ersetzen Sie die Textur [TEXTURE_NUM] mit einer Bilddatei von maximal 1024x1024 
 		[AGENT] wurden zur [LIST_TYPE]-Liste von [ESTATE] hinzugefügt.
 	</notification>
 	<notification name="AgentWasRemovedFromList">
-		[AGENT] wurden von der [LIST_TYPE]-Liste von [ESTATE] entfernt.
+		[AGENT] wurde von der [LIST_TYPE]-Liste von [ESTATE] entfernt.
 	</notification>
 	<notification name="AgentsWereRemovedFromList">
 		[AGENT] wurden von der [LIST_TYPE]-Liste von [ESTATE] entfernt.
@@ -1801,11 +1834,14 @@ Eingehende Gruppeneinladungen werden jetzt automatisch abgewiesen. Sie erhalten 
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="GroupLimitInfo">
-		Die Gruppenbegrenzung für Basiskonten ist [MAX_BASIC]; für 
-[https://secondlife.com/premium/ Premium-]Konten ist sie [MAX_PREMIUM].
-Wenn Sie ein Downgrade Ihres Kontos durchgeführt haben, müssen Sie das Gruppenlimit unter [MAX_BASIC] bringen, bevor sich weitere Personen registrieren können.
-
-[https://secondlife.com/my/account/membership.php Noch heute upgraden!]
+		Einwohner mit einer Basis-Mitgliedschaft können bis zu [MAX_BASIC] Gruppen beitreten.
+Eine Premium-Mitgliedschaft erlaubt bis zu [MAX_PREMIUM]. [https://secondlife.com/my/account/membership.php Mehr erfahren oder upgraden]
+		<usetemplate name="okbutton" yestext="Schließen"/>
+	</notification>
+	<notification name="GroupLimitInfoPlus">
+		Einwohner mit einer Basis-Mitgliedschaft können bis zu [MAX_BASIC] Gruppen beitreten.
+Eine Premium-Mitgliedschaft erlaubt bis zu [MAX_PREMIUM]. [https://secondlife.com/my/account/membership.php Mehr erfahren oder upgraden]
+Eine Premium-Plus-Mitgliedschaft erlaubt bis zu [MAX_PREMIUM_PLUS]. [https://secondlife.com/my/account/membership.php Mehr erfahren oder upgraden]
 		<usetemplate name="okbutton" yestext="Schließen"/>
 	</notification>
 	<notification name="KickUser">
@@ -3485,6 +3521,22 @@ Diese werden für ein paar Sekunden sicherheitshalber gesperrt.
 		Sie wurden vom Moderator stummgeschaltet.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
+	<notification name="FailedToGetBenefits">
+		Leider konnten die Vorteilsinformationen für diese Sitzung nicht abgerufen werden. Dieses sollte normalerweise nicht passieren. Bitte kontaktieren Sie den Support. Diese Sitzung wird nicht normal funktionieren und wir empfehlen einen Neustart.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="BulkUploadCostConfirmation">
+		Das Hochladen von [COUNT] Gegenständen wird insgesamt [COST] L$ kosten. Möchten Sie mit dem Hochladen fortfahren?
+		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="Hochladen"/>
+	</notification>
+	<notification name="BulkUploadNoCompatibleFiles">
+		Die ausgewählten Dateien können nicht per Mehrfach-Upload hochgeladen werden.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
+	<notification name="BulkUploadIncompatibleFiles">
+		Einige der ausgewählten Dateien können nicht per Mehrfach-Upload hochgeladen werden.
+		<usetemplate name="okbutton" yestext="OK"/>
+	</notification>
 	<notification name="UploadCostConfirmation">
 		Das Hochladen kostet [PRICE] L$. Möchten Sie fortfahren?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="Hochladen"/>
@@ -3608,7 +3660,7 @@ Bitte prüfen Sie Ihre Netzwerk- und Firewall-Konfiguration.
 Deaktivieren Sie alle SIP ALG-Funktionen in Ihrem Router. 
 
 Voice-Kommunikation ist leider nicht verfügbar.
-[https://wiki.phoenixviewer.com/fs_voice]
+[https://wiki.firestormviewer.org/fs_voice]
 		<usetemplate name="okignore" yestext="OK" ignoretext="Warnen, wenn keine Verbindung zum Voice-Server hergestellt werden kann."/>
 	</notification>
 	<notification name="NoVoiceConnect-GIAB">
@@ -3616,7 +3668,7 @@ Voice-Kommunikation ist leider nicht verfügbar.
 
 Voice-Kommunikation ist leider nicht verfügbar.
 Bitte überprüfen Sie Ihr Netzwerk- und Firewall-Setup.
-[https://wiki.phoenixviewer.com/fs_voice]
+[https://wiki.firestormviewer.org/fs_voice]
 		<usetemplate name="okignore" yestext="OK"/>
 	</notification>
 	<notification name="AvatarRezLeftNotification">
@@ -5038,7 +5090,7 @@ Fehler im Regulären Ausdruck:
 	</notification>
 
 	<notification name="NoHavok">
-Einige Funktionen wie [FEATURE] sind nicht in [APP_NAME] für OpenSimulator enthalten. Falls Sie [FEATURE] nutzen möchten, laden Sie sich bitte [APP_NAME] für Second Life hier herunter:
+Einige Funktionen wie [FEATURE] sind nicht in dieser Version von [APP_NAME] enthalten. Falls Sie [FEATURE] nutzen möchten, laden Sie sich bitte eine Version von [APP_NAME] mit Havok-Unterstützung hier herunter:
 [DOWNLOAD_URL]
 		<form name="form">
 			<ignore name="ignore" text="Kein-Havok-Warnung"/>

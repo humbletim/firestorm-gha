@@ -173,6 +173,7 @@ set(viewer_SOURCE_FILES
     fsfloaterplacedetails.cpp
     fsfloaterposestand.cpp
     fsfloaterprofile.cpp
+    fsfloaterprotectedfolders.cpp
     fsfloaterradar.cpp
     fsfloatersearch.cpp
     fsfloaterstatistics.cpp
@@ -208,6 +209,7 @@ set(viewer_SOURCE_FILES
     fsradarentry.cpp
     fsradarlistctrl.cpp
     fsradarmenu.cpp
+    fsregioncross.cpp
     fsscriptlibrary.cpp
     fsscrolllistctrl.cpp
     fsslurlcommand.cpp
@@ -219,6 +221,8 @@ set(viewer_SOURCE_FILES
     lggbeamscolors.cpp
     lggcontactsets.cpp
     lfsimfeaturehandler.cpp
+    llflickrconnect.cpp
+    llfloaterflickr.cpp
     llpanelopenregionsettings.cpp
     # <FS:Ansariel> [Legacy Bake]
     llagentwearablesfetch.cpp
@@ -227,6 +231,7 @@ set(viewer_SOURCE_FILES
     llaisapi.cpp
     llagent.cpp
     llagentaccess.cpp
+    llagentbenefits.cpp
     llagentcamera.cpp
     llagentdata.cpp
     llagentlanguage.cpp
@@ -320,7 +325,6 @@ set(viewer_SOURCE_FILES
     llfilteredwearablelist.cpp
     llfirstuse.cpp
     llflexibleobject.cpp
-    llflickrconnect.cpp
     llfloaterabout.cpp
     llfloaterbvhpreview.cpp
     llfloaterauction.cpp
@@ -357,8 +361,8 @@ set(viewer_SOURCE_FILES
     llfloaterexperiencepicker.cpp
     llfloaterexperienceprofile.cpp
     llfloaterexperiences.cpp
-    llfloaterflickr.cpp
     llfloaterfonttest.cpp
+    llfloaterforgetuser.cpp
     llfloatergesture.cpp
     llfloatergodtools.cpp
     llfloatergotoline.cpp
@@ -432,7 +436,6 @@ set(viewer_SOURCE_FILES
     llfloatertos.cpp
     llfloatertoybox.cpp
     llfloatertranslationsettings.cpp
-    llfloatertwitter.cpp
     llfloateruipreview.cpp
     llfloaterurlentry.cpp
     llfloatervoiceeffect.cpp
@@ -555,6 +558,7 @@ set(viewer_SOURCE_FILES
     llpanelface.cpp
     llpanelgenerictip.cpp
     llpanelgroup.cpp
+    llpanelgroupcreate.cpp
     llpanelgroupbulk.cpp
     llpanelgroupbulkban.cpp
     llpanelgroupexperiences.cpp
@@ -730,7 +734,6 @@ set(viewer_SOURCE_FILES
     lltransientdockablefloater.cpp
     lltransientfloatermgr.cpp
     lltranslate.cpp
-    lltwitterconnect.cpp
     lluiavatar.cpp
     lluilistener.cpp
     lluploaddialog.cpp
@@ -779,6 +782,7 @@ set(viewer_SOURCE_FILES
     llviewerobject.cpp
     llviewerobjectlist.cpp
     llvieweroctree.cpp
+    llviewerparcelaskplay.cpp
     llviewerparcelmedia.cpp
     llviewerparcelmediaautoplay.cpp
     llviewerparcelmgr.cpp
@@ -928,6 +932,7 @@ set(viewer_HEADER_FILES
     fsfloaterplacedetails.h
     fsfloaterposestand.h
     fsfloaterprofile.h
+    fsfloaterprotectedfolders.h
     fsfloaterradar.h
     fsfloatersearch.h
     fsfloaterstatistics.h
@@ -964,6 +969,7 @@ set(viewer_HEADER_FILES
     fsradarentry.h
     fsradarlistctrl.h
     fsradarmenu.h
+    fsregioncross.h
     fsscriptlibrary.h
     fsscrolllistctrl.h
     fsslurl.h
@@ -977,6 +983,8 @@ set(viewer_HEADER_FILES
     lggbeamscolors.h
     lggcontactsets.h
     lfsimfeaturehandler.h
+    llflickrconnect.h
+    llfloaterflickr.h
     # <FS:Ansariel> [Legacy Bake]
     llagentwearablesfetch.h
 
@@ -984,6 +992,7 @@ set(viewer_HEADER_FILES
     llaisapi.h
     llagent.h
     llagentaccess.h
+    llagentbenefits.h
     llagentcamera.h
     llagentdata.h
     llagentlanguage.h
@@ -1078,7 +1087,6 @@ set(viewer_HEADER_FILES
     llfilteredwearablelist.h
     llfirstuse.h
     llflexibleobject.h
-    llflickrconnect.h
     llfloaterabout.h
     llfloaterbvhpreview.h
     llfloaterauction.h
@@ -1115,8 +1123,8 @@ set(viewer_HEADER_FILES
     llfloaterexperiencepicker.h
     llfloaterexperienceprofile.h
     llfloaterexperiences.h
-    llfloaterflickr.h
     llfloaterfonttest.h
+    llfloaterforgetuser.h
     llfloatergesture.h
     llfloatergodtools.h
     llfloatergotoline.h
@@ -1193,7 +1201,6 @@ set(viewer_HEADER_FILES
     llfloatertos.h
     llfloatertoybox.h
     llfloatertranslationsettings.h
-    llfloatertwitter.h
     llfloateruipreview.h
     llfloaterurlentry.h
     llfloatervoiceeffect.h
@@ -1306,6 +1313,7 @@ set(viewer_HEADER_FILES
     llpanelface.h
     llpanelgenerictip.h
     llpanelgroup.h
+    llpanelgroupcreate.h
     llpanelgroupbulk.h
     llpanelgroupbulkimpl.h
     llpanelgroupbulkban.h
@@ -1481,7 +1489,6 @@ set(viewer_HEADER_FILES
     lltransientdockablefloater.h
     lltransientfloatermgr.h
     lltranslate.h
-    lltwitterconnect.h
     lluiconstants.h
     lluiavatar.h
     lluilistener.h
@@ -1531,6 +1538,7 @@ set(viewer_HEADER_FILES
     llviewerobject.h
     llviewerobjectlist.h
     llvieweroctree.h
+    llviewerparcelaskplay.h
     llviewerparcelmedia.h
     llviewerparcelmediaautoplay.h
     llviewerparcelmgr.h
@@ -1632,10 +1640,14 @@ list(APPEND viewer_HEADER_FILES ${CMAKE_CURRENT_BINARY_DIR}/exoflickrkeys.h)
 # </exodus>
 
 #<FS:LO> Discord rich presence
-  if (USE_DISCORD)
-    LIST(APPEND viewer_HEADER_FILES fsfloaterdiscord.h fsdiscordconnect.h)
-    LIST(APPEND viewer_SOURCE_FILES fsfloaterdiscord.cpp fsdiscordconnect.cpp)
-  endif (USE_DISCORD)
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/fsdiscordkey.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/fsdiscordkey.h
+    @ONLY
+)
+list(APPEND viewer_HEADER_FILES ${CMAKE_CURRENT_BINARY_DIR}/fsdiscordkey.h)
+LIST(APPEND viewer_HEADER_FILES fsfloaterdiscord.h fsdiscordconnect.h)
+LIST(APPEND viewer_SOURCE_FILES fsfloaterdiscord.cpp fsdiscordconnect.cpp)
 #</FS:LO>
 
 # <FS:TS> Generate the version information header file.
@@ -1678,8 +1690,12 @@ if (DARWIN)
     PROPERTIES
     COMPILE_DEFINITIONS "${VIEWER_CHANNEL_VERSION_DEFINES}"
     # BugsplatMac is a module, imported with @import. That language feature
-    # demands these switches.
-    COMPILE_FLAGS "-fmodules -fcxx-modules"
+    # demands these -f switches.
+    # Xcode 10.2 requires that Objective-C++ headers declare nullability of
+    # pointer variables. As of 2019-06-26, the BugsplatMac version we're using
+    # does not yet do so in its own header files. This -W flag prevents fatal
+    # warnings.
+    COMPILE_FLAGS "-fmodules -fcxx-modules -Wno-nullability-completeness"
     )
 
 # [FS] Growl libs
@@ -1772,6 +1788,9 @@ if (LINUX)
     endif( ND_CTAGS )
     # </FS:ND>
 
+    # <FS:ND> Get rid of memory limit exceeded for -fvar-tracking-assignments.
+    SET_SOURCE_FILES_PROPERTIES(llviewermenu.cpp PROPERTIES COMPILE_FLAGS -fno-var-tracking-assignments)
+    # </FS:ND>
 endif (LINUX)
 
 if (WINDOWS)
@@ -1963,6 +1982,10 @@ if (WINDOWS)
         LIST(APPEND viewer_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../tools/manifests/legacy.manifest)
     endif (ADDRESS_SIZE EQUAL 64)
     # </FS:Ansariel>
+
+    if (OPENAL)
+      LIST(APPEND viewer_LIBRARIES ${OPENAL_LIBRARIES})
+    endif (OPENAL)
 endif (WINDOWS)
 
 # Add the xui files. This is handy for searching for xui elements
@@ -2107,7 +2130,7 @@ endif (FMODEX)
 
 # <FS:Ansariel> Output device selection
 # set_source_files_properties(llstartup.cpp PROPERTIES COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS}")
-set_source_files_properties(llstartup.cpp llfloaterpreference.cpp PROPERTIES COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS}")
+set_source_files_properties(llstartup.cpp llfloaterpreference.cpp llfloaterabout.cpp PROPERTIES COMPILE_FLAGS "${LLSTARTUP_COMPILE_FLAGS}")
 # </FS:Ansariel>
 
 list(APPEND viewer_SOURCE_FILES ${viewer_HEADER_FILES})
@@ -2140,11 +2163,17 @@ list(APPEND EVENT_HOST_SCRIPTS ${EVENT_HOST_SCRIPT_GLOB_LIST})
 set(PACKAGE ON CACHE BOOL
     "Add a package target that builds an installer package.")
 
-if ( OPENSIM )
-  set( ND_VIEWER_FLAVOR "oss" )
-else ( OPENSIM )
-  set( ND_VIEWER_FLAVOR "hvk" )
-endif ( OPENSIM )
+if (OPENSIM )
+  set(ND_VIEWER_FLAVOR "oss")
+else (OPENSIM)
+  set(ND_VIEWER_FLAVOR "hvk")
+endif (OPENSIM)
+
+if (FMODSTUDIO)
+    set(FMODVERSION "fmodstudio")
+elseif (FMODEX)
+    set(FMODVERSION "fmodex")
+endif (FMODSTUDIO)
 
 if (WINDOWS)
     set_target_properties(${VIEWER_BINARY_NAME}
@@ -2229,19 +2258,11 @@ if (WINDOWS)
     endif (ADDRESS_SIZE EQUAL 64)
 
     if (FMODSTUDIO)
-      if (ADDRESS_SIZE EQUAL 64)
-        list(APPEND COPY_INPUT_DEPENDENCIES
-           ${SHARED_LIB_STAGING_DIR}/Release/fmod64.dll
-           ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/fmod64.dll
-           ${SHARED_LIB_STAGING_DIR}/Debug/fmodL64.dll
-          )
-      else (ADDRESS_SIZE EQUAL 64)
-        list(APPEND COPY_INPUT_DEPENDENCIES
-           ${SHARED_LIB_STAGING_DIR}/Release/fmod.dll
-           ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/fmod.dll
-           ${SHARED_LIB_STAGING_DIR}/Debug/fmodL.dll
-          )
-      endif (ADDRESS_SIZE EQUAL 64)
+      list(APPEND COPY_INPUT_DEPENDENCIES
+         ${SHARED_LIB_STAGING_DIR}/Release/fmod.dll
+         ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/fmod.dll
+         ${SHARED_LIB_STAGING_DIR}/Debug/fmodL.dll
+        )
     endif (FMODSTUDIO)
 
     if (FMODEX)
@@ -2251,6 +2272,13 @@ if (WINDOWS)
            ${SHARED_LIB_STAGING_DIR}/Debug/fmodexL.dll
           )
     endif (FMODEX)
+
+    if (OPENAL)
+        list(APPEND COPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/OpenAL32.dll
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/alut.dll
+        )
+    endif (OPENAL)
 
     add_custom_command(
       OUTPUT  ${CMAKE_CFG_INTDIR}/copy_touched.bat
@@ -2270,6 +2298,9 @@ if (WINDOWS)
         --source=${CMAKE_CURRENT_SOURCE_DIR}
         --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/copy_touched.bat
         --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
+        --viewer_flavor=${ND_VIEWER_FLAVOR}
+        --fmodversion=${FMODVERSION}
+        --openal=${OPENAL}
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         stage_third_party_libs
@@ -2332,6 +2363,8 @@ if (WINDOWS)
           --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/touched.bat
           --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
           --viewer_flavor=${ND_VIEWER_FLAVOR}
+          --fmodversion=${FMODVERSION}
+          --openal=${OPENAL}
         DEPENDS
             ${VIEWER_BINARY_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -2420,6 +2453,7 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${DBUSGLIB_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${FMODWRAPPER_LIBRARY} # must come after LLAudio
+    ${OPENAL_LIBRARIES}
     ${GLOD_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${JSONCPP_LIBRARIES}
@@ -2438,9 +2472,7 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${GROWL_LIBRARY}
     )
 
-if( USE_DISCORD )
-  target_link_libraries(${VIEWER_BINARY_NAME} ${DISCORD_LIBRARY} )
-endif()
+target_link_libraries(${VIEWER_BINARY_NAME} ${DISCORD_LIBRARY} )
 
 if (BUGSPLAT_DB)
   target_link_libraries(${VIEWER_BINARY_NAME}
@@ -2505,6 +2537,8 @@ endif (NOT ENABLE_MEDIA_PLUGINS)
         --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/.${product}.touched
         --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
         --viewer_flavor=${ND_VIEWER_FLAVOR}
+        --fmodversion=${FMODVERSION}
+        --openal=${OPENAL}
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         ${COPY_INPUT_DEPENDENCIES}
@@ -2528,6 +2562,9 @@ endif (NOT ENABLE_MEDIA_PLUGINS)
       --grid=${GRID}
       --source=${CMAKE_CURRENT_SOURCE_DIR}
       --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
+      --viewer_flavor=${ND_VIEWER_FLAVOR}
+      --fmodversion=${FMODVERSION}
+      --openal=${OPENAL}
     DEPENDS
       ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
       ${COPY_INPUT_DEPENDENCIES}
@@ -2558,9 +2595,9 @@ if (DARWIN)
   set(MACOSX_BUNDLE_BUNDLE_NAME "Firestorm")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${VIEWER_SHORT_VERSION}${VIEWER_MACOSX_PHASE}${VIEWER_REVISION}")
-  set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2010-2019 The Phoenix Firestorm Project, Inc.")
+  set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2010-2020 The Phoenix Firestorm Project, Inc.")
   set(MACOSX_BUNDLE_NSMAIN_NIB_FILE "Firestorm.nib")
-  set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "LLNSApplication")
+  set(MACOSX_BUNDLE_NSPRINCIPAL_CLASS "LLApplication")
 
   # https://blog.kitware.com/upcoming-in-cmake-2-8-12-osx-rpath-support/
   set(CMAKE_MACOSX_RPATH 1)
@@ -2610,6 +2647,9 @@ if (DARWIN)
       --grid=${GRID}
       --source=${CMAKE_CURRENT_SOURCE_DIR}
       --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
+      --viewer_flavor=${ND_VIEWER_FLAVOR}
+      --fmodversion=${FMODVERSION}
+      --openal=${OPENAL}
     DEPENDS
       ${VIEWER_BINARY_NAME}
       ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -2645,6 +2685,8 @@ if (DARWIN)
           --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/.${product}.touched
           --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
           --viewer_flavor=${ND_VIEWER_FLAVOR}
+          --fmodversion=${FMODVERSION}
+          --openal=${OPENAL}
           ${SIGNING_SETTING}
         DEPENDS
           ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -2736,8 +2778,8 @@ if (PACKAGE AND (RELEASE_CRASH_REPORTING OR NON_RELEASE_CRASH_REPORTING) AND VIE
           "${VIEWER_SYMBOL_FILE_CYGWIN}"
           "-C"
           "${PARENT_DIRECTORY_CYGWIN}"
-          "secondlife-bin.pdb"
-        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/secondlife-bin.pdb"
+          "firestorm-bin.pdb"
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/firestorm-bin.pdb"
         COMMENT "Packing viewer PDB into ${VIEWER_SYMBOL_FILE_CYGWIN}"
         )
       add_custom_target(generate_symbols DEPENDS "${VIEWER_SYMBOL_FILE}" ${VIEWER_BINARY_NAME})

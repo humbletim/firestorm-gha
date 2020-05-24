@@ -141,6 +141,7 @@ LLScrollListCtrl::Params::Params()
 	background_visible("background_visible"),
 	draw_stripes("draw_stripes"),
 	column_padding("column_padding"),
+	row_padding("row_padding", 2),
 	fg_unselected_color("fg_unselected_color"),
 	fg_selected_color("fg_selected_color"),
 	bg_selected_color("bg_selected_color"),
@@ -203,6 +204,7 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mHoveredColor(p.hovered_color()),
 	mSearchColumn(p.search_column),
 	mColumnPadding(p.column_padding),
+	mRowPadding(p.row_padding),
 	mContextMenuType(MENU_NONE),
 	mIsFriendSignal(NULL),
 	// <FS:Ansariel> Fix for FS-specific people list (radar)
@@ -375,7 +377,7 @@ LLScrollListCtrl::~LLScrollListCtrl()
 			}
 			sort_order.append(LLSD(sort_val));
 		}
-		LLControlVariable* sort_order_setting = LLUI::sSettingGroups["config"]->declareLLSD(mPersistedSortOrderControl, LLSD(), "Column sort order for control " + mPersistedSortOrderControl);
+		LLControlVariable* sort_order_setting = LLUI::getInstance()->mSettingGroups["config"]->declareLLSD(mPersistedSortOrderControl, LLSD(), "Column sort order for control " + mPersistedSortOrderControl);
 		sort_order_setting->setValue(sort_order);
 	}
 	// </FS:Ansariel>
@@ -773,8 +775,6 @@ bool LLScrollListCtrl::updateColumnWidths()
 	return width_changed;
 }
 
-const S32 SCROLL_LIST_ROW_PAD = 2;
-
 // Line height is the max height of all the cells in all the items.
 void LLScrollListCtrl::updateLineHeight()
 {
@@ -787,7 +787,7 @@ void LLScrollListCtrl::updateLineHeight()
 		S32 i = 0;
 		for (const LLScrollListCell* cell = itemp->getColumn(i); i < num_cols; cell = itemp->getColumn(++i))
 		{
-			mLineHeight = llmax( mLineHeight, cell->getHeight() + SCROLL_LIST_ROW_PAD );
+			mLineHeight = llmax( mLineHeight, cell->getHeight() + mRowPadding );
 		}
 	}
 }
@@ -799,7 +799,7 @@ void LLScrollListCtrl::updateLineHeightInsert(LLScrollListItem* itemp)
 	S32 i = 0;
 	for (const LLScrollListCell* cell = itemp->getColumn(i); i < num_cols; cell = itemp->getColumn(++i))
 	{
-		mLineHeight = llmax( mLineHeight, cell->getHeight() + SCROLL_LIST_ROW_PAD );
+		mLineHeight = llmax( mLineHeight, cell->getHeight() + mRowPadding );
 	}
 }
 
@@ -1788,6 +1788,20 @@ BOOL LLScrollListCtrl::handleScrollWheel(S32 x, S32 y, S32 clicks)
 	BOOL handled = FALSE;
 	// Pretend the mouse is over the scrollbar
 	handled = mScrollbar->handleScrollWheel( 0, 0, clicks );
+
+	if (mMouseWheelOpaque)
+	{
+		return TRUE;
+	}
+
+	return handled;
+}
+
+BOOL LLScrollListCtrl::handleScrollHWheel(S32 x, S32 y, S32 clicks)
+{
+	BOOL handled = FALSE;
+	// Pretend the mouse is over the scrollbar
+	handled = mScrollbar->handleScrollHWheel( 0, 0, clicks );
 
 	if (mMouseWheelOpaque)
 	{
@@ -3487,11 +3501,11 @@ void LLScrollListCtrl::loadPersistedSortOrder()
 	if (root_floater)
 	{
 		mPersistedSortOrderControl = root_floater->getName() + "_" + getName() + "_sortorder";
-		if (LLUI::sSettingGroups["config"]->controlExists(mPersistedSortOrderControl))
+		if (LLUI::getInstance()->mSettingGroups["config"]->controlExists(mPersistedSortOrderControl))
 		{
 			clearSortOrder();
 
-			LLSD sort_order = LLUI::sSettingGroups["config"]->getLLSD(mPersistedSortOrderControl);
+			LLSD sort_order = LLUI::getInstance()->mSettingGroups["config"]->getLLSD(mPersistedSortOrderControl);
 			for (LLSD::array_iterator it = sort_order.beginArray(); it != sort_order.endArray(); ++it)
 			{
 				S32 sort_val = (*it).asInteger();

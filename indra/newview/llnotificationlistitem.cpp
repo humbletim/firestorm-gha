@@ -274,6 +274,7 @@ std::set<std::string> LLTransactionNotificationListItem::getTypes()
     std::set<std::string> types;
     types.insert("PaymentReceived");
     types.insert("PaymentSent");
+    types.insert("UploadPayment");
     return types;
 }
 
@@ -597,8 +598,13 @@ LLTransactionNotificationListItem::LLTransactionNotificationListItem(const Param
 
 BOOL LLTransactionNotificationListItem::postBuild()
 {
-	// <FS:Ansariel> Unscrew avatar icon for transaction messages
-	mParams.title = mParams.payment_message;
+    // <FS:Ansariel> Unscrew avatar icon for transaction messages
+    if (mParams.notification_name == "PaymentReceived" ||
+        mParams.notification_name == "PaymentSent")
+    {
+        mParams.title = mParams.payment_message;
+    }
+    // </FS:Ansariel>
 
     BOOL rv = LLNotificationListItem::postBuild();
 
@@ -623,42 +629,42 @@ BOOL LLTransactionNotificationListItem::postBuild()
         // <FS:Ansariel> Unscrew avatar icon for transaction messages
         //mAvatarIcon->setValue(mParams.paid_from_id);
         //mAvatarIconExp->setValue(mParams.paid_from_id);
-		if (!mParams.payment_is_group)
-		{
-			mAvatarIcon->setValue(mParams.paid_from_id);
-			mAvatarIconExp->setValue(mParams.paid_from_id);
-		}
-		else
-		{
-			mGroupIcon->setValue(mParams.paid_from_id);
-			mGroupIconExp->setValue(mParams.paid_from_id);
-			mGroupIcon->setVisible(TRUE);
-			mGroupIconExp->setVisible(TRUE);
-			mAvatarIcon->setVisible(FALSE);
-			mAvatarIconExp->setVisible(FALSE);
-		}
-		// </FS:Ansariel>
+        if (!mParams.payment_is_group)
+        {
+            mAvatarIcon->setValue(mParams.paid_from_id);
+            mAvatarIconExp->setValue(mParams.paid_from_id);
+        }
+        else
+        {
+            mGroupIcon->setValue(mParams.paid_from_id);
+            mGroupIconExp->setValue(mParams.paid_from_id);
+            mGroupIcon->setVisible(TRUE);
+            mGroupIconExp->setVisible(TRUE);
+            mAvatarIcon->setVisible(FALSE);
+            mAvatarIconExp->setVisible(FALSE);
+        }
+        // </FS:Ansariel>
     }
     else if (mParams.notification_name == "PaymentSent")
     {
         // <FS:Ansariel> Unscrew avatar icon for transaction messages
         //mAvatarIcon->setValue(mParams.paid_to_id);
         //mAvatarIconExp->setValue(mParams.paid_to_id);
-		if (!mParams.payment_is_group)
-		{
-			mAvatarIcon->setValue(mParams.paid_to_id);
-			mAvatarIconExp->setValue(mParams.paid_to_id);
-		}
-		else
-		{
-			mGroupIcon->setValue(mParams.paid_to_id);
-			mGroupIconExp->setValue(mParams.paid_to_id);
-			mGroupIcon->setVisible(TRUE);
-			mGroupIconExp->setVisible(TRUE);
-			mAvatarIcon->setVisible(FALSE);
-			mAvatarIconExp->setVisible(FALSE);
-		}
-		// </FS:Ansariel>
+        if (!mParams.payment_is_group)
+        {
+            mAvatarIcon->setValue(mParams.paid_to_id);
+            mAvatarIconExp->setValue(mParams.paid_to_id);
+        }
+        else
+        {
+            mGroupIcon->setValue(mParams.paid_to_id);
+            mGroupIconExp->setValue(mParams.paid_to_id);
+            mGroupIcon->setVisible(TRUE);
+            mGroupIconExp->setVisible(TRUE);
+            mAvatarIcon->setVisible(FALSE);
+            mAvatarIconExp->setVisible(FALSE);
+        }
+        // </FS:Ansariel>
     }
 
     return rv;

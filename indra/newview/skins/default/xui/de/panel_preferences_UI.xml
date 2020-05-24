@@ -33,8 +33,11 @@
 
 	<!--2D Overlay-->
 	<panel label="2D-Overlay" name="ui-2d-overlay">
-		<text name="UI Size:" width="80">
+		<text name="UI Size:" width="95">
 			UI-Skalierung:
+		</text>
+		<text name="HUD Size:" width="95">
+			HUD-Skalierung:
 		</text>
 		<text name="ScriptDialogsPerObjectLabel">
 			Skriptdialoge pro Objekt:
@@ -63,7 +66,13 @@
 		<check_box label="Pie-Menü aktivieren" name="UsePieMenu" tool_tip="Aktiviert das klassische V1-Kontextmenü in Kuchenform anstelle des standardmäßigen Kontextmenüs."/>
 		<check_box label="Text-Animation aktivieren" name="PieMenuPopupFontEffect" tool_tip="Aktiviert die Animation der Texte innerhalb des klassischen V1-Kontextmenü in Kuchenform, wenn sich dieses öffnet."/>
 		<check_box label="Außenring-Schatten aktivieren" name="PieMenuOuterRingShade" tool_tip="Aktiviert einen zusätzlichen Schatten um den äußeren Ring des klassischen V1-Kontextmenü in Kuchenform, der bei der Visualisierung von Untermenüs unterstützt."/>
-		<check_box label="Gruppenmitteilungen und Chiclets oben rechts" name="ShowGroupNoticesTopRight" tool_tip="Aktivieren, um Gruppenmitteilungen in der oberen rechten Ecke des Bildschirms anzuzeigen (Klassisches V1.x-Verhalten)."/>
+		<text name="ShowGroupNoticesTopRightLabel">
+			Position Gruppenmitt. und Chiclets:
+		</text>
+		<radio_group name="ShowGroupNoticesTopRight" tool_tip="Legt fest, wo Gruppenmitteilungen und Chiclet-Icons auf dem Bildschirm angezeigt werden.">
+			<radio_item label="Rechts unten" name="radio" />
+			<radio_item label="Rechts oben" name="radio1" />
+		</radio_group>
 		<text name="GroupTopRightRequiresRestart" left_delta="280">
 			(Erfordert Neustart)
 		</text>
@@ -91,7 +100,7 @@
 		<check_box name="FSUseStatsInsteadOfLagMeter" label="Klick auf Datentransfer-Indikator öffnet Statistik-Fenster anstatt Lag-Meter"/>
 		<check_box label="Mediensteuerung in Menüleiste anzeigen" name="FSEnableVolumeControls" tool_tip="Falls aktiviert, werden in der oberen rechte Ecke des Bildschirms in der Menüleiste die Icons zur Mediensteuerung angezeigt. Nützlich, wenn das Oberflächendesign bereits eigene Icons zur Mediensteuerung besitzt."/>
 		<check_box label="Position in Menüleiste anzeigen" name="ShowMenuBarLocation" />
-		<check_box label="Simulator-Kanal in der Menüleiste anzeigen" name="FSStatusbarShowSimulatorVersion" tool_tip="Zeigt den Kanal des Simulators an (RC Magnum, RC Le Tigre, RC BlueSteel usw.), auf dem die aktuelle Region läuft."/>
+		<check_box label="Simulator-Version in der Menüleiste anzeigen" name="FSStatusbarShowSimulatorVersion" tool_tip="Zeigt die Version des Simulators an, auf dem die aktuelle Region läuft."/>
 		<check_box label="Menüsuche anzeigen" name="show_search_menu_check"/>
 		<check_box label="Kontostand anzeigen" name="FSShowCurrencyBalanceInStatusbar"/>
 		<check_box label="Popup-Fenster beim Überfahren der Icons mit der Maus in der Menüleiste aktivieren" name="FSStatusBarMenuButtonPopupOnRollover"/>
@@ -108,7 +117,7 @@
 		<check_box label="Beim Klicken auf Avatarnamen direkt Profil öffnen" name="FSInspectAvatarSlurlOpensProfile" tool_tip="Falls aktiviert, wird bei einem Klick auf den Namenslink eines Avatars direkt dessen komplettes Profil geöffnet."/>
 		<check_box name="FSUseWebProfiles" label="Webprofile als Standard nutzen" tool_tip="Zeigt profile als Webseite anstelle des Profilfensters im Viewer-1-Stil"/>
 		<check_box label="Deaktiviere automatisches Öffnen der Blockierliste" name="FSDisableBlockListAutoOpen" tool_tip="Deaktiviert das automatische Öffnen der Blockierliste, wenn Avatare oder Objekte geblockt werden."/>
-		<check_box label="„Freunde“ und „Gruppen“ im Menü „Unterhalten“ öffnen die V5-Version" name="FSUseV2Friends" tool_tip="Falls aktiviert, werden Freunde bzw. Gruppen im „Leute“-Fenster geöffnet - ansonsten im Fenster „Kontakte“."/>
+		<check_box label="„Freunde“ und „Gruppen“ im Menü „Unterhalten“ öffnen die [SHORT_VIEWER_GENERATION]-Version" name="FSUseV2Friends" tool_tip="Falls aktiviert, werden Freunde bzw. Gruppen im „Leute“-Fenster geöffnet - ansonsten im Fenster „Kontakte“."/>
 		<check_box label="Ursprüngliche Version des Objekteigenschaften-Fensters verwenden" name="FSUseLegacyObjectProperties" tool_tip="Falls aktiviert, wird die ursprüngliche Version im Viewer-1-Stil des Eigenschaften-Fensters für Objekte verwendet."/>
 		<text name="standalone_textbox">
 			Eigene Fenster verwenden für:

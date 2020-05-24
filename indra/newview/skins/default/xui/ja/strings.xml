@@ -28,6 +28,9 @@
 	<string name="StartupRequireDriverUpdate">
 		グラフィックを初期化できませんでした。グラフィックドライバを更新してください。
 	</string>
+	<string name="AboutOSXHiDPI">
+		HiDPI 表示モード: [HIDPI]
+	</string>
 	<string name="AboutTime">
 		[month, datetime, slt] [day, datetime, slt] [year, datetime, slt] [hour, datetime, slt]:[min, datetime, slt]:[second,datetime,slt]
 	</string>
@@ -451,6 +454,12 @@ support@secondlife.com にお問い合わせください。
 	</string>
 	<string name="TooltipOutboxMixedStock">
 		在庫フォルダ内のアイテムはすべて同じ種類と権限でなければなりません
+	</string>
+	<string name="TooltipOutfitNotInInventory">
+		「アウトフィット」に入れることが出来るのは、ご自分の持ち物にあるアイテムやアウトフィットに限られます
+	</string>
+	<string name="TooltipCantCreateOutfit">
+		１つ以上のアイテムが「アウトフィット」として利用することができません
 	</string>
 	<string name="TooltipDragOntoOwnChild">
 		フォルダをその子フォルダに移動することはできません
@@ -1442,6 +1451,15 @@ http://www.firestormviewer.org/support
 	<string name="MarketplaceURL_LearnMore">
 		https://marketplace.[MARKETPLACE_DOMAIN_NAME]/learn_more
 	</string>
+	<string name="InventoryPlayAnimationTooltip">
+		[再生] オプションでウィンドウを開ける。
+	</string>
+	<string name="InventoryPlayGestureTooltip">
+		インワールドで選択済みのジェスチャーを実行する。
+	</string>
+	<string name="InventoryPlaySoundTooltip">
+		[再生] オプションでウィンドウを開ける。
+	</string>
 	<string name="InventoryOutboxNotMerchantTitle">
 		マーケットプレイスでは誰でもアイテムを売ることができます。
 	</string>
@@ -2158,6 +2176,9 @@ http://www.firestormviewer.org/support
 	<string name="NoGroupDataFound">
 		グループのデータが見つかりませんでした
 	</string>
+	<string name="AlreadyInGroup">
+		既にこのグループに所属しています
+	</string>
 	<string name="IMParentEstate">
 		parent estate
 	</string>
@@ -2579,7 +2600,7 @@ http://www.firestormviewer.org/support
 	</string>
 	<string name="UnknownFileExtension">
 		不明の拡張子： %s
-使用可能な拡張子： .wav, .tga, .bmp, .jpg, .jpeg, or .bvh
+使用可能な拡張子： .wav, .tga, .bmp, .jpg, .jpeg, or .anim
 	</string>
 	<string name="MuteObject2">
 		ブロック
@@ -5029,7 +5050,7 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 		このアウトフィットにはアイテムがありません
 	</string>
 	<string name="ExternalEditorNotSet">
-		ExternalEditor 設定を使ってエディターを選択します。
+		環境変数 LL_SCRIPT_EDITOR を設定するか、ExternalEditor 設定を使ってエディターを選択します。
 	</string>
 	<string name="ExternalEditorNotFound">
 		指定された外部エディターが見つかりません。
@@ -5402,9 +5423,6 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="Command_Destinations_Label">
 		行き先
 	</string>
-	<string name="Command_Facebook_Label">
-		Facebook
-	</string>
 	<string name="Command_Flickr_Label">
 		Flickr
 	</string>
@@ -5538,9 +5556,6 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	</string>
 	<string name="Command_Destinations_Tooltip">
 		行ってみたい場所
-	</string>
-	<string name="Command_Facebook_Tooltip">
-		Facebook へ投稿
 	</string>
 	<string name="Command_Flickr_Tooltip">
 		Flickr にアップロード
@@ -5721,6 +5736,13 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	</string>
 	<string name="Command_Stop_Animations_Tooltip">
 		自分のアニメーションを停止する
+	</string>
+	
+	<string name="Command_Discord_Label">
+		Discord
+	</string>
+	<string name="Command_Discord_Tooltip">
+		Discord
 	</string>
 	
  <!-- Mesh UI terms -->

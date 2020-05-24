@@ -843,34 +843,11 @@ bool LLVivoxVoiceClient::startAndLaunchDaemon()
 #if LL_WINDOWS
         // On windows use exe (not work or RO) directory
         std::string exe_path = gDirUtilp->getExecutableDir();
-        // <FS:Ansariel> FIRE-22709: Local voice not working in OpenSim
-#ifdef OPENSIM
-        if (!LLGridManager::instance().isInSecondLife())
-        {
-            gDirUtilp->append(exe_path, "voice_os" + gDirUtilp->getDirDelimiter() + "SLVoice.exe");
-        }
-        else
-#endif
-        // </FS:Ansariel>
         gDirUtilp->append(exe_path, "SLVoice.exe");
 #elif LL_DARWIN
         // On MAC use resource directory
         std::string exe_path = gDirUtilp->getAppRODataDir();
-        // <FS:Ansariel/TS> FIRE-22709: Local voice not working in OpenSim
-        //gDirUtilp->append(exe_path, "SLVoice");
-#ifdef OPENSIM
-        if (LLGridManager::instance().isInSecondLife())
-        {
-#endif
-            gDirUtilp->append(exe_path, "SLVoice");
-#ifdef OPENSIM
-        }
-        else
-        {
-            gDirUtilp->append(exe_path, "voice_os/SLVoice");
-        }
-#endif
-        // </FS:Ansariel/TS>
+        gDirUtilp->append(exe_path, "SLVoice");
 #else
         std::string exe_path = gDirUtilp->getExecutableDir();
         // <FS:ND> On Linux the viewer can run SLVoice.exe through wine (https://www.winehq.org/)
@@ -924,6 +901,20 @@ bool LLVivoxVoiceClient::startAndLaunchDaemon()
             params.args.add("-lf");
             params.args.add(log_folder);
 
+            // set log file basename and .log
+            params.args.add("-lp");
+            params.args.add("SLVoice");
+            params.args.add("-ls");
+            params.args.add(".log");
+
+            // rotate any existing log
+            std::string new_log = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "SLVoice.log");
+            std::string old_log = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "SLVoice.old");
+            if (gDirUtilp->fileExists(new_log))
+            {
+                LLFile::rename(new_log, old_log);
+            }
+            
             std::string shutdown_timeout = gSavedSettings.getString("VivoxShutdownTimeout");
             if (!shutdown_timeout.empty())
             {
@@ -5303,6 +5294,7 @@ void LLVivoxVoiceClient::setVoiceEnabled(bool enabled)
 		{
 			// Turning voice off looses your current channel -- this makes sure the UI isn't out of sync when you re-enable it.
 			LLVoiceChannel::getCurrentVoiceChannel()->deactivate();
+			gAgent.setVoiceConnected(false);
 			status = LLVoiceClientStatusObserver::STATUS_VOICE_DISABLED;
 		}
 

@@ -9,14 +9,15 @@
 				<combo_box.item label="Moje miejsce startu" name="MyHome" />
 			</combo_box>
 			<button label="Zaloguj" name="connect_btn" />
-			<check_box label="Pamiętaj mnie" name="remember_check" />
-			<text name="forgot_password_text">
-				Zapomniałem/am hasła
-			</text>
 			<text name="sign_up_text">
 				Dołącz
 			</text>
-			<combo_box label="Wybierz siatkę" name="server_combo" />
+			<check_box label="Pamiętaj mnie" name="remember_name" tool_tip="Już zapamiętanego użytkownika można zapomnieć w Awatar &gt; Ustawienia &gt; Zaawansowane &gt; Zapamiętani użytkownicy." />
+			<check_box label="Pamiętaj hasło" name="remember_password" />
+			<combo_box label="Wybierz świat" name="server_combo" />
+			<text name="forgot_password_text">
+				Pomoc z hasłem
+			</text>
 		</layout_panel>
 	</layout_stack>
 </panel>

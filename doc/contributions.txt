@@ -350,6 +350,7 @@ Charles Courtois
 Charlie Sazaland
 Chaser Zaks
     BUG-225599
+    BUG-227485
 Cherry Cheevers
 ChickyBabes Zuzu
 Christopher  Organiser
@@ -1436,6 +1437,8 @@ Thickbrick Sleaford
 	STORM-956
 	STORM-1147
 	STORM-1325
+Thoys Pan
+	SL-12396
 Thraxis Epsilon
 	SVC-371
 	VWR-383
@@ -1454,6 +1457,7 @@ Tonya Souther
 	STORM-1905
 	BUG-3875
 	BUG-3968
+	OPEN-345
 Torben Trautman
 TouchaHoney Perhaps
 TraductoresAnonimos Alter

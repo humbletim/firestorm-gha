@@ -171,6 +171,7 @@ LLTextBase::Params::Params()
 	plain_text("plain_text",false),
 	track_end("track_end", false),
 	read_only("read_only", false),
+	skip_link_underline("skip_link_underline", false),
 	spellcheck("spellcheck", false),
 	v_pad("v_pad", 0),
 	h_pad("h_pad", 0),
@@ -205,6 +206,7 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mFontShadow(p.font_shadow),
 	mPopupMenuHandle(),
 	mReadOnly(p.read_only),
+	mSkipLinkUnderline(p.skip_link_underline),
 	mSpellCheck(p.spellcheck),
 	mSpellCheckStart(-1),
 	mSpellCheckEnd(-1),
@@ -1090,7 +1092,40 @@ BOOL LLTextBase::handleMouseDown(S32 x, S32 y, MASK mask)
 	// handle triple click
 	if (!mTripleClickTimer.hasExpired())
 	{
-		selectAll();
+		S32 real_line = getLineNumFromDocIndex(mCursorPos, false);
+		S32 line_start = -1;
+		S32 line_end = -1;
+		for (line_list_t::const_iterator it = mLineInfoList.begin(), end_it = mLineInfoList.end();
+				it != end_it;
+				++it)
+		{
+			if (it->mLineNum < real_line)
+			{
+				continue;
+			}
+			if (it->mLineNum > real_line)
+			{
+				break;
+			}
+			if (line_start == -1)
+			{
+				line_start = it->mDocIndexStart;
+			}
+			line_end = it->mDocIndexEnd;
+
+			// <FS:Ansariel> FIRE-29545: Backspace not working after triple-click selecting last line
+			line_end = llclamp(line_end, 0, getLength());
+		}
+
+		if (line_start == -1)
+		{
+			return TRUE;
+		}
+
+		mSelectionEnd = line_start;
+		mSelectionStart = line_end;
+		setCursorPos(line_start);
+
 		return TRUE;
 	}
 
@@ -2457,7 +2492,7 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 			S32 cur_length = getLength();
 			LLStyleConstSP sp(new LLStyle(highlight_params));
 			LLTextSegmentPtr segmentp;
-			if(underline_on_hover_only)
+			if (underline_on_hover_only || mSkipLinkUnderline)
 			{
 				highlight_params.font.style("NORMAL");
 				LLStyleConstSP normal_sp(new LLStyle(highlight_params));
@@ -2481,7 +2516,7 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 		S32 segment_start = old_length;
 		S32 segment_end = old_length + wide_text.size();
 		LLStyleConstSP sp(new LLStyle(style_params));
-		if (underline_on_hover_only)
+		if (underline_on_hover_only || mSkipLinkUnderline)
 		{
 			LLStyle::Params normal_style_params(style_params);
 			normal_style_params.font.style("NORMAL");
@@ -3338,6 +3373,7 @@ BOOL LLTextSegment::handleRightMouseUp(S32 x, S32 y, MASK mask) { return FALSE; 
 BOOL LLTextSegment::handleDoubleClick(S32 x, S32 y, MASK mask) { return FALSE; }
 BOOL LLTextSegment::handleHover(S32 x, S32 y, MASK mask) { return FALSE; }
 BOOL LLTextSegment::handleScrollWheel(S32 x, S32 y, S32 clicks) { return FALSE; }
+BOOL LLTextSegment::handleScrollHWheel(S32 x, S32 y, S32 clicks) { return FALSE; }
 BOOL LLTextSegment::handleToolTip(S32 x, S32 y, MASK mask) { return FALSE; }
 const std::string&	LLTextSegment::getName() const 
 {
@@ -3471,7 +3507,7 @@ BOOL LLNormalTextSegment::handleHover(S32 x, S32 y, MASK mask)
 		// Only process the click if it's actually in this segment, not to the right of the end-of-line.
 		if(mEditor.getSegmentAtLocalPos(x, y, false) == this)
 		{
-			LLUI::getWindow()->setCursor(UI_CURSOR_HAND);
+			LLUI::getInstance()->getWindow()->setCursor(UI_CURSOR_HAND);
 			return TRUE;
 		}
 	}
@@ -3726,7 +3762,7 @@ F32 LLOnHoverChangeableTextSegment::draw(S32 start, S32 end, S32 selection_start
 /*virtual*/
 BOOL LLOnHoverChangeableTextSegment::handleHover(S32 x, S32 y, MASK mask)
 {
-	mStyle = mHoveredStyle;
+	mStyle = mEditor.getSkipLinkUnderline() ? mNormalStyle : mHoveredStyle;
 	return LLNormalTextSegment::handleHover(x, y, mask);
 }
 

@@ -9,7 +9,7 @@
   animate="false"
   name="option_buttons"
   orientation="vertical"
-  height="186"
+  height="152"
   width="208"
   left="0"
   top="9"
@@ -92,30 +92,6 @@
    user_resize="false"
    top_pad="0"
    height="22"
-   name="lp_twitter">
-  <button
-   follows="left|top"
-   font="SansSerif"
-   halign="left"
-   height="22"
-   image_overlay="Command_Twitter_Icon"
-   image_overlay_alignment="left"
-   image_top_pad="0"
-   imgoverlay_label_space="10"
-   label="Share to Twitter"
-   layout="topleft"
-   left="9"
-   name="send_to_twitter_btn"
-   top_pad="0">
-    <button.commit_callback
-     function="Snapshot.SendToTwitter"/>
-  </button>
-  </layout_panel>
-  <layout_panel
-   auto_resize="false"
-   user_resize="false"
-   top_pad="0"
-   height="22"
    name="lp_flickr">
   <button
    follows="left|top"
@@ -160,4 +136,19 @@
   </button>
   </layout_panel>
   </layout_stack>
+
+  <text
+   follows="top|left"
+   font="SansSerif"
+   height="56"
+   layout="topleft"
+   left="10"
+   length="1"
+   name="fee_hint_lbl"
+   top_pad="7"
+   width="200"
+   type="string"
+   word_wrap="true">
+    Fee is based on your subscription level. Higher levels are charged lower fees.
+  </text>
 </panel>

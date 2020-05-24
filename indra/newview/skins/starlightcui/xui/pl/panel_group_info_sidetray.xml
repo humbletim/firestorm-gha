@@ -27,6 +27,7 @@
 						<accordion_tab name="group_roles_tab" title="Funkcje i osoby"/>
 						<accordion_tab name="group_notices_tab" title="Ogłoszenia"/>
 						<accordion_tab name="group_land_tab" title="Działka/Majątek"/>
+						<accordion_tab name="group_experiences_tab" title="Przygody"/>
 					</accordion>
 				</layout_panel>
 			</layout_stack>
@@ -41,9 +42,6 @@
 						</layout_panel>
 						<layout_panel name="btn_apply_lp">
 							<button label="Zapisz" label_selected="Zapisz" name="btn_apply"/>
-						</layout_panel>
-						<layout_panel name="btn_create_lp">
-							<button label="Stwórz grupę" name="btn_create" tool_tip="Stwórz nową grupę"/>
 						</layout_panel>
 					</layout_stack>
 				</layout_panel>

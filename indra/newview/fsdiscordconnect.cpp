@@ -48,9 +48,9 @@
 
 #include "boost/algorithm/string/case_conv.hpp"
 
-#ifndef DISCORD_API_KEY
-#define DISCORD_API_KEY ""
-#endif
+#include "fsdiscordkey.h"
+
+#include "llviewernetwork.h"
 
 boost::scoped_ptr<LLEventPump> FSDiscordConnect::sStateWatcher(new LLEventStream("DiscordConnectState"));
 boost::scoped_ptr<LLEventPump> FSDiscordConnect::sInfoWatcher(new LLEventStream("DiscordConnectInfo"));
@@ -208,10 +208,10 @@ void FSDiscordConnect::updateRichPresence()
 	memset(&discordPresence, 0, sizeof(discordPresence));
 	discordPresence.state = region_name.c_str();
 
+	std::string name;
 	if (RlvActions::canShowName(RlvActions::SNC_DEFAULT, gAgentID) && gSavedPerAccountSettings.getBOOL("FSShareNameToDiscord"))
 	{
 		LLAvatarName av_name;
-		std::string name;
 		if (LLAvatarNameCache::get(gAgentID, &av_name))
 		{
 			name = av_name.getCompleteName(true, true);
@@ -225,8 +225,20 @@ void FSDiscordConnect::updateRichPresence()
 	
 	discordPresence.startTimestamp = mConnectTime;
 
+#ifdef OPENSIM
+	if (LLGridManager::getInstance()->isInSecondLife())
+	{
+		discordPresence.largeImageKey = "secondlife_512";
+	}
+	else
+	{
+		discordPresence.largeImageKey = "opensimulator_512";
+	}
+#else
 	discordPresence.largeImageKey = "secondlife_512";
-	discordPresence.largeImageText = "Second Life";
+#endif
+
+	discordPresence.largeImageText = LLGridManager::getInstance()->getGridLabel().c_str();
 	discordPresence.smallImageKey = "firestorm_512";
 	std::string appName = std::string("via " + APP_NAME);
 	discordPresence.smallImageText = appName.c_str();

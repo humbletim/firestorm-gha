@@ -32,12 +32,14 @@
 #include "pipeline.h"
 
 #include "llagentaccess.h"
+#include "llagentbenefits.h"
 #include "llagentcamera.h"
 #include "llagentlistener.h"
 #include "llagentwearables.h"
 #include "llagentui.h"
 #include "llappearancemgr.h"
 #include "llanimationstates.h"
+#include "llavatarappearancedefines.h"
 #include "llcallingcard.h"
 #include "llchannelmanager.h"
 #include "llchicletbar.h"
@@ -2459,6 +2461,14 @@ U8 LLAgent::getRenderState()
 //-----------------------------------------------------------------------------
 void LLAgent::endAnimationUpdateUI()
 {
+	if (LLApp::isExiting()
+		|| !gViewerWindow
+		|| !gMenuBarView
+		|| !gToolBarView
+		|| !gStatusBar)
+	{
+		return;
+	}
 	if (gAgentCamera.getCameraMode() == gAgentCamera.getLastCameraMode())
 	{
 		// We're already done endAnimationUpdateUI for this transition.
@@ -3556,10 +3566,17 @@ BOOL LLAgent::setUserGroupFlags(const LLUUID& group_id, BOOL accept_notices, BOO
 
 BOOL LLAgent::canJoinGroups() const
 {
-	// [CR] FIRE-12229
-	//return (S32)mGroups.size() < gMaxAgentGroups;
-	return ((!gMaxAgentGroups) || ((S32)mGroups.size() < gMaxAgentGroups));
-	// [/CR]
+	// <FS:CR> FIRE-12229
+	//return (S32)mGroups.size() < LLAgentBenefitsMgr::current().getGroupMembershipLimit();
+	if (LLGridManager::instance().isInSecondLife())
+	{
+		return (S32)mGroups.size() < LLAgentBenefitsMgr::current().getGroupMembershipLimit();
+	}
+	else
+	{
+		return ((!gMaxAgentGroups) || ((S32)mGroups.size() < gMaxAgentGroups));
+	}
+	// </FS:CR>
 }
 
 LLQuaternion LLAgent::getHeadRotation()
@@ -4414,6 +4431,23 @@ BOOL LLAgent::getHomePosGlobal( LLVector3d* pos_global )
 	from_region_handle( mHomeRegionHandle, &x, &y);
 	pos_global->setVec( x + mHomePosRegion.mV[VX], y + mHomePosRegion.mV[VY], mHomePosRegion.mV[VZ] );
 	return TRUE;
+}
+
+bool LLAgent::isInHomeRegion()
+{
+	if(!mHaveHomePosition)
+	{
+		return false;
+	}
+	if (!getRegion())
+	{
+		return false;
+	}
+	if (getRegion()->getHandle() != mHomeRegionHandle)
+	{
+		return false;
+	}
+	return true;
 }
 
 void LLAgent::clearVisualParams(void *data)
@@ -5900,8 +5934,19 @@ void LLAgent::sendAgentSetAppearance()
 	// NOTE -- when we start correcting all of the other Havok geometry 
 	// to compensate for the COLLISION_TOLERANCE ugliness we will have 
 	// to tweak this number again
-	const LLVector3 body_size = gAgentAvatarp->mBodySize + gAgentAvatarp->mAvatarOffset;
-	msg->addVector3Fast(_PREHASH_Size, body_size);	
+	
+	// <FS:BEQ> Havok hover adjustment is not present on OS
+	// const LLVector3 body_size = gAgentAvatarp->mBodySize + gAgentAvatarp->mAvatarOffset;
+	// msg->addVector3Fast(_PREHASH_Size, body_size);	
+	if(!LLGridManager::getInstance()->isInSecondLife())
+	{
+		msg->addVector3Fast(_PREHASH_Size, gAgentAvatarp->mBodySize);	
+	}
+	else
+	{
+		const LLVector3 body_size = gAgentAvatarp->mBodySize + gAgentAvatarp->mAvatarOffset;
+		msg->addVector3Fast(_PREHASH_Size, body_size);	
+	}//</FS:BEQ>
 
 	// To guard against out of order packets
 	// Note: always start by sending 1.  This resets the server's count. 0 on the server means "uninitialized"
@@ -5911,8 +5956,10 @@ void LLAgent::sendAgentSetAppearance()
 	// is texture data current relative to wearables?
 	// KLW - TAT this will probably need to check the local queue.
 	BOOL textures_current = gAgentAvatarp->areTexturesCurrent();
-
-	for(U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; baked_index++ )
+	//<FS:Beq> BOM fallback legacy opensim
+	// for(U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; baked_index++ )
+	for(U8 baked_index = 0; baked_index < gAgentAvatarp->getNumBakes(); baked_index++ )
+	//</FS:Beq>
 	{
 		const ETextureIndex texture_index = LLAvatarAppearanceDictionary::bakedToLocalTextureIndex((EBakedTextureIndex)baked_index);
 
@@ -5945,7 +5992,10 @@ void LLAgent::sendAgentSetAppearance()
 			dumpSentAppearance(dump_prefix);
 		}
 		LL_DEBUGS("Avatar") << gAgentAvatarp->avString() << "TAT: Sending cached texture data" << LL_ENDL;
-		for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; baked_index++)
+		//<FS:Beq> BOM fallback for legacy opensim
+		// for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; baked_index++)
+		for (U8 baked_index = 0; baked_index < gAgentAvatarp->getNumBakes(); baked_index++)
+		//</FS:Beq>
 		{
 			BOOL generate_valid_hash = TRUE;
 			if (isAgentAvatarValid() && !gAgentAvatarp->isBakedTextureFinal((LLAvatarAppearanceDefines::EBakedTextureIndex)baked_index))
@@ -5953,6 +6003,13 @@ void LLAgent::sendAgentSetAppearance()
 				generate_valid_hash = FALSE;
 				LL_DEBUGS("Avatar") << gAgentAvatarp->avString() << "Not caching baked texture upload for " << (U32)baked_index << " due to being uploaded at low resolution." << LL_ENDL;
 			}
+			// <FS:Beq> Exclude BAKED_SKIRT from being sent if no skirt is worn (should only reach here if it were already baked)
+			if (baked_index == BAKED_SKIRT && !gAgentAvatarp->isWearingWearableType(LLWearableType::WT_SKIRT))
+			{
+				LL_DEBUGS("Avatar") << "Not caching baked texture for unworn skirt." << LL_ENDL;
+				generate_valid_hash = FALSE;
+			}
+			// </FS:Beq>
 
 			const LLUUID hash = gAgentWearables.computeBakedTextureHash((EBakedTextureIndex) baked_index, generate_valid_hash);
 			if (hash.notNull())
@@ -5964,6 +6021,7 @@ void LLAgent::sendAgentSetAppearance()
 			}
 		}
 		msg->nextBlockFast(_PREHASH_ObjectData);
+		// gAgentAvatarp->dumpAvatarTEs("sendAppearance"); // <FS:Beq> useful when debugging appeanrce updates
 		gAgentAvatarp->sendAppearanceMessage( gMessageSystem );
 	}
 	else

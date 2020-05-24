@@ -76,7 +76,13 @@
 // Bugsplat (http://bugsplat.com) crash reporting tool
 #ifdef LL_BUGSPLAT
 #include "BugSplat.h"
-#include "reader.h"                 // JsonCpp
+
+#if LL_USESYSTEMLIBS
+#include "jsoncpp/reader.h" // JSON
+#else
+#include "json/reader.h" // JSON
+#endif
+
 #include "llagent.h"                // for agent location
 #include "llviewerregion.h"
 #include "llvoavatarself.h"         // for agent name
@@ -121,27 +127,52 @@ namespace
         {
             // send the main viewer log file
             // widen to wstring, convert to __wchar_t, then pass c_str()
-            sBugSplatSender->sendAdditionalFile(
-                WCSTR(gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "SecondLife.log")));
+            
+            // <FS:ND> We don't send log files
+            // sBugSplatSender->sendAdditionalFile(
+            //     WCSTR(gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "SecondLife.log")));
+            // </FS:ND>
 
-            sBugSplatSender->sendAdditionalFile(
-                WCSTR(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "settings.xml")));
+            // sBugSplatSender->sendAdditionalFile(
+            //   WCSTR(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "settings.xml")));
+
+            if (gCrashSettings.getBOOL("CrashSubmitSettings"))
+                sBugSplatSender->sendAdditionalFile(  WCSTR(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "settings.xml")));
+
 
             sBugSplatSender->sendAdditionalFile(
                 WCSTR(*LLAppViewer::instance()->getStaticDebugFile()));
 
             // We don't have an email address for any user. Hijack this
             // metadata field for the platform identifier.
-            sBugSplatSender->setDefaultUserEmail(
-                WCSTR(STRINGIZE(LLOSInfo::instance().getOSStringSimple() << " ("
-                                << ADDRESS_SIZE << "-bit)")));
+            // sBugSplatSender->setDefaultUserEmail(
+            //    WCSTR(STRINGIZE(LLOSInfo::instance().getOSStringSimple() << " ("
+            //                    << ADDRESS_SIZE << "-bit)")));
 
-            if (gAgentAvatarp)
+            // <FS:ND> Add which flavor of FS generated an error
+            std::string flavor = "hvk";
+#ifdef OPENSIM
+            flavor = "oss";
+#endif
+            sBugSplatSender->setDefaultUserEmail( WCSTR(STRINGIZE(LLOSInfo::instance().getOSStringSimple() << " ("  << ADDRESS_SIZE << "-bit, flavor " << flavor <<")")));
+            // </FS:ND>
+
+            //<FS:ND/> Clear out username first, as we get some crashes that has the OS set as username, let's see if this fixes it.
+            sBugSplatSender->setDefaultUserName( WCSTR("<unset>") );
+
+            // <FS:ND> Only send avatar name if enabled via prefs
+            if (gCrashSettings.getBOOL("CrashSubmitName"))
             {
-                // user name, when we have it
-                sBugSplatSender->setDefaultUserName(WCSTR(gAgentAvatarp->getFullname()));
+            // </FS:ND>
+                if (gAgentAvatarp)
+                {
+                    // user name, when we have it
+                    sBugSplatSender->setDefaultUserName(WCSTR(gAgentAvatarp->getFullname()));
+                }
+            // <FS:ND> Only send avatar name if enabled via prefs
             }
-
+            // </FS:ND>
+            
             // LL_ERRS message, when there is one
             sBugSplatSender->setDefaultUserDescription(WCSTR(LLError::getFatalMessage()));
 
@@ -385,12 +416,12 @@ void ll_nvapi_init(NvDRSSessionHandle hSession)
 #if DEBUGGING_SEH_FILTER
 #	define WINMAIN DebuggingWinMain
 #else
-#	define WINMAIN WinMain
+#	define WINMAIN wWinMain
 #endif
 
 int APIENTRY WINMAIN(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
+                     PWSTR     pCmdLine,
                      int       nCmdShow)
 {
 	const S32 MAX_HEAPS = 255;
@@ -430,8 +461,8 @@ int APIENTRY WINMAIN(HINSTANCE hInstance,
 	// *FIX: global
 	gIconResource = MAKEINTRESOURCE(IDI_LL_ICON);
 
-	LLAppViewerWin32* viewer_app_ptr = new LLAppViewerWin32(lpCmdLine);
-	
+	LLAppViewerWin32* viewer_app_ptr = new LLAppViewerWin32(ll_convert_wide_to_string(pCmdLine).c_str());
+
 	gOldTerminateHandler = std::set_terminate(exceptionTerminateHandler);
 
 	viewer_app_ptr->setErrorHandler(LLAppViewer::handleViewerCrash);
@@ -543,9 +574,9 @@ int APIENTRY WINMAIN(HINSTANCE hInstance,
 // in a method that uses object destructors. Go figure.
 // This winmain just calls the real winmain inside __try.
 // The __except calls our exception filter function. For debugging purposes.
-int APIENTRY WinMain(HINSTANCE hInstance,
+int APIENTRY wWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
-                     LPSTR     lpCmdLine,
+                     PWSTR     lpCmdLine,
                      int       nCmdShow)
 {
     __try

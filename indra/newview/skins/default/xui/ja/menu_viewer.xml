@@ -12,6 +12,7 @@
 		
 		<menu_item_check label="持ち物" name="Inventory"/>
 		<menu_item_check label="持ち物" name="ShowSidetrayInventory"/>
+		<menu_item_check label="保護フォルダ" name="Protected Folders" />
 		<menu_item_check label="お気に入りの服やHUD" name="WearableFavorites" />
 		<menu_item_call label="ピック..." name="Picks"/>
 		<menu_item_call label="体験..." name="Experiences"/>
@@ -44,6 +45,7 @@
 			<menu_item_call label="アバターを男性のデフォルトにリセット" name="ResetDefaultAvM"/>
 			<menu_item_call label="アバターを女性のデフォルトにリセット" name="ResetDefaultAvF"/>
 			<menu_item_check label="アバター表示の複雑さ情報を表示" name="Avatar Draw Info" />
+			<menu_item_call label="スクリプト" name="MyScripts" />
 			<menu_item_call label="ラグメーター" name="Lag Meter" />
 			<menu_item_call label="ブリッジを再作成" name="Recreate LSL Bridge"/>
 		</menu>
@@ -53,17 +55,6 @@
 		
 		<menu_item_call label="環境設定" name="Preferences"/>
 		<menu_item_call label="ツールバーボタン" name="Toolbar Buttons" />
-		<!--
-		<menu label="アップロード" name="Upload">
-			<menu_item_call label="画像（[COST]）..." name="Upload Image"/>
-			<menu_item_call label="サウンド（[COST]）..." name="Upload Sound"/>
-			<menu_item_call label="アニメーション（[COST]）..." name="Upload Animation"/>
-			<menu_item_call label="メッシュモデル" name="Upload Model"/>
-			<menu_item_call label="一括アップロード..." name="Bulk Upload"/>
-			<menu_item_call label="権限の初期設定..." name="perm prefs"/>
-			<menu_item_call label="リンクセットをインポート" name="import linkset" />
-		</menu>
-		-->
 		<menu_item_check label="HUD を表示" name="Show HUD Attachments"/>
 		<menu_item_check label="インターフェイスを表示" name="Show User Interface" />都
 		<menu_item_call label="管理者権限のリクエスト" name="Request Admin Options"/>
@@ -96,6 +87,7 @@
 		<menu_item_call label="Facebook..." name="Facebook" />
 		<menu_item_call label="Twitter..." name="Twitter" />
 		<menu_item_call label="Flickr..." name="Flickr" />
+		<menu_item_call label="Discord..." name="Discord"/>
         <menu_item_separator/>
         <menu label="ボイスモーフィング" name="VoiceMorphing">
             <menu_item_check label="ボイスモーフィングなし" name="NoVoiceMorphing" />
@@ -105,42 +97,6 @@
 			<menu_item_call label="プレミアム特典..." name="PremiumPerk" />
         </menu>
 		<menu_item_check name="Conversation Log..." label="会話ログ..." />
-        <!--
-        <menu_item_separator/>
-        <menu_item_check
-         label="Friends"
-         name="My Friends"
-         shortcut="control|shift|F">
-            <menu_item_check.on_check
-             function="SideTray.CheckPanelPeopleTab"
-             parameter="friends_panel" />
-            <menu_item_check.on_click
-             function="SideTray.PanelPeopleTab"
-             parameter="friends_panel" />
-            </menu_item_check>
-        <menu_item_check
-         label="Groups"
-         name="My Groups"
-         shortcut="control|shift|G">
-         	<menu_item_check.on_check
-             function="SideTray.CheckPanelPeopleTab"
-             parameter="groups_panel" />
-            <menu_item_check.on_click
-             function="SideTray.PanelPeopleTab"
-             parameter="groups_panel" />
-        </menu_item_check>
-        <menu_item_check
-         label="Nearby people"
-         name="Active Speakers"
-         shortcut="control|shift|A">
-        	 <menu_item_check.on_check
-             function="SideTray.CheckPanelPeopleTab"
-             parameter="nearby_panel" />
-            <menu_item_check.on_click
-              function="SideTray.PanelPeopleTab"
-              parameter="nearby_panel" />
-        </menu_item_check>
-        -->
 		<menu_item_check label="近くのボイス" name="Nearby Voice"/>
 		<menu_item_call label="ブロックリスト" name="Block List"/>
 	</menu>
@@ -294,11 +250,11 @@
 			<menu_item_call label="権限の初期設定..." name="Set default permissions" />
 		</menu>
 		<menu label="アップロード" name="Upload">
-			<menu_item_call label="画像（[COST]）..." name="Upload Image"/>
-			<menu_item_call label="サウンド（[COST]）..." name="Upload Sound"/>
-			<menu_item_call label="アニメーション（[COST]）..." name="Upload Animation"/>
+			<menu_item_call label="画像（L$[COST]）..." name="Upload Image"/>
+			<menu_item_call label="サウンド（L$[COST]）..." name="Upload Sound"/>
+			<menu_item_call label="アニメーション（L$[COST]）..." name="Upload Animation"/>
 			<menu_item_call label="メッシュモデル" name="Upload Model"/>
-			<menu_item_call label="一括 （ファイルにつき[COST]）..." name="Bulk Upload"/>
+			<menu_item_call label="一括..." name="Bulk Upload"/>
 			<menu_item_call label="リンクセットをインポート" name="import linkset" />
 		</menu>
 		<menu_item_call label="元に戻す" name="Undo"/>
@@ -337,7 +293,7 @@
 		<menu_item_check label="ヒントを有効にする" name="Enable Hints"/>
 		<menu_item_call label="Firestorm Wiki" name="Firestorm Wiki"/>
 		<menu_item_call label="問題の解決" name="Troubleshooting">
-			<menu_item_call.on_click name="wiki_troubleshooting_url" parameter="WebLaunchExternalTarget,http://wiki.phoenixviewer.com/firestorm_troubleshooting" />
+			<menu_item_call.on_click name="wiki_troubleshooting_url" parameter="WebLaunchExternalTarget,http://wiki.firestormviewer.org/firestorm_troubleshooting" />
 		</menu_item_call>
 		
 		<menu_item_call label="Firestormサポートグループに参加" name="firestorm_support_group"/>

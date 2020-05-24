@@ -590,7 +590,7 @@ BOOL LLFolderViewItem::handleMouseDown( S32 x, S32 y, MASK mask )
 
 BOOL LLFolderViewItem::handleHover( S32 x, S32 y, MASK mask )
 {
-	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::sSettingGroups["config"],"DragAndDropDistanceThreshold", 3);
+	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::getInstance()->mSettingGroups["config"],"DragAndDropDistanceThreshold", 3);
 
 	mIsMouseOverTitle = (y > (getRect().getHeight() - mItemHeight));
 
@@ -971,7 +971,17 @@ void LLFolderViewItem::draw()
     }
     drawLabel(font, text_left, y, color, right_x);
 
-	// <FS:Ansariel> Special for protected items
+	// <FS:Ansariel> Special for locked items
+	if (mViewModelItem->isLocked())
+	{
+		static const std::string locked_string = " (" + LLTrans::getString("LockedFolder") + ") ";
+		font->renderUTF8(locked_string, 0, right_x, y, sProtectedColor,
+						 LLFontGL::LEFT, LLFontGL::BOTTOM, LLFontGL::NORMAL, LLFontGL::NO_SHADOW, 
+						 S32_MAX, S32_MAX, &right_x, FALSE);
+	}
+	// </FS:Ansariel>
+
+	// <FS:Ansariel> FIRE-29342: Protect folder option
 	if (mViewModelItem->isProtected())
 	{
 		static const std::string protected_string = " (" + LLTrans::getString("ProtectedFolder") + ") ";

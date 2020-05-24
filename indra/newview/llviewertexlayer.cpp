@@ -207,8 +207,20 @@ void LLViewerTexLayerSetBuffer::midRenderTexLayerSet(BOOL success)
 			LLViewerTexLayerSet* layer_set = getViewerTexLayerSet();
 			if (layer_set->isVisible())
 			{
-				layer_set->getAvatar()->debugBakedTextureUpload(layer_set->getBakedTexIndex(), FALSE); // FALSE for start of upload, TRUE for finish.
-				doUpload();
+				//<FS:Beq> OpenSim BOM fallback
+				// layer_set->getAvatar()->debugBakedTextureUpload(layer_set->getBakedTexIndex(), FALSE); // FALSE for start of upload, TRUE for finish.
+				//	doUpload();
+				auto bakedTexIdx = layer_set->getBakedTexIndex();
+				if(bakedTexIdx <= layer_set->getAvatar()->getNumBakes())
+				{
+					layer_set->getAvatar()->debugBakedTextureUpload(bakedTexIdx, FALSE); // FALSE for start of upload, TRUE for finish.
+					doUpload();
+				}
+				else
+				{
+					LL_DEBUGS("Avatar") << "Skipping bake for unsupported layer on this region" << LL_ENDL;
+				}
+				// <FS:Beq>
 			}
 			else
 			{

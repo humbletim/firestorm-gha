@@ -53,7 +53,7 @@ viewer_dir = os.path.dirname(__file__)
 # Put it FIRST because some of our build hosts have an ancient install of
 # indra.util.llmanifest under their system Python!
 sys.path.insert(0, os.path.join(viewer_dir, os.pardir, "lib", "python"))
-from indra.util.llmanifest import LLManifest, main, path_ancestors, CHANNEL_VENDOR_BASE, RELEASE_CHANNEL, ManifestError
+from indra.util.llmanifest import LLManifest, main, path_ancestors, CHANNEL_VENDOR_BASE, RELEASE_CHANNEL, ManifestError, MissingError
 from llbase import llsd
 
 class ViewerManifest(LLManifest,FSViewerManifest):
@@ -164,8 +164,6 @@ class ViewerManifest(LLManifest,FSViewerManifest):
                 
             # <FS:AO> Include firestorm resources
             with self.prefix(src_dst="fs_resources"):
-                self.path("*.txt")
-                self.path("*.lsl")
                 self.path("*.lsltxt")
 
             # skins
@@ -173,13 +171,12 @@ class ViewerManifest(LLManifest,FSViewerManifest):
                     self.path("skins.xml")
                     # include the entire textures directory recursively
                     with self.prefix(src_dst="*/textures"):
-                            self.path("*/*.tga")
-                            self.path("*/*.j2c")
+                            self.path("*/*.tga") # <FS:Ansariel> Needed for legacy icons
                             self.path("*/*.jpg")
                             self.path("*/*.png")
                             self.path("*.tga")
                             self.path("*.j2c")
-                            self.path("*.jpg")
+                            self.path("*.jpg") # <FS:Ansariel> Needed for Firestorm
                             self.path("*.png")
                             self.path("textures.xml")
                     self.path("*/xui/*/*.xml")
@@ -187,12 +184,10 @@ class ViewerManifest(LLManifest,FSViewerManifest):
                     self.path("*/themes/*/colors.xml")
                     with self.prefix(src_dst="*/themes/*/textures"):
                         self.path("*/*.tga")
-                        self.path("*/*.j2c")
                         self.path("*/*.jpg")
                         self.path("*/*.png")
                         self.path("*.tga")
                         self.path("*.j2c")
-                        self.path("*.jpg")
                         self.path("*.png")
                     self.path("*/*.xml")
 
@@ -208,14 +203,6 @@ class ViewerManifest(LLManifest,FSViewerManifest):
                             self.path("*/*/*.html")
                             self.path("*/*/*.gif")
 
-
-            # local_assets dir (for pre-cached textures)
-            with self.prefix(src_dst="local_assets"):
-                self.path("*.j2c")
-                self.path("*.tga")
-
-            # File in the newview/ directory
-            # self.path("gpu_table.txt")
 
             #build_data.json.  Standard with exception handling is fine.  If we can't open a new file for writing, we have worse problems
             #platform is computed above with other arg parsing
@@ -261,6 +248,13 @@ class ViewerManifest(LLManifest,FSViewerManifest):
 
     def channel_type(self): # returns 'release', 'beta', 'project', or 'test'
         channel_qualifier=self.channel_variant().lower()
+        #<FS:TS> Somehow, we started leaving the - separating the variant from the app name
+        # on the beginning of the channel qualifier. This screws up later processing that
+        # depends on the channel type. If it's there, we chop it off.
+        #<FS:TS> Well, not for 6.3.9...this is broken elsewhere and we're too rushed to fix
+        # it properly, so we kludge our way around it elsewhere.
+        #if channel_qualifier[0] == '-':
+        #    channel_qualifier = channel_qualifier[1:]
         if channel_qualifier.startswith('release'):
             channel_type='release'
         elif channel_qualifier.startswith('beta'):
@@ -584,17 +578,6 @@ class WindowsManifest(ViewerManifest):
         with self.prefix(src=os.path.join(self.args['build'], os.pardir,
                                           'sharedlibs', self.args['configuration'])):
 
-            # Get llcommon and deps. If missing assume static linkage and continue.
-            try:
-                self.path('llcommon.dll')
-                self.path('libapr-1.dll')
-                self.path('libaprutil-1.dll')
-                self.path('libapriconv-1.dll')
-                
-            except RuntimeError as err:
-                print err.message
-                print "Skipping llcommon.dll (assuming llcommon was linked statically)"
-
             # Mesh 3rd party libs needed for auto LOD and collada reading
             try:
                 self.path("glod.dll")
@@ -602,23 +585,24 @@ class WindowsManifest(ViewerManifest):
                 print err.message
                 print "Skipping GLOD library (assumming linked statically)"
 
-            # Get fmodstudio dll, continue if missing
-            try:
+            # Get fmodstudio dll
+            if self.args['fmodversion'].lower() == 'fmodstudio':
                 if self.args['configuration'].lower() == 'debug':
                     self.path("fmodL.dll")
                 else:
                     self.path("fmod.dll")
-            except:
-                print "Skipping fmodstudio audio library (assuming other audio engine)"
 
-            # Get fmodex dll, continue if missing
-            try:
+            # Get fmodex dll
+            if self.args['fmodversion'].lower() == 'fmodex':
                 if(self.address_size == 64):
                     self.path("fmodex64.dll")
                 else:
                     self.path("fmodex.dll")
-            except:
-                print "Skipping fmodex audio library (assuming other audio engine)"
+
+            # Get openal dll
+            if self.args.get('openal') == 'ON':
+                self.path("OpenAL32.dll")
+                self.path("alut.dll")
 
             # For textures
             self.path("openjpeg.dll")
@@ -632,16 +616,17 @@ class WindowsManifest(ViewerManifest):
                 self.path("msvcr120.dll")
                 self.path("msvcp120.dll")
 
-            # Vivox runtimes
-            self.path("SLVoice.exe")
+            # SLVoice executable
+            with self.prefix(src=os.path.join(pkgdir, 'bin', 'release')):
+                self.path("SLVoice.exe")
+
+            # Vivox libraries
             if (self.address_size == 64):
                 self.path("vivoxsdk_x64.dll")
                 self.path("ortp_x64.dll")
             else:
                 self.path("vivoxsdk.dll")
                 self.path("ortp.dll")
-            self.path("libsndfile-1.dll")
-            self.path("vivoxoal.dll")
             
             # Security
             self.path("ssleay32.dll")
@@ -669,22 +654,13 @@ class WindowsManifest(ViewerManifest):
             self.path("growl++.dll")
 
             # <FS:ND> Copy symbols for breakpad
-            self.path("ssleay32.pdb")
-            self.path("libeay32.pdb")
+            #self.path("ssleay32.pdb")
+            #self.path("libeay32.pdb")
             #self.path("growl.pdb")
             #self.path("growl++.pdb")
-            self.path('apr-1.pdb', 'libarp.pdb')
-            self.path('aprutil-1.pdb', 'libaprutil.pdb')
+            #self.path('apr-1.pdb', 'libarp.pdb')
+            #self.path('aprutil-1.pdb', 'libaprutil.pdb')
             # </FS:ND>
-
-            # For google-perftools tcmalloc allocator.
-            try:
-                if self.args['configuration'].lower() == 'debug':
-                    self.path('libtcmalloc_minimal-debug.dll')
-                else:
-                    self.path('libtcmalloc_minimal.dll')
-            except:
-                print "Skipping libtcmalloc_minimal.dll"
 
         self.path(src="licenses-win32.txt", dst="licenses.txt")
         self.path("featuretable.txt")
@@ -814,18 +790,6 @@ class WindowsManifest(ViewerManifest):
             with self.prefix(src=os.path.join(self.args['build'], os.pardir, os.pardir, 'indra', 'newview', 'installers', 'windows_x64')):
                 self.path("msvcp120.dll")
                 self.path("msvcr120.dll")
-
-        # <FS:Ansariel> FIRE-22709: Local voice not working in OpenSim
-        if self.fs_is_opensim():
-            with self.prefix(src=os.path.join(relpkgdir, 'voice_os'), dst="voice_os"):
-                self.path("libsndfile-1.dll")
-                self.path("ortp.dll")
-                self.path("SLVoice.exe")
-                self.path("vivoxoal.dll")
-                self.path("vivoxsdk.dll")
-            with self.prefix(src=pkgdir, dst="voice_os"):
-                self.path("ca-bundle.crt")
-        # </FS:Ansariel>
 
         if not self.is_packaging_viewer():
             self.package_file = "copied_deps"    
@@ -1116,7 +1080,7 @@ class DarwinManifest(ViewerManifest):
 
                 # with self.prefix(src=relpkgdir, dst=""):
                     # self.path("libndofdev.dylib")
-                    # self.path("libhunspell-1.3.0.dylib")   
+                    # self.path("libhunspell-1.3.a")   
 
                 # with self.prefix(src_dst="cursors_mac"):
                     # self.path("*.tif")
@@ -1163,11 +1127,15 @@ class DarwinManifest(ViewerManifest):
                     # # (source, dest) pair to self.file_list for every expanded
                     # # file processed. Remember its size before the call.
                     # oldlen = len(self.file_list)
-                    # self.path(src, dst)
-                    # # The dest appended to self.file_list has been prepended
-                    # # with self.get_dst_prefix(). Strip it off again.
-                    # added = [os.path.relpath(d, self.get_dst_prefix())
-                             # for s, d in self.file_list[oldlen:]]
+                    # try:
+                        # self.path(src, dst)
+                        # # The dest appended to self.file_list has been prepended
+                        # # with self.get_dst_prefix(). Strip it off again.
+                        # added = [os.path.relpath(d, self.get_dst_prefix())
+                                 # for s, d in self.file_list[oldlen:]]
+                    # except MissingError as err:
+                        # print >> sys.stderr, "Warning: "+err.msg
+                        # added = []
                     # if not added:
                         # print "Skipping %s" % dst
                     # return added
@@ -1178,17 +1146,10 @@ class DarwinManifest(ViewerManifest):
                 # # Need to get the llcommon dll from any of the build directories as well.
                 # libfile_parent = self.get_dst_prefix()
                 # libfile = "libllcommon.dylib"
-                # dylibs = path_optional(self.find_existing_file(os.path.join(os.pardir,
-                                                               # "llcommon",
-                                                               # self.args['configuration'],
-                                                               # libfile),
-                                                               # os.path.join(relpkgdir, libfile)),
-                                       # dst=libfile)
-
+                # dylibs=[]
                 # for libfile in (
                                 # "libapr-1.0.dylib",
                                 # "libaprutil-1.0.dylib",
-                                # "libcollada14dom.dylib",
                                 # "libexpat.1.dylib",
                                 # "libexception_handler.dylib",
                                 # "libGLOD.dylib",
@@ -1199,14 +1160,14 @@ class DarwinManifest(ViewerManifest):
                                 # ):
                     # dylibs += path_optional(os.path.join(relpkgdir, libfile), libfile)
 
-                # # SLVoice and vivox lols, no symlinks needed
+                # # SLVoice executable
+                # with self.prefix(src=os.path.join(pkgdir, 'bin', 'release')):
+                    # self.path("SLVoice")
+
+                # # Vivox libraries
                 # for libfile in (
                                 # 'libortp.dylib',
-                                # 'libsndfile.dylib',
-                                # 'libvivoxoal.dylib',
                                 # 'libvivoxsdk.dylib',
-                                # 'libvivoxplatform.dylib',
-                                # 'SLVoice',
                                 # ):
                     # self.path2basename(relpkgdir, libfile)
 
@@ -1360,9 +1321,6 @@ class DarwinManifest(ViewerManifest):
             self.path(os.path.join(relpkgdir, "libndofdev.dylib"), dst="Resources/libndofdev.dylib")
             # self.path(os.path.join(relpkgdir, "libhunspell-1.3.0.dylib"), dst="Resources/libhunspell-1.3.0.dylib")   
 
-            # Growl Frameworks
-            # self.path("../packages/Frameworks/Growl", dst="Frameworks/Growl")
-
             # most everything goes in the Resources directory
             with self.prefix(dst="Resources"):
                 super(DarwinManifest, self).construct()
@@ -1417,11 +1375,15 @@ class DarwinManifest(ViewerManifest):
                     # (source, dest) pair to self.file_list for every expanded
                     # file processed. Remember its size before the call.
                     oldlen = len(self.file_list)
-                    self.path(src, dst)
-                    # The dest appended to self.file_list has been prepended
-                    # with self.get_dst_prefix(). Strip it off again.
-                    added = [os.path.relpath(d, self.get_dst_prefix())
-                             for s, d in self.file_list[oldlen:]]
+                    try:
+                        self.path(src, dst)
+                        # The dest appended to self.file_list has been prepended
+                        # with self.get_dst_prefix(). Strip it off again.
+                        added = [os.path.relpath(d, self.get_dst_prefix())
+                                 for s, d in self.file_list[oldlen:]]
+                    except MissingError as err:
+                        print >> sys.stderr, "Warning: "+err.msg
+                        added = []
                     if not added:
                         print "Skipping %s" % dst
                     return added
@@ -1430,19 +1392,10 @@ class DarwinManifest(ViewerManifest):
                 # in our bundled sub-apps. For each of these we'll create a
                 # symlink from sub-app/Contents/Resources to the real .dylib.
                 # Need to get the llcommon dll from any of the build directories as well.
-                # libfile = "libllcommon.dylib"
-                # dylibs = path_optional(self.find_existing_file(os.path.join(os.pardir,
-                #                                               "llcommon",
-                #                                               self.args['configuration'],
-                #                                               libfile),
-                #                                               os.path.join(relpkgdir, libfile)),
-                #                       dst=libfile)
-
                 dylibs = []
                 for libfile in (
                                 "libapr-1.0.dylib",
                                 "libaprutil-1.0.dylib",
-                                # "libcollada14dom.dylib",
                                 "libexpat.1.dylib",
                                 "libexception_handler.dylib",
                                 "libGLOD.dylib",
@@ -1452,61 +1405,45 @@ class DarwinManifest(ViewerManifest):
                                 "libnghttp2.*dylib",
                                 "libgrowl.dylib",
                                 "libgrowl++.dylib",
-                                # "libLeap.dylib",
                                 ):
                     dylibs += path_optional(os.path.join(relpkgdir, libfile), libfile)
 
-                # SLVoice and vivox lols, no symlinks needed
+                # SLVoice executable
+                with self.prefix(src=os.path.join(pkgdir, 'bin', 'release')):
+                    self.path("SLVoice")
+
+                # Vivox libraries
                 for libfile in (
-                                # 'libalut.dylib',
-                                # 'libopenal.dylib',
                                 'libortp.dylib',
-                                # 'libsndfile.dylib',
-                                # 'libvivoxoal.dylib',
                                 'libvivoxsdk.dylib',
-                                'libvivoxplatform.dylib',
-                                'SLVoice',
                                 ):
                     self.path2basename(relpkgdir, libfile)
 
-                # <FS:Ansariel/TS> FIRE-22709: Local voice not working in OpenSim
-                if self.fs_is_opensim():
-                    with self.prefix(src=os.path.join(relpkgdir, 'voice_os'), dst="voice_os"):
-                        # self.path('libalut.dylib')
-                        # self.path('libopenal.dylib')
-                        self.path('libortp.dylib')
-                        self.path('libsndfile.dylib')
-                        self.path('libvivoxoal.dylib')
-                        self.path('libvivoxsdk.dylib')
-                        self.path('libvivoxplatform.dylib')
-                        self.path('SLVoice')
-                    with self.prefix(src=pkgdir, dst="voice_os"):
-                        self.path("ca-bundle.crt")
-                # </FS:Ansariel/TS>
+                # dylibs that vary based on configuration
+                if self.args['fmodversion'].lower() == 'fmodstudio':
+                    if self.args['configuration'].lower() == 'debug':
+                        for libfile in (
+                                    "libfmodL.dylib",
+                                    ):
+                            dylibs += path_optional(os.path.join(debpkgdir, libfile), libfile)
+                    else:
+                        for libfile in (
+                                    "libfmod.dylib",
+                                    ):
+                            dylibs += path_optional(os.path.join(relpkgdir, libfile), libfile)
 
                 # dylibs that vary based on configuration
-                if self.args['configuration'].lower() == 'debug':
-                    for libfile in (
-                                "libfmodL.dylib",
-                                ):
-                        dylibs += path_optional(os.path.join(debpkgdir, libfile), libfile)
-                else:
-                    for libfile in (
-                                "libfmod.dylib",
-                                ):
-                        dylibs += path_optional(os.path.join(relpkgdir, libfile), libfile)
-
-                # dylibs that vary based on configuration
-                if self.args['configuration'].lower() == 'debug':
-                   for libfile in (
-                               "libfmodexL.dylib",
-                               ):
-                       dylibs += path_optional(os.path.join(debpkgdir, libfile), libfile)
-                else:
-                   for libfile in (
-                               "libfmodex.dylib",
-                               ):
-                       dylibs += path_optional(os.path.join(relpkgdir, libfile), libfile)
+                if self.args['fmodversion'].lower() == 'fmodex':
+                    if self.args['configuration'].lower() == 'debug':
+                        for libfile in (
+                                   "libfmodexL.dylib",
+                                   ):
+                            dylibs += path_optional(os.path.join(debpkgdir, libfile), libfile)
+                    else:
+                        for libfile in (
+                                   "libfmodex.dylib",
+                                   ):
+                            dylibs += path_optional(os.path.join(relpkgdir, libfile), libfile)
 
                 # our apps
                 executable_path = {}
@@ -1546,7 +1483,7 @@ class DarwinManifest(ViewerManifest):
                     helperappfile = 'DullahanHelper.app'
                     self.path2basename(relpkgdir, helperappfile)
 
-                    pluginframeworkpath = self.dst_path_of('Chromium Embedded Framework.framework');
+                    pluginframeworkpath = self.dst_path_of('Chromium Embedded Framework.framework')
                     # Putting a Frameworks directory under Contents/MacOS
                     # isn't canonical, but the path baked into Dullahan
                     # Helper.app/Contents/MacOS/DullahanHelper is:
@@ -1809,12 +1746,41 @@ class DarwinManifest(ViewerManifest):
                     signed=False
                     sign_attempts=3
                     sign_retry_wait=15
+                    #<FS:TS> The order of these is critical. When two things need signing and one is contained within the
+                    # other, they must be signed from the innermost out.
+                    things_to_sign = ['Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework',
+                                        'Resources/SLPlugin.app/Contents/Frameworks/DullahanHelper.app',
+                                        'Resources/SLPlugin.app',
+                                        'Resources/SLVoice',
+                                        'Resources/mac-crash-logger.app']
                     while (not signed) and (sign_attempts > 0):
                         try:
-                            sign_attempts-=1;
-                            self.run_command(
+                            sign_attempts-=1
+                            #<FS:TS> This is ugly as hell, but it's the only way to make sure that every dylib in the
+                            # entire package gets signed, as required for notarization. Apparently the --deep option
+                            # isn't sufficient any more. Don't ask me why.
+                            contents_dir = os.path.join(app_in_dmg, 'Contents')
+                            try:
+                                all_dylibs = subprocess.check_output(['find', contents_dir, '-name', '*.dylib', '-print'])
+                            except subprocess.CalledProcessError as err:
+                                sys.exit("failed to get list of dylib files")
+                            for dylib in all_dylibs.split('\n'):
+                                if dylib: # ignore any empty lines
+                                    self.run_command(
+                                       ['codesign', '--verbose', '--deep', '--force', '--option=runtime',
+                                        '--keychain', viewer_keychain, '--sign', identity,
+                                        dylib])
+                            for item in things_to_sign:
                                 # Note: See blurb above about names of keychains
-                               ['codesign', '--verbose', '--deep', '--force',
+                                sign_path = os.path.join(contents_dir, item)
+                                print "Signing %s" % sign_path
+                                self.run_command(
+                                   ['codesign', '--verbose', '--deep', '--force', '--option=runtime',
+                                    '--keychain', viewer_keychain, '--sign', identity,
+                                    sign_path])
+                            print "Signing main app bundle %s" % app_in_dmg
+                            self.run_command(
+                               ['codesign', '--verbose', '--deep', '--force', '--option=runtime',
                                 '--keychain', viewer_keychain, '--sign', identity,
                                 app_in_dmg])
                             signed=True # if no exception was raised, the codesign worked
@@ -1835,7 +1801,6 @@ class DarwinManifest(ViewerManifest):
         print "Converting temp disk image to final disk image"
         self.run_command(['hdiutil', 'convert', sparsename, '-format', 'UDZO',
                           '-imagekey', 'zlib-level=9', '-o', finalname])
-        self.run_command(['hdiutil', 'internet-enable', '-yes', finalname])
         # get rid of the temp file
         self.package_file = finalname
         self.remove(sparsename)
@@ -1901,13 +1866,12 @@ class LinuxManifest(ViewerManifest):
         print "DEBUG: icon_path '%s'" % icon_path
         with self.prefix(src=icon_path) :
             self.path("firestorm_256.png","firestorm_48.png")
-            with self.prefix(dst="res-sdl") :
-                self.path("firestorm_256.BMP","ll_icon.BMP")
+            #with self.prefix(dst="res-sdl") :
+            #    self.path("firestorm_256.bmp","ll_icon.BMP")
 
         # plugins
         with self.prefix(src=os.path.join(self.args['build'], os.pardir, 'media_plugins'), dst="bin/llplugin"):
-            self.path("gstreamer010/libmedia_plugin_gstreamer010.so",
-                      "libmedia_plugin_gstreamer.so")
+            #self.path("gstreamer010/libmedia_plugin_gstreamer010.so", "libmedia_plugin_gstreamer.so")
             self.path2basename("libvlc", "libmedia_plugin_libvlc.so")
             self.path("cef/libmedia_plugin_cef.so", "libmedia_plugin_cef.so" )
 
@@ -1929,7 +1893,6 @@ class LinuxManifest(ViewerManifest):
         # CEF files 
         with self.prefix(src=os.path.join(pkgdir, 'lib', 'release'), dst="lib"):
             self.path( "libcef.so" )
-            self.path( "libllceflib.so" )
             
         with self.prefix(src=os.path.join(pkgdir, 'lib', 'release', 'swiftshader'), dst=os.path.join("bin", "swiftshader") ):
             self.path( "*.so" )
@@ -1940,7 +1903,6 @@ class LinuxManifest(ViewerManifest):
             self.path( "natives_blob.bin" )
             self.path( "snapshot_blob.bin" )
             self.path( "v8_context_snapshot.bin" )
-            self.path( "libffmpegsumo.so" )
 
         with self.prefix(src=os.path.join(pkgdir, 'resources'), dst="bin"):
             self.path( "cef.pak" )
@@ -2006,8 +1968,8 @@ class LinuxManifest(ViewerManifest):
             self.path("zh-TW.pak")
 
         # llcommon
-        if not self.path("../llcommon/libllcommon.so", "lib/libllcommon.so"):
-            print "Skipping llcommon.so (assuming llcommon was linked statically)"
+        #if not self.path("../llcommon/libllcommon.so", "lib/libllcommon.so"):
+        #    print "Skipping llcommon.so (assuming llcommon was linked statically)"
 
         self.path("featuretable_linux.txt")
 
@@ -2018,34 +1980,34 @@ class LinuxManifest(ViewerManifest):
           with self.prefix(src=os.path.join(pkgdir, 'lib', 'release'), dst="lib"):
             self.path("libapr-1.so*")
             self.path("libaprutil-1.so*")
-            self.path("libboost_context-mt.so*")
-            self.path("libboost_filesystem-mt.so*")
-            self.path("libboost_program_options-mt.so*")
-            self.path("libboost_regex-mt.so*")
-            self.path("libboost_signals-mt.so*")
-            self.path("libboost_system-mt.so*")
-            self.path("libboost_thread-mt.so*")
-            self.path("libboost_chrono-mt.so*") #<FS:TM> FS spcific
-            self.path("libboost_date_time-mt.so*") #<FS:TM> FS spcific
-            self.path("libboost_wave-mt.so*") #<FS:TM> FS spcific
-            self.path("libcollada14dom.so*")
-            self.path("libdb*.so*")
-            self.path("libcrypto.so*")
+            #self.path("libboost_context-mt.so*")
+            #self.path("libboost_filesystem-mt.so*")
+            #self.path("libboost_program_options-mt.so*")
+            #self.path("libboost_regex-mt.so*")
+            #self.path("libboost_signals-mt.so*")
+            #self.path("libboost_system-mt.so*")
+            #self.path("libboost_thread-mt.so*")
+            #self.path("libboost_chrono-mt.so*") #<FS:TM> FS spcific
+            #self.path("libboost_date_time-mt.so*") #<FS:TM> FS spcific
+            #self.path("libboost_wave-mt.so*") #<FS:TM> FS spcific
+            #self.path("libcollada14dom.so*")
+            #self.path("libdb*.so*")
+            #self.path("libcrypto.so*")
             self.path("libexpat.so*")
-            self.path("libssl.so*")
-            self.path("libGLOD.so")
-            self.path("libminizip.so")
+            #self.path("libssl.so*")
+            #self.path("libGLOD.so")
+            #self.fs_path("libminizip.so")
             self.path("libuuid.so*")
             self.path("libSDL-1.2.so*")
             self.path("libdirectfb*.so*")
             self.path("libfusion*.so*")
             self.path("libdirect*.so*")
-            self.path("libopenjpeg.so*")
+            self.fs_try_path("libopenjpeg.so*")
             self.path("libhunspell-1.3.so*")
             self.path("libalut.so*")
-            self.path("libpng15.so.15") #use provided libpng to workaround incompatible system versions on some distros
-            self.path("libpng15.so.15.13.0") #use provided libpng to workaround incompatible system versions on some distros
-            self.path("libpng15.so.15.1.0") #use provided libpng to workaround incompatible system versions on some distros
+            #self.path("libpng15.so.15") #use provided libpng to workaround incompatible system versions on some distros
+            #self.path("libpng15.so.15.13.0") #use provided libpng to workaround incompatible system versions on some distros
+            #self.path("libpng15.so.15.1.0") #use provided libpng to workaround incompatible system versions on some distros
             self.path("libopenal.so", "libopenal.so.1") # Install as versioned file in case it's missing from the 3p- and won't get copied below
             self.path("libopenal.so*")
             #self.path("libnotify.so.1.1.2", "libnotify.so.1") # LO - uncomment when testing libnotify(growl) on linux
@@ -2068,17 +2030,8 @@ class LinuxManifest(ViewerManifest):
             # previous call did, without having to explicitly state the
             # version number.
             self.path("libfontconfig.so.*.*")
-            try:
-                self.path("libtcmalloc.so*") #formerly called google perf tools
-                pass
-            except:
-                print "tcmalloc files not found, skipping"
-                pass
 
-            try:
-                self.path("libjemalloc.so*")
-            except:
-                pass
+            self.fs_try_path("libjemalloc.so*")
 
           # Vivox runtimes
           # Currentelly, the 32-bit ones will work with a 64-bit client.
@@ -2213,22 +2166,15 @@ class Linux_i686_Manifest(LinuxManifest):
                 print "tcmalloc files not found, skipping"
                 pass
 
-            try:
+            if self.args['fmodversion'].lower() == 'fmodex':
                 self.path("libfmodex-*.so")
                 self.path("libfmodex.so")
                 self.path("libfmodex.so*")
                 pass
-            except:
-                print "Skipping libfmodex.so - not found"
-                pass
 
-            try:
-                self.path("libfmod-*.so")
+            if self.args['fmodversion'].lower() == 'fmodstudio':
                 self.path("libfmod.so")
                 self.path("libfmod.so*")
-                pass
-            except:
-                print "Skipping libfmodstudio.so - not found"
                 pass
 
 
@@ -2240,7 +2186,6 @@ class Linux_i686_Manifest(LinuxManifest):
             self.path("libsndfile.so.1")
             #self.path("libvivoxoal.so.1") # no - we'll re-use the viewer's own OpenAL lib
             self.path("libvivoxsdk.so")
-            self.path("libvivoxplatform.so")
 
         self.fs_delete_linux_symbols() # <FS:ND/> Delete old syms
         self.strip_binaries()
@@ -2265,38 +2210,19 @@ class Linux_x86_64_Manifest(LinuxManifest):
             # <FS:TS> No, we don't need to dink with this. A usable library
             # is now in the slvoice package, and we need to just use it as is.
             # self.path("libopenal32.so", "libvivoxoal.so.1") # vivox's sdk expects this soname
-            try:
+            if self.args['fmodversion'].lower() == 'fmodex':
                     self.path("libfmodex64-*.so")
                     self.path("libfmodex64.so")
                     self.path("libfmodex64.so*")
                     pass
-            except:
-                    print "Skipping libfmodex.so - not found"
-                    pass
 
-            try:
-                self.path("libfmod-*.so")
+            if self.args['fmodversion'].lower() == 'fmodstudio':
                 self.path("libfmod.so")
                 self.path("libfmod.so*")
                 pass
-            except:
-                print "Skipping libfmod.so - not found"
-                pass
-
-          self.prefix(src=os.path.join(pkgdir, 'lib', 'release', 'x64'), dst="lib")
-          try:
-              self.path("libLeap.so")
-          except:
-              print "Leap Motion library not found"
-          self.end_prefix("lib")
 
         with self.prefix(dst="bin"):
             self.path2basename("../llplugin/slplugin", "SLPlugin")
-
-        # plugins
-        with self.prefix(dst="bin/llplugin"):
-            self.path2basename("../media_plugins/webkit", "libmedia_plugin_webkit.so")
-            self.path("../media_plugins/gstreamer010/libmedia_plugin_gstreamer010.so", "libmedia_plugin_gstreamer.so")
 
         self.path("secondlife-i686.supp")
 
@@ -2348,5 +2274,11 @@ if __name__ == "__main__":
     extra_arguments = [
         dict(name='bugsplat', description="""BugSplat database to which to post crashes,
              if BugSplat crash reporting is desired""", default=''),
+        dict(name='openal', description="""Indication openal libraries are needed""", default='OFF')
         ]
-    main(extra=extra_arguments)
+    try:
+        main(extra=extra_arguments)
+    except (ManifestError, MissingError) as err:
+        sys.exit("\nviewer_manifest.py failed: "+err.msg)
+    except:
+        raise
