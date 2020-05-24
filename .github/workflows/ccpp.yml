@@ -8,8 +8,8 @@ jobs:
   build:
     strategy:
         matrix:
-          os: [windows-latest, ubuntu-16.04]
-          #os: [ubuntu-16.04]
+          #os: [windows-latest, ubuntu-16.04]
+          os: [ubuntu-16.04]
           build_type: [full]
           include:
             - os: ubuntu-16.04
@@ -31,7 +31,7 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
-        sudo apt-get install -y --install-recommends libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxinerama-dev libxrender-dev 
+        sudo apt-get install -y --install-recommends libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxinerama-dev libxrender-dev gdb
         echo ::set-env name=AUTOBUILD_VARIABLES_FILE::$PWD/fs-build-variables/variables
         echo ::set-env name=LIBRARY_PATH::$PWD/openvr/lib/linux64
     - name: Download VS2013 Community
@@ -64,7 +64,7 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
-        autobuild configure -A 64 -c ReleaseFS_open -- --package --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --jobs 2 --ninja -DCMAKE_EXE_LINKER_FLAGS=-lopenvr_api
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --jobs 3 --ninja
     - name: Build & Package
       if: startsWith(matrix.os, 'windows')
       shell: cmd
@@ -75,7 +75,7 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
-        autobuild build -A 64 -c ReleaseFS_open -- --package --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --jobs 2 --ninja -DCMAKE_EXE_LINKER_FLAGS=-lopenvr_api
+        autobuild build -A 64 -c ReleaseFS_open -- --package --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --jobs 3 --ninja
     - uses: actions/upload-artifact@v2
       if: startsWith(matrix.os, 'windows')
       with:
