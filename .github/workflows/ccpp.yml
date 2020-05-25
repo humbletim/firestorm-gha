@@ -54,12 +54,12 @@ jobs:
       shell: cmd
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        autobuild configure -A 64 -c ReleaseFS_open -- --package --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE
     - name: Configure autobuild
       if: startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
-        autobuild configure -A 64 -c ReleaseFS_open -- --package --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --ninja
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --ninja
     - name: Build & Package
       if: startsWith(matrix.os, 'windows')
       shell: cmd
@@ -70,7 +70,7 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
-        autobuild build -A 64 -c ReleaseFS_open -- --package --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --ninja
+        autobuild build -A 64 -c ReleaseFS_open -- --package --openal --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --ninja
     - uses: actions/upload-artifact@v2
       if: startsWith(matrix.os, 'windows')
       with:
