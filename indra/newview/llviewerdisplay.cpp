@@ -86,6 +86,11 @@
 #include "llpresetsmanager.h"
 #include "fsdata.h"
 
+//################################### P373R ######################################
+#include "llviewerVR.cpp"
+llviewerVR gVR;
+//################################### END P373R ##################################
+
 extern LLPointer<LLViewerTexture> gStartTexture;
 extern bool gShiftFrame;
 
@@ -756,6 +761,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 
 		//upkeep gl name pools
 		LLGLNamePool::upkeepPools();
+		//################################### P373R ######################################
+		sec:
+		gVR.ProcessVRCamera();
+		//################################### END P373R ##################################
 		
 		stop_glerror();
 		display_update_camera();
@@ -1156,7 +1165,29 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		if (!for_snapshot)
 		{
 			render_ui();
-			swap();
+			//################################### P373R ######################################
+			gVR.vrDisplay();
+
+			//################################### END P373R ######################################
+			//swap();
+			//################################### P373R ######################################
+			if (gVR.leftEyeDesc.IsReady  && !gVR.rightEyeDesc.IsReady && gVR.m_fEyeDistance > 0)
+			{
+				goto sec;
+
+
+			}
+			if (!gVR.leftEyeDesc.IsReady  && !gVR.rightEyeDesc.IsReady)
+			{
+				//gVR.HandleInput();
+
+			}
+			if (!gVR.m_bVrActive)
+				swap();
+
+			//################################### END P373R ##################################
+			//swap();
+			
 		}
 
 		
@@ -1586,7 +1617,9 @@ void render_ui_3d()
 	{
 		gUIProgram.bind();
 	}
-
+	//################################### P373R ######################################
+	gVR.RenderControllerAxes();
+	//################################### END P373R ##################################
 	// Coordinate axes
 	// <FS:Ansariel> gSavedSettings replacement
 	//if (gSavedSettings.getBOOL("ShowAxes"))
@@ -1727,7 +1760,9 @@ void render_ui_2d()
 	{
 		gViewerWindow->draw();
 	}
-
+	//################################### P373R ######################################
+	gVR.DrawCursors();
+	//################################### END P373R ##################################
 
 
 	// reset current origin for font rendering, in case of tiling render
@@ -1820,6 +1855,9 @@ void render_disconnected_background()
 
 void display_cleanup()
 {
+	//################################### P373R ######################################
+		gVR.vrStartup(TRUE);
+	//################################### END P373R ######################################
 	gDisconnectedImagep = NULL;
 }
 

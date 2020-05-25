@@ -1,0 +1,6 @@
+[submodule "openvr"]
+	path = openvr
+	url = https://github.com/ValveSoftware/openvr
+[submodule "fs-build-variables"]
+	path = fs-build-variables
+	url = https://vcs.firestormviewer.org/fs-build-variables
