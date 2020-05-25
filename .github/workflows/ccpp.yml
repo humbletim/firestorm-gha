@@ -1,0 +1,83 @@
+name: C/C++ CI
+
+on: [push, pull_request]
+defaults:
+  run:
+    shell: bash
+jobs:
+  build:
+    strategy:
+        matrix:
+          os: [windows-latest, ubuntu-16.04]
+          build_type: [full]
+    runs-on: ${{matrix.os}}
+    env:
+      AUTOBUILD_VSVER: 120
+      PreferredToolArchitecture: x64
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Set env
+      if: startsWith(matrix.os, 'windows')
+      shell: cmd
+      run: echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
+    - name: Set env apt
+      if: startsWith(matrix.os, 'ubuntu')
+      shell: bash
+      run: |
+        sudo apt-get install -y -qq libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxinerama-dev libxrender-dev gdb
+        echo ::set-env name=AUTOBUILD_VARIABLES_FILE::$PWD/fs-build-variables/variables
+        echo ::set-env name=LIBRARY_PATH::$PWD/openvr/lib/linux64
+    - name: Download VS2013 Community
+      if: startsWith(matrix.os, 'windows')
+      run: choco install visualstudiocommunity2013
+    - name: Setup Ninja
+      if: startsWith(matrix.os, 'ubuntu')
+      uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 2.7
+        architecture: x64
+    - name: Get software versions please
+      run: |
+        cmake --version
+        git --version
+        python --version
+    - name: Install autobuild through PIP
+      run: pip install git+https://vcs.firestormviewer.org/autobuild-1.1#egg=autobuild
+    - name: Get autobuild version
+      run: autobuild --version
+    - name: Configure autobuild
+      if: startsWith(matrix.os, 'windows')
+      shell: cmd
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE
+    - name: Configure autobuild
+      if: startsWith(matrix.os, 'ubuntu')
+      shell: bash
+      run: |
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --ninja
+    - name: Build & Package
+      if: startsWith(matrix.os, 'windows')
+      shell: cmd
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
+        msbuild build-vc120-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount /detailedsummary
+    - name: Build & Package
+      if: startsWith(matrix.os, 'ubuntu')
+      shell: bash
+      run: |
+        autobuild build -A 64 -c ReleaseFS_open -- --package --openal --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE --ninja
+    - uses: actions/upload-artifact@v2
+      if: startsWith(matrix.os, 'windows')
+      with:
+        name: fs-windows-gha-artifact
+        path: build-vc120-64/newview/Release/*_Setup.exe
+    - uses: actions/upload-artifact@v2
+      if: startsWith(matrix.os, 'ubuntu')
+      with:
+        name: fs-ubuntu-gha-artifact
+        path: build-linux-x86_64/newview/Phoenix*.tar.*
