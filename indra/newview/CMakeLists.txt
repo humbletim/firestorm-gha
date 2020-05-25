@@ -2563,6 +2563,7 @@ endif (WINDOWS)
 
 if (LINUX)
     target_link_libraries(${VIEWER_BINARY_NAME} "dl" )
+    target_link_libraries(${VIEWER_BINARY_NAME} openvr_api)
 endif (LINUX)
 
 set(ARTWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH
