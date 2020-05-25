@@ -595,6 +595,9 @@ class WindowsManifest(ViewerManifest):
                                         'llplugin', 'slplugin', self.args['configuration']),
                            "slplugin.exe")
         
+        with self.prefix(src=os.path.join(pkgdir, os.pardir, os.pardir, 'openvr', 'bin', 'win64')):
+            self.path("openvr_api.dll")
+
         # Get shared libs from the shared libs staging directory
         with self.prefix(src=os.path.join(self.args['build'], os.pardir,
                                           'sharedlibs', self.args['configuration'])):
@@ -1828,6 +1831,9 @@ class LinuxManifest(ViewerManifest):
                 self.path("refresh_desktop_app_entry.sh")
                 self.path("launch_url.sh")
             self.path("install.sh")
+
+        with self.prefix(src=os.path.join(pkgdir, os.pardir, os.pardir, 'openvr', 'bin', 'linux64')):
+            self.path("libopenvr_api.so")
 
         with self.prefix(dst="bin"):
             self.path("firestorm-bin","do-not-directly-run-firestorm-bin")
