@@ -1858,6 +1858,26 @@ class Darwin_x86_64_Manifest(DarwinManifest):
 class LinuxManifest(ViewerManifest):
     build_data_json_platform = 'lnx'
 
+    def ccopyfile(self, src, dst):
+        if re.match(".*firestorm-bin.*", src+dst):
+            print("not hardlinking firestorm-bin...", src)
+            super(LinuxManifest, self).ccopyfile(src, dst)
+            return
+        copy2 = shutil.copy2
+        try:
+            shutil.copy2 = os.link
+            super(LinuxManifest, self).ccopyfile(src, dst)
+        finally:
+            shutil.copy2 = copy2
+
+    def ccopytree(self, src, dst):
+        copy2 = shutil.copy2
+        try:
+            shutil.copy2 = os.link
+            super(LinuxManifest, self).ccopytree(src, dst)
+        finally:
+            shutil.copy2 = copy2
+
     def construct(self):
         # <FS:ND> HACK! Force parent to always copy XML/... even when not having configured with --package.
         # This allows build result to be started without always having to --package and thus waiting for the length tar ball generation --package incurs
