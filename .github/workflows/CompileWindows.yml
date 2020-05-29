@@ -1,0 +1,52 @@
+name: CompileWindows
+
+on: [pull_request]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  windows_build:
+    runs-on: windows-latest
+    env:
+      AUTOBUILD_VSVER: 120
+      PreferredToolArchitecture: x64
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Set env
+      shell: cmd
+      run: echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
+    - name: Download VS2013 Community
+      run: choco install visualstudiocommunity2013
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 2.7
+        architecture: x64
+    - name: Get software versions please
+      run: |
+        cmake --version
+        git --version
+        python --version
+    - name: Install autobuild through PIP
+      run: pip install git+https://vcs.firestormviewer.org/autobuild-1.1#egg=autobuild
+    - name: Configure autobuild
+      shell: cmd
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
+        autobuild --version
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE
+    - name: Build & Package
+      shell: cmd
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
+        msbuild build-vc120-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: fs-windows-gha-artifact
+        path: build-vc120-64/newview/Release/*_Setup.exe

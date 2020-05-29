@@ -575,6 +575,9 @@ class WindowsManifest(ViewerManifest):
                                         'llplugin', 'slplugin', self.args['configuration']),
                            "slplugin.exe")
         
+        with self.prefix(src=os.path.join(pkgdir, os.pardir, os.pardir, 'openvr', 'bin', 'win64')):
+            self.path("openvr_api.dll")
+
         # Get shared libs from the shared libs staging directory
         with self.prefix(src=os.path.join(self.args['build'], os.pardir,
                                           'sharedlibs', self.args['configuration'])):
@@ -1823,6 +1826,26 @@ class Darwin_x86_64_Manifest(DarwinManifest):
 class LinuxManifest(ViewerManifest):
     build_data_json_platform = 'lnx'
 
+    def ccopyfile(self, src, dst):
+        if re.match(".*firestorm-bin.*", src+dst):
+            print("not hardlinking firestorm-bin...", src)
+            super(LinuxManifest, self).ccopyfile(src, dst)
+            return
+        copy2 = shutil.copy2
+        try:
+            shutil.copy2 = os.link
+            super(LinuxManifest, self).ccopyfile(src, dst)
+        finally:
+            shutil.copy2 = copy2
+
+    def ccopytree(self, src, dst):
+        copy2 = shutil.copy2
+        try:
+            shutil.copy2 = os.link
+            super(LinuxManifest, self).ccopytree(src, dst)
+        finally:
+            shutil.copy2 = copy2
+
     def construct(self):
         super(LinuxManifest, self).construct()
 
@@ -1845,6 +1868,9 @@ class LinuxManifest(ViewerManifest):
                 self.path("refresh_desktop_app_entry.sh")
                 self.path("launch_url.sh")
             self.path("install.sh")
+
+        with self.prefix(src=os.path.join(pkgdir, os.pardir, os.pardir, 'openvr', 'bin', 'linux64')):
+            self.path("libopenvr_api.so")
 
         with self.prefix(dst="bin"):
             self.path("firestorm-bin","do-not-directly-run-firestorm-bin")
