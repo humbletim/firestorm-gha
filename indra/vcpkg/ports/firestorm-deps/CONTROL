@@ -1,0 +1,4 @@
+Source: firestorm-deps
+Version: 6.3.9
+Build-Depends: firestorm-boost-deps, collada-dom, libjpeg-turbo, pcre, libpng, hunspell, libxml2, libiconv, nghttp2, libogg, libvorbis, freetype, openssl, curl[core,openssl], breakpad, apr, apr-util, uriparser, zlib, jsoncpp, expat
+Description: firestorm vcpkg dependencies placeholder

@@ -55,6 +55,26 @@ set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo;Release;Debug" CACHE STRING
 
 
 # Platform-specific compilation flags.
+  if(VCPKG_TOOLCHAIN)
+      # if (NOT DEFINED $ENV{VCPKG_TOOLCHAIN})
+      #   set(ENV{VCPKG_TOOLCHAIN} "${VCPKG_TOOLCHAIN}")
+      #   message(STATUS "VCPKG_TOOLCHAIN == ${VCPKG_TOOLCHAIN}")
+      # endif()
+      include_directories(
+        "${CMAKE_SOURCE_DIR}/vcpkg/include"
+        "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/boost-160"
+        "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include"
+        "${CMAKE_BINARY_DIR}/_deps"
+        "${CMAKE_BINARY_DIR}/packages/include"
+      )
+      add_definitions( /DVCPKG_TOOLCHAIN /DBOOST_BIND_GLOBAL_PLACEHOLDERS )
+
+      if (MSVC)
+        set(VS_DISABLE_FATAL_WARNINGS ON)
+        add_definitions( /wd4305 /wd4091 )
+        include(InstallRequiredSystemLibraries)
+      endif()
+  endif()
 
 if (WINDOWS)
   # Don't build DLLs.
@@ -136,6 +156,13 @@ if (WINDOWS)
   if (NOT VS_DISABLE_FATAL_WARNINGS)
     add_definitions(/WX)
   endif (NOT VS_DISABLE_FATAL_WARNINGS)
+
+  if (USE_CLCACHE)
+      #string(REGEX REPLACE "/Z[oiI7]" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+      string(REGEX REPLACE "/Z[oiI7]" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+      string(REGEX REPLACE "/Z[oiI7]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  endif()
+  
 endif (WINDOWS)
 
 

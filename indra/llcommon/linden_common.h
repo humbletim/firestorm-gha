@@ -40,6 +40,12 @@
 # endif
 #endif
 
+#if VCPKG_TOOLCHAIN
+//#include <apr.h>
+#include <winsock2.h>
+#include <ws2ipdef.h>
+#endif
+
 #include "llpreprocessor.h"
 
 #include <cstring>

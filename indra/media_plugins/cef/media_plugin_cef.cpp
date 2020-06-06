@@ -68,8 +68,12 @@ private:
 	void onLoadError(int status, const std::string error_text);
 	void onAddressChangeCallback(std::string url);
 	void onOpenPopupCallback(std::string url, std::string target);
-	bool onHTTPAuthCallback(const std::string host, const std::string realm, std::string& username, std::string& password);
-	void onCursorChangedCallback(dullahan::ECursorType type);
+#if VCPKG_TOOLCHAIN
+  bool onHTTPAuthCallback(std::string host, std::string realm, bool isproxy, std::string& username, std::string& password);
+#else
+  bool onHTTPAuthCallback(const std::string host, const std::string realm, std::string& username, std::string& password);
+#endif
+  void onCursorChangedCallback(dullahan::ECursorType type);
 	const std::vector<std::string> onFileDialog(dullahan::EFileDialogType dialog_type, const std::string dialog_title, const std::string default_file, const std::string dialog_accept_filter, bool& use_default);
 
 	void postDebugMessage(const std::string& msg);
@@ -291,7 +295,11 @@ void MediaPluginCEF::onCustomSchemeURLCallback(std::string url)
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-bool MediaPluginCEF::onHTTPAuthCallback(const std::string host, const std::string realm, std::string& username, std::string& password)
+#if VCPKG_TOOLCHAIN
+  bool MediaPluginCEF::onHTTPAuthCallback(std::string host, std::string realm, bool isproxy, std::string& username, std::string& password)
+#else
+  bool MediaPluginCEF::onHTTPAuthCallback(const std::string host, const std::string realm, std::string& username, std::string& password)
+#endif
 {
 	mAuthOK = false;
 
@@ -499,7 +507,11 @@ void MediaPluginCEF::receiveMessage(const char* message_string)
 				mCEFLib->setOnLoadErrorCallback(std::bind(&MediaPluginCEF::onLoadError, this, std::placeholders::_1, std::placeholders::_2));
 				mCEFLib->setOnAddressChangeCallback(std::bind(&MediaPluginCEF::onAddressChangeCallback, this, std::placeholders::_1));
 				mCEFLib->setOnOpenPopupCallback(std::bind(&MediaPluginCEF::onOpenPopupCallback, this, std::placeholders::_1, std::placeholders::_2));
-				mCEFLib->setOnHTTPAuthCallback(std::bind(&MediaPluginCEF::onHTTPAuthCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+#if VCPKG_TOOLCHAIN
+        mCEFLib->setOnHTTPAuthCallback(std::bind(&MediaPluginCEF::onHTTPAuthCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
+#else
+        mCEFLib->setOnHTTPAuthCallback(std::bind(&MediaPluginCEF::onHTTPAuthCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+#endif
 				mCEFLib->setOnFileDialogCallback(std::bind(&MediaPluginCEF::onFileDialog, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5));
 				mCEFLib->setOnCursorChangedCallback(std::bind(&MediaPluginCEF::onCursorChangedCallback, this, std::placeholders::_1));
 				mCEFLib->setOnRequestExitCallback(std::bind(&MediaPluginCEF::onRequestExitCallback, this));
@@ -527,7 +539,9 @@ void MediaPluginCEF::receiveMessage(const char* message_string)
 				settings.webgl_enabled = true;
 				settings.log_file = mCefLogFile;
 				settings.log_verbose = mCefLogVerbose;
+#ifndef VCPKG_TOOLCHAIN
 				settings.autoplay_without_gesture = true;
+#endif
 
 				std::vector<std::string> custom_schemes(1, "secondlife");
 				mCEFLib->setCustomSchemes(custom_schemes);

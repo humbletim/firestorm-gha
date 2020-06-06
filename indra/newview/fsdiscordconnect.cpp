@@ -44,7 +44,35 @@
 
 #include "llfloaterreg.h"
 
-#include "discord-rpc/discord_rpc.h"
+#if USE_DISCORD
+#  include "discord-rpc/discord_rpc.h"
+#else
+struct DiscordUser {
+  const char* username{ nullptr };
+};
+struct DiscordEventHandlers {
+  std::function<void(const DiscordUser *request)> ready{nullptr};
+  std::function<void(int errorCode, const char* message)> errored{nullptr};
+  std::function<void(int errorCode, const char* message)> disconnected{nullptr};
+};
+struct DiscordRichPresence{
+  const char* state{nullptr};
+  const char* details{nullptr};
+  const char* largeImageKey{ nullptr };
+  const char* largeImageText{ nullptr };
+  const char* smallImageKey{ nullptr };
+  const char* smallImageText{ nullptr };
+  int startTimestamp{ 0 };
+  int partySize{ 0 };
+  int partyMax{ 0 };
+  const char* partyId{ nullptr };
+ };
+ void Discord_Shutdown() {}
+ void Discord_RunCallbacks() {}
+ void Discord_UpdatePresence(DiscordRichPresence*) {}
+ void Discord_Initialize(const char*, DiscordEventHandlers*, int, const char*) {}
+ 
+#endif
 
 #include "boost/algorithm/string/case_conv.hpp"
 

@@ -223,6 +223,9 @@ bool LLURLDispatcherImpl::dispatchRegion(const LLSLURL& slurl, const std::string
 // 
 // 									  LLURLDispatcherImpl::regionNameCallback,
 // 									  slurl.getSLURLString(),
+#ifdef hyper
+#undef hyper
+#endif
 	LLSLURL hyper = slurl;
 #ifdef OPENSIM // <FS:AW optional opensim support>
 	std::string grid = slurl.getGrid();
