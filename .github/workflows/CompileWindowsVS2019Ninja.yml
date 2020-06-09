@@ -12,35 +12,69 @@ jobs:
     env:
       AUTOBUILD_VSVER: 164
       PreferredToolArchitecture: x64
-      NINJA_FLAGS: -j2
+      NINJA_FLAGS: -j4
       VIEWER_VERSION_REVISION: 58205
       FSCHANNEL: FirestormVR-GHA-VS2019
+      CXX: cl.exe
+      CC: cl.exe
+      CPP_OBJ_CACHE_REV: 2
 
     steps:
+    - name: .git cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          .git
+          .gitmodules
+          indra
+          openvr/.git*
+          fs-build-variables/.git*
+          vcpkg/.git*
+        key: ${{ runner.os }}-gittest-1-${{ env.FSCHANNEL }}
     - uses: actions/checkout@v2
       with:
+        clean: false
         submodules: true
-    - uses: seanmiddleditch/gha-setup-vsdevenv@master
+        # include branch tag histories (for timesync)
+        fetch-depth: 0
 
-    - name: download clcache
+    - name: fetch git-restore-mtime
       shell: powershell
-      run: wget -O clcache-4.2.0.zip https://github.com/frerich/clcache/releases/download/v4.2.0/clcache-4.2.0.zip
-    - name: install clcache
+      run: wget -O git-restore-mtime https://raw.githubusercontent.com/MestreLion/git-tools/master/git-restore-mtime
+    - name: run git-restore-mtime
       run: |
-        unzip -d clcache clcache-4.2.0.zip
-        echo "::add-path::$GITHUB_WORKSPACE/clcache"	
-        echo ::set-env name=CLCACHE_CL::$(which cl.exe)
-        echo ::set-env name=CLCACHE_HARDLINK::1
-        echo ::set-env name=CLCACHE_DIR::$PWD/clcache-data
+        git config diff.renameLimit 8192
+        py -3 git-restore-mtime --commit --no-directories indra
 
+    # - name: run git-timesync
+    #   run: |
+    #     git ls-files | grep -E 'indra/.*\.(cpp|c|h|hpp|inl)$' |
+    #       while IFS= read -r file; do
+    #         touch -m -d "`git log -n1 --pretty='format:%ci' "$file"`" "$file" &
+    #       done
+    #     wait
+    - uses: seanmiddleditch/gha-setup-vsdevenv@master
     - uses: seanmiddleditch/gha-setup-ninja@master
     - uses: actions/setup-python@v2
       with:
         python-version: 2.7
         architecture: x64
 
+    - name: Get pip cache dir
+      id: pip-cache
+      run: |
+        echo "::set-output name=dir::$(pip cache dir)"
+    - name: pip cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ steps.pip-cache.outputs.dir }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
     - name: Install autobuild through PIP
-      run: pip install git+https://vcs.firestormviewer.org/autobuild-1.1#egg=autobuild
+      run: |
+        pip install git+https://vcs.firestormviewer.org/autobuild-1.1#egg=autobuild
+        echo PYTHONPATH=$PYTHONPATH
 
     - name: Set env
       shell: cmd
@@ -59,29 +93,20 @@ jobs:
       run: |
         echo NINJA_FLAGS=="${{ env.NINJA_FLAGS }}"
         echo BUILD_DIR==${{ env.BUILD_DIR }}
-        which clcache.exe
         which cl.exe
         cl.exe
+        which cmake
         cmake --version
+        which git
         git --version
+        which pip
+        pip --version
+        which python
         python --version
+        which ninja
         ninja --version
+        which autobuild
         autobuild --version
-
-    - name: cache -- clcache
-      id: cachedclcache
-      uses: actions/cache@v2
-      with:
-        path: clcache-data
-        key: ${{ runner.os }}-cachedclcache-${{ hashFiles('vs2019_autobuild.xml') }}-${{ env.FSCHANNEL }}
-
-    - name: test clcache
-      run: |
-        echo "CLCACHE_CL==$CLCACHE_CL"
-        echo "PATH==$PATH"
-        which clcache.exe
-        clcache.exe -M 4194304
-        clcache.exe -s
 
     - name: VCPKG
       uses: lukka/run-vcpkg@master
@@ -89,7 +114,6 @@ jobs:
       with:
         vcpkgArguments: '@${{ github.workspace }}/indra/vcpkg/install_args.txt'
         vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-        # Ensure the cache key changes any time the content of the response file changes.
         appendedCacheKey: ${{ hashFiles( 'indra/vcpkg/install_args.txt' ) }}-${{ hashFiles( 'indra/vcpkg/ports/**' ) }}
 
     - name: Debug print vars
@@ -114,38 +138,69 @@ jobs:
         path: ${{ env.BUILD_DIR }}/packages
         key: ${{ runner.os }}-cachedpackages-${{ hashFiles('vs2019_autobuild.xml') }}-${{ env.FSCHANNEL }}
 
+    - name: cache -- autobuild installed packages detection
+      if: steps.cachedpackages.outputs.cache-hit == 'true'
+      run: |
+        echo ::set-env name=AUTOBUILD_CACHE_HIT::-DAUTOBUILD_CACHE_HIT=ON
+
     - name: autobuild -- configure
       run: |
         autobuild configure -A 64 -c ReleaseFS_open -- \
           --package --openal --openvr --vcpkg --ninja --chan ${{ env.FSCHANNEL }} \
-          -DUSE_PRECOMPILED_HEADERS:BOOL=FALSE \
-          -DUSE_CLCACHE=ON \
-          -DCMAKE_CXX_COMPILER=$PWD/clcache/clcache.exe \
-          -DCMAKE_C_COMPILER=$PWD/clcache/clcache.exe
+          ${{ env.AUTOBUILD_CACHE_HIT }} -DGENERATE_DEBUG_SYMBOLS:BOOL=OFF
+
+    - name: cache -- lllibs.cpp.obj
+      id: cachedllibs
+      uses: actions/cache@v2
+      with:
+        path: |
+          ${{ env.BUILD_DIR }}/**/*.cpp.obj
+          !${{ env.BUILD_DIR }}/newview/**/*.cpp.obj
+          ${{ env.BUILD_DIR }}/.ninja_log
+          ${{ env.BUILD_DIR }}/.ninja_deps
+        key: ${{ runner.os }}-cachedllibs-${{ env.CPP_OBJ_CACHE_REV }}-${{ env.FSCHANNEL }}
 
     - name: Build ll* libs
       run: |
-        ninja ${{ env.NINJA_FLAGS }} llappearance llaudio llcharacter llcommon llcorehttp llcrashlogger llimage llimagej2coj llinventory llmath llmessage llplugin llprimitive llrender llui llvfs llwindow llxml || true
+        ninja ${{ env.NINJA_FLAGS }} -n -d explain llappearance llaudio llcharacter llcommon llcorehttp llcrashlogger llimage llimagej2coj llinventory llmath llmessage llplugin llprimitive llrender llui llvfs llwindow llxml
+        ninja ${{ env.NINJA_FLAGS }} llappearance llaudio llcharacter llcommon llcorehttp llcrashlogger llimage llimagej2coj llinventory llmath llmessage llplugin llprimitive llrender llui llvfs llwindow llxml
+        du -hsc ${{ env.BUILD_DIR }}/*
 
-    - name: verify mid clcache
+    - name: generate llviewerprecompiledheaders.i
       run: |
-        clcache.exe -s
+        cl.exe -DWIN32 -D_WINDOWS -DADDRESS_SIZE=64 -DLL_WINDOWS \
+          -Ivcpkg/installed/x64-windows/include -Iindra/llcommon -Iindra/llmessage -Iindra/llvfs -Iindra/llmath \
+          -EP -E -C indra/newview/llviewerprecompiledheaders.h > ${{ env.BUILD_DIR }}/llviewerprecompiledheaders.i
 
-    # - name: Generate precompiled headers
-    #   run: |
-    #     echo ::set-env name=CLCACHE_DISABLE::1
-    #     ninja ${{ env.NINJA_FLAGS }} xprecompiled_stamp || true
-    #     ninja ${{ env.NINJA_FLAGS }} xprecompiled || true
+    - name: cache -- .pch
+      id: cachedpch
+      uses: actions/cache@v2
+      with:
+        path: |
+          ${{ env.BUILD_DIR }}/**/*.pch
+          ${{ env.BUILD_DIR }}/newview/pch.stamp
+          ${{ env.BUILD_DIR }}/newview/pch.cpp
+        key: ${{ runner.os }}-cachedpch-2-${{ hashFiles(format('{0}{1}', env.BUILD_DIR, '/llviewerprecompiledheaders.i')) }}-${{ env.FSCHANNEL }}
+
+    - name: Generate precompiled headers
+      if: steps.cachedpch.outputs.cache-hit != 'true'
+      run: |
+        ninja ${{ env.NINJA_FLAGS }} xprecompiled_stamp
+        ninja ${{ env.NINJA_FLAGS }} xprecompiled
+
+    - name: cache -- newview* .cpp.obj
+      id: cachednewview
+      uses: actions/cache@v2
+      with:
+        path: |
+          ${{ env.BUILD_DIR }}/newview/**/*.cpp.obj
+        key: ${{ runner.os }}-cachednewview-${{ env.CPP_OBJ_CACHE_REV }}-${{ env.FSCHANNEL }}
 
     - name: Build firestorm executable
-      run: ninja ${{ env.NINJA_FLAGS }} firestorm-bin || true
-
-    - name: verify end clcache
-      run: |
-        clcache.exe -s
-
+      run: ninja ${{ env.NINJA_FLAGS }} firestorm-bin
+    
     - name: Generate installer
-      run: ninja ${{ env.NINJA_FLAGS }} llpackage || true
+      run: ninja ${{ env.NINJA_FLAGS }} llpackage
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v2

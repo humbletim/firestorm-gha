@@ -56,14 +56,18 @@ macro(_install_prebuilt_binary _binary)
       --install-dir=${AUTOBUILD_INSTALL_DIR}
       ${_binary} ")
     endif(DEBUG_PREBUILT)
-    execute_process(COMMAND "${AUTOBUILD_EXECUTABLE}"
-      install
-      --install-dir=${AUTOBUILD_INSTALL_DIR}
-      ${_binary}
-      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-      RESULT_VARIABLE ${_binary}_installed
-      )
-    file(WRITE ${PREBUILD_TRACKING_DIR}/${_binary}_installed "${${_binary}_installed}")
+    if (AUTOBUILD_CACHE_HIT)
+      set(${_binary}_installed 0)
+    else()
+      execute_process(COMMAND "${AUTOBUILD_EXECUTABLE}"
+        install
+        --install-dir=${AUTOBUILD_INSTALL_DIR}
+        ${_binary}
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        RESULT_VARIABLE ${_binary}_installed
+        )
+      file(WRITE ${PREBUILD_TRACKING_DIR}/${_binary}_installed "${${_binary}_installed}")
+    endif()
     #set_property(GLOBAL PROPERTY ${_binary}_installed "${${_binary}_installed}")
   endif(${PREBUILD_TRACKING_DIR}/sentinel_installed IS_NEWER_THAN ${PREBUILD_TRACKING_DIR}/${_binary}_installed OR NOT ${${_binary}_installed} EQUAL 0)
 
