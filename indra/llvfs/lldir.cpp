@@ -44,6 +44,7 @@
 #include "stringize.h"
 #include "llstring.h"
 #include <boost/filesystem.hpp>
+namespace filesystem = boost::filesystem;
 #include <boost/foreach.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
@@ -110,10 +111,10 @@ std::vector<std::string> LLDir::getFilesInDir(const std::string &dirname)
 {
     //Returns a vector of fullpath filenames.
 
-#ifdef LL_WINDOWS // or BOOST_WINDOWS_API
-    boost::filesystem::path p(utf8str_to_utf16str(dirname));
+#if LL_WINDOWS && !VCPKG_TOOLCHAIN // or BOOST_WINDOWS_API
+    filesystem::path p(utf8str_to_utf16str(dirname));asfdsdf
 #else
-    boost::filesystem::path p(dirname);
+    filesystem::path p(dirname);
 #endif
 
     std::vector<std::string> v;
@@ -122,12 +123,12 @@ std::vector<std::string> LLDir::getFilesInDir(const std::string &dirname)
     {
         if (is_directory(p))
         {
-            boost::filesystem::directory_iterator end_iter;
-            for (boost::filesystem::directory_iterator dir_itr(p);
+            filesystem::directory_iterator end_iter;
+            for (filesystem::directory_iterator dir_itr(p);
                  dir_itr != end_iter;
                  ++dir_itr)
             {
-                if (boost::filesystem::is_regular_file(dir_itr->status()))
+                if (filesystem::is_regular_file(dir_itr->status()))
                 {
                     v.push_back(dir_itr->path().filename().string());
                 }
@@ -205,25 +206,25 @@ U32 LLDir::deleteDirAndContents(const std::string& dir_name)
 
 	try
 	{
-#ifdef LL_WINDOWS // or BOOST_WINDOWS_API
-		boost::filesystem::path dir_path(utf8str_to_utf16str(dir_name));
+#if LL_WINDOWS && !VCPKG_TOOLCHAIN // or BOOST_WINDOWS_API
+		filesystem::path dir_path(utf8str_to_utf16str(dir_name));
 #else
-		boost::filesystem::path dir_path(dir_name);
+		filesystem::path dir_path(dir_name);
 #endif
 
-	   if (boost::filesystem::exists (dir_path))
+	   if (filesystem::exists (dir_path))
 	   {
-	      if (!boost::filesystem::is_empty (dir_path))
+	      if (!filesystem::is_empty (dir_path))
 		  {   // Directory has content
-		     num_deleted = boost::filesystem::remove_all (dir_path);
+		     num_deleted = filesystem::remove_all (dir_path);
 		  }
 		  else
 		  {   // Directory is empty
-		     boost::filesystem::remove (dir_path);
+		     filesystem::remove (dir_path);
 		  }
 	   }
 	}
-	catch (boost::filesystem::filesystem_error &er)
+	catch (filesystem::filesystem_error &er)
 	{ 
 		LL_WARNS() << "Failed to delete " << dir_name << " with error " << er.code().message() << LL_ENDL;
 	} 

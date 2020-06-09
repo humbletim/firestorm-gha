@@ -7,11 +7,19 @@ include(Python)
 # Within an autobuild build, AUTOBUILD_ADDRSIZE is already set. But when
 # building in an IDE, it probably isn't. Set it explicitly using
 # run_build_test.py.
-add_custom_command(OUTPUT packages-info.txt
-  COMMENT "Generating packages-info.txt for the about box"
-  MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/../autobuild.xml
+add_custom_target(generate_packages_info
+  DEPENDS
   DEPENDS ${CMAKE_SOURCE_DIR}/../scripts/packages-formatter.py
-          ${CMAKE_SOURCE_DIR}/../autobuild.xml
+          ${AUTOBUILD_CONFIG_FILE}
+)
+
+add_custom_command(TARGET generate_packages_info
+  BYPRODUCTS packages-info.txt
+  PRE_BUILD
+  COMMENT "Generating packages-info.txt for the about box"
+  MAIN_DEPENDENCY ${AUTOBUILD_CONFIG_FILE}
+  DEPENDS ${CMAKE_SOURCE_DIR}/../scripts/packages-formatter.py
+          ${AUTOBUILD_CONFIG_FILE}
   COMMAND ${PYTHON_EXECUTABLE}
           ${CMAKE_SOURCE_DIR}/cmake/run_build_test.py -DAUTOBUILD_ADDRSIZE=${ADDRESS_SIZE}
           ${PYTHON_EXECUTABLE}

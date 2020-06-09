@@ -502,7 +502,9 @@ void LLXMLRPCTransaction::Impl::setHttpStatus(const LLCore::HttpStatus &status)
 		message = LLTrans::getString("ssl_peer_certificate");
 		break;
 
+#if LIBCURL_VERSION_NUM < 0x073e00
 	case CURLE_SSL_CACERT:
+#endif
 	case CURLE_SSL_CONNECT_ERROR:		
 		message = LLTrans::getString("ssl_connect_error");
 		break;

@@ -47,6 +47,7 @@ include(LLXML)
 include(NDOF)
 include(NVAPI)
 include(OPENAL)
+set(OPENVR ON CACHE BOOL "Enable OpenVR")
 include(OpenGL)
 include(OpenSSL)
 include(PNG)
@@ -54,13 +55,15 @@ include(TemplateCheck)
 include(UI)
 include(UnixInstall)
 include(ViewerMiscLibs)
-include(ViewerManager)
+# include(ViewerManager)
 include(VisualLeakDetector)
 include(URIPARSER)
 include(Growl)
 include(ColladaDom)
 include(jemalloc)
-include(Discord)
+if (USE_DISCORD)
+  include(Discord)
+endif()
 
 # <FS:ND> if using ndPhysicsstub this variable will be unset, we don't need to build any stub code viewer side in that case
 if( LLPHYSICSEXTENSIONS_SRC_DIR )
@@ -1676,6 +1679,19 @@ set_source_files_properties(
 #   COMPILE_DEFINITIONS "${VIEWER_CHANNEL_VERSION_DEFINES}" # see BuildVersion.cmake
    )
 
+if (VCPKG_TOOLCHAIN)
+  set_source_files_properties(
+    daeexport.cpp llviewerfloaterreg.cpp llfloatermodelpreview.cpp llmeshrepository.cpp llviewermenufile.cpp
+    PROPERTIES
+      COMPILE_FLAGS "/I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5 /I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5/1.4"
+  )
+  set_source_files_properties(
+    fslslpreproc.cpp
+    PROPERTIES
+      #COMPILE_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=0"
+  )
+endif()
+
 if (DARWIN)
   LIST(APPEND viewer_SOURCE_FILES llappviewermacosx.cpp)
   LIST(APPEND viewer_SOURCE_FILES llappviewermacosx-objc.mm)
@@ -1821,11 +1837,45 @@ if (WINDOWS)
     # All sources added to viewer_SOURCE_FILES
     # at this point use it.
     if(USE_PRECOMPILED_HEADERS)
-        set_source_files_properties(llviewerprecompiledheaders.cpp
+        set_source_files_properties(
+            pch.cpp
             PROPERTIES
+            GENERATED TRUE
             COMPILE_FLAGS "/Ycllviewerprecompiledheaders.h"
-            )
-        set(viewer_SOURCE_FILES "${viewer_SOURCE_FILES}" llviewerprecompiledheaders.cpp)
+        )
+        add_custom_command(
+            OUTPUT pch.cpp
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/llviewerprecompiledheaders.cpp pch.cpp
+            DEPENDS llviewerprecompiledheaders.cpp
+            COMMENT "generating pch.cpp"
+        )
+        add_library(pchlib STATIC pch.cpp)
+        add_custom_target(xprecompiled ALL DEPENDS pchlib)
+        
+add_custom_command(OUTPUT pch.stamp
+  COMMAND ${CMAKE_COMMAND} -E remove ../llviewerprecompiledheaders.pch
+  COMMAND ${CMAKE_COMMAND} -E remove pch.cpp
+  COMMAND ${CMAKE_COMMAND} -E touch pch.stamp
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMENT "Creating pch.stamp"
+  VERBATIM)
+
+  add_custom_command(OUTPUT ../llviewerprecompiledheaders.pch
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMENT "generated .pch"
+    DEPENDS xprecompiled
+    VERBATIM)
+
+add_custom_target(xprecompiled_stamp DEPENDS pch.stamp)
+
+        # add_custom_command(
+        #   COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj
+        #   DEPENDS $<TARGET_OBJECTS:xprecompiled>
+        # )
+        #add_dependencies(xxprecompiled ${CMAKE_CURRENT_BINARY_DIR}/../llviewerprecompiledheaders.pch xprecompiled)
+        # set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/../llviewerprecompiledheaders.pch PROPERTIES GENERATED TRUE)
+        # set_source_files_properties(${viewer_SOURCE_FILES} PROPERTIES OBJECT_DEPENDS xprecompiled)
+        #set(viewer_SOURCE_FILES "${viewer_SOURCE_FILES}" llviewerprecompiledheaders.cpp)
     endif(USE_PRECOMPILED_HEADERS)
 
     # Replace the icons with the appropriate ones for the channel
@@ -2138,11 +2188,32 @@ list(APPEND viewer_SOURCE_FILES ${viewer_HEADER_FILES})
 set_source_files_properties(${viewer_HEADER_FILES}
                             PROPERTIES HEADER_FILE_ONLY TRUE)
 
+if (OPENVR)
+  configure_vcpkg_dependency(openvr_api OPENVR)
+endif()
+
+if(USE_PRECOMPILED_HEADERS)
+  list(APPEND viewer_SOURCE_FILES $<TARGET_OBJECTS:pchlib>)
+endif()
+
 add_executable(${VIEWER_BINARY_NAME}
     WIN32
     MACOSX_BUNDLE
     ${viewer_SOURCE_FILES}
     )
+
+if (VCPKG_TOOLCHAIN)
+    add_dependencies(${VIEWER_BINARY_NAME} SLPlugin windows-crash-logger media_plugin_cef media_plugin_example media_plugin_libvlc generate_packages_info) #newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj
+endif()
+
+if(USE_PRECOMPILED_HEADERS)
+  #get_target_property(_xxpdbname ${VIEWER_BINARY_NAME} COMPILE_PDB)
+  set(_xxpdbname "CMakeFiles/firestorm-bin.dir/vc140")
+  message(STATUS "**** _xxpdbname ${_xxpdbname}")
+  set_target_properties(pchlib PROPERTIES COMPILE_PDB_NAME ${_xxpdbname})
+  add_dependencies(${VIEWER_BINARY_NAME} xprecompiled_stamp)
+  target_link_libraries(${VIEWER_BINARY_NAME} pchlib)
+endif()
 
 if (SDL_FOUND)
   set_property(TARGET ${VIEWER_BINARY_NAME}
@@ -2199,6 +2270,7 @@ if (WINDOWS)
     # In the meantime, if you have any ideas on how to easily maintain one list, either here or in viewer_manifest.py
     # and have the build deps get tracked *please* tell me about it.
 
+if (NOT VCPKG_TOOLCHAIN)
     set(COPY_INPUT_DEPENDENCIES
       # The following commented dependencies are determined at variably at build time. Can't do this here.
       ${CMAKE_SOURCE_DIR}/../etc/message.xml
@@ -2280,8 +2352,25 @@ if (WINDOWS)
         )
     endif (OPENAL)
 
-    add_custom_command(
-      OUTPUT  ${CMAKE_CFG_INTDIR}/copy_touched.bat
+else(NOT VCPKG_TOOLCHAIN)
+  #list(APPEND COPY_INPUT_DEPENDENCIES boost_filesystem_patch)
+  #     ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/msvcr120.dll
+  #     ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/msvcp120.dll
+  # )
+    #add_dependencies(${VIEWER_BINARY_NAME} SLPlugin windows-crash-logger media_plugin_cef media_plugin_example media_plugin_libvlc newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj)
+endif(NOT VCPKG_TOOLCHAIN)
+
+    add_custom_target(copy_w_touched_bat
+      DEPENDS
+        ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
+        stage_third_party_libs
+        ${COPY_INPUT_DEPENDENCIES}
+        SLPlugin windows-crash-logger media_plugin_cef media_plugin_example media_plugin_libvlc
+    )
+
+    add_custom_command(TARGET copy_w_touched_bat
+      BYPRODUCTS ${CMAKE_CFG_INTDIR}/copy_touched.bat
+      POST_BUILD
       COMMAND ${PYTHON_EXECUTABLE}
       ARGS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -2301,14 +2390,17 @@ if (WINDOWS)
         --viewer_flavor=${ND_VIEWER_FLAVOR}
         --fmodversion=${FMODVERSION}
         --openal=${OPENAL}
+        --openvr=${OPENVR}
+        --vcpkg-build=${VCPKG_TOOLCHAIN}
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         stage_third_party_libs
         ${COPY_INPUT_DEPENDENCIES}
+        SLPlugin windows-crash-logger media_plugin_cef media_plugin_example media_plugin_libvlc
       COMMENT "Performing viewer_manifest copy"
       )
 
-    add_custom_target(copy_w_viewer_manifest ALL DEPENDS ${CMAKE_CFG_INTDIR}/copy_touched.bat)
+    add_custom_target(copy_w_viewer_manifest ALL DEPENDS copy_w_touched_bat)
 
     add_dependencies(${VIEWER_BINARY_NAME} stage_third_party_libs llcommon copy_w_viewer_manifest)
 
@@ -2345,8 +2437,15 @@ if (WINDOWS)
           ${CMAKE_CURRENT_SOURCE_DIR}/event_host_manifest.py
         )
 
-      add_custom_command(
-        OUTPUT ${CMAKE_CFG_INTDIR}/touched.bat
+      add_custom_target(llpackage DEPENDS
+        ${VIEWER_BINARY_NAME}
+        ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
+        ${COPY_INPUT_DEPENDENCIES}
+        )
+
+      add_custom_command(TARGET llpackage
+        BYPRODUCTS ${CMAKE_CFG_INTDIR}/touched.bat
+        PRE_BUILD
         COMMAND ${PYTHON_EXECUTABLE}
         ARGS
           ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -2365,6 +2464,8 @@ if (WINDOWS)
           --viewer_flavor=${ND_VIEWER_FLAVOR}
           --fmodversion=${FMODVERSION}
           --openal=${OPENAL}
+          --openvr=${OPENVR}
+          --vcpkg-build=${VCPKG_TOOLCHAIN}
         DEPENDS
             ${VIEWER_BINARY_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -2372,10 +2473,6 @@ if (WINDOWS)
             ${COPY_INPUT_DEPENDENCIES}
         )
 
-      add_custom_target(llpackage ALL DEPENDS
-        ${CMAKE_CFG_INTDIR}/touched.bat
-        windows-setup-build-all
-        )
         # temporarily disable packaging of event_host until hg subrepos get
         # sorted out on the parabuild cluster...
         #${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/event_host.tar.bz2)
@@ -2470,6 +2567,7 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${LLPHYSICSEXTENSIONS_LIBRARIES}
     ${LLAPPEARANCE_LIBRARIES}
     ${GROWL_LIBRARY}
+    ${BOOST_FILESYTEM_PATCH_LIBRARY}
     )
 
 target_link_libraries(${VIEWER_BINARY_NAME} ${DISCORD_LIBRARY} )
@@ -2538,6 +2636,8 @@ endif (NOT ENABLE_MEDIA_PLUGINS)
         --viewer_flavor=${ND_VIEWER_FLAVOR}
         --fmodversion=${FMODVERSION}
         --openal=${OPENAL}
+        --openvr=${OPENVR}
+        --vcpkg-build=${VCPKG_TOOLCHAIN}
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         ${COPY_INPUT_DEPENDENCIES}
@@ -2564,6 +2664,8 @@ endif (NOT ENABLE_MEDIA_PLUGINS)
       --viewer_flavor=${ND_VIEWER_FLAVOR}
       --fmodversion=${FMODVERSION}
       --openal=${OPENAL}
+      --openvr=${OPENVR}
+      --vcpkg-build=${VCPKG_TOOLCHAIN}
     DEPENDS
       ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
       ${COPY_INPUT_DEPENDENCIES}
@@ -2649,6 +2751,8 @@ if (DARWIN)
       --viewer_flavor=${ND_VIEWER_FLAVOR}
       --fmodversion=${FMODVERSION}
       --openal=${OPENAL}
+      --openvr=${OPENVR}
+      --vcpkg-build=${VCPKG_TOOLCHAIN}
     DEPENDS
       ${VIEWER_BINARY_NAME}
       ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
@@ -2686,6 +2790,8 @@ if (DARWIN)
           --viewer_flavor=${ND_VIEWER_FLAVOR}
           --fmodversion=${FMODVERSION}
           --openal=${OPENAL}
+          --openvr=${OPENVR}
+          --vcpkg-build=${VCPKG_TOOLCHAIN}
           ${SIGNING_SETTING}
         DEPENDS
           ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py

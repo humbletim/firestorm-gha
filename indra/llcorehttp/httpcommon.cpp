@@ -302,8 +302,15 @@ CURL *getCurlTemplateHandle()
             check_curl_code(result, CURLOPT_NOSIGNAL);
             result = curl_easy_setopt(curlpTemplateHandle, CURLOPT_NOPROGRESS, 1);
             check_curl_code(result, CURLOPT_NOPROGRESS);
+
+#if LIBCURL_VERSION_NUM < 0x073e00
             result = curl_easy_setopt(curlpTemplateHandle, CURLOPT_ENCODING, "");
             check_curl_code(result, CURLOPT_ENCODING);
+#else
+						result = curl_easy_setopt(curlpTemplateHandle, CURLOPT_ACCEPT_ENCODING, NULL);
+						check_curl_code(result, CURLOPT_ACCEPT_ENCODING);
+#endif
+
             result = curl_easy_setopt(curlpTemplateHandle, CURLOPT_AUTOREFERER, 1);
             check_curl_code(result, CURLOPT_AUTOREFERER);
             result = curl_easy_setopt(curlpTemplateHandle, CURLOPT_FOLLOWLOCATION, 1);

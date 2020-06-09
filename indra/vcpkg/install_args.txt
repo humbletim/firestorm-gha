@@ -1,0 +1,5 @@
+firestorm-deps
+--overlay-ports=../indra/vcpkg/ports
+--overlay-triplets=../indra/vcpkg/triplets
+--triplet
+x64-windows

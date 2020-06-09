@@ -1365,7 +1365,7 @@ BOOL gunzip_file(const std::string& srcfile, const std::string& dstfile)
 
 	// <FS:ND> Proper UTF8->UTF16 handling for Windows
 	// src = gzopen(srcfile.c_str(), "rb");
-#if LL_WINDOWS
+#if LL_WINDOWS && _MSC_VER < 1920
 	std::string utf8filename = srcfile;
 	llutf16string utf16filename = utf8str_to_utf16str(utf8filename);
 	src = gzopen_w(utf16filename.c_str(), "rb");
@@ -1410,7 +1410,7 @@ BOOL gzip_file(const std::string& srcfile, const std::string& dstfile)
 
 	// <FS:ND> Proper UTF8->UTF16 handling for Windows
 	// dst = gzopen(tmpfile.c_str(), "wb");		/* Flawfinder: ignore */
-#if LL_WINDOWS
+#if LL_WINDOWS && _MSC_VER < 1920
 	std::string utf8filename = tmpfile;
 	llutf16string utf16filename = utf8str_to_utf16str(utf8filename);
 	dst = gzopen_w(utf16filename.c_str(), "wb");

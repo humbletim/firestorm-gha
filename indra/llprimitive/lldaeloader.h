@@ -29,6 +29,13 @@
 
 #include "llmodelloader.h"
 
+#ifdef VCPKG_TOOLCHAIN
+#  define COLLADA_DOM_SUPPORT141
+#include <dom/domElements.h>
+#include <dom/domConstants.h>
+using namespace ColladaDOM141;
+#else
+
 class DAE;
 class daeElement;
 class domProfile_COMMON;
@@ -38,6 +45,8 @@ class domTranslate;
 class domController;
 class domSkin;
 class domMesh;
+
+#endif
 
 class LLDAELoader : public LLModelLoader
 {

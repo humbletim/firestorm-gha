@@ -26,3 +26,11 @@ install(FILES featuretable_linux.txt featuretable_solaris.txt
 install(FILES ${SCRIPTS_DIR}/messages/message_template.msg
         DESTINATION ${APP_SHARE_DIR}/app_settings
         )
+
+if (VCPKG_TOOLCHAIN AND MSVC)
+    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP FALSE)
+    set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+    #set(CMAKE_INSTALL_OPENMP_LIBRARIES ${WITH_OPENMP})
+    #set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
+    include(InstallRequiredSystemLibraries)
+endif()

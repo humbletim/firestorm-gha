@@ -147,6 +147,7 @@ DirText $(DirectoryChooseTitle) $(DirectoryChooseSetup)
 Var INSTNAME
 Var INSTEXE
 Var VIEWER_EXE
+Var Firestorm
 Var INSTSHORTCUT
 Var COMMANDLINE         # Command line passed to this installer, set in .onInit
 Var SHORTCUT_LANG_PARAM # "--set InstallLanguage de", Passes language to viewer
@@ -366,6 +367,7 @@ Section ""
 StrCpy $INSTNAME "${INSTNAME}"
 StrCpy $INSTEXE "${INSTEXE}"
 StrCpy $VIEWER_EXE "${VIEWER_EXE}"
+StrCpy $Firestorm "${VIEWER_APP_NAME}"
 StrCpy $INSTSHORTCUT "${SHORTCUT}"
 
 Call CheckIfAdministrator		# Make sure the user can install/uninstall
@@ -717,17 +719,17 @@ Push $2
 
 # Delete files in \Users\<User>\AppData\Roaming\Firestorm
 # Remove all settings files but leave any other .txt files to preserve the chat logs
-    RMDir /r "$2\AppData\Roaming\Firestorm\logs"
-    RMDir /r "$2\AppData\Roaming\Firestorm\browser_profile"
-    RMDir /r "$2\AppData\Roaming\Firestorm\user_settings"
-    Delete  "$2\AppData\Roaming\Firestorm\*.xml"
-    Delete  "$2\AppData\Roaming\Firestorm\*.bmp"
-    Delete  "$2\AppData\Roaming\Firestorm\search_history.txt"
-    Delete  "$2\AppData\Roaming\Firestorm\plugin_cookies.txt"
-    Delete  "$2\AppData\Roaming\Firestorm\typed_locations.txt"
+    RMDir /r "$2\AppData\Roaming\$Firestorm\logs"
+    RMDir /r "$2\AppData\Roaming\$Firestorm\browser_profile"
+    RMDir /r "$2\AppData\Roaming\$Firestorm\user_settings"
+    Delete  "$2\AppData\Roaming\$Firestorm\*.xml"
+    Delete  "$2\AppData\Roaming\$Firestorm\*.bmp"
+    Delete  "$2\AppData\Roaming\$Firestorm\search_history.txt"
+    Delete  "$2\AppData\Roaming\$Firestorm\plugin_cookies.txt"
+    Delete  "$2\AppData\Roaming\$Firestorm\typed_locations.txt"
 # Delete files in \Users\<User>\AppData\Local\Firestorm
-    RMDir /r  "$2\AppData\Local\Firestorm"						#Delete the Havok cache folder
-    RMDir /r  "$2\AppData\Local\FirestormOS"						#Delete the OpenSim cache folder
+    RMDir /r  "$2\AppData\Local\$Firestorm"						#Delete the Havok cache folder
+    # RMDir /r  "$2\AppData\Local\FirestormOS"						#Delete the OpenSim cache folder
 
   CONTINUE:
     IntOp $0 $0 + 1

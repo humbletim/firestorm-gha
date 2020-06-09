@@ -310,10 +310,13 @@ class ViewerManifest(LLManifest,FSViewerManifest):
         else:
             app_suffix=self.channel_variant()
 
-        #<FS:ND> tag "OS" after CHANNEL_VENDOR_BASE and before any suffix
-        if self.fs_is_opensim():
-            app_suffix = "OS" + app_suffix
-        #</FS:ND>
+        if self.args.get('openvr') == 'ON':
+            app_suffix = "VR" + app_suffix
+        else:
+            #<FS:ND> tag "OS" after CHANNEL_VENDOR_BASE and before any suffix
+            if self.fs_is_opensim():
+                app_suffix = "OS" + app_suffix
+            #</FS:ND>
 
         #<FS:ND> Don't separate name by whitespace. This break a lot of things in the old FS installer logic.
         #return CHANNEL_VENDOR_BASE + ' ' + app_suffix
@@ -550,7 +553,7 @@ class WindowsManifest(ViewerManifest):
 
         if self.is_packaging_viewer():
             # Find secondlife-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
-            self.path(src='%s/firestorm-bin.exe' % self.args['configuration'], dst=self.final_exe())
+            self.path(src='%s/firestorm-bin.exe' % self._artifact_Subdir(), dst=self.final_exe())
 
             # <FS:Ansariel> Remove VMP
             #with self.prefix(src=os.path.join(pkgdir, "VMP")):
@@ -566,14 +569,70 @@ class WindowsManifest(ViewerManifest):
             #        self.path("*.gif")
 
             # </FS:Ansariel> Remove VMP
-        # Plugin host application
-        self.path2basename(os.path.join(os.pardir,
-                                        'llplugin', 'slplugin', self.args['configuration']),
-                           "slplugin.exe")
-        
+            # Plugin host application
+            self.path2basename(os.path.join(os.pardir,
+                                            'llplugin', 'slplugin', self._artifact_Subdir()),
+                               "slplugin.exe")
+
+        if self.args.get('vcpkg-build') == 'ON':
+          with self.prefix(os.path.join(self.args['build'], os.pardir, os.pardir, 'vcpkg','installed','x64-windows','bin')):
+            # self.path('alut.dll')
+            self.path('boost_context-vc142-mt-x64-1_73.dll')
+            self.path('boost_coroutine-vc142-mt-x64-1_73.dll')
+            self.path('boost_context-vc140-mt-1_60.dll')
+            self.path('boost_coroutine-vc140-mt-1_60.dll')
+            self.path('boost_filesystem-vc142-mt-x64-1_73.dll')
+            self.path2basename('../vcpkg/boost_filesystem_codecvt_patch','boost_filesystem_patch.dll')
+            self.path('boost_program_options-vc142-mt-x64-1_73.dll')
+            self.path('boost_regex-vc142-mt-x64-1_73.dll')
+            self.path('boost_thread-vc142-mt-x64-1_73.dll')
+            self.path('boost_wave-vc142-mt-x64-1_73.dll')
+            self.path('bz2.dll')
+            self.path('collada-dom2.5-dp-vc140-mt.dll')
+            self.path('expat.dll')
+            self.path('freetype.dll')
+            # self.path('glod.dll')
+            # self.path('growl.dll')
+            # self.path('growl++.dll')
+            self.path('jpeg62.dll')
+            self.path('jsoncpp.dll')
+            self.path('libapr-1.dll')
+            self.path('libaprutil-1.dll')
+            self.path('libcharset.dll')
+            self.path('libcrypto-1_1-x64.dll')
+            self.path('libcurl.dll')
+            self.path('libhunspell.dll')
+            self.path('libiconv.dll')
+            self.path('libpng16.dll')
+            self.path('libssl-1_1-x64.dll')
+            self.path('libxml2.dll')
+            self.path('lzma.dll')
+            # self.path('msvcp120.dll')
+            # self.path('msvcr120.dll')
+            self.path('ogg.dll')
+            # self.path('OpenAL32.dll')
+            # self.path('openjpeg.dll')
+            # self.path('openvr_api.dll')
+            # self.path('ortp_x64.dll')
+            self.path('uriparser.dll')
+            # self.path('vivoxsdk_x64.dll')
+            self.path('vorbis.dll')
+            self.path('vorbisenc.dll')
+            self.path('vorbisfile.dll')
+            self.path('zlib1.dll')
+    
+        if self.args.get('openvr') == 'ON':
+            with self.prefix(src=os.path.join(pkgdir, os.pardir, os.pardir, 'openvr', 'bin', 'win64')):
+                self.path("openvr_api.dll")
+
+        if self.args.get('vcpkg-build') == 'ON':
+            Release = self.args['buildtype']
+        else:
+            Release = self.args['configuration']
+
         # Get shared libs from the shared libs staging directory
         with self.prefix(src=os.path.join(self.args['build'], os.pardir,
-                                          'sharedlibs', self.args['configuration'])):
+                                        'sharedlibs', Release)):
 
             # Mesh 3rd party libs needed for auto LOD and collada reading
             try:
@@ -603,15 +662,23 @@ class WindowsManifest(ViewerManifest):
 
             # For textures
             self.path("openjpeg.dll")
+            
+            if self.args.get('vcpkg-build') == 'ON':
+                self.path("msvcr120.dll")
+                self.path("msvcp120.dll")
+                self.path("msvcp140.dll")
+                self.path("vcruntime140.dll")
+                self.path("vcruntime140_1.dll")
+                self.path("concrt140.dll")
 
             # These need to be installed as a SxS assembly, currently a 'private' assembly.
             # See http://msdn.microsoft.com/en-us/library/ms235291(VS.80).aspx
-            if self.args['configuration'].lower() == 'debug':
-                self.path("msvcr120d.dll")
-                self.path("msvcp120d.dll")
-            else:
-                self.path("msvcr120.dll")
-                self.path("msvcp120.dll")
+            # if self.args['configuration'].lower() == 'debug':
+            #     self.path("msvcr120d.dll")
+            #     self.path("msvcp120d.dll")
+            # else:
+            #     self.path("msvcr120.dll")
+            #     self.path("msvcp120.dll")
 
             # SLVoice executable
             with self.prefix(src=os.path.join(pkgdir, 'bin', 'release')):
@@ -626,14 +693,17 @@ class WindowsManifest(ViewerManifest):
                 self.path("ortp.dll")
             
             # Security
-            self.path("ssleay32.dll")
-            self.path("libeay32.dll")
+            if self.args.get('vcpkg-build') != 'ON':
+                self.path("ssleay32.dll")
+                self.path("libeay32.dll")
 
             # HTTP/2
-            self.path("nghttp2.dll")
+            if self.args.get('vcpkg-build') != 'ON':
+                self.path("nghttp2.dll")
 
             # Hunspell
-            self.path("libhunspell.dll")
+            if self.args.get('vcpkg-build') != 'ON':
+                self.path("libhunspell.dll")
 
             # BugSplat
             if self.args.get('bugsplat'):
@@ -669,16 +739,16 @@ class WindowsManifest(ViewerManifest):
         # Media plugins - CEF
         with self.prefix(dst="llplugin"):
             with self.prefix(src=os.path.join(self.args['build'], os.pardir, 'media_plugins')):
-                with self.prefix(src=os.path.join('cef', self.args['configuration'])):
+                with self.prefix(src=os.path.join('cef', self._artifact_Subdir())):
                     self.path("media_plugin_cef.dll")
 
                 # Media plugins - LibVLC
-                with self.prefix(src=os.path.join('libvlc', self.args['configuration'])):
+                with self.prefix(src=os.path.join('libvlc', self._artifact_Subdir())):
                     self.path("media_plugin_libvlc.dll")
 
                 # Media plugins - Example (useful for debugging - not shipped with release viewer)
                 if self.channel_type() != 'release':
-                    with self.prefix(src=os.path.join('example', self.args['configuration'])):
+                    with self.prefix(src=os.path.join('example', self._artifact_Subdir())):
                         self.path("media_plugin_example.dll")
 
             # CEF runtime files - debug
@@ -696,11 +766,19 @@ class WindowsManifest(ViewerManifest):
                 self.path("snapshot_blob.bin")
                 self.path("v8_context_snapshot.bin")
 
+            if self.args.get('vcpkg-build') == 'ON':
+                Release = self.args['buildtype']
+            else:
+                Release = self.args['configuration']
             # MSVC DLLs needed for CEF and have to be in same directory as plugin
             with self.prefix(src=os.path.join(self.args['build'], os.pardir,
-                                              'sharedlibs', 'Release')):
-                self.path("msvcp120.dll")
-                self.path("msvcr120.dll")
+                                              'sharedlibs', Release)):
+                if self.args.get('vcpkg-build') == 'ON':
+                    self.path("msvcp140.dll")
+                    self.path("vcruntime140.dll")
+                else:
+                    self.path("msvcp120.dll")
+                    self.path("msvcr120.dll")
 
             # CEF files common to all configurations
             with self.prefix(src=os.path.join(pkgdir, 'resources')):
@@ -773,20 +851,20 @@ class WindowsManifest(ViewerManifest):
 
         # pull in the crash logger from other projects
         # tag:"crash-logger" here as a cue to the exporter
-        self.path(src='../win_crash_logger/%s/windows-crash-logger.exe' % self.args['configuration'],
+        self.path(src='../win_crash_logger/%s/windows-crash-logger.exe' % self._artifact_Subdir(),
                   dst="win_crash_logger.exe")
 
         # <FS:Ansariel> This is still needed! The method to copy the Visual C++ Runtime files
         #               in Copy3rdPartyLibs is copying the wrong files for 64bit because Autobuild
         #               is a 32bit process and Windows will silently copy the 32bit versions from
         #               the SysWOW64 folder, even if explicitly trying to copy from System32!
-        if (self.address_size == 64):
-            with self.prefix(src=os.path.join(self.args['build'], os.pardir, os.pardir, 'indra', 'newview', 'installers', 'windows_x64'), dst="llplugin"):
-                self.path("msvcp120.dll")
-                self.path("msvcr120.dll")
-            with self.prefix(src=os.path.join(self.args['build'], os.pardir, os.pardir, 'indra', 'newview', 'installers', 'windows_x64')):
-                self.path("msvcp120.dll")
-                self.path("msvcr120.dll")
+        # if (self.address_size == 64):
+        #     with self.prefix(src=os.path.join(self.args['build'], os.pardir, os.pardir, 'indra', 'newview', 'installers', 'windows_x64'), dst="llplugin"):
+        #         self.path("msvcp120.dll")
+        #         self.path("msvcr120.dll")
+        #     with self.prefix(src=os.path.join(self.args['build'], os.pardir, os.pardir, 'indra', 'newview', 'installers', 'windows_x64')):
+        #         self.path("msvcp120.dll")
+        #         self.path("msvcr120.dll")
 
         if not self.is_packaging_viewer():
             self.package_file = "copied_deps"    
@@ -848,7 +926,8 @@ class WindowsManifest(ViewerManifest):
             'final_exe' : self.final_exe(),
             'flags':'',
             'app_name':self.app_name(),
-            'app_name_oneword':self.app_name_oneword()
+            'app_name_oneword':self.app_name_oneword(),
+            'viewer_app_name': self.app_name_oneword().split('-')[0],
             }
 
         substitution_strings = self.fs_splice_grid_substitution_strings( substitution_strings ) #<FS:ND/> Add grid args
@@ -868,6 +947,7 @@ class WindowsManifest(ViewerManifest):
         !define VERSION_DASHES "%(version_dashes)s"
         !define VERSION_REGISTRY "%(version_registry)s"
         !define VIEWER_EXE "%(final_exe)s"
+        !define VIEWER_APP_NAME   "%(viewer_app_name)s"
         """ % substitution_strings
         
         if self.channel_type() == 'release':
@@ -1842,6 +1922,10 @@ class LinuxManifest(ViewerManifest):
                 self.path("launch_url.sh")
             self.path("install.sh")
 
+        if self.args.get('openvr') == 'ON':
+            with self.prefix(src=os.path.join(pkgdir, os.pardir, os.pardir, 'openvr', 'bin', 'linux64')):
+                self.path("libopenvr_api.so")
+
         with self.prefix(dst="bin"):
             self.path("firestorm-bin","do-not-directly-run-firestorm-bin")
             self.path("../linux_crash_logger/linux-crash-logger","linux-crash-logger.bin")
@@ -2268,7 +2352,9 @@ if __name__ == "__main__":
     extra_arguments = [
         dict(name='bugsplat', description="""BugSplat database to which to post crashes,
              if BugSplat crash reporting is desired""", default=''),
-        dict(name='openal', description="""Indication openal libraries are needed""", default='OFF')
+        dict(name='openal', description="""Indication openal libraries are needed""", default='OFF'),
+        dict(name='openvr', description="""Indication openvr libraries are needed""", default='ON'),
+        dict(name='vcpkg-build', description="""Indication if building against VCPKG libraries""", default='OFF'),
         ]
     try:
         main(extra=extra_arguments)

@@ -400,6 +400,7 @@ void LLCrashLoggerWindows::OnClientDumpRequest(void* context,
 
 bool LLCrashLoggerWindows::initCrashServer()
 {
+#if LL_CRASH_REPORTING
 	//For Breakpad on Windows we need a full Out of Process service to get good data.
 	//This routine starts up the service on a named pipe that the viewer will then
 	//communicate with. 
@@ -442,6 +443,9 @@ bool LLCrashLoggerWindows::initCrashServer()
 
 	LL_INFOS("CRASHREPORT") << "Initialized OOP server with pipe named " << stringize(wpipe_name) << LL_ENDL;
 	return true;
+#else
+    return false;
+#endif
 }
 
 bool LLCrashLoggerWindows::init(void)

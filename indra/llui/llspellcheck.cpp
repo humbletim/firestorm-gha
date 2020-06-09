@@ -30,7 +30,7 @@
 #include "llsdserialize.h"
 
 #include "llspellcheck.h"
-#if LL_WINDOWS
+#if LL_WINDOWS && !VCPKG_TOOLCHAIN
 	#include <hunspell/hunspelldll.h>
 	#pragma comment(lib, "libhunspell.lib")
 #else

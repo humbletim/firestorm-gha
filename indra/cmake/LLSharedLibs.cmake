@@ -24,6 +24,8 @@ macro(ll_deploy_sharedlibs_command target_exe)
       set(OUTPUT_PATH ${OUTPUT_PATH}/lib)
     endif(WINDOWS)
 
+    list(APPEND SEARCH_DIRS "${CMAKE_BINARY_DIR}/vcpkg/boost_filesystem_codecvt_patch")
+    list(PREPEND SEARCH_DIRS "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin")
     add_custom_command(
       TARGET ${target_exe} POST_BUILD
       COMMAND ${CMAKE_COMMAND} 

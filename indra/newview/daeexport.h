@@ -28,6 +28,9 @@
 #include "llfloater.h"
 #include "lltextureentry.h"
 #include "lltexturecache.h"
+#if VCPKG_TOOLCHAIN
+#  define COLLADA_DOM_SUPPORT141
+#endif
 #include <dom/domElements.h>
 
 class LLViewerObject;

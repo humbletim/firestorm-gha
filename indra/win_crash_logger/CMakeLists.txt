@@ -76,6 +76,9 @@ list(APPEND win_crash_logger_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../tools/m
 
 find_library(DXGUID_LIBRARY dxguid ${DIRECTX_LIBRARY_DIR})
 
+if (RELEASE_CRASH_REPORTING OR NON_RELEASE_CRASH_REPORTING)
+  add_definitions(LL_CRASH_REPORTING=1)
+endif()
 add_executable(windows-crash-logger WIN32 ${win_crash_logger_SOURCE_FILES})
 
 target_link_libraries(windows-crash-logger
@@ -99,6 +102,7 @@ target_link_libraries(windows-crash-logger
     wininet
     Wldap32
     dbgeng
+    ${BOOST_FILESYTEM_PATCH_LIBRARY}
     )
     
 if (WINDOWS)

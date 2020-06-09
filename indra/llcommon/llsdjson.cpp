@@ -85,7 +85,11 @@ Json::Value LlsdToJson(const LLSD &val)
     switch (val.type())
     {
     case LLSD::TypeUndefined:
+#if JSON_USE_NULLREF
+        result = Json::Value::nullSingleton();
+#else
         result = Json::Value::null;
+#endif
         break;
     case LLSD::TypeBoolean:
         result = Json::Value(static_cast<bool>(val.asBoolean()));

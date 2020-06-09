@@ -14,6 +14,10 @@ include(Linking)
 include(Tut)
 include(LLAddBuildTest)
 
+if (VCPKG_TOOLCHAIN)
+  include(Boost)
+endif()
+
 # <FS:ND> Google Mock/Test is not used
 #include(GoogleMock)
 # </FS:ND>
@@ -104,6 +108,7 @@ target_link_libraries(lltest
     ${BOOST_CONTEXT_LIBRARY}
     ${BOOST_SYSTEM_LIBRARY}
     ${DL_LIBRARY}
+    ${BOOST_FILESYTEM_PATCH_LIBRARY}
     )
 
 if (WINDOWS)
