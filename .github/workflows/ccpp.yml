@@ -1,6 +1,6 @@
 name: C/C++ CI
 
-on: [push, pull_request]
+on: [pull_request]
 defaults:
   run:
     shell: bash
@@ -14,6 +14,7 @@ jobs:
     env:
       AUTOBUILD_VSVER: 120
       PreferredToolArchitecture: x64
+      VIEWER_VERSION_REVISION: 58205
     steps:
     - uses: actions/checkout@v2
       with:
