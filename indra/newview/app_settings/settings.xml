@@ -6,14 +6,28 @@
   <!-- non-persisted settings -->
   <key>$vrEnabled</key>
   <map>
-    <key>Comment</key><string>[vr] Toggles OpenVR enabled state</string>
+    <key>Comment</key><string>[vr-session] Toggles OpenVR enabled state</string>
     <key>Persist</key><integer>0</integer>
     <key>Type</key><string>Boolean</string>
     <key>Value</key><integer>0</integer>
   </map>
   <key>$vrActive</key>
   <map>
-    <key>Comment</key><string>[vr] Toggles VR compositor output (only applies when OpenVR is enabled)</string>
+    <key>Comment</key><string>[vr-session] Toggles VR compositor output (only applies when OpenVR is enabled)</string>
+    <key>Persist</key><integer>0</integer>
+    <key>Type</key><string>Boolean</string>
+    <key>Value</key><integer>0</integer>
+  </map>
+  <key>$vrCamRotOffset</key>
+  <map>
+    <key>Comment</key><string>[vr-session] HMD yaw pre-rotation in degrees (only applies when OpenVR is enabled)</string>
+    <key>Persist</key><integer>0</integer>
+    <key>Type</key><string>F32</string>
+    <key>Value</key><real>90.0</real>
+  </map>
+  <key>$vrCopySettingsToClipboard</key>
+  <map>
+    <key>Comment</key><string>[vr-session] (internal) settings trigger for dumping current values to system log and clipboard.</string>
     <key>Persist</key><integer>0</integer>
     <key>Type</key><string>Boolean</string>
     <key>Value</key><integer>0</integer>
@@ -38,7 +52,7 @@
 
       <key>$vrConfigVersion</key>
       <map>
-        <key>Comment</key><string>[vr] (internal) tracks VR Mod user-specific configuration version</string>
+        <key>Comment</key><string>[vr] (internal) tracks changes to legacy vrsettings.ini file</string>
         <key>Persist</key><integer>1</integer>
         <key>Type</key><string>F32</string>
         <key>Value</key><real>0.0</real>

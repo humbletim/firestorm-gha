@@ -30,6 +30,7 @@
  * $/LicenseInfo$
  */
 
+#include "llviewerprecompiledheaders.h"
 #include "lltrans.h"
 #include "llapp.h"
 #include "vrprefs.h"
