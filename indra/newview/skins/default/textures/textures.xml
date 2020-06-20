@@ -768,6 +768,7 @@ with the same filename but different name
   <texture name="nearbychat_18" file_name="toolbar_icons/nearbychat.png" preload="true" />
   <texture name="ao_toggle_18" file_name="toolbar_icons/animation_override.png" preload="true" />
   <texture name="phoenix_18" file_name="toolbar_icons/phoenix.png" preload="true" />
+  <texture name="vr" file_name="toolbar_icons/vr.png" preload="true" />
   <texture name="www_18" file_name="toolbar_icons/www.png" preload="true" />
   <texture name="areasearch" file_name="toolbar_icons/areasearch.png" preload="true" />
   <texture name="settings_debug" file_name="toolbar_icons/settings_debug.png" preload="true" />

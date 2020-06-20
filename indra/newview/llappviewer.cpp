@@ -924,6 +924,7 @@ bool LLAppViewer::init()
 		LLFile::remove(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "grids.user.xml"));
 		LLFile::remove(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "password.dat"));
 		LLFile::remove(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "quick_preferences.xml"));
+		LLFile::remove(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "vr_preferences.xml"));
 		LLFile::remove(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "releases.xml"));
 		LLFile::remove(gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, CRASH_SETTINGS_FILE));
 		
@@ -2722,7 +2723,7 @@ bool LLAppViewer::loadSettingsFromDirectory(const std::string& location_key,
 		{
 			// <FS:Ansariel> Skip quickprefs settings - we don't have a settings group
 			//               for it as it's not a regular settings file
-			if (file.name() == "QuickPreferences")
+			if (file.name() == "QuickPreferences" || file.name() == "VRPreferences")
 			{
 				continue;
 			}
