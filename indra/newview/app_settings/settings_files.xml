@@ -20,6 +20,9 @@
     <file name="QuickPreferences"
           file_name="quick_preferences.xml"
           required="false"/>
+    <file name="VRPreferences"
+          file_name="vr_preferences.xml"
+          required="false"/>
     <!-- </FS:Zi> -->
   </group>
   <group name="User"
