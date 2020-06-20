@@ -28,6 +28,8 @@
 #define sprintf_s(buffer, buffer_size, stringbuffer, ...) (sprintf(buffer, stringbuffer, __VA_ARGS__))
 #endif
 
+#include "llviewerVR.settings.h"
+
 //#include <time.h>
 //#include <sys/time.h>
 llviewerVR::llviewerVR()
@@ -660,8 +662,9 @@ void llviewerVR::vrStartup(bool is_shutdown)
 				
 			}
 			if(gVRInitComplete)
-				m_strHudText.append("\nVR driver ready.\n Press TAB to enter VR mode.");
+				m_strHudText.append("\nVR driver ready.\n Enable HMD Output within VR Preferences.");
 			hud_textp->setString(m_strHudText);
+			LL_WARNS("llviewerVR") << m_strHudText << LL_ENDL;
 			m_strHudText = "";
 			hud_textp->setDoFade(FALSE);
 			hud_textp->setHidden(FALSE);
@@ -695,8 +698,9 @@ bool llviewerVR::ProcessVRCamera()
 					hud_textp->setHidden(FALSE);
 					hud_textp->setMaxLines(-1);
 
-					m_strHudText.append("Press CTRL+TAB to enable or disable VR mode\n Press TAB to remove this message");
+					m_strHudText.append("Use VR Preferences toolbar button to enable or disable VR mode\n");
 					hud_textp->setString(m_strHudText);
+					LL_WARNS("llviewerVR") << m_strHudText << LL_ENDL;
 					m_strHudText = "";
 				}
 		
@@ -838,7 +842,9 @@ bool llviewerVR::ProcessVRCamera()
 			
 			if (m_iMenuIndex)
 			{
-				hud_textp->setString(Settings());
+				auto str = Settings();
+				hud_textp->setString(str);
+				LL_WARNS("llviewerVR") << str << LL_ENDL;
 				LLVector3 end = m_vpos + m_vdir * 1.0f;
 				hud_textp->setPositionAgent(end);
 				hud_textp->setDoFade(FALSE);
@@ -954,6 +960,9 @@ void llviewerVR::vrDisplay()
 				{
 					m_iZoomIndex = 0;
 				}
+
+				static LLCachedControl<bool> cursorZooming(gSavedSettings, "$vrCursorZooming");
+				if (!cursorZooming) m_iZoomIndex = 0;
 
 				///Zoom in
 				if (m_iZoomIndex == 0)
@@ -1115,7 +1124,7 @@ void llviewerVR::ProcessVREvent(const vr::VREvent_t & event)//process vr´events
 		m_bVrEnabled = FALSE;
 		gHMD = NULL;
 		vr::VR_Shutdown();
-		vr::VRSystem()->AcknowledgeQuit_Exiting();
+		if (vr::VRSystem()) vr::VRSystem()->AcknowledgeQuit_Exiting();
 	}
 	break;
 	}
@@ -1265,6 +1274,11 @@ bool llviewerVR::HandleInput()// handles controller input for now  only the stic
 
 void llviewerVR::HandleKeyboard()
 {
+  if (!vr::settings) {
+    vr::settings = new vr::Settings();
+  }
+#if 0
+
 	// Don't attempt to update controllers if input is not available
 	//gCtrlNum = 0;
 
@@ -1326,6 +1340,7 @@ void llviewerVR::HandleKeyboard()
 		{
 			m_strHudText = "";
 			hud_textp->setString(m_strHudText);
+			LL_WARNS("llviewerVR") << m_strHudText << LL_ENDL;
 			hud_textp->setDoFade(FALSE);
 			hud_textp->setHidden(TRUE);
 		}
@@ -1382,11 +1397,12 @@ void llviewerVR::HandleKeyboard()
 		if (m_iMenuIndex > 5)
 			m_iMenuIndex = 0;
 	}
+#endif
 }
 
 void llviewerVR::DrawCursors()
 {
-	if (!m_bVrActive)
+	if (!m_bVrActive || !gHMD)
 		return;
 	gUIProgram.bind();
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -2216,6 +2232,7 @@ void llviewerVR::Debug()
 
 
 	hud_textp->setString(str);
+	LL_WARNS("llviewerVR") << str << LL_ENDL;
 	LLVector3 end = m_vpos + (m_vdir)* 1.0f;
 	hud_textp->setPositionAgent(end);
 	hud_textp->setDoFade(FALSE);

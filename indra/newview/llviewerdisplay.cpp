@@ -299,7 +299,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		gWindowResized = FALSE;
 		return;
 	}
-
+	
 	if (LLPipeline::sRenderDeferred)
 	{ //hack to make sky show up in deferred snapshots
 		for_snapshot = FALSE;
@@ -753,7 +753,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		stop_glerror();
 		display_update_camera();
 		stop_glerror();
-				
+		
 		// *TODO: merge these two methods
 		{
 			LL_RECORD_BLOCK_TIME(FTM_HUD_UPDATE);
