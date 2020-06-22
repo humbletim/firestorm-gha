@@ -212,6 +212,7 @@ LLView *LLUICtrlFactory::createFromXML(LLXMLNodePtr node, LLView* parent, const 
 	const LLWidgetCreatorFunc* funcp = registry.getValue(ctrl_type);
 	if (funcp == NULL)
 	{
+		LL_WARNS() << "createFromXML -- control type not registered: " << ctrl_type << " @ " << filename << LL_ENDL;
 		return NULL;
 	}
 

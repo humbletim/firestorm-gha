@@ -1822,6 +1822,9 @@ class Darwin_x86_64_Manifest(DarwinManifest):
 class LinuxManifest(ViewerManifest):
     build_data_json_platform = 'lnx'
 
+    def is_packaging_viewer(self):
+        # linux requires full app bundle packaging even for debugging.
+        return True
     def construct(self):
         super(LinuxManifest, self).construct()
 

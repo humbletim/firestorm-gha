@@ -263,6 +263,7 @@
     </row>
   </scroll_list>
   <!-- "slider" is a horizontal input widget for numerical data. -->
+  <vr_slider bottom_delta="45" follows="top|left" layout="topleft" min_val="0" max_val="100" initial_value="20" label="VR Slider" name="test_slider" tool_tip="slider" />
   <slider
    bottom_delta="45"
    follows="top|left"
@@ -276,6 +277,7 @@
    width="200" />
   <!-- "spinner" is a numerical input widget with an up and down arrow to
        change the value. -->
+  <vr_spinner height="10" bottom_delta="35" follows="top|left" label="VR Spinner" layout="topleft" label_width="45" name="test_spinner" tool_tip="spinner" />
   <spinner
     height="10"
    bottom_delta="35"

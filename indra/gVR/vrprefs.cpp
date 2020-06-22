@@ -30,7 +30,6 @@
  * $/LicenseInfo$
  */
 
-#include "llviewerprecompiledheaders.h"
 #include "lltrans.h"
 #include "llapp.h"
 #include "vrprefs.h"
@@ -50,9 +49,18 @@
 #include "llmultisliderctrl.h"
 #include "llnotificationsutil.h"
 #include "llsliderctrl.h"
+#include "vrsliderctrl.h"
 #include "llspinctrl.h"
+#include "vrspinctrl.h"
 #include "lltoolbarview.h"
 #include "llviewercontrol.h"
+
+namespace {
+	// needed to avoid VRSpinCtrl not being exported from llui?
+	LLDefaultChildRegistry::Register<VRSpinCtrl> r2("vr_spinner");
+	LLDefaultChildRegistry::Register<VRSliderCtrl> r3("vr_slider");
+	LLDefaultChildRegistry::Register<VRSlider> r4("vr_slider_bar");
+}
 
 #include <boost/foreach.hpp>
 
@@ -181,6 +189,15 @@ BOOL FloaterVRPrefs::postBuild()
 	mControlNameCombo->sortByName();
   // </FS:Zi>
 
+  if (auto setting = gSavedSettings.getControl("$vrStatus")) {
+    if (auto vr_status = getChild<LLUICtrl>("vr_status")) {
+        setting->getSignal()->connect([vr_status](LLControlVariable *control, const LLSD& newValue, const LLSD& oldValue) {
+          vr_status->setValue(newValue);
+        });
+    }
+  }
+
+
 	return LLFloater::postBuild();
 }
 
@@ -285,7 +302,15 @@ void FloaterVRPrefs::updateControl(const std::string& controlName, ControlEntry&
 	typeMap[ControlTypeSlider]		= "option_slider_control";
 	typeMap[ControlTypeRadio]		= "option_radio_control";
 	typeMap[ControlTypeColor3]		= "option_color3_control";
-  typeMap[ControlTypeColor4]		= "option_color4_control";
+	typeMap[ControlTypeColor4]		= "option_color4_control";
+	
+	typeMap[ControlTypeVRCheckbox]		= "option_vr_checkbox_control";
+	typeMap[ControlTypeVRText]		= "option_vr_text_control";
+	typeMap[ControlTypeVRSpinner]		= "option_vr_spinner_control";
+	typeMap[ControlTypeVRSlider]		= "option_vr_slider_control";
+	typeMap[ControlTypeVRRadio]		= "option_vr_radio_control";
+	typeMap[ControlTypeVRButton]		= "option_vr_button_control";
+	typeMap[ControlTypeVRLabel]		= "option_vr_label_control";
 
 	// hide all widget types except for the one the user wants
 	LLUICtrl* widget;
@@ -323,12 +348,12 @@ void FloaterVRPrefs::updateControl(const std::string& controlName, ControlEntry&
 	if (entry.increment == 0.0f)
 	{
 		// finer grained for sliders
-		if (entry.type == ControlTypeSlider)
+		if (entry.type == ControlTypeSlider || entry.type == ControlTypeVRSlider)
 		{
 			entry.increment = (entry.max_value - entry.min_value) / 100.0f;
 		}
 		// a little less for spinners
-		else if (entry.type == ControlTypeSpinner)
+		else if (entry.type == ControlTypeSpinner || entry.type == ControlTypeVRSpinner)
 		{
 			entry.increment = (entry.max_value - entry.min_value) / 20.0f;
 		}
@@ -364,10 +389,25 @@ void FloaterVRPrefs::updateControl(const std::string& controlName, ControlEntry&
 		spinner->setMinValue(entry.min_value);
 		spinner->setMaxValue(entry.max_value);
 		spinner->setIncrement(entry.increment);
+	} else if (entry.type == ControlTypeVRSpinner)
+	{
+		VRSpinCtrl* spinner = (VRSpinCtrl*)widget;
+		spinner->setPrecision(decimals);
+		spinner->setMinValue(entry.min_value);
+		spinner->setMaxValue(entry.max_value);
+		spinner->setIncrement(entry.increment);
 	}
 	else if (entry.type == ControlTypeSlider)
 	{
 		LLSliderCtrl* slider = (LLSliderCtrl*)widget;
+		slider->setPrecision(decimals);
+		slider->setMinValue(entry.min_value);
+		slider->setMaxValue(entry.max_value);
+		slider->setIncrement(entry.increment);
+	}
+	else if (entry.type == ControlTypeVRSlider)
+	{
+		VRSliderCtrl* slider = (VRSliderCtrl*)widget;
 		slider->setPrecision(decimals);
 		slider->setMinValue(entry.min_value);
 		slider->setMaxValue(entry.max_value);
@@ -586,6 +626,8 @@ void FloaterVRPrefs::selectControl(std::string controlName)
 			// enable floating point widgets for these types
 			case ControlTypeSpinner:	// fall through
 			case ControlTypeSlider:		// fall through
+			case ControlTypeVRSpinner:	// fall through
+			case ControlTypeVRSlider:		// fall through
 			{
 				enable_floating_point = TRUE;
 
@@ -794,7 +836,7 @@ void FloaterVRPrefs::onValuesChanged()
 					// increment will be calculated below
 					min_value = 0.0f;
 					max_value = 1.0f;
-					type = ControlTypeRadio;
+					type = ControlTypeVRCheckbox;
 					break;
 				}
 				// LLColor3/4 are just colors
@@ -818,24 +860,24 @@ void FloaterVRPrefs::onValuesChanged()
 				// Fallthrough, S32, U32 and F32 should use sliders
 				case TYPE_F32:
 				{
-					type = ControlTypeSlider;
+					type = ControlTypeVRSlider;
 					break;
 				}
 				// Everything else gets a text widget for now
 				default:
 				{
-					type=ControlTypeText;
+					type=ControlTypeVRText;
 				}
 			}
 
 			// choose a sane increment
 			F32 increment = 0.1f;
-			if (mControlsList[mSelectedControl].type == ControlTypeSlider)
+			if (mControlsList[mSelectedControl].type == ControlTypeSlider || mControlsList[mSelectedControl].type == ControlTypeVRSlider)
 			{
 				// fine grained control for sliders
 				increment = (max_value - min_value) / 100.0f;
 			}
-			else if (mControlsList[mSelectedControl].type == ControlTypeSpinner)
+			else if (mControlsList[mSelectedControl].type == ControlTypeSpinner || mControlsList[mSelectedControl].type == ControlTypeVRSpinner)
 			{
 				// not as fine grained for spinners
 				increment = (max_value - min_value) / 20.0f;

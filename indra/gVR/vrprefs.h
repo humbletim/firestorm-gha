@@ -41,7 +41,10 @@ class LLLineEditor;
 class LLMultiSliderCtrl;
 class LLSlider;
 class LLSliderCtrl;
+class VRSlider;
+class VRSliderCtrl;
 class LLSpinCtrl;
+class VRSpinCtrl;
 class LLTextBox;
 
 class FloaterVRPrefs : public LLFloater, public LLTransientFloater
@@ -72,14 +75,22 @@ public:
 protected:
 	enum ControlType
 	{
-		ControlTypeCheckbox,
-		ControlTypeText,
-		ControlTypeSpinner,
-		ControlTypeSlider,
-		ControlTypeRadio,
-		ControlTypeColor3,
-    ControlTypeColor4,
-    ControlTypeDivider
+		ControlTypeCheckbox = 0,
+		ControlTypeText = 1,
+		ControlTypeSpinner = 2,
+		ControlTypeSlider = 3,
+		ControlTypeRadio = 4,
+		ControlTypeColor3 = 5,
+		ControlTypeColor4 = 6,
+
+		ControlTypeVRCheckbox = 100,
+		ControlTypeVRText = 101,
+		ControlTypeVRSpinner = 102,
+		ControlTypeVRSlider = 103,
+		ControlTypeVRRadio = 104,
+
+		ControlTypeVRLabel= 201,
+		ControlTypeVRButton = 204,
 	};
 
 	struct ControlEntry

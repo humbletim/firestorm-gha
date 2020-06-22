@@ -851,7 +851,9 @@ set(viewer_SOURCE_FILES
     pipeline.cpp
     qtoolalign.cpp
     quickprefs.cpp
-    vrprefs.cpp
+    ../gVR/vrprefs.cpp
+    ../gVR/vrsliderctrl.cpp
+    ../gVR/vrspinctrl.cpp
     rlvactions.cpp
     rlvhandler.cpp
     rlvhelper.cpp
@@ -1621,7 +1623,9 @@ set(viewer_HEADER_FILES
     roles_constants.h
     qtoolalign.h
     quickprefs.h
-    vrprefs.h
+    ../gVR/vrprefs.h
+    ../gVR/vrsliderctrl.h
+    ../gVR/vrspinctrl.h
     sanitycheck.h
     streamtitledisplay.h
     utilitybar.h
@@ -1828,6 +1832,7 @@ if (WINDOWS)
             COMPILE_FLAGS "/Ycllviewerprecompiledheaders.h"
             )
         set(viewer_SOURCE_FILES "${viewer_SOURCE_FILES}" llviewerprecompiledheaders.cpp)
+        set_source_files_properties(../gVR/vrspinctrl.cpp ../gVR/vrsliderctrl.cpp ../gVR/vrprefs.cpp PROPERTIES COMPILE_FLAGS /Y-)
     endif(USE_PRECOMPILED_HEADERS)
 
     # Replace the icons with the appropriate ones for the channel
