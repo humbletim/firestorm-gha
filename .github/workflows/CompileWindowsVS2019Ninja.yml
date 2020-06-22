@@ -84,6 +84,7 @@ jobs:
         echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
         echo ::set-env name=AUTOBUILD_CONFIG_FILE::%cd%\vs2019_autobuild.xml
         echo ::set-env name=BUILD_DIR::build-vc${{ env.AUTOBUILD_VSVER }}-64
+        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep Merge | awk '{ print $2 }' | xargs git rev-parse --short)
         
         echo ::set-env name=NINJA_FLAGS::${{ env.NINJA_FLAGS }} -C build-vc${{ env.AUTOBUILD_VSVER }}-64
         echo github.workspace = ${{ github.workspace }}
@@ -207,4 +208,12 @@ jobs:
       with:
         name: ${{ env.FSCHANNEL }}-artifact
         path: ${{ env.BUILD_DIR }}/newview/Phoenix*_Setup.exe
+
+    - name: cache autobuild xml file
+      run: cp -av '${{ env.AUTOBUILD_CONFIG_FILE }}' '${{ env.AUTOBUILD_INSTALLABLE_CACHE }}/'
+    - name: Upload Autobuild Dependency Set
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.FSCHANNEL }}-autobuild-deps
+        path: ${{ env.AUTOBUILD_INSTALLABLE_CACHE }}
   
