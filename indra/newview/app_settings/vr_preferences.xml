@@ -2,7 +2,7 @@
 <vrprefs>
     <entries
      control_name="$vrEnabled"
-     control_type="4"
+     control_type="100"
      increment="1"
      integer="0"
      label="OpenVR"
@@ -10,7 +10,7 @@
      min="0" />
     <entries
      control_name="$vrActive"
-     control_type="4"
+     control_type="100"
      increment="1"
      integer="0"
      label="HMD Output"
@@ -18,7 +18,7 @@
      min="0" />
     <entries
      control_name="$vrCamRotOffset"
-     control_type="2"
+     control_type="102"
      increment="5.0"
      integer="0"
      label="&lt;&lt; HMD Offset &gt;&gt;"
@@ -26,7 +26,7 @@
      min="-360.0" />
     <entries
      control_name="$vrEyeDistance"
-     control_type="2"
+     control_type="102"
      increment="1.0"
      integer="0"
      label="EyeDistance"
@@ -34,7 +34,7 @@
      min="0" />
     <entries
      control_name="$vrFieldOfView"
-     control_type="2"
+     control_type="102"
      increment="0.5"
      integer="0"
      label="Field Of View"
@@ -42,7 +42,7 @@
      min="50" />
     <entries
      control_name="$vrFocusDistance"
-     control_type="2"
+     control_type="102"
      increment="0.25"
      integer="0"
      label="Focus Distance"
@@ -50,7 +50,7 @@
      min="0.5" />
     <entries
      control_name="$vrTextureShift"
-     control_type="2"
+     control_type="102"
      increment="0.5"
      integer="0"
      label="Texture Shift"
@@ -58,7 +58,7 @@
      min="-100.0" />
     <entries
      control_name="$vrTextureZoom"
-     control_type="2"
+     control_type="102"
      increment="1.0"
      integer="0"
      label="Texture Zoom"
@@ -66,7 +66,7 @@
      min="-200.0" />
     <entries
      control_name="$vr_right_toolbar_offset"
-     control_type="2"
+     control_type="102"
      increment="0.01"
      integer="0"
      label="Toolbar Offset"
@@ -74,7 +74,7 @@
      min="0" />
     <entries
      control_name="$vrCursorZooming"
-     control_type="4"
+     control_type="100"
      increment="1"
      integer="0"
      label="Follow Cursor"
@@ -82,7 +82,7 @@
      min="0" />
     <entries
      control_name="EnableMouselook"
-     control_type="4"
+     control_type="100"
      increment="1"
      integer="0"
      label="EnableMouselook"
@@ -90,7 +90,7 @@
      min="0" />
     <entries
      control_name="ShowHoverTips"
-     control_type="4"
+     control_type="100"
      increment="1"
      integer="0"
      label="ShowHoverTips"
@@ -98,7 +98,7 @@
      min="0" />
     <entries
      control_name="AgentPause"
-     control_type="4"
+     control_type="100"
      increment="1"
      integer="0"
      label="AgentPause"
@@ -106,7 +106,7 @@
      min="0" />
     <entries
      control_name="RenderFarClip"
-     control_type="3"
+     control_type="103"
      increment="1"
      integer="1"
      label="Max Distance"
@@ -114,7 +114,7 @@
      min="32" />
     <entries
      control_name="IndirectMaxNonImpostors"
-     control_type="3"
+     control_type="103"
      increment="1"
      integer="1"
      label="Max Avatars"
@@ -122,7 +122,7 @@
      min="1" />
     <entries
      control_name="$vrCopySettingsToClipboard"
-     control_type="4"
+     control_type="204"
      increment="0.1"
      integer="0"
      label="Copy Settings"

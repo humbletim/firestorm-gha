@@ -59,6 +59,12 @@ namespace vr {
       }
     }
 
+    void _deferred(std::function<void()> func) {
+      LLTempBoundListener* mBoundListener = new LLTempBoundListener();
+      *mBoundListener = LLEventPumps::instance().obtain("mainloop").listen(LLEventPump::ANONYMOUS,
+        [mBoundListener, func](const LLSD&) { delete mBoundListener; func(); return false; }
+      );  
+    }
     Settings() {
         // OpenVR toggle
         addSetting("$vrEnabled", [this](LLSD newValue) {
@@ -67,7 +73,10 @@ namespace vr {
           if (!newValue.asBoolean()) {
             if (gVR.m_bVrActive) {
               LL_WARNS("vr::Settings") << "!gVR.m_bVrEnabled && gVR.m_bVrActive -- auto-disabling m_bVrActive" << LL_ENDL;
-              if (settings["$vrActive"]) settings["$vrActive"]->setValue(false);
+              _deferred([this]{
+                  LL_WARNS("vr::Settings") << "///!gVR.m_bVrEnabled && gVR.m_bVrActive -- auto-disabling m_bVrActive" << LL_ENDL;
+                  settings["$vrActive"]->setValue(false);
+              });
             }
             //   // TODO: if disabling VR maybe also save the values to the legacy .ini file?
             //   gVR.INISaveRead(true);
@@ -92,7 +101,11 @@ namespace vr {
           };
           if (newValue.asBoolean()) {
             if (!gVR.m_bVrEnabled || !gVR.gHMD) {
-              if (settings["$vrActive"]) settings["$vrActive"]->setValue(false); // prevent activating until VR is enabled
+              _deferred([this]{
+                LL_WARNS("vr::Settings") << "///auto-disabling m_bVrActive" << LL_ENDL;
+                settings["$vrActive"]->setValue(false);
+                gSavedSettings.setString("$vrStatus", !gVR.m_bVrEnabled ? "(enable vr first)" : "(!gHMD)");
+              });
               hide_hud();
               return;
             }
@@ -104,6 +117,7 @@ namespace vr {
             if (gVR.m_fFOV > 20) {
               LLViewerCamera::getInstance()->setDefaultFOV(gVR.m_fFOV * DEG_TO_RAD);
             }
+            gSavedSettings.setString("$vrStatus", llformat("HMD output [%ux%u]", gVR.m_nRenderWidth, gVR.m_nRenderHeight));
           } else {
             LL_WARNS("vr::Settings") << "!gHMD " << gVR.hud_textp << " " << gVR.m_strHudText << LL_ENDL;
             hide_hud();
@@ -125,11 +139,15 @@ namespace vr {
 
       addSetting("$vrCopySettingsToClipboard", [this](LLSD newValue) {
         if (newValue.asBoolean()) {
-          if (settings["$vrCopySettingsToClipboard"]) settings["$vrCopySettingsToClipboard"]->setValue(false); // hack so radio button can be re-used as button
+          _deferred([this]{
+            LL_WARNS("vr::Settings") << "///auto-disabling vrCopySettingsToClipboard" << LL_ENDL;
+            settings["$vrCopySettingsToClipboard"]->setValue(false);
+          });
           auto json = Json::StyledWriter().write(LlsdToJson(asLLSD()));
           LL_WARNS("vr::Settings") << json << LL_ENDL;
+          //gSavedSettings.setString("$vrStatus", json);
           LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(json));
-          LLNotificationsUtil::add("ControlNameCopiedToClipboard");
+          LLNotificationsUtil::add("GenericAlertOK", LLSD().with("MESSAGE", "(copied to clipboard)\n"+json));
         }
       });
 
@@ -143,11 +161,11 @@ namespace vr {
               LL_WARNS("vr::Settings") << "importing legacy vrsettings.ini values..." << settings["$vrConfigVersion"]->getValue().asReal() << " < " << stat_data.st_mtime << LL_ENDL;
               settings["$vrConfigVersion"]->setValue((LLSD::Real)stat_data.st_mtime);
               gVR.INISaveRead(false);
-              if (settings["$vrEyeDistance"]) settings["$vrEyeDistance"]->setValue(gVR.m_fEyeDistance);
-              if (settings["$vrFocusDistance"]) settings["$vrFocusDistance"]->setValue(gVR.m_fFocusDistance);
-              if (settings["$vrTextureShift"]) settings["$vrTextureShift"]->setValue(gVR.m_fTextureShift);
-              if (settings["$vrTextureZoom"]) settings["$vrTextureZoom"]->setValue(gVR.m_fTextureZoom);
-              if (settings["$vrFieldOfView"]) settings["$vrFieldOfView"]->setValue(gVR.m_fFOV);
+              gSavedSettings.setF32("$vrEyeDistance", gVR.m_fEyeDistance);
+              gSavedSettings.setF32("$vrFocusDistance", gVR.m_fFocusDistance);
+              gSavedSettings.setF32("$vrTextureShift", gVR.m_fTextureShift);
+              gSavedSettings.setF32("$vrTextureZoom", gVR.m_fTextureZoom);
+              gSavedSettings.setF32("$vrFieldOfView", gVR.m_fFOV);
             }
         }
       }

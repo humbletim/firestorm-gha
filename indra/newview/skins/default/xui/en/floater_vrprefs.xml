@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<floater positioning="centered" legacy_header_height="18" can_resize="false" can_close="true" height="161" width="320" layout="topleft" name="vrprefs" save_rect="true" save_visibility="true" single_instance="true" title="VR Preferences">
-    <panel name="vrprefs" left="0" top="16" width="320" height="185" follows="all" layout="topleft">
-        <layout_stack layout="topleft" follows="all" name="options_stack" left="0" top="4" width="320" height="0" orientation="vertical" border_size="0">
+<floater positioning="centered" legacy_header_height="18" can_resize="false" can_close="true" height="161" width="260" layout="topleft" name="vrprefs" save_rect="true" save_visibility="true" single_instance="true" title="VR Preferences">
+    <panel name="vrprefs" left="0" top="16" width="260" height="185" follows="all" layout="topleft">
+        <layout_stack layout="topleft" follows="all" name="options_stack" left="0" top="4" width="260" height="0" orientation="vertical" border_size="0">
             <!-- <FS:Zi> dummy panel to make XUI validation happy -->
             <layout_panel layout="topleft" follows="all" name="dummy_options_panel" visible="false" height="20" />
         </layout_stack>
+    </panel>
+    <panel layout="topleft" follows="left|right|bottom" name="edit_overlay_panel" invisibility_control="VRPrefsEditMode" left="1" top="-138" right="-1" height="143">
+      <view_border 
+        layout="topleft"
+        follows="left|right|bottom"
+         bevel_style="in" 
+         right="-1"
+         top="1"
+         bottom="110"
+         left="1"/>
+      <text_editor show_context_menu="true" name="vr_status" left="4" top="4" text_color="White" bg_visible="false" width="250" height="100" follows="top|left|top" font="SansSerifSmall">
+     </text_editor>
     </panel>
     <panel layout="topleft" follows="left|right|bottom" name="edit_overlay_panel" visibility_control="VRPrefsEditMode" left="1" top="-138" right="-1" height="143">
         <button layout="topleft" follows="left|top" name="move_up_button" tool_tip="Move selected control one slot up" enabled_control="VRPrefsSelectedControl" image_overlay="Arrow_Up" top="8" left="4" width="20" height="23" />
@@ -24,6 +36,13 @@
             <combo_box.item type="string" label="Radio" name="Radio" value="4" />
             <combo_box.item type="string" label="Color 3" name="Color 3" value="5" />
             <combo_box.item type="string" label="Color 4" name="Color 4" value="6" />
+            <combo_box.item type="string" label="VR Checkbox" name="VR Checkbox" value="100" />
+            <combo_box.item type="string" label="VR Text" name="VR Text" value="101" />
+            <combo_box.item type="string" label="VR Spinner" name="VR Spinner" value="102" />
+            <combo_box.item type="string" label="VR Slider" name="VR Slider" value="103" />
+            <combo_box.item type="string" label="VR Radio" name="VR Radio" value="104" />
+            <combo_box.item type="string" label="VR Label" name="VR Label" value="201" />
+            <combo_box.item type="string" label="VR Button" name="VR Button" value="204" />
         </combo_box>
         <!-- enable/disable done in code depending on the type of control chosen -->
         <check_box layout="topleft" enabled="false" follows="left|top" name="control_integer_checkbox" tool_tip="Activate this checkbox if your setting is an integer value, i.e. it has only whole numbers" enabled_control="VRPrefsSelectedControl" left_pad="4" height="20" top_delta="0" width="16" label="Integer" />

@@ -577,6 +577,7 @@ void llviewerVR::vrStartup(bool is_shutdown)
 	hud_textp->setString(str);
 	hud_textp->setHidden(FALSE);*/
 
+	if (!m_bVrEnabled) gSavedSettings.setString("$vrStatus", "(vr disabled)");
 
 	if (m_bVrEnabled && !is_shutdown)
 	{
@@ -636,11 +637,11 @@ void llviewerVR::vrStartup(bool is_shutdown)
 				m_strHudText.append(buf);
 				gHMD = NULL;
 				vr::VR_Shutdown();
-
 			}
 			if (gHMD != NULL && !gVRInitComplete)
 			{
 				gVRInitComplete = TRUE;
+				m_strHudText.append("\nHMD: " + GetTrackedDeviceString(gHMD, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_ModelNumber_String));
 				vr::VRCompositor()->SetTrackingSpace(vr::TrackingUniverseSeated);
 				gHMD->GetRecommendedRenderTargetSize(&m_nRenderWidth, &m_nRenderHeight);
 				
@@ -665,6 +666,7 @@ void llviewerVR::vrStartup(bool is_shutdown)
 				m_strHudText.append("\nVR driver ready.\n Enable HMD Output within VR Preferences.");
 			hud_textp->setString(m_strHudText);
 			LL_WARNS("llviewerVR") << m_strHudText << LL_ENDL;
+			gSavedSettings.setString("$vrStatus", m_strHudText);
 			m_strHudText = "";
 			hud_textp->setDoFade(FALSE);
 			hud_textp->setHidden(FALSE);
@@ -676,6 +678,7 @@ void llviewerVR::vrStartup(bool is_shutdown)
 		vr::VR_Shutdown();
 		gHMD = NULL;
 		gVRInitComplete = FALSE;
+		gSavedSettings.setString("$vrStatus", "(vr shutdown)");
 		//m_tTimer1.stop();
 		//m_tTimer1.cleanupClass();
 	}
@@ -701,6 +704,7 @@ bool llviewerVR::ProcessVRCamera()
 					m_strHudText.append("Use VR Preferences toolbar button to enable or disable VR mode\n");
 					hud_textp->setString(m_strHudText);
 					LL_WARNS("llviewerVR") << m_strHudText << LL_ENDL;
+					gSavedSettings.setString("$vrStatus", m_strHudText);
 					m_strHudText = "";
 				}
 		
@@ -845,6 +849,7 @@ bool llviewerVR::ProcessVRCamera()
 				auto str = Settings();
 				hud_textp->setString(str);
 				LL_WARNS("llviewerVR") << str << LL_ENDL;
+				gSavedSettings.setString("$vrStatus", str);
 				LLVector3 end = m_vpos + m_vdir * 1.0f;
 				hud_textp->setPositionAgent(end);
 				hud_textp->setDoFade(FALSE);
@@ -1125,6 +1130,7 @@ void llviewerVR::ProcessVREvent(const vr::VREvent_t & event)//process vr´events
 		gHMD = NULL;
 		vr::VR_Shutdown();
 		if (vr::VRSystem()) vr::VRSystem()->AcknowledgeQuit_Exiting();
+		gSavedSettings.setString("$vrStatus", "vr::VREvent_Quit");
 	}
 	break;
 	}
@@ -2233,6 +2239,7 @@ void llviewerVR::Debug()
 
 	hud_textp->setString(str);
 	LL_WARNS("llviewerVR") << str << LL_ENDL;
+	gSavedSettings.setString("$vrStatus", str);
 	LLVector3 end = m_vpos + (m_vdir)* 1.0f;
 	hud_textp->setPositionAgent(end);
 	hud_textp->setDoFade(FALSE);
