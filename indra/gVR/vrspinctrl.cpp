@@ -108,7 +108,7 @@ VRSpinCtrl::VRSpinCtrl(const VRSpinCtrl::Params& p)
 		btn_left += label_rect.mRight + spinctrl_spacing;
 	}
 
-	S32 btn_right = btn_left + spinctrl_btn_width;
+	//S32 btn_right = btn_left + spinctrl_btn_width;
 	
 	// Spin buttons
 	LLButton::Params up_button_params(p.up_button);
