@@ -45,7 +45,7 @@ jobs:
         minorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 2`
         patchVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 3`
         echo ::set-env name=VIEWER_VERSION_STR::${majorVer}.${minorVer}.${patchVer}.${VIEWER_VERSION_REVISION}
-        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep Merge | awk '{ print $2 }' | xargs git rev-parse --short)
+        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short)
 
     - name: fetch git-restore-mtime
       shell: powershell
