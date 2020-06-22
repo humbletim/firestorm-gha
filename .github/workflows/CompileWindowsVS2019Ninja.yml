@@ -38,6 +38,15 @@ jobs:
         # include branch tag histories (for timesync)
         fetch-depth: 0
 
+    - name: Set VIEWER_VERSION_GITHASH
+      shell: bash
+      run: |
+        majorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 1`
+        minorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 2`
+        patchVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 3`
+        echo ::set-env name=VIEWER_VERSION_STR::${majorVer}.${minorVer}.${patchVer}.${VIEWER_VERSION_REVISION}
+        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep Merge | awk '{ print $2 }' | xargs git rev-parse --short)
+
     - name: fetch git-restore-mtime
       shell: powershell
       run: wget -O git-restore-mtime https://raw.githubusercontent.com/MestreLion/git-tools/master/git-restore-mtime
@@ -207,4 +216,12 @@ jobs:
       with:
         name: ${{ env.FSCHANNEL }}-artifact
         path: ${{ env.BUILD_DIR }}/newview/Phoenix*_Setup.exe
+
+    - name: cache autobuild xml file
+      run: cp -av '${{ env.AUTOBUILD_CONFIG_FILE }}' '${{ env.AUTOBUILD_INSTALLABLE_CACHE }}/'
+    - name: Upload Autobuild Dependency Set
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.FSCHANNEL }}-autobuild-deps
+        path: ${{ env.AUTOBUILD_INSTALLABLE_CACHE }}
   

@@ -1848,9 +1848,41 @@ if (WINDOWS)
             PROPERTIES
             GENERATED TRUE
             COMPILE_FLAGS "/Ycllviewerprecompiledheaders.h"
-            )
-        set(viewer_SOURCE_FILES "${viewer_SOURCE_FILES}" llviewerprecompiledheaders.cpp)
         set_source_files_properties(../gVR/vrspinctrl.cpp ../gVR/vrsliderctrl.cpp ../gVR/vrprefs.cpp PROPERTIES COMPILE_FLAGS /Y-)
+        )
+        add_custom_command(
+            OUTPUT pch.cpp
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/llviewerprecompiledheaders.cpp pch.cpp
+            DEPENDS llviewerprecompiledheaders.cpp
+            COMMENT "generating pch.cpp"
+        )
+        add_library(pchlib STATIC pch.cpp)
+        add_custom_target(xprecompiled ALL DEPENDS pchlib)
+        
+add_custom_command(OUTPUT pch.stamp
+  COMMAND ${CMAKE_COMMAND} -E remove ../llviewerprecompiledheaders.pch
+  COMMAND ${CMAKE_COMMAND} -E remove pch.cpp
+  COMMAND ${CMAKE_COMMAND} -E touch pch.stamp
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMENT "Creating pch.stamp"
+  VERBATIM)
+
+  add_custom_command(OUTPUT ../llviewerprecompiledheaders.pch
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMENT "generated .pch"
+    DEPENDS xprecompiled
+    VERBATIM)
+
+add_custom_target(xprecompiled_stamp DEPENDS pch.stamp)
+
+        # add_custom_command(
+        #   COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj
+        #   DEPENDS $<TARGET_OBJECTS:xprecompiled>
+        # )
+        #add_dependencies(xxprecompiled ${CMAKE_CURRENT_BINARY_DIR}/../llviewerprecompiledheaders.pch xprecompiled)
+        # set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/../llviewerprecompiledheaders.pch PROPERTIES GENERATED TRUE)
+        # set_source_files_properties(${viewer_SOURCE_FILES} PROPERTIES OBJECT_DEPENDS xprecompiled)
+        #set(viewer_SOURCE_FILES "${viewer_SOURCE_FILES}" llviewerprecompiledheaders.cpp)
     endif(USE_PRECOMPILED_HEADERS)
 
     # Replace the icons with the appropriate ones for the channel
