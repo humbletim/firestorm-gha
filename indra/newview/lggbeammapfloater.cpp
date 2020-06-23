@@ -23,10 +23,11 @@
 #include "llviewercontrol.h"
 #include "llviewermenufile.h"
 
+namespace lggbeammapfloater {
 const F32 CONTEXT_CONE_IN_ALPHA = 0.0f;
 const F32 CONTEXT_CONE_OUT_ALPHA = 1.f;
 const F32 CONTEXT_FADE_TIME = 0.08f;
-
+}
 
 void lggBeamMapFloater::clearPoints()
 {
@@ -34,7 +35,7 @@ void lggBeamMapFloater::clearPoints()
 }
 
 void lggBeamMapFloater::draw()
-{
+{using namespace lggbeammapfloater;
 	LLRect swatch_rect;
 	LLButton* createButton = mFSPanel->getChild<LLButton>("custom_beam_btn");
 

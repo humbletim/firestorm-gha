@@ -29,99 +29,102 @@ include_directories(
 #     ${LLCOMMON_LIBRARIES})
 
 set(llcommon_SOURCE_FILES
-    indra_constants.cpp
-    llallocator.cpp
-    llallocator_heap_profile.cpp
-    llapp.cpp
-    llapr.cpp
-    llassettype.cpp
-    llatomic.cpp
-    llbase32.cpp
-    llbase64.cpp
-    llbitpack.cpp
-    llcallbacklist.cpp
-    llcallstack.cpp
-    llcleanup.cpp
-    llcommon.cpp
-    llcommonutils.cpp
-    llcoro_get_id.cpp
-    llcoros.cpp
-    llcrc.cpp
-    llcriticaldamp.cpp
-    lldate.cpp
-    lldeadmantimer.cpp
-    lldependencies.cpp
-    lldictionary.cpp
-    llerror.cpp
-    llerrorthread.cpp
-    llevent.cpp
-    lleventapi.cpp
-    lleventcoro.cpp
-    lleventdispatcher.cpp
-    lleventfilter.cpp
-    llevents.cpp
-    lleventtimer.cpp
-    llexception.cpp
-    llfasttimer.cpp
-    llfile.cpp
-    llfindlocale.cpp
-    llfixedbuffer.cpp
-    llformat.cpp
-    llframetimer.cpp
-    llheartbeat.cpp
-    llheteromap.cpp
-    llinitparam.cpp
-    llinitdestroyclass.cpp
-    llinstancetracker.cpp
-    llleap.cpp
-    llleaplistener.cpp
-    llliveappconfig.cpp
-    lllivefile.cpp
-    llmd5.cpp
-    llmemory.cpp
-    llmemorystream.cpp
-    llmetrics.cpp
-    llmetricperformancetester.cpp
-    llmortician.cpp
-    llmutex.cpp
-    llptrto.cpp 
-    llpredicate.cpp
-    llprocess.cpp
-    llprocessor.cpp
-    llprocinfo.cpp
-    llqueuedthread.cpp
-    llrand.cpp
-    llrefcount.cpp
-    llrun.cpp
-    llsd.cpp
-    llsdjson.cpp
-    llsdparam.cpp
-    llsdserialize.cpp
-    llsdserialize_xml.cpp
-    llsdutil.cpp
-    llsingleton.cpp
-    llstacktrace.cpp
-    llstreamqueue.cpp
-    llstreamtools.cpp
-    llstring.cpp
-    llstringtable.cpp
-    llsys.cpp
-    llthread.cpp
-    llthreadlocalstorage.cpp
-    llthreadsafequeue.cpp
-    lltimer.cpp
-    lltrace.cpp
-    lltraceaccumulators.cpp
-    lltracerecording.cpp
-    lltracethreadrecorder.cpp
-    lluri.cpp
-    lluriparser.cpp
-    lluuid.cpp
-    llworkerthread.cpp
-    timing.cpp
-    u64.cpp
-    StackWalker.cpp
+    # indra_constants.cpp
+    # llallocator.cpp
+    # llallocator_heap_profile.cpp
+    # llapp.cpp
+    # llapr.cpp
+    # llassettype.cpp
+    # llatomic.cpp
+    # llbase32.cpp
+    # llbase64.cpp
+    # llbitpack.cpp
+    # llcallbacklist.cpp
+    # llcallstack.cpp
+    # llcleanup.cpp
+    # llcommon.cpp
+    # llcommonutils.cpp
+    # llcoro_get_id.cpp
+    # llcoros.cpp
+    # llcrc.cpp
+    # llcriticaldamp.cpp
+    # lldate.cpp
+    # lldeadmantimer.cpp
+    # lldependencies.cpp
+    # lldictionary.cpp
+    # llerror.cpp
+    # llerrorthread.cpp
+    # llevent.cpp
+    # lleventapi.cpp
+    # lleventcoro.cpp
+    # lleventdispatcher.cpp
+    # lleventfilter.cpp
+    # llevents.cpp
+    # lleventtimer.cpp
+    # llexception.cpp
+    # llfasttimer.cpp
+    # llfile.cpp
+    # llfindlocale.cpp
+    # llfixedbuffer.cpp
+    # llformat.cpp
+    # llframetimer.cpp
+    # llheartbeat.cpp
+    # llheteromap.cpp
+    # llinitparam.cpp
+    # llinitdestroyclass.cpp
+    # llinstancetracker.cpp
+    # llleap.cpp
+    # llleaplistener.cpp
+    # llliveappconfig.cpp
+    # lllivefile.cpp
+    # llmd5.cpp
+    # llmemory.cpp
+    # llmemorystream.cpp
+    # llmetrics.cpp
+    # llmetricperformancetester.cpp
+    # llmortician.cpp
+    # llmutex.cpp
+    # llptrto.cpp 
+    # llpredicate.cpp
+    # llprocess.cpp
+    # llprocessor.cpp
+    # llprocinfo.cpp
+    # llqueuedthread.cpp
+    # llrand.cpp
+    # llrefcount.cpp
+    # llrun.cpp
+    # llsd.cpp
+    # llsdjson.cpp
+    # llsdparam.cpp
+    # llsdserialize.cpp
+    # llsdserialize_xml.cpp
+    # llsdutil.cpp
+    # llsingleton.cpp
+    # llstacktrace.cpp
+    # llstreamqueue.cpp
+    # llstreamtools.cpp
+    # llstring.cpp
+    # llstringtable.cpp
+    # llsys.cpp
+    # llthread.cpp
+    # llthreadlocalstorage.cpp
+    # llthreadsafequeue.cpp
+    # lltimer.cpp
+    # lltrace.cpp
+    # lltraceaccumulators.cpp
+    # lltracerecording.cpp
+    # lltracethreadrecorder.cpp
+    # lluri.cpp
+    # lluriparser.cpp
+    # lluuid.cpp
+    # llworkerthread.cpp
+    # timing.cpp
+    # u64.cpp
+    # StackWalker.cpp
+    llcommon_star.cpp
     )
+
+  set_source_files_properties(llcommon_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
     
 set(llcommon_HEADER_FILES
     CMakeLists.txt

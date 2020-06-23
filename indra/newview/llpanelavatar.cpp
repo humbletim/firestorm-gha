@@ -117,7 +117,9 @@ BOOL LLDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 	return FALSE;
 }
 
+namespace llpanelavatar {
 static LLDefaultChildRegistry::Register<LLDropTarget> r("drop_target");
+}
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

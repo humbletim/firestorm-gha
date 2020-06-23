@@ -35,9 +35,11 @@ S32 convertHueToX(F32 place)
 }
 
 
+namespace lggbeamcolormapfloater {
 const F32 CONTEXT_CONE_IN_ALPHA = 0.0f;
 const F32 CONTEXT_CONE_OUT_ALPHA = 1.f;
 const F32 CONTEXT_FADE_TIME = 0.08f;
+}
 
 // Correction factors needed after porting from Phoenix
 const S32 CORRECTION_X = 0;
@@ -49,7 +51,7 @@ void lggBeamColorMapFloater::onClickSlider()
 }
 
 void lggBeamColorMapFloater::draw()
-{
+{using namespace lggbeamcolormapfloater;
 	static const std::string start_hue_label = getString("start_hue");
 	static const std::string end_hue_label = getString("end_hue");
 

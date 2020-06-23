@@ -1486,7 +1486,7 @@ void LLVOAvatar::calculateSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
 	//stretch bounding box by static attachments
     if (box_detail >= 2)
     {
-        float max_attachment_span = get_default_max_prim_scale() * 5.0f;
+        float max_attachment_span = llmanipscale::get_default_max_prim_scale() * 5.0f;
 	
 	for (attachment_map_t::iterator iter = mAttachmentPoints.begin(); 
 		 iter != mAttachmentPoints.end();

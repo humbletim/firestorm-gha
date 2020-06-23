@@ -43,7 +43,6 @@
 
 using namespace std;
 
-static std::string empty;
 
 // Many of the methods below use OS-level functions that mess with errno. Wrap
 // variants of strerror() to report errors.
@@ -133,6 +132,7 @@ int warnif(const std::string& desc, const std::string& filename, int rc, int acc
 		// process has the file open. Try to find out.
 		if (errn == EACCES)         // *not* EPERM
 		{
+static std::string empty;
 			// Only do any of this stuff (before LL_ENDL) if it will be logged.
 			LL_DEBUGS("LLFile") << empty;
 			// would be nice to use LLDir for this, but dependency goes the

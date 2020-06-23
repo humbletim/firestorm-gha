@@ -37,107 +37,110 @@ include_directories(SYSTEM
 set(llui_SOURCE_FILES
     fsregistrarutils.cpp
 
-    llaccordionctrl.cpp
-    llaccordionctrltab.cpp
-    llbadge.cpp
-    llbadgeholder.cpp
-    llbadgeowner.cpp
-    llbutton.cpp
-    llchatentry.cpp
-    llcheckboxctrl.cpp
-    llclipboard.cpp
-    llcombobox.cpp
-    llcommandmanager.cpp
-    llconsole.cpp
-    llcontainerview.cpp
-    llctrlselectioninterface.cpp
-    lldockablefloater.cpp
-    lldockcontrol.cpp
-    lldraghandle.cpp
-    lleditmenuhandler.cpp
-    llf32uictrl.cpp
-    llfiltereditor.cpp
-    llflashtimer.cpp
-    llflatlistview.cpp
-    llfloater.cpp
-    llfloaterreg.cpp
-    llfloaterreglistener.cpp
+    # llaccordionctrl.cpp
+    # llaccordionctrltab.cpp
+    # llbadge.cpp
+    # llbadgeholder.cpp
+    # llbadgeowner.cpp
+    # llbutton.cpp
+    # llchatentry.cpp
+    # llcheckboxctrl.cpp
+    # llclipboard.cpp
+    # llcombobox.cpp
+    # llcommandmanager.cpp
+    # llconsole.cpp
+    # llcontainerview.cpp
+    # llctrlselectioninterface.cpp
+    # lldockablefloater.cpp
+    # lldockcontrol.cpp
+    # lldraghandle.cpp
+    # lleditmenuhandler.cpp
+    # llf32uictrl.cpp
+    # llfiltereditor.cpp
+    # llflashtimer.cpp
+    # llflatlistview.cpp
+    # llfloater.cpp
+    # llfloaterreg.cpp
+    # llfloaterreglistener.cpp
     llflyoutbutton.cpp 
-    llfocusmgr.cpp
-    llfolderview.cpp
-    llfolderviewitem.cpp
-    llfolderviewmodel.cpp
-    lliconctrl.cpp
-    llkeywords.cpp
-    lllayoutstack.cpp
-    lllineeditor.cpp
-    llloadingindicator.cpp
-    lllocalcliprect.cpp
-    llmenubutton.cpp
-    llmenugl.cpp
-    llmodaldialog.cpp
+    # llfocusmgr.cpp
+    # llfolderview.cpp
+    # llfolderviewitem.cpp
+    # llfolderviewmodel.cpp
+    # lliconctrl.cpp
+    # llkeywords.cpp
+    # lllayoutstack.cpp
+    # lllineeditor.cpp
+    # llloadingindicator.cpp
+    # lllocalcliprect.cpp
+    # llmenubutton.cpp
+    # llmenugl.cpp
+    # llmodaldialog.cpp
     llmultifloater.cpp 
-    llmultislider.cpp
-    llmultisliderctrl.cpp
-    llnotifications.cpp
-    llnotificationslistener.cpp
-    llnotificationsutil.cpp
-    llpanel.cpp
-    llprogressbar.cpp
-    llradiogroup.cpp
-    llresizebar.cpp
-    llresizehandle.cpp
-    llresmgr.cpp
-    llrngwriter.cpp
-    llscrollbar.cpp
-    llscrollcontainer.cpp
-    llscrollingpanellist.cpp
-    llscrolllistcell.cpp
-    llscrolllistcolumn.cpp
-    llscrolllistctrl.cpp
-    llscrolllistitem.cpp
-    llsearcheditor.cpp
-    llslider.cpp
-    llsliderctrl.cpp
-    llspellcheck.cpp
-    llspinctrl.cpp
-    llstatbar.cpp
-    llstatgraph.cpp
-    llstatview.cpp
-    llstyle.cpp
-    lltabcontainer.cpp
-    lltextbase.cpp
-    lltextbox.cpp
-    lltexteditor.cpp
-    lltextparser.cpp
-    lltextutil.cpp
-    lltextvalidate.cpp
-    lltimectrl.cpp
-    lltrans.cpp
-    lltransutil.cpp
-    lltoggleablemenu.cpp
-    lltoolbar.cpp
-    lltooltip.cpp
-    llui.cpp
-    lluicolor.cpp
-    lluicolortable.cpp
-    lluictrl.cpp
-    lluictrlfactory.cpp
-    lluistring.cpp
-    llundo.cpp
-    llurlaction.cpp
-    llurlentry.cpp
-    llurlmatch.cpp
-    llurlregistry.cpp
-    llviewborder.cpp
-    llviewinject.cpp
-    llviewmodel.cpp
-    llview.cpp
-    llviewquery.cpp
-    llviewereventrecorder.cpp
-    llwindowshade.cpp
-    llxuiparser.cpp
+    # llmultislider.cpp
+    # llmultisliderctrl.cpp
+    # llnotifications.cpp
+    # llnotificationslistener.cpp
+    # llnotificationsutil.cpp
+    # llpanel.cpp
+    # llprogressbar.cpp
+    # llradiogroup.cpp
+    # llresizebar.cpp
+    # llresizehandle.cpp
+    # llresmgr.cpp
+    # llrngwriter.cpp
+    # llscrollbar.cpp
+    # llscrollcontainer.cpp
+    # llscrollingpanellist.cpp
+    # llscrolllistcell.cpp
+    # llscrolllistcolumn.cpp
+    # llscrolllistctrl.cpp
+    # llscrolllistitem.cpp
+    # llsearcheditor.cpp
+    # llslider.cpp
+    # llsliderctrl.cpp
+    # llspellcheck.cpp
+    # llspinctrl.cpp
+    # llstatbar.cpp
+    # llstatgraph.cpp
+    # llstatview.cpp
+    # llstyle.cpp
+    # lltabcontainer.cpp
+    # lltextbase.cpp
+    # lltextbox.cpp
+    # lltexteditor.cpp
+    # lltextparser.cpp
+    # lltextutil.cpp
+    # lltextvalidate.cpp
+    # lltimectrl.cpp
+    # lltrans.cpp
+    # lltransutil.cpp
+    # lltoggleablemenu.cpp
+    # lltoolbar.cpp
+    # lltooltip.cpp
+    # llui.cpp
+    # lluicolor.cpp
+    # lluicolortable.cpp
+    # lluictrl.cpp
+    # lluictrlfactory.cpp
+    # lluistring.cpp
+    # llundo.cpp
+    # llurlaction.cpp
+    # llurlentry.cpp
+    # llurlmatch.cpp
+    # llurlregistry.cpp
+    # llviewborder.cpp
+    # llviewinject.cpp
+    # llviewmodel.cpp
+    # llview.cpp
+    # llviewquery.cpp
+    # llviewereventrecorder.cpp
+    # llwindowshade.cpp
+    # llxuiparser.cpp
+    llui_star.cpp
     )
+
+  set_source_files_properties(llui_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
     
 set(llui_HEADER_FILES
     CMakeLists.txt

@@ -275,7 +275,7 @@ void LLPreviewTexture::onSaveAsBtn(LLUICtrl* ctrl, void* data)
 }
 
 void LLPreviewTexture::draw()
-{
+{using namespace llpreview;
 	updateDimensions();
 	
 	LLPreview::draw();
@@ -470,7 +470,7 @@ void LLPreviewTexture::saveTextureToFile(const std::vector<std::string>& filenam
 
 // virtual
 void LLPreviewTexture::reshape(S32 width, S32 height, BOOL called_from_parent)
-{
+{using namespace llpreview;
 	LLPreview::reshape(width, height, called_from_parent);
 
 	LLRect dim_rect;
@@ -680,7 +680,7 @@ void LLPreviewTexture::onFileLoadedForSavePNG(BOOL success,
 // It takes a while until we get height and width information.
 // When we receive it, reshape the window accordingly.
 void LLPreviewTexture::updateDimensions()
-{
+{using namespace llpreview;
 	if (!mImage)
 	{
 		return;

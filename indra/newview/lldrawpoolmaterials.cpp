@@ -32,7 +32,9 @@
 #include "pipeline.h"
 #include "llglcommonfunc.h"
 
+namespace lldrawpoolmaterials {
 S32 diffuse_channel = -1;
+}
 
 LLDrawPoolMaterials::LLDrawPoolMaterials()
 :  LLRenderPass(LLDrawPool::POOL_MATERIALS)
@@ -51,7 +53,7 @@ S32 LLDrawPoolMaterials::getNumDeferredPasses()
 }
 
 void LLDrawPoolMaterials::beginDeferredPass(S32 pass)
-{
+{using namespace lldrawpoolmaterials;
 	U32 shader_idx[] = 
 	{
 		0, //LLRenderPass::PASS_MATERIAL,
@@ -163,7 +165,7 @@ void LLDrawPoolMaterials::bindNormalMap(LLViewerTexture* tex)
 }
 
 void LLDrawPoolMaterials::pushBatch(LLDrawInfo& params, U32 mask, BOOL texture, BOOL batch_textures)
-{
+{using namespace lldrawpoolmaterials;
 	applyModelMatrix(params);
 	
 	bool tex_setup = false;

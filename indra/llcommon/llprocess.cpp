@@ -52,7 +52,6 @@
 *   Helpers
 *****************************************************************************/
 static const char* whichfile_[] = { "stdin", "stdout", "stderr" };
-static std::string empty;
 static LLProcess::Status interpret_status(int status);
 static std::string getDesc(const LLProcess::Params& params);
 
@@ -935,6 +934,8 @@ static struct ReasonCode
 // Object-oriented callback
 void LLProcess::handle_status(int reason, int status)
 {
+static std::string empty;
+
 	{
 		// This odd appearance of LL_DEBUGS is just to bracket a lookup that will
 		// only be performed if in fact we're going to produce the log message.

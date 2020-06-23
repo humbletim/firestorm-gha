@@ -47,8 +47,9 @@
 #define MENU_ITEM_VIEW_PROFILE 0
 #define MENU_ITEM_SEND_IM 1
 
+namespace llavatariconctrl {
 static LLDefaultChildRegistry::Register<LLAvatarIconCtrl> r("avatar_icon");
-
+}
 namespace LLInitParam
 {
 	void TypeValues<LLAvatarIconCtrlEnums::ESymbolPos>::declareValues()

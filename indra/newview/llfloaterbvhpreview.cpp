@@ -69,6 +69,7 @@
 
 S32 LLFloaterBvhPreview::sOwnAvatarInstanceCount = 0; // <FS> Preview on own avatar
 
+namespace llfloaterbvhpreview {
 const S32 PREVIEW_BORDER_WIDTH = 2;
 const S32 PREVIEW_RESIZE_HANDLE_SIZE = S32(RESIZE_HANDLE_WIDTH * OO_SQRT2) + PREVIEW_BORDER_WIDTH;
 const S32 PREVIEW_HPAD = PREVIEW_RESIZE_HANDLE_SIZE;
@@ -122,6 +123,7 @@ std::string STATUS[] =
 	"E_ST_NO_XLT_EMOTE",
 "E_ST_BAD_ROOT"
 };
+}
 
 //-----------------------------------------------------------------------------
 // LLFloaterBvhPreview()
@@ -218,7 +220,7 @@ std::map <std::string, std::string> LLFloaterBvhPreview::getJointAliases()
 // postBuild()
 //-----------------------------------------------------------------------------
 BOOL LLFloaterBvhPreview::postBuild()
-{
+{using namespace llfloaterbvhpreview;
 	// <FS> Reload animation from disk
 	//LLKeyframeMotion* motionp = NULL;
 	//LLBVHLoader* loaderp = NULL;
@@ -287,7 +289,7 @@ BOOL LLFloaterBvhPreview::postBuild()
 // loadBVH()
 //-----------------------------------------------------------------------------
 BOOL LLFloaterBvhPreview::loadBVH()
-{
+{ using namespace llfloaterbvhpreview;
 	LLKeyframeMotion* motionp = NULL;
 	LLBVHLoader* loaderp = NULL;
 
@@ -543,7 +545,7 @@ LLFloaterBvhPreview::~LLFloaterBvhPreview()
 // draw()
 //-----------------------------------------------------------------------------
 void LLFloaterBvhPreview::draw()
-{
+{ using namespace llfloaterbvhpreview;
 	LLFloater::draw();
 	LLRect r = getRect();
 
@@ -612,7 +614,7 @@ void LLFloaterBvhPreview::draw()
 // resetMotion()
 //-----------------------------------------------------------------------------
 void LLFloaterBvhPreview::resetMotion()
-{
+{ using namespace llfloaterbvhpreview;
 	if (!mAnimPreview)
 		return;
 
@@ -857,7 +859,7 @@ void LLFloaterBvhPreview::onBtnStop()
 // onSliderMove()
 //-----------------------------------------------------------------------------
 void LLFloaterBvhPreview::onSliderMove()
-{
+{ using namespace llfloaterbvhpreview;
 	if (!getEnabled())
 		return;
 
@@ -1478,7 +1480,7 @@ void LLFloaterBvhPreview::onBtnReload(void* userdata)
 // LLPreviewAnimation
 //-----------------------------------------------------------------------------
 LLPreviewAnimation::LLPreviewAnimation(S32 width, S32 height) : LLViewerDynamicTexture(width, height, 3, ORDER_MIDDLE, FALSE)
-{
+{ using namespace llfloaterbvhpreview;
 	mNeedsUpdate = TRUE;
 	mCameraDistance = PREVIEW_CAMERA_DISTANCE;
 	mCameraYaw = 0.f;
@@ -1617,7 +1619,7 @@ void LLPreviewAnimation::zoom(F32 zoom_delta)
 // setZoom()
 //-----------------------------------------------------------------------------
 void LLPreviewAnimation::setZoom(F32 zoom_amt)
-{
+{ using namespace llfloaterbvhpreview;
 	mCameraZoom	= llclamp(zoom_amt, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM);
 }
 

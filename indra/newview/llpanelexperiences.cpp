@@ -38,12 +38,14 @@
 #include "lllayoutstack.h"
 
 
-
+namespace llpanelexperiences {
 static LLPanelInjector<LLPanelExperiences> register_experiences_panel("experiences_panel");
 
 
 //comparators
 static const LLExperienceItemComparator NAME_COMPARATOR;
+
+}
 
 LLPanelExperiences::LLPanelExperiences(  )
 	: mExperiencesList(NULL)
@@ -52,7 +54,7 @@ LLPanelExperiences::LLPanelExperiences(  )
 }
 
 BOOL LLPanelExperiences::postBuild( void )
-{
+{using namespace llpanelexperiences;
 	mExperiencesList = getChild<LLFlatListView>("experiences_list");
 	if (hasString("loading_experiences"))
 	{

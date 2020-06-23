@@ -56,9 +56,11 @@ const F32 DEFAULT_BUTTON_DELAY = 0.5f;
 //-----------------------------------------------------------------------------
 // Private methods
 
+namespace lltoastalertpanel {
 static const S32 VPAD = 16;
 static const S32 HPAD = 25;
 static const S32 BTN_HPAD = 8;
+}
 
 LLToastAlertPanel::LLToastAlertPanel( LLNotificationPtr notification, bool modal)
 	  : LLCheckBoxToastPanel(notification),
@@ -66,7 +68,7 @@ LLToastAlertPanel::LLToastAlertPanel( LLNotificationPtr notification, bool modal
 		mCaution(notification->getPriority() >= NOTIFICATION_PRIORITY_HIGH),
 		mLabel(notification->getName()),
 		mLineEditor(NULL)
-{
+{using namespace lltoastalertpanel;
     // EXP-1822
     // save currently focused view, so that return focus to it
     // on destroying this toast.

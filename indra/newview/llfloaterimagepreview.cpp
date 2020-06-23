@@ -64,12 +64,14 @@
 #include "llcheckboxctrl.h"
 #include "llagentbenefits.h"
 
+namespace llfloaterimagepreview {
 const S32 PREVIEW_BORDER_WIDTH = 2;
 const S32 PREVIEW_RESIZE_HANDLE_SIZE = S32(RESIZE_HANDLE_WIDTH * OO_SQRT2) + PREVIEW_BORDER_WIDTH;
 const S32 PREVIEW_HPAD = PREVIEW_RESIZE_HANDLE_SIZE;
 const S32 PREVIEW_VPAD = -24 + 35;	// yuk, hard coded
 const S32 PREF_BUTTON_HEIGHT = 16 + 7 + 16 + 35;
 const S32 PREVIEW_TEXTURE_HEIGHT = 320;
+}
 
 //-----------------------------------------------------------------------------
 // LLFloaterImagePreview()
@@ -90,7 +92,7 @@ LLFloaterImagePreview::LLFloaterImagePreview(const std::string& filename) :
 // postBuild()
 //-----------------------------------------------------------------------------
 BOOL LLFloaterImagePreview::postBuild()
-{
+{using namespace llfloaterimagepreview;
 	if (!LLFloaterNameDesc::postBuild())
 	{
 		return FALSE;
@@ -256,7 +258,7 @@ void LLFloaterImagePreview::clearAllPreviewTextures()
 // draw()
 //-----------------------------------------------------------------------------
 void LLFloaterImagePreview::draw()
-{
+{ using namespace llfloaterimagepreview;
 	LLFloater::draw();
 	LLRect r = getRect();
 

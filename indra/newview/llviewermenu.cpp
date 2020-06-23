@@ -10141,7 +10141,9 @@ void handle_test_load_url(void*)
 //
 // LLViewerMenuHolderGL
 //
+namespace llviewermenu {
 static LLDefaultChildRegistry::Register<LLViewerMenuHolderGL> r("menu_holder");
+}
 
 LLViewerMenuHolderGL::LLViewerMenuHolderGL(const LLViewerMenuHolderGL::Params& p)
 : LLMenuHolderGL(p)

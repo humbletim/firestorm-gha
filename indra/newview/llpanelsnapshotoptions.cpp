@@ -62,8 +62,9 @@ private:
 	LLFloaterSnapshotBase* mSnapshotFloater;
 };
 
+namespace llpanelsnapshotoptions {
 static LLPanelInjector<LLPanelSnapshotOptions> panel_class("llpanelsnapshotoptions");
-
+}
 LLPanelSnapshotOptions::LLPanelSnapshotOptions()
 {
 	mCommitCallbackRegistrar.add("Snapshot.SaveToProfile",		boost::bind(&LLPanelSnapshotOptions::onSaveToProfile,	this));

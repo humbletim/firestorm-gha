@@ -535,3 +535,4 @@ void LLMD5::decode (uint4 *output, const uint1 *input, const uint4 len){
 }
 
 
+#undef S32

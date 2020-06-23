@@ -24,6 +24,8 @@
  * $/LicenseInfo$
  */
 
+#pragma once
+
 #include <map>
 
 class LLCallStackImpl;

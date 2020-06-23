@@ -43,7 +43,9 @@
 #include "llfocusmgr.h"
 #include "lltextbox.h"
 
+namespace llcolorswatch {
 static LLDefaultChildRegistry::Register<LLColorSwatchCtrl> r("color_swatch");
+}
 
 LLColorSwatchCtrl::Params::Params()
 :	color("color", LLColor4::white),

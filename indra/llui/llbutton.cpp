@@ -53,8 +53,9 @@
 
 #include "llcheckboxctrl.h"		// <FS:Zi> Add checkbox control toggle
 
+namespace llbutton {
 static LLDefaultChildRegistry::Register<LLButton> r("button");
-
+}
 // Compiler optimization, generate extern template
 template class LLButton* LLView::getChild<class LLButton>(
 	const std::string& name, BOOL recurse) const;

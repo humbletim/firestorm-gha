@@ -42,6 +42,8 @@
 #include <openssl/crypto.h>
 #endif
 
+static const char * const LOG_CORE("CoreHttp");
+
 
 namespace LLCore
 {

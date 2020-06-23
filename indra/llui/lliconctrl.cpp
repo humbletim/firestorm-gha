@@ -36,7 +36,9 @@
 #include "lluictrlfactory.h"
 #include "lluiimage.h"
 
-static LLDefaultChildRegistry::Register<LLIconCtrl> r("icon");
+namespace lliconctrl {
+	static LLDefaultChildRegistry::Register<LLIconCtrl> r("icon");
+}
 
 LLIconCtrl::Params::Params()
 :	image("image_name"),

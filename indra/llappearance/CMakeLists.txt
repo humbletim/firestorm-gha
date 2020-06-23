@@ -29,24 +29,27 @@ include_directories(
     )
 
 set(llappearance_SOURCE_FILES
-    llavatarappearance.cpp
-    llavatarjoint.cpp
-    llavatarjointmesh.cpp
-    lldriverparam.cpp
-    lllocaltextureobject.cpp
-    llpolyskeletaldistortion.cpp
-    llpolymesh.cpp
-    llpolymorph.cpp
-    lltexglobalcolor.cpp
-    lltexlayer.cpp
-    lltexlayerparams.cpp
-    lltexturemanagerbridge.cpp
-    llwearable.cpp
-    llwearabledata.cpp
-    llwearabletype.cpp
-    llviewervisualparam.cpp
-    llavatarappearancedefines.cpp
+    # llavatarappearance.cpp
+    # llavatarjoint.cpp
+    # llavatarjointmesh.cpp
+    # lldriverparam.cpp
+    # lllocaltextureobject.cpp
+    # llpolyskeletaldistortion.cpp
+    # llpolymesh.cpp
+    # llpolymorph.cpp
+    # lltexglobalcolor.cpp
+    # lltexlayer.cpp
+    # lltexlayerparams.cpp
+    # lltexturemanagerbridge.cpp
+    # llwearable.cpp
+    # llwearabledata.cpp
+    # llwearabletype.cpp
+    # llviewervisualparam.cpp
+    # llavatarappearancedefines.cpp
+    llappearance_star.cpp
     )
+
+  set_source_files_properties(llappearance_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
     
 set(llappearance_HEADER_FILES
     CMakeLists.txt

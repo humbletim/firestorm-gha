@@ -39,6 +39,14 @@ class LLAccordionCtrlTab;
 
 class LLAccordionCtrl: public LLPanel
 {
+	const int BORDER_MARGIN = 2;
+	const int PARENT_BORDER_MARGIN = 5;
+	const int VERTICAL_MULTIPLE = 16;
+	const float MIN_AUTO_SCROLL_RATE = 120.f;
+	const float MAX_AUTO_SCROLL_RATE = 500.f;
+	const float AUTO_SCROLL_RATE_ACCEL = 120.f;
+
+
 private:
 
 	std::vector<LLAccordionCtrlTab*> mAccordionTabs;

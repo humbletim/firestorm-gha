@@ -300,6 +300,9 @@ class LLTextBase
 	public LLSpellCheckMenuHandler,
 	public ll::ui::SearchableControl
 {
+	const float CURSOR_FLASH_DELAY = 1.0f;  // in seconds
+	const int	CURSOR_THICKNESS = 2;
+	const float	TRIPLE_CLICK_INTERVAL = 0.3f;	// delay between double and triple click.
 public:
 	friend class LLTextSegment;
 	friend class LLNormalTextSegment;

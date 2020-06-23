@@ -30,7 +30,9 @@
 #include "fsscrolllistctrl.h"
 #include "lltooldraganddrop.h"
 
+namespace fsscrolllistctrl {
 static LLDefaultChildRegistry::Register<FSScrollListCtrl> r("fs_scroll_list");
+}
 
 FSScrollListCtrl::FSScrollListCtrl(const Params& p)
 :	LLScrollListCtrl(p),

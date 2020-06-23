@@ -56,7 +56,9 @@
 #include "llviewertexturelist.h"
 #include "llwearableitemslist.h"
 
+namespace lloutfitgallery {
 static LLPanelInjector<LLOutfitGallery> t_outfit_gallery("outfit_gallery");
+}
 
 #define MAX_OUTFIT_PHOTO_WIDTH 256
 #define MAX_OUTFIT_PHOTO_HEIGHT 256

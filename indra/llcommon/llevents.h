@@ -151,8 +151,8 @@ struct LLStopWhenHandled
  */
 typedef boost::signals2::signal<bool(const LLSD&), LLStopWhenHandled, float>  LLStandardSignal;
 /// Methods that forward listeners (e.g. constructed with
-/// <tt>boost::bind()</tt>) should accept (const LLEventListener&)
-typedef LLStandardSignal::slot_type LLEventListener;
+/// <tt>boost::bind()</tt>) should accept (const llevents_LLEventListener&)
+typedef LLStandardSignal::slot_type llevents_LLEventListener;
 /// Result of registering a listener, supports <tt>connected()</tt>,
 /// <tt>disconnect()</tt> and <tt>blocked()</tt>
 typedef boost::signals2::connection LLBoundListener;
@@ -185,9 +185,9 @@ public:
     LLListenerOrPumpName(const char* pumpname);
     /// passing listener -- the "anything else" catch-all case. The type of an
     /// object constructed by boost::bind() isn't intended to be written out.
-    /// Normally we'd just accept 'const LLEventListener&', but that would
+    /// Normally we'd just accept 'const llevents_LLEventListener&', but that would
     /// require double implicit conversion: boost::bind() object to
-    /// LLEventListener, LLEventListener to LLListenerOrPumpName. So use a
+    /// llevents_LLEventListener, llevents_LLEventListener to LLListenerOrPumpName. So use a
     /// template to forward anything.
     template<typename T>
     LLListenerOrPumpName(const T& listener): mListener(listener) {}
@@ -200,10 +200,10 @@ public:
     bool operator! () const { return ! mListener; }
 
     /// explicit accessor
-    const LLEventListener& getListener() const { return *mListener; }
+    const llevents_LLEventListener& getListener() const { return *mListener; }
 
-    /// implicit conversion to LLEventListener
-    operator LLEventListener() const { return *mListener; }
+    /// implicit conversion to llevents_LLEventListener
+    operator llevents_LLEventListener() const { return *mListener; }
 
     /// allow calling directly
     bool operator()(const LLSD& event) const;
@@ -216,7 +216,7 @@ public:
     };
 
 private:
-    boost::optional<LLEventListener> mListener;
+    boost::optional<llevents_LLEventListener> mListener;
 };
 
 /*****************************************************************************
@@ -309,10 +309,10 @@ testable:
 *****************************************************************************/
 namespace LLEventDetail
 {
-    /// Any callable capable of connecting an LLEventListener to an
+    /// Any callable capable of connecting an llevents_LLEventListener to an
     /// LLStandardSignal to produce an LLBoundListener can be mapped to this
     /// signature.
-    typedef boost::function<LLBoundListener(const LLEventListener&)> ConnectFunc;
+    typedef boost::function<LLBoundListener(const llevents_LLEventListener&)> ConnectFunc;
 
     /// overload of visit_and_connect() when we have a string identifier available
     template <typename LISTENER>
@@ -540,7 +540,7 @@ public:
         // Examine listener, using our listen_impl() method to make the
         // actual connection.
         // This is why listen() is a template. Conversion from boost::bind()
-        // to LLEventListener performs type erasure, so it's important to look
+        // to llevents_LLEventListener performs type erasure, so it's important to look
         // at the boost::bind object itself before that happens.
         return LLEventDetail::visit_and_connect(name,
                                                 listener,
@@ -593,7 +593,7 @@ private:
 
 
 private:
-    LLBoundListener listen_invoke(const std::string& name, const LLEventListener& listener,
+    LLBoundListener listen_invoke(const std::string& name, const llevents_LLEventListener& listener,
         const NameList& after,
         const NameList& before)
     {
@@ -606,7 +606,7 @@ private:
     std::string mName;
 
 protected:
-    virtual LLBoundListener listen_impl(const std::string& name, const LLEventListener&,
+    virtual LLBoundListener listen_impl(const std::string& name, const llevents_LLEventListener&,
                                         const NameList& after,
                                         const NameList& before);
     
@@ -681,7 +681,7 @@ public:
     /// Remove any history stored in the mail drop.
     virtual void flush() override { mEventHistory.clear(); LLEventStream::flush(); };
 protected:
-    virtual LLBoundListener listen_impl(const std::string& name, const LLEventListener&,
+    virtual LLBoundListener listen_impl(const std::string& name, const llevents_LLEventListener&,
                                         const NameList& after,
                                         const NameList& before) override;
 
@@ -931,7 +931,7 @@ namespace LLEventDetail
      * boost::visit_each() Visitor, used on a template argument <tt>const F&
      * f</tt> as follows (see visit_and_connect()):
      * @code
-     * LLEventListener listener(f);
+     * llevents_LLEventListener listener(f);
      * Visitor visitor(listener); // bind listener so it can track() shared_ptrs
      * using boost::visit_each;   // allow unqualified visit_each() call for ADL
      * visit_each(visitor, unwrap(f));
@@ -941,10 +941,10 @@ namespace LLEventDetail
     {
     public:
         /**
-         * Visitor binds a reference to LLEventListener so we can track() any
+         * Visitor binds a reference to llevents_LLEventListener so we can track() any
          * shared_ptrs we find in the argument list.
          */
-        Visitor(LLEventListener& listener):
+        Visitor(llevents_LLEventListener& listener):
             mListener(listener)
         {
         }
@@ -1086,8 +1086,8 @@ namespace LLEventDetail
 #undef  BOOST_PP_LOCAL_LIMITS
 |*==========================================================================*/
 
-        /// Bind a reference to the LLEventListener to call its track() method.
-        LLEventListener& mListener;
+        /// Bind a reference to the llevents_LLEventListener to call its track() method.
+        llevents_LLEventListener& mListener;
     };
 
     /**
@@ -1104,7 +1104,7 @@ namespace LLEventDetail
                                       const ConnectFunc& connect_func)
     {
         // Capture the listener
-        LLEventListener listener(raw_listener);
+        llevents_LLEventListener listener(raw_listener);
         // Define our Visitor, binding the listener so we can call
         // listener.track() if we discover any shared_ptr<Foo>.
         LLEventDetail::Visitor visitor(listener);
@@ -1133,7 +1133,7 @@ namespace LLEventDetail
 } // namespace LLEventDetail
 
 // Somewhat to my surprise, passing boost::bind(...boost::weak_ptr<T>...) to
-// listen() fails in Boost code trying to instantiate LLEventListener (i.e.
+// listen() fails in Boost code trying to instantiate llevents_LLEventListener (i.e.
 // LLStandardSignal::slot_type) because the boost::get_pointer() utility function isn't
 // specialized for boost::weak_ptr. This remedies that omission.
 namespace boost

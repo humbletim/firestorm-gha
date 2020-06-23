@@ -53,11 +53,13 @@
 #include "llviewerwindow.h"
 #include "lllineeditor.h"
 
+namespace llfloateroutfitphotopreview {
 const S32 MAX_OUTFIT_PHOTO_WIDTH = 256;
 const S32 MAX_OUTFIT_PHOTO_HEIGHT = 256;
 
 const S32 CLIENT_RECT_VPAD = 4;
 
+}
 LLFloaterOutfitPhotoPreview::LLFloaterOutfitPhotoPreview(const LLSD& key)
 	: LLPreview(key),
 	  mUpdateDimensions(TRUE),
@@ -90,7 +92,7 @@ BOOL LLFloaterOutfitPhotoPreview::postBuild()
 }
 
 void LLFloaterOutfitPhotoPreview::draw()
-{
+{ using namespace llfloateroutfitphotopreview; using namespace llpreview;
 	updateDimensions();
 	
 	LLPreview::draw();
@@ -132,7 +134,7 @@ void LLFloaterOutfitPhotoPreview::draw()
 
 // virtual
 void LLFloaterOutfitPhotoPreview::reshape(S32 width, S32 height, BOOL called_from_parent)
-{
+{ using namespace llfloateroutfitphotopreview; using namespace llpreview;
 	LLPreview::reshape(width, height, called_from_parent);
 
 	LLRect dim_rect(getChildView("dimensions")->getRect());
@@ -159,7 +161,7 @@ void LLFloaterOutfitPhotoPreview::reshape(S32 width, S32 height, BOOL called_fro
 
 
 void LLFloaterOutfitPhotoPreview::updateDimensions()
-{
+{using namespace llfloateroutfitphotopreview;
 	if (!mImage)
 	{
 		return;

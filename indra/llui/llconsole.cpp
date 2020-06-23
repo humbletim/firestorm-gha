@@ -54,7 +54,9 @@ LLConsole* gConsole = NULL;  // Created and destroyed in LLViewerWindow.
 
 const F32 FADE_DURATION = 2.f;
  
-static LLDefaultChildRegistry::Register<LLConsole> r("console");
+namespace llconsole {
+	static LLDefaultChildRegistry::Register<LLConsole> r("console");
+}
 
 LLConsole::LLConsole(const LLConsole::Params& p) 
 :	LLUICtrl(p),

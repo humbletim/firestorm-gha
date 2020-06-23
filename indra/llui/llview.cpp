@@ -84,7 +84,9 @@ BOOL LLView::sIsDrawing = FALSE;
 template class LLView* LLView::getChild<class LLView>(
 	const std::string& name, BOOL recurse) const;
 
-static LLDefaultChildRegistry::Register<LLView> r("view");
+namespace llview {
+	static LLDefaultChildRegistry::Register<LLView> r("view");
+}
 
 namespace LLInitParam
 {

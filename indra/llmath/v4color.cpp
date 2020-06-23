@@ -302,6 +302,7 @@ LLColor4	vec3to4(const LLColor3 &vec)
 	return temp;
 }
 
+namespace v4color {
 static F32 hueToRgb ( F32 val1In, F32 val2In, F32 valHUeIn )
 {
 	if ( valHUeIn < 0.0f ) valHUeIn += 1.0f;
@@ -311,9 +312,9 @@ static F32 hueToRgb ( F32 val1In, F32 val2In, F32 valHUeIn )
 	if ( ( 3.0f * valHUeIn ) < 2.0f ) return ( val1In + ( val2In - val1In ) * ( ( 2.0f / 3.0f ) - valHUeIn ) * 6.0f );
 	return ( val1In );
 }
-
+}
 void LLColor4::setHSL ( F32 hValIn, F32 sValIn, F32 lValIn)
-{
+{using namespace v4color;
 	if ( sValIn < 0.00001f )
 	{
 		mV[VRED] = lValIn;

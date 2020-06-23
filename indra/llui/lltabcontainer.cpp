@@ -190,8 +190,10 @@ struct LLPlaceHolderPanel : public LLPanel
 	LLPlaceHolderPanel(const Params& p) : LLPanel(p)
 	{}
 };
+namespace lltabcontainer {
 static LLDefaultChildRegistry::Register<LLPlaceHolderPanel> r1("placeholder");
 static LLDefaultChildRegistry::Register<LLTabContainer> r2("tab_container");
+}
 
 LLTabContainer::TabParams::TabParams()
 :	tab_top_image_unselected("tab_top_image_unselected"),

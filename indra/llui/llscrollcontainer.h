@@ -54,6 +54,10 @@ struct ScrollContainerRegistry : public LLChildRegistry<ScrollContainerRegistry>
 
 class LLScrollContainer : public LLUICtrl
 {
+	const int VERTICAL_MULTIPLE = 16;
+	const float AUTO_SCROLL_RATE_ACCEL = 120.f;
+
+
 public:
 	// Note: vertical comes before horizontal because vertical
 	// scrollbars have priority for mouse and keyboard events.

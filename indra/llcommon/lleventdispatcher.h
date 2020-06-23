@@ -86,6 +86,7 @@ class LLSD;
  * listener class that will register some of its own methods, though any
  * callable can be used.
  */
+namespace lleventdispatcher {
 class LL_COMMON_API LLEventDispatcher
 {
 public:
@@ -538,4 +539,5 @@ private:
     LLTempBoundListener mBoundListener;
 };
 
+}//ns
 #endif /* ! defined(LL_LLEVENTDISPATCHER_H) */

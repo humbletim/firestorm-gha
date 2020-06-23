@@ -51,8 +51,9 @@
 #include "rlvhandler.h"
 #include "rlvactions.h"
 // [/RLVa:KB]
+namespace llavatarlist {
 static LLDefaultChildRegistry::Register<LLAvatarList> r("avatar_list");
-
+}
 // Last interaction time update period.
 static const F32 LIT_UPDATE_PERIOD = 5.f;
 
@@ -151,6 +152,7 @@ static bool findInsensitive(std::string haystack, const std::string& needle_uppe
     return haystack.find(needle_upper) != std::string::npos;
 }
 
+namespace llavatarlist {
 
 //comparators
 static const LLAvatarItemNameComparator NAME_COMPARATOR;
@@ -159,6 +161,7 @@ static const LLFlatListView::ItemReverseComparator REVERSE_NAME_COMPARATOR(NAME_
 static const LLAvatarItemUserNameComparator USERNAME_COMPARATOR;
 // <FS:Ansariel> [FS Communication UI]
 static const LLAvatarItemAgentOnTopComparator AGENT_ON_TOP_NAME_COMPARATOR;
+}
 
 LLAvatarList::Params::Params()
 : ignore_online_status("ignore_online_status", false)
@@ -192,7 +195,7 @@ LLAvatarList::LLAvatarList(const Params& p)
 , mShowVoiceVolume(p.show_voice_volume)
 , mShowUsername((bool)gSavedSettings.getBOOL("NameTagShowUsernames"))
 , mShowDisplayName((bool)gSavedSettings.getBOOL("UseDisplayNames"))
-{
+{using namespace llavatarlist;
 	setCommitOnSelectionChange(true);
 
 	// Set default sort order.
@@ -328,7 +331,7 @@ void LLAvatarList::setNameFilter(const std::string& filter)
 //{
 //	setComparator(&NAME_COMPARATOR);
 void LLAvatarList::sortByName(bool agent_on_top /* = false*/)
-{
+{using namespace llavatarlist;
 	if (agent_on_top)
 	{
 		setComparator(&AGENT_ON_TOP_NAME_COMPARATOR);
@@ -343,7 +346,7 @@ void LLAvatarList::sortByName(bool agent_on_top /* = false*/)
 
 // <FS:Ansariel> FIRE-5283: Sort by username
 void LLAvatarList::sortByUserName()
-{
+{using namespace llavatarlist;
 	setComparator(&USERNAME_COMPARATOR);
 	sort();
 }
@@ -560,7 +563,7 @@ boost::signals2::connection LLAvatarList::setItemDoubleClickCallback(const mouse
 
 //virtual
 S32 LLAvatarList::notifyParent(const LLSD& info)
-{
+{using namespace llavatarlist;
 	// <FS:Ansariel> FIRE-11344: Group IM chatter list (and probably other) not sorting properly
 	//if (info.has("sort") && &NAME_COMPARATOR == mItemComparator)
 	if (info.has("sort") &&

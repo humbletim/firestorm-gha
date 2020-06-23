@@ -63,9 +63,10 @@ S32 gStartImageWidth = 1;
 S32 gStartImageHeight = 1;
 const F32 FADE_TO_WORLD_TIME = 1.0f;
 
+namespace llprogressview {
 static LLPanelInjector<LLProgressView> r("progress_view");
 static LLPanelInjector<LLProgressViewMini> r_mini("progress_view_mini");
-
+}
 LLProgressViewMini::LLProgressViewMini()
 {
 	sInstance=this;

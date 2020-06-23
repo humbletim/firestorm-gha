@@ -455,7 +455,9 @@ void LLFloaterLinkReplace::processBatch(LLInventoryModel::item_array_t items)
 //////////////////////////////////////////////////////////////////////////////
 // LLInventoryLinkReplaceDropTarget
 
+namespace llfloaterlinkreplace {
 static LLDefaultChildRegistry::Register<LLInventoryLinkReplaceDropTarget> r("inventory_link_replace_drop_target");
+}
 
 BOOL LLInventoryLinkReplaceDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 														   EDragAndDropType cargo_type,

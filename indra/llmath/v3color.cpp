@@ -67,6 +67,7 @@ std::ostream& operator<<(std::ostream& s, const LLColor3 &a)
 	return s;
 }
 
+namespace v3color {
 static F32 hueToRgb ( F32 val1In, F32 val2In, F32 valHUeIn )
 {
 	if ( valHUeIn < 0.0f ) valHUeIn += 1.0f;
@@ -76,9 +77,9 @@ static F32 hueToRgb ( F32 val1In, F32 val2In, F32 valHUeIn )
 	if ( ( 3.0f * valHUeIn ) < 2.0f ) return ( val1In + ( val2In - val1In ) * ( ( 2.0f / 3.0f ) - valHUeIn ) * 6.0f );
 	return ( val1In );
 }
-
+}
 void LLColor3::setHSL ( F32 hValIn, F32 sValIn, F32 lValIn)
-{
+{using namespace v3color;
 	if ( sValIn < 0.00001f )
 	{
 		mV[VRED] = lValIn;

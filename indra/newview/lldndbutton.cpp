@@ -29,7 +29,9 @@
 #include "lldndbutton.h"
 
 
+namespace lldndbutton {
 static LLDefaultChildRegistry::Register<LLDragAndDropButton> r("dnd_button");
+}
 
 LLDragAndDropButton::LLDragAndDropButton(const Params& params)
 : LLButton(params)

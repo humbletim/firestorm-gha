@@ -48,8 +48,8 @@
 class LLAvatarName;
 
 // defined in llfloaterland.cpp
-void send_parcel_select_objects(S32 parcel_local_id, U32 return_type,
-								uuid_list_t* return_ids = NULL);
+extern void send_parcel_select_objects(S32 parcel_local_id, U32 return_type,
+								uuid_list_t* return_ids);
 
 enum Badge { BADGE_OK, BADGE_NOTE, BADGE_WARN, BADGE_ERROR };
 
@@ -443,7 +443,7 @@ void LLFloaterSellLandUI::doShowObjects(void *userdata)
 	LLParcel* parcel = self->mParcelSelection->getParcel();
 	if (!parcel) return;
 
-	send_parcel_select_objects(parcel->getLocalID(), RT_SELL);
+	send_parcel_select_objects(parcel->getLocalID(), RT_SELL, NULL);
 
 	// we shouldn't pass callback functor since it is registered in LLFunctorRegistration
 	LLNotificationsUtil::add("TransferObjectsHighlighted",

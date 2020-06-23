@@ -62,6 +62,7 @@
 #include "llurlaction.h"
 #include "llviewermenu.h"
 
+namespace llpanelgroupgeneral {
 static LLPanelInjector<LLPanelGroupGeneral> t_panel_group_general("panel_group_general");
 
 // consts
@@ -74,6 +75,8 @@ static F32 sSDTime = 0.0f;
 static F32 sElementTime = 0.0f;
 static F32 sAllTime = 0.0f;
 // </FS:Ansariel>
+
+}
 
 LLPanelGroupGeneral::LLPanelGroupGeneral()
 :	LLPanelGroupTab(),
@@ -116,7 +119,7 @@ LLPanelGroupGeneral::~LLPanelGroupGeneral()
 }
 
 BOOL LLPanelGroupGeneral::postBuild()
-{
+{ using namespace llpanelgroupgeneral;
 	bool recurse = true;
 
 	mEditCharter = getChild<LLTextEditor>("charter", recurse);
@@ -380,7 +383,7 @@ void LLPanelGroupGeneral::draw()
 }
 
 bool LLPanelGroupGeneral::apply(std::string& mesg)
-{
+{using namespace llpanelgroupgeneral;
 	if (mGroupID.isNull())
 	{
 		return false;
@@ -498,7 +501,7 @@ void LLPanelGroupGeneral::cancel()
 
 // invoked from callbackConfirmMature
 bool LLPanelGroupGeneral::confirmMatureApply(const LLSD& notification, const LLSD& response)
-{
+{using namespace llpanelgroupgeneral;
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	// 0 == Yes
 	// 1 == No
@@ -530,7 +533,7 @@ bool LLPanelGroupGeneral::confirmMatureApply(const LLSD& notification, const LLS
 
 // virtual
 void LLPanelGroupGeneral::update(LLGroupChange gc)
-{
+{using namespace llpanelgroupgeneral;
 	if (mGroupID.isNull()) return;
 
 	LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(mGroupID);

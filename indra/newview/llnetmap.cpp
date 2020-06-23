@@ -87,12 +87,15 @@
 #include "lggcontactsets.h"
 #include "fscommon.h"
 
+namespace llnetmap {
 static LLDefaultChildRegistry::Register<LLNetMap> r1("net_map");
+}
 
 const F32 LLNetMap::MAP_SCALE_MIN = 32;
 const F32 LLNetMap::MAP_SCALE_MID = 1024;
 const F32 LLNetMap::MAP_SCALE_MAX = 4096;
 
+namespace llnetmap {
 const F32 MAP_SCALE_ZOOM_FACTOR = 1.04f; // Zoom in factor per click of scroll wheel (4%)
 const F32 MIN_DOT_RADIUS = 3.5f;
 const F32 DOT_SCALE = 0.75f;
@@ -103,6 +106,7 @@ const F64 COARSEUPDATE_MAX_Z = 1020.0f;
 
 const F32 WIDTH_PIXELS = 2.f;
 const S32 CIRCLE_STEPS = 100;
+}
 
 LLNetMap::avatar_marks_map_t LLNetMap::sAvatarMarksMap; // <FS:Ansariel>
 F32 LLNetMap::sScale; // <FS:Ansariel> Synchronizing netmaps throughout instances
@@ -248,7 +252,7 @@ BOOL LLNetMap::postBuild()
 }
 
 void LLNetMap::setScale( F32 scale )
-{
+{using namespace llnetmap;
 	scale = llclamp(scale, MAP_SCALE_MIN, MAP_SCALE_MAX);
 	mCurPan *= scale / mScale;
 	mScale = scale;
@@ -287,7 +291,7 @@ void LLNetMap::setScale( F32 scale )
 ///////////////////////////////////////////////////////////////////////////////////
 
 void LLNetMap::draw()
-{
+{using namespace llnetmap;
 	// <FS:Ansariel>: Synchronize netmap scale throughout instances
 	if (mScale != sScale)
 	{
@@ -971,7 +975,7 @@ LLVector3 LLNetMap::globalPosToView(const LLVector3d& global_pos)
 
 void LLNetMap::drawRing(const F32 radius, const LLVector3 pos_map, const LLUIColor& color)
 
-{
+{using namespace llnetmap;
 // <FS:CR> Aurora Sim
 	//F32 meters_to_pixels = mScale / LLWorld::getInstance()->getRegionWidthInMeters();
 	F32 meters_to_pixels = mScale / REGION_WIDTH_METERS;
@@ -1040,7 +1044,7 @@ LLVector3d LLNetMap::viewPosToGlobal( S32 x, S32 y )
 }
 
 BOOL LLNetMap::handleScrollWheel(S32 x, S32 y, S32 clicks)
-{
+{using namespace llnetmap;
 	// note that clicks are reversed from what you'd think: i.e. > 0  means zoom out, < 0 means zoom in
 	F32 new_scale = mScale * pow(MAP_SCALE_ZOOM_FACTOR, -clicks);
 	F32 old_scale = mScale;
@@ -1739,7 +1743,7 @@ bool LLNetMap::outsideSlop( S32 x, S32 y, S32 start_x, S32 start_y, S32 slop )
 }
 
 BOOL LLNetMap::handleHover( S32 x, S32 y, MASK mask )
-{
+{using namespace llnetmap;
 	if (hasMouseCapture())
 	{
 		if (mPanning || outsideSlop(x, y, mMouseDown.mX, mMouseDown.mY, MOUSE_DRAG_SLOP))

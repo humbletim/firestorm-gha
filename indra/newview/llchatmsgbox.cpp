@@ -31,7 +31,9 @@
 #include "llwindow.h"
 
 
+namespace llchatmsgbox {
 static LLDefaultChildRegistry::Register<LLChatMsgBox> r("text_chat");
+}
 
 class ChatSeparator : public LLTextSegment
 {

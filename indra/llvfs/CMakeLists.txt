@@ -12,14 +12,17 @@ include_directories(
     )
 
 set(llvfs_SOURCE_FILES
-    lldir.cpp
-    lldiriterator.cpp
-    lllfsthread.cpp
-    llpidlock.cpp
-    llvfile.cpp
-    llvfs.cpp
-    llvfsthread.cpp
+    # lldir.cpp
+    # lldiriterator.cpp
+    # lllfsthread.cpp
+    # llpidlock.cpp
+    # llvfile.cpp
+    # llvfs.cpp
+    # llvfsthread.cpp
+    llvfs_star.cpp
     )
+
+  set_source_files_properties(llvfs_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 
 set(llvfs_HEADER_FILES
     CMakeLists.txt

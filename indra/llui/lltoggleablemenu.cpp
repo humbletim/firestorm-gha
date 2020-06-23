@@ -30,7 +30,9 @@
 #include "lltoggleablemenu.h"
 #include "lluictrlfactory.h"
 
-static LLDefaultChildRegistry::Register<LLToggleableMenu> r("toggleable_menu");
+namespace lltoggleablemenu {
+	static LLDefaultChildRegistry::Register<LLToggleableMenu> r("toggleable_menu");
+}
 
 LLToggleableMenu::LLToggleableMenu(const LLToggleableMenu::Params& p)
 :	LLMenuGL(p),

@@ -52,6 +52,7 @@
 
 //BOOL LLHUDEffectLookAt::sDebugLookAt = FALSE;
 
+namespace llhudeffectlookat {
 // packet layout
 const S32 SOURCE_AVATAR = 0;
 const S32 TARGET_OBJECT = 16;
@@ -68,6 +69,7 @@ const F32 MIN_TARGET_OFFSET_SQUARED = 0.0001f;
 
 // can't use actual F32_MAX, because we add this to the current frametime
 const F32 MAX_TIMEOUT = F32_MAX / 2.f;
+}
 
 /**
  * Simple data class holding values for a particular type of attention.
@@ -112,6 +114,8 @@ public:
 // can be overwritten with customizing data from the XML file. The actual values below
 // are those that will give exactly the same look-at behavior as before the ability
 // to customize was added. - MG
+namespace llhudeffectlookat {
+
 static const 
 	LLAttention 
 		BOY_ATTS[] = { // default set of masculine attentions
@@ -239,7 +243,7 @@ static BOOL loadAttentions()
 }
 
 
-
+}//ns
 
 //-----------------------------------------------------------------------------
 // LLHUDEffectLookAt()
@@ -252,7 +256,8 @@ LLHUDEffectLookAt::LLHUDEffectLookAt(const U8 type) :
 	//mDebugLookAt( LLCachedControl<bool>(gSavedPerAccountSettings, "DebugLookAt", FALSE))
 	mDebugLookAt( LLCachedControl<S32>(gSavedPerAccountSettings, "DebugLookAt", FALSE))
 	//</FS:AO>
-{
+{using namespace llhudeffectlookat;
+
 	clearLookAtTarget();
 	// parse the default sets
 	loadAttentions();
@@ -271,7 +276,7 @@ LLHUDEffectLookAt::~LLHUDEffectLookAt()
 // packData()
 //-----------------------------------------------------------------------------
 void LLHUDEffectLookAt::packData(LLMessageSystem *mesgsys)
-{
+{using namespace llhudeffectlookat;
 	// pack both target object and position
 	// position interpreted as offset if target object is non-null
 	ELookAtType target_type = mTargetType;
@@ -361,7 +366,7 @@ void LLHUDEffectLookAt::packData(LLMessageSystem *mesgsys)
 // unpackData()
 //-----------------------------------------------------------------------------
 void LLHUDEffectLookAt::unpackData(LLMessageSystem *mesgsys, S32 blocknum)
-{
+{using namespace llhudeffectlookat;
 	LLVector3d new_target;
 	U8 packed_data[PKT_SIZE];
 
@@ -456,7 +461,7 @@ void LLHUDEffectLookAt::setTargetPosGlobal(const LLVector3d &target_pos_global)
 // called by agent logic to set look at behavior locally, and propagate to sim
 //-----------------------------------------------------------------------------
 BOOL LLHUDEffectLookAt::setLookAt(ELookAtType target_type, LLViewerObject *object, LLVector3 position)
-{
+{using namespace llhudeffectlookat;
 	if (!mSourceObject)
 	{
 		return FALSE;
@@ -756,7 +761,7 @@ void LLHUDEffectLookAt::render()
 // update()
 //-----------------------------------------------------------------------------
 void LLHUDEffectLookAt::update()
-{
+{using namespace llhudeffectlookat;
 	// If the target object is dead, set the target object to NULL
 	if (!mTargetObject.isNull() && mTargetObject->isDead())
 	{
@@ -821,7 +826,7 @@ void LLHUDEffectLookAt::update()
  * Returns whether we successfully calculated a finite target position.
  */
 bool LLHUDEffectLookAt::calcTargetPosition()
-{
+{using namespace llhudeffectlookat;
 	LLViewerObject *target_obj = (LLViewerObject *)mTargetObject;
 	LLVector3 local_offset;
 	

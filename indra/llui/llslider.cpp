@@ -36,7 +36,9 @@
 #include "llcontrol.h"
 #include "lluictrlfactory.h"
 
-static LLDefaultChildRegistry::Register<LLSlider> r1("slider_bar");
+namespace llslider {
+	static LLDefaultChildRegistry::Register<LLSlider> r1("slider_bar");
+}
 //FIXME: make this into an unregistered template so that code constructed sliders don't
 // have ambigious template lookup problem
 

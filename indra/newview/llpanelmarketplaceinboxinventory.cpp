@@ -42,7 +42,9 @@
 
 #define DEBUGGING_FRESHNESS	0
 
+namespace llpanelmarketplaceinboxinventory {
 const LLColor4U DEFAULT_WHITE(255, 255, 255);
+}
 
 //
 // statics
@@ -71,7 +73,7 @@ void LLInboxInventoryPanel::initFromParams(const LLInventoryPanel::Params& param
 }
 
 LLFolderViewFolder * LLInboxInventoryPanel::createFolderViewFolder(LLInvFVBridge * bridge, bool allow_drop)
-{
+{using namespace llpanelmarketplaceinboxinventory;
 	LLUIColor item_color = LLUIColorTable::instance().getColor("MenuItemEnabledColor", DEFAULT_WHITE);
 
 	LLInboxFolderViewFolder::Params params;
@@ -97,7 +99,7 @@ LLFolderViewFolder * LLInboxInventoryPanel::createFolderViewFolder(LLInvFVBridge
 }
 
 LLFolderViewItem * LLInboxInventoryPanel::createFolderViewItem(LLInvFVBridge * bridge)
-{
+{using namespace llpanelmarketplaceinboxinventory;
 	LLUIColor item_color = LLUIColorTable::instance().getColor("MenuItemEnabledColor", DEFAULT_WHITE);
 
 	LLInboxFolderViewItem::Params params;

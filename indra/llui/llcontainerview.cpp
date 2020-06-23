@@ -36,13 +36,16 @@
 #include "llscrollcontainer.h"
 #include "lluictrlfactory.h"
 
+namespace llcontainerview {
 static LLDefaultChildRegistry::Register<LLContainerView> r1("container_view");
+}
 
 #include "llpanel.h"
 #include "llstatview.h"
+namespace llcontainerview {
 static ContainerViewRegistry::Register<LLStatView> r2("stat_view");
 static ContainerViewRegistry::Register<LLPanel> r3("panel", &LLPanel::fromXML);
-
+}
 LLContainerView::LLContainerView(const LLContainerView::Params& p)
 :	LLView(p),
 	mShowLabel(p.show_label),

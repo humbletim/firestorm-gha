@@ -40,7 +40,9 @@
 #include "lluictrlfactory.h"
 #include "lluiimage.h"
 
-static LLDefaultChildRegistry::Register<LLProgressBar> r("progress_bar");
+namespace llprogressbar {
+	static LLDefaultChildRegistry::Register<LLProgressBar> r("progress_bar");
+}
 
 LLProgressBar::Params::Params()
 :	image_bar("image_bar"),

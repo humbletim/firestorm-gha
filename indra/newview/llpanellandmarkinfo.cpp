@@ -48,6 +48,8 @@
 // Aux types and methods
 //----------------------------------------------------------------------------
 
+namespace llpanellandmarkinfo {
+
 typedef std::pair<LLUUID, std::string> folder_pair_t;
 
 static bool cmp_folders(const folder_pair_t& left, const folder_pair_t& right);
@@ -60,6 +62,8 @@ static std::string icon_pg;
 static std::string icon_m;
 static std::string icon_r;
 
+}
+
 LLPanelLandmarkInfo::LLPanelLandmarkInfo()
 :	LLPanelPlaceInfo()
 {}
@@ -70,7 +74,7 @@ LLPanelLandmarkInfo::~LLPanelLandmarkInfo()
 
 // virtual
 BOOL LLPanelLandmarkInfo::postBuild()
-{
+{using namespace llpanellandmarkinfo;
 	LLPanelPlaceInfo::postBuild();
 
 	mOwner = getChild<LLTextBox>("owner");
@@ -189,7 +193,7 @@ void LLPanelLandmarkInfo::setInfoType(EInfoType type)
 
 // virtual
 void LLPanelLandmarkInfo::processParcelInfo(const LLParcelData& parcel_data)
-{
+{using namespace llpanellandmarkinfo;
 	LLPanelPlaceInfo::processParcelInfo(parcel_data);
 
 	// HACK: Flag 0x2 == adult region,
@@ -290,7 +294,7 @@ void LLPanelLandmarkInfo::displayItemInfo(const LLInventoryItem* pItem)
 }
 
 void LLPanelLandmarkInfo::toggleLandmarkEditMode(BOOL enabled)
-{
+{using namespace llpanellandmarkinfo;
 	// If switching to edit mode while creating landmark
 	// the "Create Landmark" title remains.
 	if (enabled && mInfoType != CREATE_LANDMARK)
@@ -424,7 +428,7 @@ std::string LLPanelLandmarkInfo::getFullFolderName(const LLViewerInventoryCatego
 }
 
 void LLPanelLandmarkInfo::populateFoldersList()
-{
+{using namespace llpanellandmarkinfo;
 	// Collect all folders that can contain landmarks.
 	LLInventoryModel::cat_array_t cats;
 	collectLandmarkFolders(cats);
@@ -460,6 +464,8 @@ void LLPanelLandmarkInfo::populateFoldersList()
 		mFolderCombo->add(it->second, LLSD(it->first));
 }
 
+namespace llpanellandmarkinfo {
+
 static bool cmp_folders(const folder_pair_t& left, const folder_pair_t& right)
 {
 	return left.second < right.second;
@@ -491,3 +497,4 @@ static void collectLandmarkFolders(LLInventoryModel::cat_array_t& cats)
 		cats.push_back(favorites_cat);
 	}
 }
+}//ns

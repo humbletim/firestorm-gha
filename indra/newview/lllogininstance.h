@@ -104,7 +104,7 @@ private:
 	std::string mPlatform;
 	std::string mPlatformVersion;
 	std::string mPlatformVersionName;
-	LLEventDispatcher mDispatcher;
+	lleventdispatcher::LLEventDispatcher mDispatcher;
 };
 
 #endif

@@ -49,7 +49,9 @@
 #include "lluictrlfactory.h"
 #include "llviewborder.h"
 
-static LLDefaultChildRegistry::Register<LLPanel> r1("panel", &LLPanel::fromXML);
+namespace llpanel {
+	static LLDefaultChildRegistry::Register<LLPanel> r1("panel", &LLPanel::fromXML);
+}
 LLPanel::factory_stack_t	LLPanel::sFactoryStack;
 
 

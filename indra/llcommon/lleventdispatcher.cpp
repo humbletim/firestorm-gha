@@ -390,6 +390,7 @@ std::string LLSDArgsMapper::formatlist(const LLSD& list)
     return out.str();
 }
 
+namespace lleventdispatcher {
 LLEventDispatcher::LLEventDispatcher(const std::string& desc, const std::string& key):
     mDesc(desc),
     mKey(key)
@@ -670,3 +671,4 @@ LLEventDispatcher::DispatchEntry::DispatchEntry(const std::string& desc):
     mDesc(desc)
 {}
 
+}//ns

@@ -48,6 +48,16 @@ class LLScrollbar;
 
 class LLAccordionCtrlTab : public LLUICtrl
 {
+        static const char* DD_BUTTON_NAME;
+        static const char* DD_TEXTBOX_NAME;
+        static const char* DD_HEADER_NAME;
+
+        static const int HEADER_HEIGHT;
+        static const int HEADER_IMAGE_LEFT_OFFSET;
+        static const int HEADER_TEXT_LEFT_OFFSET;
+        static const float AUTO_OPEN_TIME;
+        static const int VERTICAL_MULTIPLE;
+        static const int PARENT_BORDER_MARGIN;
 // Interface
 public:
 

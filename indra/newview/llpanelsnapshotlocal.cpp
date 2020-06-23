@@ -73,7 +73,9 @@ private:
 	void onLocalCanceled();
 };
 
+namespace llpanelsnapshotlocal {
 static LLPanelInjector<LLPanelSnapshotLocal> panel_class("llpanelsnapshotlocal");
+}
 
 LLPanelSnapshotLocal::LLPanelSnapshotLocal()
 {

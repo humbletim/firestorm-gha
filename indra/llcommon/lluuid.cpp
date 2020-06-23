@@ -455,7 +455,7 @@ static void get_random_bytes(void *buf, int nbytes)
 }
 
 #if	LL_WINDOWS
-
+#include <nb30.h>
 typedef struct _ASTAT_
 {
 	ADAPTER_STATUS adapt;

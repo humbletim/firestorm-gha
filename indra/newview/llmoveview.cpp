@@ -58,9 +58,11 @@
 // Constants
 //
 
+namespace llmoveview {
 const F32 MOVE_BUTTON_DELAY = 0.0f;
 const F32 YAW_NUDGE_RATE = 0.05f;	// fraction of normal speed
 const F32 NUDGE_TIME = 0.25f;		// in seconds
+}
 
 //
 // Member functions
@@ -92,7 +94,7 @@ LLFloaterMove::~LLFloaterMove()
 
 // virtual
 BOOL LLFloaterMove::postBuild()
-{
+{using namespace llmoveview;
 	updateTransparency(TT_ACTIVE); // force using active floater transparency (STORM-730)
 	
 	// Code that implements floater buttons toggling when user moves via keyboard is located in LLAgent::propagate()
@@ -182,7 +184,8 @@ void LLFloaterMove::setVisible(BOOL visible)
 
 // static 
 F32 LLFloaterMove::getYawRate( F32 time )
-{
+{using namespace llmoveview;
+
 	if( time < NUDGE_TIME )
 	{
 		F32 rate = YAW_NUDGE_RATE + time * (1 - YAW_NUDGE_RATE)/ NUDGE_TIME;

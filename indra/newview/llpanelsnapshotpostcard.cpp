@@ -85,7 +85,9 @@ private:
 	std::string mAgentEmail; // <FS:Ansariel> For OpenSim compatibility
 };
 
+namespace llpanelsnapshotpostcard {
 static LLPanelInjector<LLPanelSnapshotPostcard> panel_class("llpanelsnapshotpostcard");
+}
 
 LLPanelSnapshotPostcard::LLPanelSnapshotPostcard()
 :	mHasFirstMsgFocus(false)

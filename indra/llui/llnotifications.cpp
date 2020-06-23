@@ -995,7 +995,7 @@ void LLNotification::repost()
 // =========================================================
 // LLNotificationChannel implementation
 // ---
-LLBoundListener LLNotificationChannelBase::connectChangedImpl(const LLEventListener& slot)
+LLBoundListener LLNotificationChannelBase::connectChangedImpl(const llevents_LLEventListener& slot)
 {
 	// when someone wants to connect to a channel, we first throw them
 	// all of the notifications that are already in the channel
@@ -1010,7 +1010,7 @@ LLBoundListener LLNotificationChannelBase::connectChangedImpl(const LLEventListe
 	return mChanged.connect(slot);
 }
 
-LLBoundListener LLNotificationChannelBase::connectAtFrontChangedImpl(const LLEventListener& slot)
+LLBoundListener LLNotificationChannelBase::connectAtFrontChangedImpl(const llevents_LLEventListener& slot)
 {
 	for (LLNotificationSet::iterator it = mItems.begin(); it != mItems.end(); ++it)
 	{
@@ -1019,14 +1019,14 @@ LLBoundListener LLNotificationChannelBase::connectAtFrontChangedImpl(const LLEve
 	return mChanged.connect(slot, boost::signals2::at_front);
 }
 
-LLBoundListener LLNotificationChannelBase::connectPassedFilterImpl(const LLEventListener& slot)
+LLBoundListener LLNotificationChannelBase::connectPassedFilterImpl(const llevents_LLEventListener& slot)
 {
 	// these two filters only fire for notifications added after the current one, because
 	// they don't participate in the hierarchy.
 	return mPassedFilter.connect(slot);
 }
 
-LLBoundListener LLNotificationChannelBase::connectFailedFilterImpl(const LLEventListener& slot)
+LLBoundListener LLNotificationChannelBase::connectFailedFilterImpl(const llevents_LLEventListener& slot)
 {
 	return mFailedFilter.connect(slot);
 }

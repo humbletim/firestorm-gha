@@ -66,6 +66,7 @@
 #include "rlvhandler.h"
 // [/RLVa:KB]
 
+namespace llmaniptranslate {
 const S32 NUM_AXES = 3;
 const S32 MOUSE_DRAG_SLOP = 2;       // pixels
 const F32 SELECTED_ARROW_SCALE = 1.3f;
@@ -76,9 +77,11 @@ const F32 MIN_PLANE_MANIP_DOT_PRODUCT = 0.25f;
 const F32 PLANE_TICK_SIZE = 0.4f;
 const F32 MANIPULATOR_SCALE_HALF_LIFE = 0.07f;
 const F32 SNAP_ARROW_SCALE = 0.7f;
+}
 
 static LLPointer<LLViewerTexture> sGridTex = NULL ;
 
+namespace llmaniptranslate {
 const LLManip::EManipPart MANIPULATOR_IDS[9] = 
 {
 	LLManip::LL_X_ARROW,
@@ -99,6 +102,7 @@ const U32 ARROW_TO_AXIS[4] =
 	VY,
 	VZ
 };
+}//ns
 
 // Sort manipulator handles by their screen-space projection
 struct ClosestToCamera
@@ -409,7 +413,7 @@ BOOL LLManipTranslate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
 }
 
 BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
-{
+{using namespace llmaniptranslate;
 	// Translation tool only works if mouse button is down.
 	// Bail out if mouse not down.
 	if( !hasMouseCapture() )
@@ -801,7 +805,7 @@ BOOL LLManipTranslate::handleHover(S32 x, S32 y, MASK mask)
 }
 
 void LLManipTranslate::highlightManipulators(S32 x, S32 y)
-{
+{using namespace llmaniptranslate;
 	mHighlightedPart = LL_NO_PART;
 
 	if (!mObjectSelection->getObjectCount())
@@ -1097,7 +1101,7 @@ void LLManipTranslate::render()
 }
 
 void LLManipTranslate::renderSnapGuides()
-{
+{using namespace llmaniptranslate;
 	if (!gSavedSettings.getBOOL("SnapEnabled"))
 	{
 		return;
@@ -1804,7 +1808,7 @@ void LLManipTranslate::renderText()
 }
 
 void LLManipTranslate::renderTranslationHandles()
-{
+{using namespace llmaniptranslate;
 	LLVector3 grid_origin;
 	LLVector3 grid_scale;
 	LLQuaternion grid_rotation;
@@ -2212,7 +2216,7 @@ void LLManipTranslate::renderTranslationHandles()
 
 
 void LLManipTranslate::renderArrow(S32 which_arrow, S32 selected_arrow, F32 box_size, F32 arrow_size, F32 handle_size, BOOL reverse_direction)
-{
+{using namespace llmaniptranslate;
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 	LLGLEnable gls_blend(GL_BLEND);
 	LLGLEnable gls_color_material(GL_COLOR_MATERIAL);

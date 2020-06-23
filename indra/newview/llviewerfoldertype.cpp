@@ -34,7 +34,8 @@
 
 extern LLControlGroup gSavedSettings;
 
-static const std::string empty_string;
+extern const std::string empty_string;
+
 
 struct ViewerFolderEntry : public LLDictionaryEntry
 {

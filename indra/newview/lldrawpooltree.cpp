@@ -40,7 +40,9 @@
 #include "llviewerregion.h"
 
 S32 LLDrawPoolTree::sDiffTex = 0;
+namespace lldrawpooltree {
 static LLGLSLShader* shader = NULL;
+}
 static LLTrace::BlockTimerStatHandle FTM_SHADOW_TREE("Tree Shadow");
 
 LLDrawPoolTree::LLDrawPoolTree(LLViewerTexture *texturep) :
@@ -61,7 +63,7 @@ void LLDrawPoolTree::prerender()
 }
 
 void LLDrawPoolTree::beginRenderPass(S32 pass)
-{
+{using namespace lldrawpooltree;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_TREES);
 		
 	if (LLPipeline::sUnderWaterRender)
@@ -136,7 +138,7 @@ void LLDrawPoolTree::render(S32 pass)
 }
 
 void LLDrawPoolTree::endRenderPass(S32 pass)
-{
+{using namespace lldrawpooltree;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_TREES);
 		
 	if (gPipeline.canUseWindLightShadersOnObjects())
@@ -154,7 +156,7 @@ void LLDrawPoolTree::endRenderPass(S32 pass)
 // deferred implementation
 //============================================
 void LLDrawPoolTree::beginDeferredPass(S32 pass)
-{
+{using namespace lldrawpooltree;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_TREES);
 		
 	shader = &gDeferredTreeProgram;
@@ -168,7 +170,7 @@ void LLDrawPoolTree::renderDeferred(S32 pass)
 }
 
 void LLDrawPoolTree::endDeferredPass(S32 pass)
-{
+{using namespace lldrawpooltree;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_TREES);
 		
 	shader->unbind();

@@ -53,7 +53,9 @@ const LLUUID OPAQUE_WATER_TEXTURE("43c32285-d658-1793-c123-bf86315de055");
 
 static float sTime;
 
+namespace lldrawpoolwater {
 BOOL deferred_render = FALSE;
+}
 
 BOOL LLDrawPoolWater::sSkipScreenCopy = FALSE;
 BOOL LLDrawPoolWater::sNeedsReflectionUpdate = TRUE;
@@ -134,13 +136,14 @@ S32 LLDrawPoolWater::getNumPasses()
 }
 
 void LLDrawPoolWater::beginPostDeferredPass(S32 pass)
-{
+{using namespace lldrawpoolwater;
+
 	beginRenderPass(pass);
 	deferred_render = TRUE;
 }
 
 void LLDrawPoolWater::endPostDeferredPass(S32 pass)
-{
+{using namespace lldrawpoolwater;
 	endRenderPass(pass);
 	deferred_render = FALSE;
 }
@@ -149,7 +152,7 @@ void LLDrawPoolWater::endPostDeferredPass(S32 pass)
 //DEFERRED IMPLEMENTATION
 //===============================
 void LLDrawPoolWater::renderDeferred(S32 pass)
-{
+{using namespace lldrawpoolwater;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_WATER);
 	deferred_render = TRUE;
 	shade();
@@ -479,7 +482,7 @@ void LLDrawPoolWater::renderReflection(LLFace* face)
 }
 
 void LLDrawPoolWater::shade()
-{
+{using namespace lldrawpoolwater;
 	if (!deferred_render)
 	{
 		gGL.setColorMask(true, true);

@@ -1256,10 +1256,12 @@ void LLVOSky::updateDummyVertexBuffer()
 //----------------------------------
 //end of fake vertex buffer updating
 //----------------------------------
+namespace llvosky {
 static LLTrace::BlockTimerStatHandle FTM_GEO_SKY("Sky Geometry");
+}
 
 BOOL LLVOSky::updateGeometry(LLDrawable *drawable)
-{
+{using namespace llvosky;
 	LL_RECORD_BLOCK_TIME(FTM_GEO_SKY);
 	if (mFace[FACE_REFLECTION] == NULL)
 	{

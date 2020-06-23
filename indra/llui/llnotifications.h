@@ -795,10 +795,10 @@ public:
 	const LLNotificationFilter& getFilter() { return mFilter; }
 
 protected:
-    LLBoundListener connectChangedImpl(const LLEventListener& slot);
-    LLBoundListener connectAtFrontChangedImpl(const LLEventListener& slot);
-    LLBoundListener connectPassedFilterImpl(const LLEventListener& slot);
-    LLBoundListener connectFailedFilterImpl(const LLEventListener& slot);
+    LLBoundListener connectChangedImpl(const llevents_LLEventListener& slot);
+    LLBoundListener connectAtFrontChangedImpl(const llevents_LLEventListener& slot);
+    LLBoundListener connectPassedFilterImpl(const llevents_LLEventListener& slot);
+    LLBoundListener connectFailedFilterImpl(const llevents_LLEventListener& slot);
 
 	LLNotificationSet mItems;
 	LLStandardSignal mChanged;

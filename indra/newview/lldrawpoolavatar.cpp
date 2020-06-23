@@ -106,9 +106,11 @@ S32 AVATAR_VERTEX_BYTES = 48;
 
 BOOL gAvatarEmbossBumpMap = FALSE;
 static BOOL sRenderingSkinned = FALSE;
+namespace lldrawpoolavatar {
 S32 normal_channel = -1;
 S32 specular_channel = -1;
 S32 cube_channel = -1;
+}
 
 static LLTrace::BlockTimerStatHandle FTM_SHADOW_AVATAR("Avatar Shadow");
 
@@ -332,7 +334,7 @@ void LLDrawPoolAvatar::beginDeferredRiggedAlpha()
 }
 
 void LLDrawPoolAvatar::beginDeferredRiggedMaterialAlpha(S32 pass)
-{
+{using namespace lldrawpoolavatar;
 	switch (pass)
 	{
 	case 0: pass = 1; break;
@@ -358,7 +360,7 @@ void LLDrawPoolAvatar::beginDeferredRiggedMaterialAlpha(S32 pass)
 }
 
 void LLDrawPoolAvatar::endDeferredRiggedAlpha()
-{
+{using namespace lldrawpoolavatar;
 	LLVertexBuffer::unbind();
 	gPipeline.unbindDeferredShader(*sVertexProgram);
 	sDiffuseChannel = 0;
@@ -834,7 +836,7 @@ void LLDrawPoolAvatar::endRigid()
 }
 
 void LLDrawPoolAvatar::beginDeferredImpostor()
-{
+{using namespace lldrawpoolavatar;
 	if (!LLPipeline::sReflectionRender)
 	{
 		LLVOAvatar::sRenderDistance = llclamp(LLVOAvatar::sRenderDistance, 16.f, 256.f);
@@ -1119,7 +1121,7 @@ void LLDrawPoolAvatar::endRiggedFullbright()
 }
 
 void LLDrawPoolAvatar::beginRiggedShinySimple()
-{
+{using namespace lldrawpoolavatar;
 	if (sShaderLevel > 0)
 	{
 		if (LLPipeline::sUnderWaterRender)
@@ -1151,7 +1153,7 @@ void LLDrawPoolAvatar::beginRiggedShinySimple()
 }
 
 void LLDrawPoolAvatar::endRiggedShinySimple()
-{
+{using namespace lldrawpoolavatar;
 	LLVertexBuffer::unbind();
 	if (sShaderLevel > 0 || gPipeline.canUseVertexShaders())
 	{
@@ -1162,7 +1164,7 @@ void LLDrawPoolAvatar::endRiggedShinySimple()
 }
 
 void LLDrawPoolAvatar::beginRiggedFullbrightShiny()
-{
+{using namespace lldrawpoolavatar;
 	if (sShaderLevel > 0)
 	{
 		if (LLPipeline::sUnderWaterRender)
@@ -1213,7 +1215,7 @@ void LLDrawPoolAvatar::beginRiggedFullbrightShiny()
 }
 
 void LLDrawPoolAvatar::endRiggedFullbrightShiny()
-{
+{using namespace lldrawpoolavatar;
 	LLVertexBuffer::unbind();
 	if (sShaderLevel > 0 || gPipeline.canUseVertexShaders())
 	{
@@ -1239,7 +1241,7 @@ void LLDrawPoolAvatar::endDeferredRiggedSimple()
 }
 
 void LLDrawPoolAvatar::beginDeferredRiggedBump()
-{
+{using namespace lldrawpoolavatar;
 	sVertexProgram = &gDeferredSkinnedBumpProgram;
 	sVertexProgram->bind();
 	normal_channel = sVertexProgram->enableTexture(LLViewerShaderMgr::BUMP_MAP);
@@ -1247,7 +1249,7 @@ void LLDrawPoolAvatar::beginDeferredRiggedBump()
 }
 
 void LLDrawPoolAvatar::endDeferredRiggedBump()
-{
+{using namespace lldrawpoolavatar;
 	LLVertexBuffer::unbind();
 	sVertexProgram->disableTexture(LLViewerShaderMgr::BUMP_MAP);
 	sVertexProgram->disableTexture(LLViewerShaderMgr::DIFFUSE_MAP);
@@ -1258,7 +1260,8 @@ void LLDrawPoolAvatar::endDeferredRiggedBump()
 }
 
 void LLDrawPoolAvatar::beginDeferredRiggedMaterial(S32 pass)
-{
+{using namespace lldrawpoolavatar;
+
 	if (pass == 1 ||
 		pass == 5 ||
 		pass == 9 ||
@@ -1280,7 +1283,7 @@ void LLDrawPoolAvatar::beginDeferredRiggedMaterial(S32 pass)
 }
 
 void LLDrawPoolAvatar::endDeferredRiggedMaterial(S32 pass)
-{
+{using namespace lldrawpoolavatar;
 	if (pass == 1 ||
 		pass == 5 ||
 		pass == 9 ||
@@ -1329,7 +1332,7 @@ static LLTrace::BlockTimerStatHandle FTM_RENDER_AVATARS("renderAvatars");
 
 
 void LLDrawPoolAvatar::renderAvatars(LLVOAvatar* single_avatar, S32 pass)
-{
+{using namespace lldrawpoolavatar;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_AVATARS);
 
 	if (pass == -1)
@@ -2037,7 +2040,7 @@ LLMatrix4a* LLDrawPoolAvatar::getCacheSkinningMats(LLDrawable* drawable, const L
 //</FS:Beq>
 
 void LLDrawPoolAvatar::renderRigged(LLVOAvatar* avatar, U32 type, bool glow)
-{
+{using namespace lldrawpoolavatar;
 	if (!avatar->shouldRenderRigged())
 	{
 		return;

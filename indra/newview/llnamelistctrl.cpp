@@ -45,8 +45,9 @@
 #include "llslurl.h"
 #include "llurlaction.h"
 
+namespace llnamelistctrl {
 static LLDefaultChildRegistry::Register<LLNameListCtrl> r("name_list");
-
+}
 static const S32 info_icon_size = 16;
 
 void LLNameListCtrl::NameTypeNames::declareValues()

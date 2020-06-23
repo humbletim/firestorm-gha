@@ -39,7 +39,7 @@
 #include "lldir.h"
 
 // size of chunks read from/written to disk
-const U32 LL_MAX_XFER_FILE_BUFFER = 65536;
+extern const U32 LL_MAX_XFER_FILE_BUFFER;
 
 // local function to copy a file
 S32 copy_file(const std::string& from, const std::string& to);

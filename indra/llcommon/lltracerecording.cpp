@@ -32,13 +32,13 @@
 #include "lltracethreadrecorder.h"
 #include "llthread.h"
 
+namespace LLTrace
+{
+
 inline F64 lerp(F64 a, F64 b, F64 u) 
 {
 	return a + ((b - a) * u);
 }
-
-namespace LLTrace
-{
 
 extern MemStatHandle gTraceMemStat;
 

@@ -124,7 +124,9 @@ private:
 	LLIconCtrl*		mArrowIcon;
 };
 
+namespace llnavigationbar {
 static LLDefaultChildRegistry::Register<LLTeleportHistoryMenuItem> r("teleport_history_menu_item");
+}
 
 
 LLTeleportHistoryMenuItem::LLTeleportHistoryMenuItem(const Params& p)

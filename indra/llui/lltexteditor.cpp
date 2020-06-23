@@ -66,17 +66,13 @@
 // 
 // Globals
 //
-static LLDefaultChildRegistry::Register<LLTextEditor> r("simple_text_editor");
+namespace lltexteditor {
+	static LLDefaultChildRegistry::Register<LLTextEditor> r("simple_text_editor");
+}
 
 // Compiler optimization, generate extern template
 template class LLTextEditor* LLView::getChild<class LLTextEditor>(
 	const std::string& name, BOOL recurse) const;
-
-//
-// Constants
-//
-const S32	SPACES_PER_TAB = 4;
-const F32	SPELLCHECK_DELAY = 0.5f;	// delay between the last keypress and spell checking the word the cursor is on
 
 ///////////////////////////////////////////////////////////////////
 

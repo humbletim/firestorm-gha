@@ -31,7 +31,7 @@
 #include "llmemory.h"
 #include "llsingleton.h"
 
-static const std::string empty_string;
+const std::string empty_string;
 
 struct ViewerAssetEntry : public LLDictionaryEntry
 {

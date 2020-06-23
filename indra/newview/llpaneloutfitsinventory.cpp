@@ -45,11 +45,14 @@
 #include "llviewercontrol.h"
 #include "llviewerfoldertype.h"
 
+namespace llpaneloutfitsinventory {
 static const std::string OUTFITS_TAB_NAME = "outfitslist_tab";
 static const std::string OUTFIT_GALLERY_TAB_NAME = "outfit_gallery_tab";
 static const std::string COF_TAB_NAME = "cof_tab";
 
 static LLPanelInjector<LLPanelOutfitsInventory> t_inventory("panel_outfits_inventory");
+
+}
 
 LLPanelOutfitsInventory::LLPanelOutfitsInventory() :
 	mMyOutfitsPanel(NULL),
@@ -212,7 +215,7 @@ void LLPanelOutfitsInventory::onWearButtonClick()
 }
 
 bool LLPanelOutfitsInventory::onSaveCommit(const LLSD& notification, const LLSD& response)
-{
+{using namespace llpaneloutfitsinventory;
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	if (0 == option)
 	{
@@ -335,7 +338,7 @@ bool LLPanelOutfitsInventory::isActionEnabled(const LLSD& userdata)
 // Tab panels                                                                   //
 
 void LLPanelOutfitsInventory::initTabPanels()
-{
+{using namespace llpaneloutfitsinventory;
     //TODO: Add LLOutfitGallery change callback
 	mCurrentOutfitPanel = findChild<LLPanelWearing>(COF_TAB_NAME);
 	mCurrentOutfitPanel->setSelectionChangeCallback(boost::bind(&LLPanelOutfitsInventory::updateVerbs, this));
@@ -362,21 +365,21 @@ void LLPanelOutfitsInventory::onTabChange()
 }
 
 bool LLPanelOutfitsInventory::isCOFPanelActive() const
-{
+{using namespace llpaneloutfitsinventory;
 	if (!mActivePanel) return false;
 
 	return mActivePanel->getName() == COF_TAB_NAME;
 }
 
 bool LLPanelOutfitsInventory::isOutfitsListPanelActive() const
-{
+{using namespace llpaneloutfitsinventory;
 	if (!mActivePanel) return false;
 
 	return mActivePanel->getName() == OUTFITS_TAB_NAME;
 }
 
 bool LLPanelOutfitsInventory::isOutfitsGalleryPanelActive() const
-{
+{using namespace llpaneloutfitsinventory;
 	if (!mActivePanel) return false;
 
 	return mActivePanel->getName() == OUTFIT_GALLERY_TAB_NAME;

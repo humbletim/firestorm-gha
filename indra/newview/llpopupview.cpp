@@ -27,7 +27,9 @@
 
 #include "llpopupview.h"
 
+namespace llpopupview {
 static LLPanelInjector<LLPopupView> r("popup_holder");
+}
 
 bool view_visible_and_enabled(LLView* viewp)
 {

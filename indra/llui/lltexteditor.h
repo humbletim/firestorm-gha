@@ -50,6 +50,12 @@ class LLTextEditor :
 	public LLTextBase,
 	protected LLPreeditor
 {
+	//
+	// Constants
+	//
+	static const int	SPACES_PER_TAB = 4;
+	const float	SPELLCHECK_DELAY = 0.5f;	// delay between the last keypress and spell checking the word the cursor is on
+
 public:
 	struct Params : public LLInitParam::Block<Params, LLTextBase::Params>
 	{

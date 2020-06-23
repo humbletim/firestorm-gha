@@ -1348,7 +1348,9 @@ LLTaskInvFVBridge* LLTaskInvFVBridge::createObjectBridge(LLPanelObjectInventory*
 /// Class LLPanelObjectInventory
 ///----------------------------------------------------------------------------
 
+namespace llpanelobjectinventory {
 static LLDefaultChildRegistry::Register<LLPanelObjectInventory> r("panel_inventory_object");
+}
 
 void do_nothing()
 {

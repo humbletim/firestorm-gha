@@ -68,7 +68,9 @@ public:
 
 };
 
-static LLDefaultChildRegistry::Register<LLUICtrlLocate> r1("locate");
+namespace lluictrlfactory {
+	static LLDefaultChildRegistry::Register<LLUICtrlLocate> r1("locate");
+}
 
 // Build time optimization, generate this once in .cpp file
 template class LLUICtrlFactory* LLSingleton<class LLUICtrlFactory>::getInstance();

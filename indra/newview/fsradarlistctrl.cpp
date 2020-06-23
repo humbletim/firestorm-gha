@@ -31,7 +31,9 @@
 #include "llscrolllistitem.h"
 #include "rlvhandler.h"
 
+namespace fsradarlistctrl {
 static LLDefaultChildRegistry::Register<FSRadarListCtrl> r("radar_list");
+}
 
 FSRadarListCtrl::FSRadarListCtrl(const Params& p)
 :	FSScrollListCtrl(p)

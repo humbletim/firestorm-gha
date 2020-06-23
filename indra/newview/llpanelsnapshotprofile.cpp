@@ -66,7 +66,9 @@ private:
 	void onSend();
 };
 
+namespace llpanelsnapshotprofile {
 static LLPanelInjector<LLPanelSnapshotProfile> panel_class("llpanelsnapshotprofile");
+}
 
 LLPanelSnapshotProfile::LLPanelSnapshotProfile()
 {

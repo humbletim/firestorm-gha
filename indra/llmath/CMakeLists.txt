@@ -12,39 +12,42 @@ include_directories(
     )
 
 set(llmath_SOURCE_FILES
-    llbbox.cpp
-    llbboxlocal.cpp
-    llcalc.cpp
-    llcalcparser.cpp
-    llcamera.cpp
-    llcoordframe.cpp
-    llline.cpp
-    llmatrix3a.cpp
-    llmatrix4a.cpp
-    llmodularmath.cpp
-    lloctree.cpp
-    llperlin.cpp
-    llquaternion.cpp
-    llrigginginfo.cpp
-    llrect.cpp
-    llsphere.cpp
-    llvector4a.cpp
-    llvolume.cpp
-    llvolumemgr.cpp
-    llvolumeoctree.cpp
-    llsdutil_math.cpp
-    m3math.cpp
-    m4math.cpp
-    raytrace.cpp
-    v2math.cpp
-    v3color.cpp
-    v3dmath.cpp
-    v3math.cpp
-    v4color.cpp
-    v4coloru.cpp
-    v4math.cpp
-    xform.cpp
+    # llbbox.cpp
+    # llbboxlocal.cpp
+    # llcalc.cpp
+    # llcalcparser.cpp
+    # llcamera.cpp
+    # llcoordframe.cpp
+    # llline.cpp
+    # llmatrix3a.cpp
+    # llmatrix4a.cpp
+    # llmodularmath.cpp
+    # lloctree.cpp
+    # llperlin.cpp
+    # llquaternion.cpp
+    # llrigginginfo.cpp
+    # llrect.cpp
+    # llsphere.cpp
+    # llvector4a.cpp
+    # llvolume.cpp
+    # llvolumemgr.cpp
+    # llvolumeoctree.cpp
+    # llsdutil_math.cpp
+    # m3math.cpp
+    # m4math.cpp
+    # raytrace.cpp
+    # v2math.cpp
+    # v3color.cpp
+    # v3dmath.cpp
+    # v3math.cpp
+    # v4color.cpp
+    # v4coloru.cpp
+    # v4math.cpp
+    # xform.cpp
+    llmath_star.cpp
     )
+
+  set_source_files_properties(llmath_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 
 set(llmath_HEADER_FILES
     CMakeLists.txt

@@ -63,7 +63,9 @@
 
 #include "fsregistrarutils.h"
 
-static LLDefaultChildRegistry::Register<LLScrollListCtrl> r("scroll_list");
+namespace llscrolllistctrl {
+	static LLDefaultChildRegistry::Register<LLScrollListCtrl> r("scroll_list");
+}
 
 // local structures & classes.
 struct SortScrollListItem

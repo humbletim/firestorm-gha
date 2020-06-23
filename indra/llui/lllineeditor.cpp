@@ -70,7 +70,9 @@ const F32	SPELLCHECK_DELAY = 0.5f;	// delay between the last keypress and spell 
 
 const std::string PASSWORD_ASTERISK( "\xE2\x80\xA2" ); // U+2022 BULLET
 
-static LLDefaultChildRegistry::Register<LLLineEditor> r1("line_editor");
+namespace lllineeditor {
+	static LLDefaultChildRegistry::Register<LLLineEditor> r1("line_editor");
+}
 
 // Compiler optimization, generate extern template
 template class LLLineEditor* LLView::getChild<class LLLineEditor>(

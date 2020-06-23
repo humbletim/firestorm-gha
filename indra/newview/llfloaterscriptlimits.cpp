@@ -81,7 +81,9 @@ const S32 FAKE_AVAILABLE_MEMORY = 895577;
 
 #endif
 
+namespace llfloaterscriptlimits {
 const S32 SIZE_OF_ONE_KB = 1024;
+}
 
 LLFloaterScriptLimits::LLFloaterScriptLimits(const LLSD& seed)
 	: LLFloater(seed)
@@ -394,7 +396,7 @@ void LLPanelScriptLimitsRegionMemory::onNameCache(
 }
 
 void LLPanelScriptLimitsRegionMemory::setRegionDetails(LLSD content)
-{
+{using namespace llfloaterscriptlimits;
 	LLScrollListCtrl *list = getChild<LLScrollListCtrl>("scripts_list");
 	
 	if(!list)
@@ -572,7 +574,7 @@ void LLPanelScriptLimitsRegionMemory::setRegionDetails(LLSD content)
 }
 
 void LLPanelScriptLimitsRegionMemory::setRegionSummary(LLSD content)
-{
+{using namespace llfloaterscriptlimits;
 	if(content["summary"]["used"][0]["type"].asString() == std::string("memory"))
 	{
 		mParcelMemoryUsed = content["summary"]["used"][0]["amount"].asInteger() / SIZE_OF_ONE_KB;

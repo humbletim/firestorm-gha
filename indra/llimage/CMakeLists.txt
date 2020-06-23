@@ -23,18 +23,21 @@ include_directories(
     )
 
 set(llimage_SOURCE_FILES
-    llimagebmp.cpp
-    llimage.cpp
-    llimagedimensionsinfo.cpp
-    llimagedxt.cpp
-    llimagefilter.cpp
-    llimagej2c.cpp
-    llimagejpeg.cpp
-    llimagepng.cpp
-    llimagetga.cpp
-    llimageworker.cpp
-    llpngwrapper.cpp
+    # llimagebmp.cpp
+    # llimage.cpp
+    # llimagedimensionsinfo.cpp
+    # llimagedxt.cpp
+    # llimagefilter.cpp
+    # llimagej2c.cpp
+    # llimagejpeg.cpp
+    # llimagepng.cpp
+    # llimagetga.cpp
+    # llimageworker.cpp
+    # llpngwrapper.cpp
+    llimage_star.cpp
     )
+
+  set_source_files_properties(llimage_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 
 set(llimage_HEADER_FILES
     CMakeLists.txt

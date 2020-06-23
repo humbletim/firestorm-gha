@@ -109,6 +109,7 @@ LLFrameTimer LLMenuHolderGL::sItemActivationTimer;
 
 const F32 ACTIVATE_HIGHLIGHT_TIME = 0.3f;
 
+namespace llmenugl {
 static MenuRegistry::Register<LLMenuItemGL> register_menu_item("menu_item");
 static MenuRegistry::Register<LLMenuItemSeparatorGL> register_separator("menu_item_separator");
 static MenuRegistry::Register<LLMenuItemCallGL> register_menu_item_call("menu_item_call");
@@ -118,7 +119,7 @@ static MenuRegistry::Register<LLMenuItemTearOffGL> register_menu_item_tear_off("
 static MenuRegistry::Register<LLMenuGL> register_menu("menu");
 
 static LLDefaultChildRegistry::Register<LLMenuGL> register_menu_default("menu");
-
+}
 
 
 ///============================================================================

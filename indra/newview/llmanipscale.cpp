@@ -62,14 +62,17 @@
 #include "llmeshrepository.h"
 #include "lltrans.h"
 
+namespace llmanipscale {
 const F32 MAX_MANIP_SELECT_DISTANCE_SQUARED = 11.f * 11.f;
 const F32 SNAP_GUIDE_SCREEN_OFFSET = 0.05f;
 const F32 SNAP_GUIDE_SCREEN_LENGTH = 0.7f;
 const F32 SELECTED_MANIPULATOR_SCALE = 1.2f;
 const F32 MANIPULATOR_SCALE_HALF_LIFE = 0.07f;
+}
 
 BOOL LLManipScale::mInvertUniform=FALSE;	// <FS:Zi> Add middle mouse control for switching uniform scaling on the fly
 
+namespace llmanipscale {
 const LLManip::EManipPart MANIPULATOR_IDS[LLManipScale::NUM_MANIPULATORS] = 
 {
 	LLManip::LL_CORNER_NNN,
@@ -108,6 +111,8 @@ F32 get_default_max_prim_scale(bool is_flora)
 // </AW: opensim-limits>
 	}
 }
+
+}//ns
 
 // static
 void LLManipScale::setUniform(BOOL b)
@@ -149,7 +154,7 @@ BOOL LLManipScale::getStretchTextures()
 }
 
 inline void LLManipScale::conditionalHighlight( U32 part, const LLColor4* highlight, const LLColor4* normal )
-{
+{using namespace llmanipscale;
 	LLColor4 default_highlight( 1.f, 1.f, 1.f, 1.f );
 	LLColor4 default_normal( 0.7f, 0.7f, 0.7f, 0.6f );
 	LLColor4 invisible(0.f, 0.f, 0.f, 0.f);
@@ -216,7 +221,7 @@ LLManipScale::~LLManipScale()
 }
 
 void LLManipScale::render()
-{
+{using namespace llmanipscale;
 	LLGLSUIDefault gls_ui;
 	gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
 	LLGLDepthTest gls_depth(GL_TRUE);
@@ -456,7 +461,7 @@ BOOL LLManipScale::handleHover(S32 x, S32 y, MASK mask)
 }
 
 void LLManipScale::highlightManipulators(S32 x, S32 y)
-{
+{using namespace llmanipscale;
 	mHighlightedPart = LL_NO_PART;
 
 	// If we have something selected, try to hit its manipulator handles.
@@ -863,7 +868,7 @@ void LLManipScale::drag( S32 x, S32 y )
 
 // Scale on three axis simultaneously
 void LLManipScale::dragCorner( S32 x, S32 y )
-{
+{using namespace llmanipscale;
 	// Suppress scale if mouse hasn't moved.
 	if (x == mLastMouseX && y == mLastMouseY)
 	{
@@ -1240,7 +1245,7 @@ void LLManipScale::sendUpdates( BOOL send_position_update, BOOL send_scale_updat
 // Rescales in a single dimension.  Either uniform (standard) or one-sided (scale plus translation)
 // depending on mUniform.  Handles multiple selection and objects that are not aligned to the bounding box.
 void LLManipScale::stretchFace( const LLVector3& drag_start_agent, const LLVector3& drag_delta_agent )
-{
+{using namespace llmanipscale;
 	LLVector3 drag_start_center_agent = gAgent.getPosAgentFromGlobal(mDragStartCenterGlobal);
 
 	for (LLObjectSelection::iterator iter = mObjectSelection->begin();
@@ -1363,7 +1368,8 @@ void LLManipScale::renderGuidelinesPart( const LLBBox& bbox )
 }
 
 void LLManipScale::updateSnapGuides(const LLBBox& bbox)
-{
+{using namespace llmanipscale;
+
 	LLVector3 grid_origin;
 	LLVector3 grid_scale;
 	LLQuaternion grid_rotation;
@@ -2030,7 +2036,7 @@ LLVector3 LLManipScale::unitVectorToLocalBBoxExtent( const LLVector3& v, const L
 
 // returns max allowable scale along a given stretch axis
 F32		LLManipScale::partToMaxScale( S32 part, const LLBBox &bbox ) const
-{
+{using namespace llmanipscale;
 	F32 max_scale_factor = 0.f;
 	LLVector3 bbox_extents = unitVectorToLocalBBoxExtent( partToUnitVector( part ), bbox );
 	bbox_extents.abs();
@@ -2054,7 +2060,7 @@ F32		LLManipScale::partToMaxScale( S32 part, const LLBBox &bbox ) const
 
 // returns min allowable scale along a given stretch axis
 F32		LLManipScale::partToMinScale( S32 part, const LLBBox &bbox ) const
-{
+{using namespace llmanipscale;
 	LLVector3 bbox_extents = unitVectorToLocalBBoxExtent( partToUnitVector( part ), bbox );
 	bbox_extents.abs();
 	F32 min_extent = get_default_max_prim_scale();

@@ -63,7 +63,9 @@
 
 #include "fsfloaterplacedetails.h"
 
+namespace llviewertexteditor {
 static LLDefaultChildRegistry::Register<LLViewerTextEditor> r("text_editor");
+}
 
 ///-----------------------------------------------------------------------
 ///  Class LLEmbeddedLandmarkCopied

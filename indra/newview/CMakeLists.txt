@@ -130,743 +130,799 @@ include_directories(SYSTEM
 
 set(viewer_SOURCE_FILES
 # <Add FS includes below this line>
-    alfloaterregiontracker.cpp
-    animationexplorer.cpp
-    ao.cpp
-    aoengine.cpp
-    aoset.cpp
-    chatbar_as_cmdline.cpp
-    daeexport.cpp
-    dialogstack.cpp
-    exoflickr.cpp
-    exoflickrauth.cpp
-    exogroupmutelist.cpp
-    exopostprocess.cpp
-    floatermedialists.cpp
-    fsareasearch.cpp
-    fsareasearchmenu.cpp
-    fsassetblacklist.cpp
-    fsavatarrenderpersistence.cpp
-    fsavatarsearchmenu.cpp
-    fsblocklistmenu.cpp
-    fschathistory.cpp
-    fschatoptionsmenu.cpp
-    fscommon.cpp
-    fsconsoleutils.cpp
-    fscontactsfriendsmenu.cpp
-    fsdata.cpp
-    fsdroptarget.cpp
-    fsexportperms.cpp
-    fsfloateraddtocontactset.cpp
-    fsfloaterassetblacklist.cpp
-    fsfloateravatarrendersettings.cpp
-    fsfloaterblocklist.cpp
-    fsfloatercontacts.cpp
-    fsfloatercontactsetconfiguration.cpp
-    fsfloaterexport.cpp
-    fsfloatergroup.cpp
-    fsfloatergrouptitles.cpp
-    fsfloaterimport.cpp
-    fsfloaterim.cpp
-    fsfloaterimcontainer.cpp
-    fsfloaternearbychat.cpp
-    fsfloaterplacedetails.cpp
-    fsfloaterposestand.cpp
-    fsfloaterprofile.cpp
-    fsfloaterprotectedfolders.cpp
-    fsfloaterradar.cpp
-    fsfloatersearch.cpp
-    fsfloaterstatistics.cpp
-    fsfloaterteleporthistory.cpp
-    fsfloatervoicecontrols.cpp
-    fsfloatervolumecontrols.cpp
-    fsfloatervramusage.cpp
-    fsfloaterwearablefavorites.cpp
-    fskeywords.cpp
-    fslightshare.cpp
-    fslslbridge.cpp
-    fslslbridgerequest.cpp
-    fslslpreproc.cpp
-    fslslpreprocviewer.cpp
-    fsmoneytracker.cpp
-    fsnamelistavatarmenu.cpp
-    fsnearbychatbarlistener.cpp
-    fsnearbychatcontrol.cpp
-    fsnearbychathub.cpp
-    fsnearbychatvoicemonitor.cpp
-    fspanelblocklist.cpp
-    fspanelclassified.cpp
-    fspanelcontactsets.cpp
-    fspanelimcontrolpanel.cpp
-    fspanellogin.cpp
-    fspanelprefs.cpp
-    fspanelprofile.cpp
-    fspanelprofileclassifieds.cpp
-    fspanelradar.cpp
-    fsparticipantlist.cpp
-    fspose.cpp
-    fsradar.cpp
-    fsradarentry.cpp
-    fsradarlistctrl.cpp
-    fsradarmenu.cpp
-    fsregioncross.cpp
-    fsscriptlibrary.cpp
-    fsscrolllistctrl.cpp
-    fsslurlcommand.cpp
-    groupchatlistener.cpp
-    kcwlinterface.cpp
-    lggbeamcolormapfloater.cpp
-    lggbeammapfloater.cpp
-    lggbeammaps.cpp
-    lggbeamscolors.cpp
-    lggcontactsets.cpp
-    lfsimfeaturehandler.cpp
-    llflickrconnect.cpp
-    llfloaterflickr.cpp
-    llpanelopenregionsettings.cpp
-    # <FS:Ansariel> [Legacy Bake]
-    llagentwearablesfetch.cpp
+    # alfloaterregiontracker.cpp
+    # animationexplorer.cpp
+    # ao.cpp
+    # aoengine.cpp
+    # aoset.cpp
+    # chatbar_as_cmdline.cpp
+    # daeexport.cpp
+    # dialogstack.cpp
+    # exoflickr.cpp
+    # exoflickrauth.cpp
+    # exogroupmutelist.cpp
+    # exopostprocess.cpp
+    # floatermedialists.cpp
+    # fsareasearch.cpp
+    # fsareasearchmenu.cpp
+    # fsassetblacklist.cpp
+    # fsavatarrenderpersistence.cpp
+    # fsavatarsearchmenu.cpp
+    # fsblocklistmenu.cpp
+    # fschathistory.cpp
+    # fschatoptionsmenu.cpp
+    # fscommon.cpp
+    # fsconsoleutils.cpp
+    # fscontactsfriendsmenu.cpp
+    # fsdata.cpp
+    # fsdroptarget.cpp
+    # fsexportperms.cpp
+    llmiscfirst_star.cpp
+    
+    # fsfloateraddtocontactset.cpp
+    # fsfloaterassetblacklist.cpp
+    # fsfloateravatarrendersettings.cpp
+    # fsfloaterblocklist.cpp
+    # fsfloatercontacts.cpp
+    # fsfloatercontactsetconfiguration.cpp
+    # fsfloaterexport.cpp
+    # fsfloatergroup.cpp
+    # fsfloatergrouptitles.cpp
+    # fsfloaterimport.cpp
+    # fsfloaterim.cpp
+    # fsfloaterimcontainer.cpp
+    # fsfloaternearbychat.cpp
+    # fsfloaterplacedetails.cpp
+    # fsfloaterposestand.cpp
+    # fsfloaterprofile.cpp
+    # fsfloaterprotectedfolders.cpp
+    # fsfloaterradar.cpp
+    # fsfloatersearch.cpp
+    # fsfloaterstatistics.cpp
+    # fsfloaterteleporthistory.cpp
+    # fsfloatervoicecontrols.cpp
+    # fsfloatervolumecontrols.cpp
+    # fsfloatervramusage.cpp
+    # fsfloaterwearablefavorites.cpp
+    fsfloater_star.cpp
 
-    llaccountingcostmanager.cpp
-    llaisapi.cpp
-    llagent.cpp
-    llagentaccess.cpp
-    llagentbenefits.cpp
-    llagentcamera.cpp
-    llagentdata.cpp
-    llagentlanguage.cpp
-    llagentlistener.cpp
-    llagentpicksinfo.cpp
-    llagentpilot.cpp
-    llagentui.cpp
-    llagentwearables.cpp
-    llanimstatelabels.cpp
-    llappcorehttp.cpp
-    llappearancemgr.cpp
-    llappviewer.cpp
-    llappviewerlistener.cpp
-    llattachmentsmgr.cpp
-    llaudiosourcevo.cpp
-    llautoreplace.cpp
-    llavataractions.cpp
-    llavatariconctrl.cpp
-    llavatarlist.cpp
-    llavatarlistitem.cpp
-    llavatarrenderinfoaccountant.cpp
-    llavatarrendernotifier.cpp
-    llavatarpropertiesprocessor.cpp
-    llblockedlistitem.cpp
-    llblocklist.cpp
-    llbox.cpp
-    llbreadcrumbview.cpp
-    llbrowsernotification.cpp
-    llbuycurrencyhtml.cpp
-    llcallingcard.cpp
-    llchannelmanager.cpp
-    llchatbar.cpp
-    llchathistory.cpp
-    llchatitemscontainerctrl.cpp
-    llchatmsgbox.cpp
-    llchiclet.cpp
-    llchicletbar.cpp
-    llclassifiedinfo.cpp
-    llcofwearables.cpp
-    llcolorswatch.cpp
-    llcommanddispatcherlistener.cpp
-    llcommandhandler.cpp
-    llcommandlineparser.cpp
-    llcommunicationchannel.cpp
-    llcompilequeue.cpp
-    llconfirmationmanager.cpp
-    llcontrolavatar.cpp
-    llconversationlog.cpp
-    llconversationloglist.cpp
-    llconversationloglistitem.cpp
-    llconversationmodel.cpp
-    llconversationview.cpp
-    llcurrencyuimanager.cpp
-    llcylinder.cpp
-    lldateutil.cpp
-    lldaycyclemanager.cpp
-    lldebugmessagebox.cpp
-    lldebugview.cpp
-    lldeferredsounds.cpp
-    lldelayedgestureerror.cpp
-    lldirpicker.cpp
-    lldonotdisturbnotificationstorage.cpp
-    lldndbutton.cpp
-    lldrawable.cpp
-    lldrawpool.cpp
-    lldrawpoolalpha.cpp
-    lldrawpoolavatar.cpp
-    lldrawpoolbump.cpp
-    lldrawpoolground.cpp
-    lldrawpoolmaterials.cpp
-    lldrawpoolsimple.cpp
-    lldrawpoolsky.cpp
-    lldrawpoolterrain.cpp
-    lldrawpooltree.cpp
-    lldrawpoolwater.cpp
-    lldrawpoolwlsky.cpp
-    lldynamictexture.cpp
-    llemote.cpp
-    llenvmanager.cpp
-    llestateinfomodel.cpp
-    lleventnotifier.cpp
-    lleventpoll.cpp
-    llexpandabletextbox.cpp
-    llexperiencelog.cpp
-    llexternaleditor.cpp
-    llface.cpp
-    llfasttimerview.cpp
-    llfavoritesbar.cpp
-    llfeaturemanager.cpp
-    llfilepicker.cpp
-    llfilteredwearablelist.cpp
-    llfirstuse.cpp
-    llflexibleobject.cpp
-    llfloaterabout.cpp
-    llfloaterbvhpreview.cpp
-    llfloaterauction.cpp
-    llfloaterautoreplacesettings.cpp
-    llfloateravatar.cpp
-    llfloateravatarpicker.cpp
-    llfloateravatarrendersettings.cpp
-    llfloateravatartextures.cpp
-    llfloaterbanduration.cpp
-    llfloaterbeacons.cpp
-    llfloaterbigpreview.cpp
-    llfloaterbuildoptions.cpp
-    llfloaterbulkpermission.cpp
-    llfloaterbump.cpp
-    llfloaterbuy.cpp
-    llfloaterbuycontents.cpp
-    llfloaterbuycurrency.cpp
-    llfloaterbuycurrencyhtml.cpp
-    llfloaterbuyland.cpp
-    llfloatercamera.cpp
-    llfloaterchatvoicevolume.cpp
-    llfloatercolorpicker.cpp
-    llfloaterconversationlog.cpp
-    llfloaterconversationpreview.cpp
-    llfloaterdeleteenvpreset.cpp
-    llfloaterdeleteprefpreset.cpp
-    llfloaterdestinations.cpp
-    llfloaterdisplayname.cpp
-    llfloatereditdaycycle.cpp
-    llfloatereditsky.cpp
-    llfloatereditwater.cpp
-    llfloaterenvironmentsettings.cpp
-    llfloaterevent.cpp
-    llfloaterexperiencepicker.cpp
-    llfloaterexperienceprofile.cpp
-    llfloaterexperiences.cpp
-    llfloaterfonttest.cpp
-    llfloaterforgetuser.cpp
-    llfloatergesture.cpp
-    llfloatergodtools.cpp
-    llfloatergotoline.cpp
-    llfloatergridstatus.cpp
-    llfloatergroupbulkban.cpp
-    llfloatergroupinvite.cpp
-    llfloatergroups.cpp
-    llfloaterhandler.cpp
-    llfloaterhelpbrowser.cpp
-    llfloaterhoverheight.cpp
-    llfloaterhud.cpp
-    llfloaterimagepreview.cpp
-    llfloaterimsessiontab.cpp
-    llfloaterimsession.cpp
-    llfloaterimcontainer.cpp
-    llfloaterinspect.cpp
-    llfloaterjoystick.cpp
-    llfloaterlagmeter.cpp
-    llfloaterland.cpp
-    llfloaterlandholdings.cpp
-    llfloaterlinkreplace.cpp
-    llfloaterloadprefpreset.cpp
-    llfloatermarketplacelistings.cpp
-    llfloatermap.cpp
-    llfloatermediasettings.cpp
-    llfloatermemleak.cpp
-    llfloatermodelpreview.cpp
-    llfloatermodeluploadbase.cpp
-    llfloatermyscripts.cpp
-    llfloaternamedesc.cpp
-    llfloaternotificationsconsole.cpp
-    llfloaternotificationstabbed.cpp
-    llfloateroutfitphotopreview.cpp 
-    llfloateroutfitsnapshot.cpp
-    llfloaterobjectweights.cpp
-    llfloateropenobject.cpp
-    llfloaterpathfindingcharacters.cpp
-    llfloaterpathfindingconsole.cpp
-    llfloaterpathfindinglinksets.cpp
-    llfloaterpathfindingobjects.cpp
-    llfloaterpay.cpp
-    llfloaterperms.cpp
-    llfloaterpostprocess.cpp
-    llfloaterpreference.cpp
-    llfloaterpreviewtrash.cpp
-    llfloaterproperties.cpp
-    llfloaterregiondebugconsole.cpp
-    llfloaterregioninfo.cpp
-    llfloaterreporter.cpp
-    llfloaterregionrestarting.cpp
-    llfloatersaveprefpreset.cpp
-    llfloatersceneloadstats.cpp
-    llfloaterscriptdebug.cpp
-    llfloaterscriptedprefs.cpp
-    llfloaterscriptlimits.cpp
-    llfloaterscriptrecover.cpp
-    llfloatersearch.cpp
-    llfloatersearchreplace.cpp
-    llfloatersellland.cpp
-    llfloatersettingsdebug.cpp
-    llfloatersidepanelcontainer.cpp
-    llfloatersnapshot.cpp
-    llfloatersounddevices.cpp
-    llfloaterspellchecksettings.cpp
-    llfloatertelehub.cpp
-    llfloatertestinspectors.cpp
-    llfloatertestlistview.cpp
-    llfloatertexturefetchdebugger.cpp
-    llfloatertools.cpp
-    llfloatertopobjects.cpp
-    llfloatertos.cpp
-    llfloatertoybox.cpp
-    llfloatertranslationsettings.cpp
-    llfloateruipreview.cpp
-    llfloaterurlentry.cpp
-    llfloatervoiceeffect.cpp
-    llfloatervoicevolume.cpp
-    llfloaterwebcontent.cpp
-    llfloaterwebprofile.cpp
-    llfloaterwhitelistentry.cpp
-    llfloaterwindowsize.cpp
-    llfloaterworldmap.cpp
-    llfolderviewmodelinventory.cpp
-    llfollowcam.cpp
-    llfriendcard.cpp
-    llgesturelistener.cpp
-    llgesturemgr.cpp
-    llgiveinventory.cpp
-    llglsandbox.cpp
-    llgroupactions.cpp
-    llgroupiconctrl.cpp
-    llgrouplist.cpp
-    llgroupmgr.cpp
-    llhasheduniqueid.cpp
-    llhints.cpp
-    llhttpretrypolicy.cpp
-    llhudeffect.cpp
-    llhudeffectbeam.cpp
-    llhudeffectlookat.cpp
-    llhudeffectpointat.cpp
-    llhudeffecttrail.cpp
-    llhudeffectblob.cpp
-    llhudicon.cpp
-    llhudmanager.cpp
-    llhudnametag.cpp
-    llhudobject.cpp
-    llhudrender.cpp
-    llhudtext.cpp
-    llhudview.cpp
-    llimagefiltersmanager.cpp
-    llimhandler.cpp
-    llimprocessing.cpp
-    llimview.cpp
-    llinspect.cpp
-    llinspectavatar.cpp
-    llinspectgroup.cpp
-    llinspectobject.cpp
-    llinspectremoteobject.cpp
-    llinspecttoast.cpp
-    llinventorybridge.cpp
-    llinventoryfilter.cpp
-    llinventoryfunctions.cpp
-    llinventoryicon.cpp
-    llinventoryitemslist.cpp
-    llinventorylistitem.cpp
-    llinventorymodel.cpp
-    llinventorymodelbackgroundfetch.cpp
-    llinventoryobserver.cpp
-    llinventorypanel.cpp
-    lljoystickbutton.cpp
-    lllandmarkactions.cpp
-    lllandmarklist.cpp
-    lllistbrowser.cpp
-    lllistcontextmenu.cpp
-    lllistview.cpp
-    lllocalbitmaps.cpp
-    lllocationhistory.cpp
-    lllocationinputctrl.cpp
-    lllogchat.cpp
-    llloginhandler.cpp
-    lllogininstance.cpp
-    llmachineid.cpp
-    llmainlooprepeater.cpp
-    llmanip.cpp
-    llmaniprotate.cpp
-    llmanipscale.cpp
-    llmaniptranslate.cpp
-    llmarketplacefunctions.cpp
-    llmarketplacenotifications.cpp
-    llmaterialmgr.cpp
-    llmediactrl.cpp
-    llmediadataclient.cpp
-    llmenuoptionpathfindingrebakenavmesh.cpp
-    llmeshrepository.cpp
-    llmimetypes.cpp
-    llmorphview.cpp
-    llmoveview.cpp
-    llmutelist.cpp
-    llnamebox.cpp
-    llnameeditor.cpp
-    llnamelistctrl.cpp
-    llnavigationbar.cpp
-    llfloaterimnearbychat.cpp
-    llfloaterimnearbychathandler.cpp
-    llfloaterimnearbychatlistener.cpp
-    llnetmap.cpp
-    llnotificationalerthandler.cpp
-    llnotificationgrouphandler.cpp
-    llnotificationhandlerutil.cpp
-    llnotificationhinthandler.cpp
-    llnotificationlistitem.cpp
-    llnotificationlistview.cpp
-    llnotificationmanager.cpp
-    llnotificationofferhandler.cpp
-    llnotificationscripthandler.cpp
-    llnotificationstorage.cpp
-    llnotificationtiphandler.cpp
-    lloutfitgallery.cpp
-    lloutfitslist.cpp
-    lloutfitobserver.cpp
-    lloutputmonitorctrl.cpp
-    llpanelappearancetab.cpp
-    llpanelavatar.cpp
-    llpanelavatartag.cpp
-    llpanelblockedlist.cpp
-    llpanelclassified.cpp
-    llpanelcontents.cpp
-    llpaneleditwearable.cpp
-    llpanelexperiencelisteditor.cpp
-    llpanelexperiencelog.cpp
-    llpanelexperiencepicker.cpp
-    llpanelexperiences.cpp
-    llpanelface.cpp
-    llpanelgenerictip.cpp
-    llpanelgroup.cpp
-    llpanelgroupcreate.cpp
-    llpanelgroupbulk.cpp
-    llpanelgroupbulkban.cpp
-    llpanelgroupexperiences.cpp
-    llpanelgroupgeneral.cpp
-    llpanelgroupinvite.cpp
-    llpanelgrouplandmoney.cpp
-    llpanelgroupnotices.cpp
-    llpanelgrouproles.cpp
-    llpanelhome.cpp
-    llpanelland.cpp
-    llpanellandaudio.cpp
-    llpanellandmarkinfo.cpp
-    llpanellandmarks.cpp
-    llpanellandmedia.cpp
-    llpanellogin.cpp
-    llpanelloginlistener.cpp
-    llpanelmaininventory.cpp
-    llpanelmarketplaceinbox.cpp
-    llpanelmarketplaceinboxinventory.cpp
-    llpanelmediasettingsgeneral.cpp
-    llpanelmediasettingspermissions.cpp
-    llpanelmediasettingssecurity.cpp
-    llpanelme.cpp
-    llpanelnearbymedia.cpp
-    llpanelobject.cpp
-    llpanelobjectinventory.cpp
-    llpanelonlinestatus.cpp
-    llpaneloutfitedit.cpp
-    llpaneloutfitsinventory.cpp
-    llpanelpeople.cpp
-    llpanelpeoplemenus.cpp
-    llpanelpermissions.cpp
-    llpanelpick.cpp
-    llpanelpicks.cpp
-    llpanelplaceinfo.cpp
-    llpanelplaceprofile.cpp
-    llpanelplaces.cpp
-    llpanelplacestab.cpp
-    llpanelpresetspulldown.cpp
-    llpanelprimmediacontrols.cpp
-    llpanelprofile.cpp
-    llpanelsnapshot.cpp
-    llpanelsnapshotinventory.cpp
-    llpanelsnapshotlocal.cpp
-    llpanelsnapshotoptions.cpp
-    llpanelsnapshotpostcard.cpp
-    llpanelsnapshotprofile.cpp
-    llpanelteleporthistory.cpp
-    llpaneltiptoast.cpp
-    llpanelvoiceeffect.cpp
-    llpaneltopinfobar.cpp
-    llpanelvoicedevicesettings.cpp
-    llpanelvolume.cpp
-    llpanelvolumepulldown.cpp
-    llpanelwearing.cpp
-    llparcelselection.cpp
-    llparticipantlist.cpp
-    llpatchvertexarray.cpp
-    llpathfindingcharacter.cpp
-    llpathfindingcharacterlist.cpp
-    llpathfindinglinkset.cpp
-    llpathfindinglinksetlist.cpp
-    llpathfindingmanager.cpp
-    llpathfindingnavmesh.cpp
-    llpathfindingnavmeshstatus.cpp
-    llpathfindingnavmeshzone.cpp
-    llpathfindingobject.cpp
-    llpathfindingobjectlist.cpp
-    llpathfindingpathtool.cpp
-    llpersistentnotificationstorage.cpp
-    llphysicsmotion.cpp
-    llphysicsshapebuilderutil.cpp
-    llpipelinelistener.cpp
-    llplacesinventorybridge.cpp
-    llplacesinventorypanel.cpp
-    llplacesfolderview.cpp
-    llpopupview.cpp
-    llpostcard.cpp
-    llpresetsmanager.cpp
-    llpreview.cpp
-    llpreviewanim.cpp
-    llpreviewgesture.cpp
-    llpreviewnotecard.cpp
-    llpreviewscript.cpp
-    llpreviewsound.cpp
-    llpreviewtexture.cpp
-    llproductinforequest.cpp
-    llprogressview.cpp
-    llrecentpeople.cpp
-    llregioninfomodel.cpp
-    llregionposition.cpp
-    llremoteparcelrequest.cpp
-    llsavedsettingsglue.cpp
-    llsaveoutfitcombobtn.cpp
-    llscenemonitor.cpp
-    llsceneview.cpp
-    llscreenchannel.cpp
-    llscripteditor.cpp
-    llscriptfloater.cpp
-    llscrollingpanelparam.cpp
-    llscrollingpanelparambase.cpp
-    llsculptidsize.cpp
-    llsearchableui.cpp
-    llsearchcombobox.cpp
-    llsearchhistory.cpp
-    llsecapi.cpp
-    llsechandler_basic.cpp
-    llselectmgr.cpp
-    llshareavatarhandler.cpp
-    llsidepanelappearance.cpp
-    llsidepanelinventory.cpp
-    llsidepanelinventorysubpanel.cpp
-    llsidepaneliteminfo.cpp
-    llsidepaneltaskinfo.cpp
-    llsidetraypanelcontainer.cpp
-    llskinningutil.cpp
-    llsky.cpp
-    #llslurl.cpp #<FS:AW optional opensim support>
-    llsnapshotlivepreview.cpp
-    llspatialpartition.cpp
-    llspeakers.cpp
-    llspeakingindicatormanager.cpp
-    llsplitbutton.cpp
-    llsprite.cpp
-    llstartup.cpp
-    llstartuplistener.cpp
-    llstatusbar.cpp
-    llstylemap.cpp
-    llsurface.cpp
-    llsurfacepatch.cpp
-    llsyntaxid.cpp
-    llsyswellitem.cpp
-    llsyswellwindow.cpp
-    llteleporthistory.cpp
-    llteleporthistorystorage.cpp
-    lltextureatlas.cpp
-    lltextureatlasmanager.cpp
-    lltexturecache.cpp
-    lltexturectrl.cpp
-    lltexturefetch.cpp
-    lltextureinfo.cpp
-    lltextureinfodetails.cpp
-    lltexturestats.cpp
-    lltextureview.cpp
-    lltoast.cpp
-    lltoastalertpanel.cpp
-    lltoastgroupnotifypanel.cpp
-    lltoastimpanel.cpp
-    lltoastnotifypanel.cpp
-    lltoastpanel.cpp
-    lltoastscripttextbox.cpp
-    lltoastscriptquestion.cpp
-    lltool.cpp
-    lltoolbarview.cpp
-    lltoolbrush.cpp
-    lltoolcomp.cpp
-    lltooldraganddrop.cpp
-    lltoolface.cpp
-    lltoolfocus.cpp
-    lltoolgrab.cpp
-    lltoolgun.cpp
-    lltoolindividual.cpp
-    lltoolmgr.cpp
-    lltoolmorph.cpp
-    lltoolobjpicker.cpp
-    lltoolpie.cpp
-    lltoolpipette.cpp
-    lltoolplacer.cpp
-    lltoolselect.cpp
-    lltoolselectland.cpp
-    lltoolselectrect.cpp
-    lltracker.cpp
-    lltransientdockablefloater.cpp
-    lltransientfloatermgr.cpp
-    lltranslate.cpp
-    lluiavatar.cpp
-    lluilistener.cpp
-    lluploaddialog.cpp
-    llurl.cpp
-    llurldispatcher.cpp
-    llurldispatcherlistener.cpp
-    llurlhistory.cpp
-    llurllineeditorctrl.cpp
-    llurlwhitelist.cpp
-    llvectorperfoptions.cpp
-    llversioninfo.cpp
-    llviewchildren.cpp
-    llviewerassetstats.cpp
-    llviewerassetstorage.cpp
-    llviewerassettype.cpp
-    llviewerassetupload.cpp
-    llviewerattachmenu.cpp
-    llvieweraudio.cpp
-    llviewercamera.cpp
-    llviewerchat.cpp
-    llviewercontrol.cpp
-    llviewercontrollistener.cpp
-    llviewerdisplay.cpp
-    llviewerdisplayname.cpp
-    llviewerfloaterreg.cpp
-    llviewerfoldertype.cpp
-    llviewergenericmessage.cpp
-    llviewergesture.cpp
-    llviewerhelp.cpp
-    llviewerhelputil.cpp
-    llviewerhome.cpp
-    llviewerinventory.cpp
-    llviewerjoint.cpp
-    llviewerjointattachment.cpp
-    llviewerjointmesh.cpp
-    llviewerjoystick.cpp
-    llviewerkeyboard.cpp
-    llviewerlayer.cpp
-    llviewermedia.cpp
-    llviewermedia_streamingaudio.cpp
-    llviewermediafocus.cpp
-    llviewermenu.cpp
-    llviewermenufile.cpp
-    llviewermessage.cpp
-    #llviewernetwork.cpp #<FS:AW optional opensim support>
-    llviewerobject.cpp
-    llviewerobjectlist.cpp
-    llvieweroctree.cpp
-    llviewerparcelaskplay.cpp
-    llviewerparcelmedia.cpp
-    llviewerparcelmediaautoplay.cpp
-    llviewerparcelmgr.cpp
-    llviewerparceloverlay.cpp
-    llviewerpartsim.cpp
-    llviewerpartsource.cpp
-    llviewerregion.cpp
-    llviewershadermgr.cpp
-    llviewerstats.cpp
-    llviewerstatsrecorder.cpp
-    llviewertexlayer.cpp
-    llviewertexteditor.cpp
-    llviewertexture.cpp
-    llviewertextureanim.cpp
-    llviewertexturelist.cpp
-    llviewerthrottle.cpp
-    llviewerwearable.cpp
-    llviewerwindow.cpp
-    llviewerwindowlistener.cpp
-    llvlcomposition.cpp
-    llvlmanager.cpp
-    llvoavatar.cpp
-    llvoavatarself.cpp
-    llvocache.cpp
-    llvograss.cpp
-    llvoground.cpp
-    llvoicecallhandler.cpp
-    llvoicechannel.cpp
-    llvoiceclient.cpp
-    llvoicevisualizer.cpp
-    llvoicevivox.cpp
-    llvoinventorylistener.cpp
-    llvopartgroup.cpp
-    llvosky.cpp
-    llvosurfacepatch.cpp
-    llvotree.cpp
-    llvovolume.cpp
-    llvowater.cpp
-    llvowlsky.cpp
-    llwatchdog.cpp
-    llwaterparammanager.cpp
-    llwaterparamset.cpp
-    llwearableitemslist.cpp
-    llwearablelist.cpp
-    llweb.cpp
-    llwebprofile.cpp
-    llwind.cpp
-    llwindowlistener.cpp
-    llwlanimator.cpp
-    llwldaycycle.cpp
-    llwlhandlers.cpp
-    llwlparammanager.cpp
-    llwlparamset.cpp
-    llworld.cpp
-    llworldmap.cpp
-    llworldmapmessage.cpp
-    llworldmipmap.cpp
-    llworldmapview.cpp
-    llxmlrpclistener.cpp
-    llxmlrpctransaction.cpp
+    # fskeywords.cpp
+    # fslightshare.cpp
+    # fslslbridge.cpp
+    # fslslbridgerequest.cpp
+    fslslpreproc.cpp
+    # fslslpreprocviewer.cpp
+    # fsmoneytracker.cpp
+    # fsnamelistavatarmenu.cpp
+    # fsnearbychatbarlistener.cpp
+    # fsnearbychatcontrol.cpp
+    # fsnearbychathub.cpp
+    # fsnearbychatvoicemonitor.cpp
+    llmiscsecond_star.cpp
+    
+    
+    # fspanelblocklist.cpp
+    # fspanelclassified.cpp
+    # fspanelcontactsets.cpp
+    # fspanelimcontrolpanel.cpp
+    # fspanellogin.cpp
+    # fspanelprefs.cpp
+    # fspanelprofile.cpp
+    # fspanelprofileclassifieds.cpp
+    # fspanelradar.cpp
+    fspanel_star.cpp
+
+    # fsparticipantlist.cpp
+    # fspose.cpp
+    # fsradar.cpp
+    # fsradarentry.cpp
+    # fsradarlistctrl.cpp
+    # fsradarmenu.cpp
+    # fsregioncross.cpp
+    # fsscriptlibrary.cpp
+    # fsscrolllistctrl.cpp
+    # fsslurlcommand.cpp
+    # groupchatlistener.cpp
+    # kcwlinterface.cpp
+    # lggbeamcolormapfloater.cpp
+    # lggbeammapfloater.cpp
+    # lggbeammaps.cpp
+    # lggbeamscolors.cpp
+    # lggcontactsets.cpp
+    # lfsimfeaturehandler.cpp
+    # llflickrconnect.cpp
+    llfloaterflickr.cpp
+    # # llpanelopenregionsettings.cpp
+    # # <FS:Ansariel> [Legacy Bake]
+    # llagentwearablesfetch.cpp
+    llmiscthird_star.cpp
+
+    # llaccountingcostmanager.cpp
+    # llaisapi.cpp
+    # llagent.cpp
+    # llagentaccess.cpp
+    # llagentbenefits.cpp
+    # llagentcamera.cpp
+    # llagentdata.cpp
+    # llagentlanguage.cpp
+    # llagentlistener.cpp
+    # llagentpicksinfo.cpp
+    # llagentpilot.cpp
+    # llagentui.cpp
+    # llagentwearables.cpp
+    # llanimstatelabels.cpp
+    # llappcorehttp.cpp
+    # llappearancemgr.cpp
+    # llappviewer.cpp
+    # llappviewerlistener.cpp
+    # llattachmentsmgr.cpp
+    # llaudiosourcevo.cpp
+    # llautoreplace.cpp
+    # llavataractions.cpp
+    # llavatariconctrl.cpp
+    # llavatarlist.cpp
+    # llavatarlistitem.cpp
+    # llavatarrenderinfoaccountant.cpp
+    # llavatarrendernotifier.cpp
+    # llavatarpropertiesprocessor.cpp
+    # llblockedlistitem.cpp
+    # llblocklist.cpp
+    # llbox.cpp
+    # llbreadcrumbview.cpp
+    # llbrowsernotification.cpp
+    # llbuycurrencyhtml.cpp
+    # llcallingcard.cpp
+    # llchannelmanager.cpp
+    # llchatbar.cpp
+    # llchathistory.cpp
+    # llchatitemscontainerctrl.cpp
+    # llchatmsgbox.cpp
+    # llchiclet.cpp
+    # llchicletbar.cpp
+    # llclassifiedinfo.cpp
+    # llcofwearables.cpp
+    # llcolorswatch.cpp
+    # llcommanddispatcherlistener.cpp
+    # llcommandhandler.cpp
+    # llcommandlineparser.cpp
+    # llcommunicationchannel.cpp
+    # llcompilequeue.cpp
+    # llconfirmationmanager.cpp
+    # llcontrolavatar.cpp
+    # llconversationlog.cpp
+    # llconversationloglist.cpp
+    # llconversationloglistitem.cpp
+    # llconversationmodel.cpp
+    # llconversationview.cpp
+    # llcurrencyuimanager.cpp
+    # llcylinder.cpp
+    llac_star.cpp
+    
+    # lldateutil.cpp
+    # lldaycyclemanager.cpp
+    # lldebugmessagebox.cpp
+    # lldebugview.cpp
+    # lldeferredsounds.cpp
+    # lldelayedgestureerror.cpp
+    # lldirpicker.cpp
+    # lldonotdisturbnotificationstorage.cpp
+    # lldndbutton.cpp
+    # lldrawable.cpp
+    # lldrawpool.cpp
+    # lldrawpoolalpha.cpp
+    # lldrawpoolavatar.cpp
+    # lldrawpoolbump.cpp
+    # lldrawpoolground.cpp
+    # lldrawpoolmaterials.cpp
+    # lldrawpoolsimple.cpp
+    # lldrawpoolsky.cpp
+    # lldrawpoolterrain.cpp
+    # lldrawpooltree.cpp
+    # lldrawpoolwater.cpp
+    # lldrawpoolwlsky.cpp
+    # lldynamictexture.cpp
+    # llemote.cpp
+    # llenvmanager.cpp
+    # llestateinfomodel.cpp
+    # lleventnotifier.cpp
+    # lleventpoll.cpp
+    # llexpandabletextbox.cpp
+    # llexperiencelog.cpp
+    # llexternaleditor.cpp
+    llde_star.cpp
+    
+    # llface.cpp
+    # llfasttimerview.cpp
+    # llfavoritesbar.cpp
+    # llfeaturemanager.cpp
+    # llfilepicker.cpp
+    # llfilteredwearablelist.cpp
+    # llfirstuse.cpp
+    # llflexibleobject.cpp
+
+    # llfloaterabout.cpp
+    # llfloaterbvhpreview.cpp
+    # llfloaterauction.cpp
+    # llfloaterautoreplacesettings.cpp
+    # llfloateravatar.cpp
+    # llfloateravatarpicker.cpp
+    # llfloateravatarrendersettings.cpp
+    # llfloateravatartextures.cpp
+    # llfloaterbanduration.cpp
+    # llfloaterbeacons.cpp
+    # llfloaterbigpreview.cpp
+    # llfloaterbuildoptions.cpp
+    # llfloaterbulkpermission.cpp
+    # llfloaterbump.cpp
+    # llfloaterbuy.cpp
+    # llfloaterbuycontents.cpp
+    # llfloaterbuycurrency.cpp
+    # llfloaterbuycurrencyhtml.cpp
+    # llfloaterbuyland.cpp
+    # llfloatercamera.cpp
+    # llfloaterchatvoicevolume.cpp
+    # llfloatercolorpicker.cpp
+    # llfloaterconversationlog.cpp
+    # llfloaterconversationpreview.cpp
+    # llfloaterdeleteenvpreset.cpp
+    # llfloaterdeleteprefpreset.cpp
+    # llfloaterdestinations.cpp
+    # llfloaterdisplayname.cpp
+    # llfloatereditdaycycle.cpp
+    # llfloatereditsky.cpp
+    # llfloatereditwater.cpp
+    # llfloaterenvironmentsettings.cpp
+    # llfloaterevent.cpp
+    # llfloaterexperiencepicker.cpp
+    # llfloaterexperienceprofile.cpp
+    # llfloaterexperiences.cpp
+    # llfloaterfonttest.cpp
+    # llfloaterforgetuser.cpp
+    # llfloatergesture.cpp
+    # llfloatergodtools.cpp
+    # llfloatergotoline.cpp
+    # llfloatergridstatus.cpp
+    # llfloatergroupbulkban.cpp
+    # llfloatergroupinvite.cpp
+    # llfloatergroups.cpp
+    # llfloaterhandler.cpp
+    # llfloaterhelpbrowser.cpp
+    # llfloaterhoverheight.cpp
+    # llfloaterhud.cpp
+    # llfloaterimagepreview.cpp
+    # llfloaterimsessiontab.cpp
+    # llfloaterimsession.cpp
+    # llfloaterimcontainer.cpp
+    # llfloaterinspect.cpp
+    # llfloaterjoystick.cpp
+    # llfloaterlagmeter.cpp
+    # llfloaterland.cpp
+    # llfloaterlandholdings.cpp
+    # llfloaterlinkreplace.cpp
+    # llfloaterloadprefpreset.cpp
+    llfloaterone_star.cpp
+
+    # llfloatermarketplacelistings.cpp
+    # llfloatermap.cpp
+    # llfloatermediasettings.cpp
+    # llfloatermemleak.cpp
+    # llfloatermodelpreview.cpp
+    # llfloatermodeluploadbase.cpp
+    # llfloatermyscripts.cpp
+    # llfloaternamedesc.cpp
+    # llfloaternotificationsconsole.cpp
+    # llfloaternotificationstabbed.cpp
+    llfloateroneb_star.cpp
+    # llfloateroutfitphotopreview.cpp 
+    # llfloateroutfitsnapshot.cpp
+    # llfloaterobjectweights.cpp
+    # llfloateropenobject.cpp
+    # llfloaterpathfindingcharacters.cpp
+    # llfloaterpathfindingconsole.cpp
+    # llfloaterpathfindinglinksets.cpp
+    # llfloaterpathfindingobjects.cpp
+    llfloateronec_star.cpp
+    # llfloaterpay.cpp
+    # llfloaterperms.cpp
+    # llfloaterpostprocess.cpp
+    # llfloaterpreference.cpp
+    # llfloaterpreviewtrash.cpp
+    # llfloaterproperties.cpp
+    llfloatertwo_star.cpp
+    # llfloaterregiondebugconsole.cpp
+    # llfloaterregioninfo.cpp
+    # llfloaterreporter.cpp
+    # llfloaterregionrestarting.cpp
+    # llfloatersaveprefpreset.cpp
+    # llfloatersceneloadstats.cpp
+    # llfloaterscriptdebug.cpp
+    # llfloaterscriptedprefs.cpp
+    # llfloaterscriptlimits.cpp
+    # llfloaterscriptrecover.cpp
+    # llfloatersearch.cpp
+    # llfloatersearchreplace.cpp
+    # llfloatersellland.cpp
+    # llfloatersettingsdebug.cpp
+    # llfloatersidepanelcontainer.cpp
+    # llfloatersnapshot.cpp
+    # llfloatersounddevices.cpp
+    # llfloaterspellchecksettings.cpp
+    # llfloatertelehub.cpp
+    # llfloatertestinspectors.cpp
+    # llfloatertestlistview.cpp
+    # llfloatertexturefetchdebugger.cpp
+    # llfloatertools.cpp
+    # llfloatertopobjects.cpp
+    # llfloatertos.cpp
+    # llfloatertoybox.cpp
+    # llfloatertranslationsettings.cpp
+    # llfloateruipreview.cpp
+    # llfloaterurlentry.cpp
+    # llfloatervoiceeffect.cpp
+    # llfloatervoicevolume.cpp
+    # llfloaterwebcontent.cpp
+    # llfloaterwebprofile.cpp
+    # llfloaterwhitelistentry.cpp
+    # llfloaterwindowsize.cpp
+    # llfloaterworldmap.cpp
+    llfloaterthree_star.cpp
+
+    # llfolderviewmodelinventory.cpp
+    # llfollowcam.cpp
+    # llfriendcard.cpp
+    # llgesturelistener.cpp
+    # llgesturemgr.cpp
+    # llgiveinventory.cpp
+    # llglsandbox.cpp
+    # llgroupactions.cpp
+    # llgroupiconctrl.cpp
+    # llgrouplist.cpp
+    # llgroupmgr.cpp
+    # llhasheduniqueid.cpp
+    # llhints.cpp
+    # llhttpretrypolicy.cpp
+    # llhudeffect.cpp
+    # llhudeffectbeam.cpp
+    # llhudeffectlookat.cpp
+    # llhudeffectpointat.cpp
+    # llhudeffecttrail.cpp
+    # llhudeffectblob.cpp
+    # llhudicon.cpp
+    # llhudmanager.cpp
+    # llhudnametag.cpp
+    # llhudobject.cpp
+    # llhudrender.cpp
+    # llhudtext.cpp
+    # llhudview.cpp
+    llfh_star.cpp
+
+    # llimagefiltersmanager.cpp
+    # llimhandler.cpp
+    # llimprocessing.cpp
+    # llimview.cpp
+    # llinspect.cpp
+    # llinspectavatar.cpp
+    # llinspectgroup.cpp
+    # llinspectobject.cpp
+    # llinspectremoteobject.cpp
+    # llinspecttoast.cpp
+
+    # llinventorybridge.cpp
+    # llinventoryfilter.cpp
+    # llinventoryfunctions.cpp
+    # llinventoryicon.cpp
+    # llinventoryitemslist.cpp
+    # llinventorylistitem.cpp
+    # llinventorymodel.cpp
+    # llinventorymodelbackgroundfetch.cpp
+    # llinventoryobserver.cpp
+    # llinventorypanel.cpp
+    llinventory_star.cpp
+
+    # lljoystickbutton.cpp
+    # lllandmarkactions.cpp
+    # lllandmarklist.cpp
+    # lllistbrowser.cpp
+    # lllistcontextmenu.cpp
+    # lllistview.cpp
+    # lllocalbitmaps.cpp
+    # lllocationhistory.cpp
+    # lllocationinputctrl.cpp
+    # lllogchat.cpp
+    # llloginhandler.cpp
+    # lllogininstance.cpp
+    # llmachineid.cpp
+    # llmainlooprepeater.cpp
+    # llmanip.cpp
+    # llmaniprotate.cpp
+    # llmanipscale.cpp
+    # llmaniptranslate.cpp
+    # llmarketplacefunctions.cpp
+    # llmarketplacenotifications.cpp
+    # llmaterialmgr.cpp
+    # llmediactrl.cpp
+    # llmediadataclient.cpp
+    # llmenuoptionpathfindingrebakenavmesh.cpp
+    # llmeshrepository.cpp
+    # llmimetypes.cpp
+    # llmorphview.cpp
+    # llmoveview.cpp
+    # llmutelist.cpp
+    # llnamebox.cpp
+    # llnameeditor.cpp
+    # llnamelistctrl.cpp
+    # llnavigationbar.cpp
+    llin_star.cpp
+    
+    # llfloaterimnearbychat.cpp
+    # llfloaterimnearbychathandler.cpp
+    # llfloaterimnearbychatlistener.cpp
+
+    # llnetmap.cpp
+    # llnotificationalerthandler.cpp
+    # llnotificationgrouphandler.cpp
+    # llnotificationhandlerutil.cpp
+    # llnotificationhinthandler.cpp
+    # llnotificationlistitem.cpp
+    # llnotificationlistview.cpp
+    # llnotificationmanager.cpp
+    # llnotificationofferhandler.cpp
+    # llnotificationscripthandler.cpp
+    # llnotificationstorage.cpp
+    # llnotificationtiphandler.cpp
+
+    # lloutfitgallery.cpp
+    # lloutfitslist.cpp
+    # lloutfitobserver.cpp
+    # lloutputmonitorctrl.cpp
+
+    # llpanelappearancetab.cpp
+    # llpanelavatar.cpp
+    # llpanelavatartag.cpp
+    # llpanelblockedlist.cpp
+    # llpanelclassified.cpp
+    # llpanelcontents.cpp
+    # llpaneleditwearable.cpp
+    # llpanelexperiencelisteditor.cpp
+    # llpanelexperiencelog.cpp
+    # llpanelexperiencepicker.cpp
+    # llpanelexperiences.cpp
+    # llpanelface.cpp
+    # llpanelgenerictip.cpp
+    # llpanelgroup.cpp
+    # llpanelgroupcreate.cpp
+    # llpanelgroupbulk.cpp
+    # llpanelgroupbulkban.cpp
+    # llpanelgroupexperiences.cpp
+    # llpanelgroupgeneral.cpp
+    # llpanelgroupinvite.cpp
+    # llpanelgrouplandmoney.cpp
+    # llpanelgroupnotices.cpp
+    # llpanelgrouproles.cpp
+    # llpanelhome.cpp
+    # llpanelland.cpp
+    # llpanellandaudio.cpp
+    # llpanellandmarkinfo.cpp
+    # llpanellandmarks.cpp
+    # llpanellandmedia.cpp
+    # llpanellogin.cpp
+    # llpanelloginlistener.cpp
+    llpanelone_star.cpp
+  
+    # llpanelmaininventory.cpp
+    # llpanelmarketplaceinbox.cpp
+    # llpanelmarketplaceinboxinventory.cpp
+    # llpanelmediasettingsgeneral.cpp
+    # llpanelmediasettingspermissions.cpp
+    # llpanelmediasettingssecurity.cpp
+    # llpanelme.cpp
+    # llpanelnearbymedia.cpp
+    # llpanelobject.cpp
+    # llpanelobjectinventory.cpp
+    # llpanelonlinestatus.cpp
+    # llpaneloutfitedit.cpp
+    # llpaneloutfitsinventory.cpp
+    # llpanelpeople.cpp
+    # llpanelpeoplemenus.cpp
+    # llpanelpermissions.cpp
+    # llpanelpick.cpp
+    # llpanelpicks.cpp
+    # llpanelplaceinfo.cpp
+    # llpanelplaceprofile.cpp
+    # llpanelplaces.cpp
+    # llpanelplacestab.cpp
+    # llpanelpresetspulldown.cpp
+    # llpanelprimmediacontrols.cpp
+    # llpanelprofile.cpp
+    # llpanelsnapshot.cpp
+    # llpanelsnapshotinventory.cpp
+    # llpanelsnapshotlocal.cpp
+    # llpanelsnapshotoptions.cpp
+    # llpanelsnapshotpostcard.cpp
+    # llpanelsnapshotprofile.cpp
+    # llpanelteleporthistory.cpp
+    # llpaneltiptoast.cpp
+    # llpanelvoiceeffect.cpp
+    # llpaneltopinfobar.cpp
+    # llpanelvoicedevicesettings.cpp
+    # llpanelvolume.cpp
+    # llpanelvolumepulldown.cpp
+    # llpanelwearing.cpp
+    llpaneltwo_star.cpp
+
+    # llparcelselection.cpp
+    # llparticipantlist.cpp
+    # llpatchvertexarray.cpp
+    
+    # llpathfindingcharacter.cpp
+    # llpathfindingcharacterlist.cpp
+    # llpathfindinglinkset.cpp
+    # llpathfindinglinksetlist.cpp
+    # llpathfindingmanager.cpp
+    # llpathfindingnavmesh.cpp
+    # llpathfindingnavmeshstatus.cpp
+    # llpathfindingnavmeshzone.cpp
+    # llpathfindingobject.cpp
+    # llpathfindingobjectlist.cpp
+    # llpathfindingpathtool.cpp
+    llpathfinding_star.cpp
+
+    # llpersistentnotificationstorage.cpp
+    # llphysicsmotion.cpp
+    # llphysicsshapebuilderutil.cpp
+    # llpipelinelistener.cpp
+    # llplacesinventorybridge.cpp
+    # llplacesinventorypanel.cpp
+    # llplacesfolderview.cpp
+    # llpopupview.cpp
+    # llpostcard.cpp
+    # llpresetsmanager.cpp
+    # llpreview.cpp
+    # llpreviewanim.cpp
+    # llpreviewgesture.cpp
+    # llpreviewnotecard.cpp
+    # llpreviewscript.cpp
+    # llpreviewsound.cpp
+    # llpreviewtexture.cpp
+    # llproductinforequest.cpp
+    # llprogressview.cpp
+    # llrecentpeople.cpp
+    # llregioninfomodel.cpp
+    # llregionposition.cpp
+    # llremoteparcelrequest.cpp
+    llor_star.cpp
+    
+    # llsavedsettingsglue.cpp
+    # llsaveoutfitcombobtn.cpp
+    # llscenemonitor.cpp
+    # llsceneview.cpp
+    # llscreenchannel.cpp
+    # llscripteditor.cpp
+    # llscriptfloater.cpp
+    # llscrollingpanelparam.cpp
+    # llscrollingpanelparambase.cpp
+    # llsculptidsize.cpp
+    # llsearchableui.cpp
+    # llsearchcombobox.cpp
+    # llsearchhistory.cpp
+    # llsecapi.cpp
+    # llsechandler_basic.cpp
+    # llselectmgr.cpp
+    # llshareavatarhandler.cpp
+    # llsidepanelappearance.cpp
+    # llsidepanelinventory.cpp
+    # llsidepanelinventorysubpanel.cpp
+    # llsidepaneliteminfo.cpp
+    # llsidepaneltaskinfo.cpp
+    # llsidetraypanelcontainer.cpp
+    # llskinningutil.cpp
+    # llsky.cpp
+    # #llslurl.cpp #<FS:AW optional opensim support>
+    # llsnapshotlivepreview.cpp
+    # llspatialpartition.cpp
+    # llspeakers.cpp
+    # llspeakingindicatormanager.cpp
+    # llsplitbutton.cpp
+    # llsprite.cpp
+    # llstartup.cpp
+    # llstartuplistener.cpp
+    # llstatusbar.cpp
+    # llstylemap.cpp
+    # llsurface.cpp
+    # llsurfacepatch.cpp
+    # llsyntaxid.cpp
+    # llsyswellitem.cpp
+    # llsyswellwindow.cpp
+    lls_star.cpp
+    
+    # llteleporthistory.cpp
+    # llteleporthistorystorage.cpp
+    # lltextureatlas.cpp
+    # lltextureatlasmanager.cpp
+    # lltexturecache.cpp
+    # lltexturectrl.cpp
+    # lltexturefetch.cpp
+    # lltextureinfo.cpp
+    # lltextureinfodetails.cpp
+    # lltexturestats.cpp
+    # lltextureview.cpp
+    # lltoast.cpp
+    # lltoastalertpanel.cpp
+    # lltoastgroupnotifypanel.cpp
+    # lltoastimpanel.cpp
+    # lltoastnotifypanel.cpp
+    # lltoastpanel.cpp
+    # lltoastscripttextbox.cpp
+    # lltoastscriptquestion.cpp
+    # lltool.cpp
+    # lltoolbarview.cpp
+    # lltoolbrush.cpp
+    # lltoolcomp.cpp
+    # lltooldraganddrop.cpp
+    # lltoolface.cpp
+    # lltoolfocus.cpp
+    # lltoolgrab.cpp
+    # lltoolgun.cpp
+    # lltoolindividual.cpp
+    # lltoolmgr.cpp
+    # lltoolmorph.cpp
+    # lltoolobjpicker.cpp
+    # lltoolpie.cpp
+    # lltoolpipette.cpp
+    # lltoolplacer.cpp
+    # lltoolselect.cpp
+    # lltoolselectland.cpp
+    # lltoolselectrect.cpp
+    # lltracker.cpp
+    # lltransientdockablefloater.cpp
+    # lltransientfloatermgr.cpp
+    # lltranslate.cpp
+    llt_star.cpp
+  
+    # lluiavatar.cpp
+    # lluilistener.cpp
+    # lluploaddialog.cpp
+    # llurl.cpp
+    # llurldispatcher.cpp
+    # llurldispatcherlistener.cpp
+    # llurlhistory.cpp
+    # llurllineeditorctrl.cpp
+    # llurlwhitelist.cpp
+    
+    # llvectorperfoptions.cpp
+    # llversioninfo.cpp
+    # llviewchildren.cpp
+    # llviewerassetstats.cpp
+    # llviewerassetstorage.cpp
+    # llviewerassettype.cpp
+    # llviewerassetupload.cpp
+    # llviewerattachmenu.cpp
+    # llvieweraudio.cpp
+    # llviewercamera.cpp
+    # llviewerchat.cpp
+    # llviewercontrol.cpp
+    # llviewercontrollistener.cpp
+    # llviewerdisplay.cpp
+    # llviewerdisplayname.cpp
+    # llviewerfloaterreg.cpp
+    # llviewerfoldertype.cpp
+    # llviewergenericmessage.cpp
+    # llviewergesture.cpp
+    # llviewerhelp.cpp
+    # llviewerhelputil.cpp
+    # llviewerhome.cpp
+    # llviewerinventory.cpp
+    # llviewerjoint.cpp
+    # llviewerjointattachment.cpp
+    # llviewerjointmesh.cpp
+    # llviewerjoystick.cpp
+    # llviewerkeyboard.cpp
+    # llviewerlayer.cpp
+    llvavl_star.cpp
+    
+    # llviewermedia.cpp
+    # llviewermedia_streamingaudio.cpp
+    # llviewermediafocus.cpp
+    # llviewermenu.cpp
+    # llviewermenufile.cpp
+    # llviewermessage.cpp
+    # #llviewernetwork.cpp #<FS:AW optional opensim support>
+    # llviewerobject.cpp
+    # llviewerobjectlist.cpp
+    # llvieweroctree.cpp
+    # llviewerparcelaskplay.cpp
+    # llviewerparcelmedia.cpp
+    # llviewerparcelmediaautoplay.cpp
+    # llviewerparcelmgr.cpp
+    # llviewerparceloverlay.cpp
+    # llviewerpartsim.cpp
+    # llviewerpartsource.cpp
+    # llviewerregion.cpp
+    # llviewershadermgr.cpp
+    # llviewerstats.cpp
+    # llviewerstatsrecorder.cpp
+    # llviewertexlayer.cpp
+    # llviewertexteditor.cpp
+    # llviewertexture.cpp
+    # llviewertextureanim.cpp
+    # llviewertexturelist.cpp
+    # llviewerthrottle.cpp
+    # llviewerwearable.cpp
+    # llviewerwindow.cpp
+    # llviewerwindowlistener.cpp
+    # llvlcomposition.cpp
+    # llvlmanager.cpp
+    llvmvz_star.cpp
+    
+    # llvoavatar.cpp
+    # llvoavatarself.cpp
+    # llvocache.cpp
+    # llvograss.cpp
+    # llvoground.cpp
+    # llvoicecallhandler.cpp
+    # llvoicechannel.cpp
+    # llvoiceclient.cpp
+    # llvoicevisualizer.cpp
+    # llvoicevivox.cpp
+    # llvoinventorylistener.cpp
+    # llvopartgroup.cpp
+    # llvosky.cpp
+    # llvosurfacepatch.cpp
+    # llvotree.cpp
+    # llvovolume.cpp
+    # llvowater.cpp
+    # llvowlsky.cpp
+    llvo_star.cpp
+
+    # llwatchdog.cpp
+    # llwaterparammanager.cpp
+    # llwaterparamset.cpp
+    # llwearableitemslist.cpp
+    # llwearablelist.cpp
+    # llweb.cpp
+    # llwebprofile.cpp
+    # llwind.cpp
+    # llwindowlistener.cpp
+    # llwlanimator.cpp
+    # llwldaycycle.cpp
+    # llwlhandlers.cpp
+    # llwlparammanager.cpp
+    # llwlparamset.cpp
+    # llworld.cpp
+    # llworldmap.cpp
+    # llworldmapmessage.cpp
+    # llworldmipmap.cpp
+    # llworldmapview.cpp
+    # llxmlrpclistener.cpp
+    # llxmlrpctransaction.cpp
+    lluwz_star.cpp
+    
     noise.cpp
-    particleeditor.cpp
-    piemenu.cpp
-    pieseparator.cpp
-    pieslice.cpp
-    pipeline.cpp
-    qtoolalign.cpp
-    quickprefs.cpp
     ../gVR/vrprefs.cpp
     ../gVR/vrsliderctrl.cpp
     ../gVR/vrspinctrl.cpp
-    rlvactions.cpp
+    # particleeditor.cpp
+    # piemenu.cpp
+    # pieseparator.cpp
+    # pieslice.cpp
+    # pipeline.cpp
+    # qtoolalign.cpp
+    # quickprefs.cpp
+    # rlvactions.cpp
     rlvhandler.cpp
     rlvhelper.cpp
-    rlvcommon.cpp
-    rlvlocks.cpp
-    rlvinventory.cpp
-    rlvextensions.cpp
-    rlvfloaters.cpp
-    rlvmodifiers.cpp
-    rlvui.cpp
-    sanitycheck.cpp
-    streamtitledisplay.cpp
-    utilitybar.cpp
+    # rlvcommon.cpp
+    # rlvlocks.cpp
+    # rlvinventory.cpp
+    # rlvextensions.cpp
+    # rlvfloaters.cpp
+    # rlvmodifiers.cpp
+    # rlvui.cpp
+    # sanitycheck.cpp
+    # streamtitledisplay.cpp
+    # utilitybar.cpp
+    llmisc_star.cpp
+    
     NACLantispam.cpp
     NACLfloaterexploresounds.cpp
     )
@@ -1681,6 +1737,19 @@ set_source_files_properties(
 #         fsversionstrings.h with the right numbers in it.
 #   COMPILE_DEFINITIONS "${VIEWER_CHANNEL_VERSION_DEFINES}" # see BuildVersion.cmake
    )
+
+  set_source_files_properties(
+    daeexport.cpp llviewerfloaterreg.cpp llfloatermodelpreview.cpp llmeshrepository.cpp llviewermenufile.cpp
+    llmiscfirst_star.cpp
+    fspanel_star.cpp
+    fsfloater_star.cpp
+    llmiscsecond_star.cpp
+    llmiscthird_star.cpp
+    llfloaterone_star.cpp llfloateroneb_star.cpp  llfloateronec_star.cpp llfloatertwo_star.cpp llfloaterthree_star.cpp llpanelone_star.cpp llpaneltwo_star.cpp llinventory_star.cpp llpathfinding_star.cpp llac_star.cpp llde_star.cpp llfh_star.cpp llin_star.cpp llor_star.cpp lls_star.cpp llt_star.cpp
+    llvavl_star.cpp llvmvz_star.cpp llvo_star.cpp lluwz_star.cpp llmisc_star.cpp
+    PROPERTIES
+      COMPILE_FLAGS "/bigobj"
+  )
 
 if (DARWIN)
   LIST(APPEND viewer_SOURCE_FILES llappviewermacosx.cpp)

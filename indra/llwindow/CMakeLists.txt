@@ -38,13 +38,16 @@ include_directories(SYSTEM
     )
 
 set(llwindow_SOURCE_FILES
-    llcursortypes.cpp
-    llkeyboard.cpp
-    llkeyboardheadless.cpp
-    llwindowheadless.cpp
-    llwindowcallbacks.cpp
-    llwindow.cpp
+    # llcursortypes.cpp
+    # llkeyboard.cpp
+    # llkeyboardheadless.cpp
+    # llwindowheadless.cpp
+    # llwindowcallbacks.cpp
+    # llwindow.cpp
+    llwindow_star.cpp
     )
+
+  set_source_files_properties(llwindow_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 
 set(llwindow_HEADER_FILES
     CMakeLists.txt

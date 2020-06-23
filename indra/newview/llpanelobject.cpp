@@ -2420,7 +2420,7 @@ void LLPanelObject::refresh()
 		mRootObject = NULL;
 	}
 	
-	F32 max_scale = get_default_max_prim_scale(LLPickInfo::isFlora(mObject));
+	F32 max_scale = llmanipscale::get_default_max_prim_scale(LLPickInfo::isFlora(mObject));
 
 	// <FS:Ansariel> Performance improvement
 	//getChild<LLSpinCtrl>("Scale X")->setMaxValue(max_scale);

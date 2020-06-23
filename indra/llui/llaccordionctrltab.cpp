@@ -35,18 +35,22 @@
 #include "lltextutil.h"
 #include "lluictrl.h"
 
-static const std::string DD_BUTTON_NAME = "dd_button";
-static const std::string DD_TEXTBOX_NAME = "dd_textbox";
-static const std::string DD_HEADER_NAME = "dd_header";
-
-static const S32 HEADER_HEIGHT = 23;
-static const S32 HEADER_IMAGE_LEFT_OFFSET = 5;
-static const S32 HEADER_TEXT_LEFT_OFFSET = 30;
-static const F32 AUTO_OPEN_TIME = 1.f;
-static const S32 VERTICAL_MULTIPLE = 16;
-static const S32 PARENT_BORDER_MARGIN = 5;
-
+namespace llaccordionctrltab {
 static LLDefaultChildRegistry::Register<LLAccordionCtrlTab> t1("accordion_tab");
+}
+        const char*LLAccordionCtrlTab::DD_BUTTON_NAME = "dd_button";
+        const char*LLAccordionCtrlTab::DD_TEXTBOX_NAME = "dd_textbox";
+        const char*LLAccordionCtrlTab::DD_HEADER_NAME = "dd_header";
+
+        const int LLAccordionCtrlTab::HEADER_HEIGHT = 23;
+        const int LLAccordionCtrlTab::HEADER_IMAGE_LEFT_OFFSET = 5;
+        const int LLAccordionCtrlTab::HEADER_TEXT_LEFT_OFFSET = 30;
+        const float LLAccordionCtrlTab::AUTO_OPEN_TIME = 1.f;
+        const int LLAccordionCtrlTab::VERTICAL_MULTIPLE = 16;
+        const int LLAccordionCtrlTab::PARENT_BORDER_MARGIN = 5;
+
+
+
 
 class LLAccordionCtrlTab::LLAccordionCtrlTabHeader : public LLUICtrl
 {

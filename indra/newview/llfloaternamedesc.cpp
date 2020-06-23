@@ -54,10 +54,12 @@
 #include "llinventorytype.h"
 #include "llagentbenefits.h"
 
+namespace llfloaternamedesc {
 const S32 PREVIEW_LINE_HEIGHT = 19;
 const S32 PREVIEW_BORDER_WIDTH = 2;
 const S32 PREVIEW_RESIZE_HANDLE_SIZE = S32(RESIZE_HANDLE_WIDTH * OO_SQRT2) + PREVIEW_BORDER_WIDTH;
 const S32 PREVIEW_HPAD = PREVIEW_RESIZE_HANDLE_SIZE;
+}
 
 //-----------------------------------------------------------------------------
 // LLFloaterNameDesc()
@@ -74,7 +76,7 @@ LLFloaterNameDesc::LLFloaterNameDesc(const LLSD& filename )
 // postBuild()
 //-----------------------------------------------------------------------------
 BOOL LLFloaterNameDesc::postBuild()
-{
+{using namespace llfloaternamedesc;
 	LLRect r;
 
 	std::string asset_name = mFilename;

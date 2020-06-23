@@ -50,10 +50,12 @@
 ///----------------------------------------------------------------------------
 LLOutfitSnapshotFloaterView* gOutfitSnapshotFloaterView = NULL;
 
+namespace llfloateroutfitsnapshot {
 const S32 OUTFIT_SNAPSHOT_WIDTH = 256;
 const S32 OUTFIT_SNAPSHOT_HEIGHT = 256;
 
 static LLDefaultChildRegistry::Register<LLOutfitSnapshotFloaterView> r("snapshot_outfit_floater_view");
+}
 
 ///----------------------------------------------------------------------------
 /// Class LLFloaterOutfitSnapshot::Impl
@@ -165,7 +167,7 @@ void LLFloaterOutfitSnapshot::Impl::setFinished(bool finished, bool ok, const st
 }
 
 void LLFloaterOutfitSnapshot::Impl::updateResolution(void* data)
-{
+{ using namespace llfloateroutfitsnapshot;
     LLFloaterOutfitSnapshot *view = (LLFloaterOutfitSnapshot *)data;
 
     if (!view)

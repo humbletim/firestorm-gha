@@ -43,7 +43,9 @@
 #include "llresmgr.h"
 #include "lluictrlfactory.h"
 
-static LLDefaultChildRegistry::Register<LLMultiSliderCtrl> r("multi_slider");
+namespace llmultisliderctrl {
+	static LLDefaultChildRegistry::Register<LLMultiSliderCtrl> r("multi_slider");
+}
 
 const U32 MAX_STRING_LENGTH = 10;
 LLMultiSliderCtrl::Params::Params()

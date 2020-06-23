@@ -51,6 +51,7 @@
 #include <boost/tokenizer.hpp>
 
 
+namespace llhudnametag {
 const F32 SPRING_STRENGTH = 0.7f;
 const F32 HORIZONTAL_PADDING = 16.f;
 const F32 VERTICAL_PADDING = 12.f;
@@ -63,6 +64,7 @@ const F32 MAX_STABLE_CAMERA_VELOCITY = 0.1f;
 const F32 LOD_0_SCREEN_COVERAGE = 0.15f;
 const F32 LOD_1_SCREEN_COVERAGE = 0.30f;
 const F32 LOD_2_SCREEN_COVERAGE = 0.40f;
+}
 
 std::set<LLPointer<LLHUDNameTag> > LLHUDNameTag::sTextObjects;
 std::vector<LLPointer<LLHUDNameTag> > LLHUDNameTag::sVisibleTextObjects;
@@ -235,7 +237,7 @@ void LLHUDNameTag::render()
 }
 
 void LLHUDNameTag::renderText(BOOL for_select)
-{
+{using namespace llhudnametag;
 	if (!mVisible || mHidden)
 	{
 		return;
@@ -439,7 +441,7 @@ void LLHUDNameTag::addLine(const std::string &text_utf8,
 						const LLColor4& color,
 						const LLFontGL::StyleFlags style,
 						const LLFontGL* font)
-{
+{using namespace llhudnametag;
 	LLWString wline = utf8str_to_wstring(text_utf8);
 	if (!wline.empty())
 	{
@@ -479,7 +481,7 @@ void LLHUDNameTag::setLabel(const std::string &label_utf8)
 }
 
 void LLHUDNameTag::addLabel(const std::string& label_utf8)
-{
+{using namespace llhudnametag;
 	LLWString wstr = utf8string_to_wstring(label_utf8);
 	if (!wstr.empty())
 	{
@@ -626,7 +628,7 @@ void LLHUDNameTag::updateVisibility()
 }
 
 LLVector2 LLHUDNameTag::updateScreenPos(LLVector2 &offset)
-{
+{using namespace llhudnametag;
 	LLCoordGL screen_pos;
 	LLVector2 screen_pos_vec;
 	LLVector3 x_pixel_vec;
@@ -667,7 +669,7 @@ LLVector2 LLHUDNameTag::updateScreenPos(LLVector2 &offset)
 }
 
 void LLHUDNameTag::updateSize()
-{
+{using namespace llhudnametag;
 	F32 height = 0.f;
 	F32 width = 0.f;
 
@@ -719,7 +721,8 @@ void LLHUDNameTag::updateSize()
 }
 
 void LLHUDNameTag::updateAll()
-{
+{using namespace llhudnametag;
+
 	// iterate over all text objects, calculate their restoration forces,
 	// and add them to the visible set if they are on screen and close enough
 	sVisibleTextObjects.clear();

@@ -39,7 +39,9 @@
 #include "lluictrlfactory.h"
 #include "llsdutil.h"
 
-static LLDefaultChildRegistry::Register<LLRadioGroup> r1("radio_group");
+namespace llradiogroup {
+	static LLDefaultChildRegistry::Register<LLRadioGroup> r1("radio_group");
+}
 
 /*
  * An invisible view containing multiple mutually exclusive toggling 

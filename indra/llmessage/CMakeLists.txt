@@ -32,82 +32,85 @@ include_directories(
     )
 
 set(llmessage_SOURCE_FILES
-    fscorehttputil.cpp
-    llassetstorage.cpp
-    llavatarname.cpp
+    # fscorehttputil.cpp
+    # llassetstorage.cpp
+    # llavatarname.cpp
     llavatarnamecache.cpp
-    llblowfishcipher.cpp
-    llbuffer.cpp
-    llbufferstream.cpp
-    llcachename.cpp
-    llchainio.cpp
-    llcircuit.cpp
-    llclassifiedflags.cpp
-    llcoproceduremanager.cpp
-    llcorehttputil.cpp
-    lldatapacker.cpp
-    lldispatcher.cpp
+    # llblowfishcipher.cpp
+    # llbuffer.cpp
+    # llbufferstream.cpp
+    # llcachename.cpp
+    # llchainio.cpp
+    # llcircuit.cpp
+    # llclassifiedflags.cpp
+    # llcoproceduremanager.cpp
+    # llcorehttputil.cpp
+    # lldatapacker.cpp
+    # lldispatcher.cpp
     llexperiencecache.cpp
-    llfiltersd2xmlrpc.cpp
-    llhost.cpp
-    llhttpnode.cpp
-    llhttpsdhandler.cpp
-    llinstantmessage.cpp
-    lliobuffer.cpp
-    lliohttpserver.cpp
-    lliopipe.cpp
-    lliosocket.cpp
-    llioutil.cpp
-    llmail.cpp
-    llmessagebuilder.cpp
-    llmessageconfig.cpp
-    llmessagereader.cpp
-    llmessagetemplate.cpp
-    llmessagetemplateparser.cpp
-    llmessagethrottle.cpp
-    llnamevalue.cpp
-    llnullcipher.cpp
-    llpacketack.cpp
-    llpacketbuffer.cpp
-    llpacketring.cpp
-    llpartdata.cpp
-    llproxy.cpp
-    llpumpio.cpp
-    llsdappservices.cpp
-    llsdhttpserver.cpp
-    llsdmessagebuilder.cpp
-    llsdmessagereader.cpp
-    llservicebuilder.cpp
-    llservice.cpp
-    llstoredmessage.cpp
-    lltemplatemessagebuilder.cpp
-    lltemplatemessagedispatcher.cpp
-    lltemplatemessagereader.cpp
-    llthrottle.cpp
-    lltransfermanager.cpp
-    lltransfersourceasset.cpp
-    lltransfersourcefile.cpp
-    lltransfertargetfile.cpp
-    lltransfertargetvfile.cpp
-    lltrustedmessageservice.cpp
-    lluseroperation.cpp
-    llxfer.cpp
-    llxfer_file.cpp
-    llxfermanager.cpp
-    llxfer_mem.cpp
-    llxfer_vfile.cpp
-    llxorcipher.cpp
-    machine.cpp
-    message.cpp
-    message_prehash.cpp
-    message_string_table.cpp
-    net.cpp
-    partsyspacket.cpp
-    patch_code.cpp
-    patch_dct.cpp
-    patch_idct.cpp
-    sound_ids.cpp
+    # llfiltersd2xmlrpc.cpp
+    # llhost.cpp
+    # llhttpnode.cpp
+    # llhttpsdhandler.cpp
+    # llinstantmessage.cpp
+    # lliobuffer.cpp
+    # lliohttpserver.cpp
+    # lliopipe.cpp
+    # lliosocket.cpp
+    # llioutil.cpp
+    # llmail.cpp
+    # llmessagebuilder.cpp
+    # llmessageconfig.cpp
+    # llmessagereader.cpp
+    # llmessagetemplate.cpp
+    # llmessagetemplateparser.cpp
+    # llmessagethrottle.cpp
+    # llnamevalue.cpp
+    # llnullcipher.cpp
+    # llpacketack.cpp
+    # llpacketbuffer.cpp
+    # llpacketring.cpp
+    # llpartdata.cpp
+    # llproxy.cpp
+    # llpumpio.cpp
+    # llsdappservices.cpp
+    # llsdhttpserver.cpp
+    # llsdmessagebuilder.cpp
+    # llsdmessagereader.cpp
+    # llservicebuilder.cpp
+    # llservice.cpp
+    # llstoredmessage.cpp
+    # lltemplatemessagebuilder.cpp
+    # lltemplatemessagedispatcher.cpp
+    # lltemplatemessagereader.cpp
+    # llthrottle.cpp
+    # lltransfermanager.cpp
+    # lltransfersourceasset.cpp
+    # lltransfersourcefile.cpp
+    # lltransfertargetfile.cpp
+    # lltransfertargetvfile.cpp
+    # lltrustedmessageservice.cpp
+    # lluseroperation.cpp
+    # llxfer.cpp
+    # llxfer_file.cpp
+    # llxfermanager.cpp
+    # llxfer_mem.cpp
+    # llxfer_vfile.cpp
+    # llxorcipher.cpp
+    # machine.cpp
+    # message.cpp
+    # message_prehash.cpp
+    # message_string_table.cpp
+    # net.cpp
+    # partsyspacket.cpp
+    # patch_code.cpp
+    # patch_dct.cpp
+    # patch_idct.cpp
+    # sound_ids.cpp
+    llmessage_star.cpp
     )
+
+  set_source_files_properties(llmessage_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 
 set(llmessage_HEADER_FILES
     CMakeLists.txt

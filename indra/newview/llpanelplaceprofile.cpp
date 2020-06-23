@@ -56,6 +56,7 @@
 #include "rlvhandler.h"
 // [/RLVa:KB]
 
+namespace llpanelplaceprofile {
 const F64 COVENANT_REFRESH_TIME_SEC = 60.0f;
 
 static LLPanelInjector<LLPanelPlaceProfile> t_place_profile("panel_place_profile");
@@ -79,6 +80,8 @@ static std::string icon_damage_no;
 static std::string icon_see_avs_on;
 static std::string icon_see_avs_off;
 
+}
+
 LLPanelPlaceProfile::LLPanelPlaceProfile()
 :	LLPanelPlaceInfo(),
 	mNextCovenantUpdateTime(0),
@@ -96,7 +99,7 @@ LLPanelPlaceProfile::~LLPanelPlaceProfile()
 
 // virtual
 BOOL LLPanelPlaceProfile::postBuild()
-{
+{using namespace llpanelplaceprofile;
 	LLPanelPlaceInfo::postBuild();
 
 	mForSalePanel = getChild<LLPanel>("for_sale_panel");
@@ -310,7 +313,7 @@ void LLPanelPlaceProfile::setInfoType(EInfoType type)
 
 // virtual
 void LLPanelPlaceProfile::processParcelInfo(const LLParcelData& parcel_data)
-{
+{using namespace llpanelplaceprofile;
 	LLPanelPlaceInfo::processParcelInfo(parcel_data);
 
 	// HACK: Flag 0x2 == adult region,
@@ -355,7 +358,7 @@ void LLPanelPlaceProfile::displaySelectedParcelInfo(LLParcel* parcel,
 													LLViewerRegion* region,
 													const LLVector3d& pos_global,
 													bool is_current_parcel)
-{
+{using namespace llpanelplaceprofile;
 	if (!region || !parcel)
 		return;
 

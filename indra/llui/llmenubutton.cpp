@@ -33,7 +33,9 @@
 #include "llstring.h"
 #include "v4color.h"
 
-static LLDefaultChildRegistry::Register<LLMenuButton> r("menu_button");
+namespace llmenubutton {
+	static LLDefaultChildRegistry::Register<LLMenuButton> r("menu_button");
+}
 
 void LLMenuButton::MenuPositions::declareValues()
 {

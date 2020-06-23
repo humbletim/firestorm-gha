@@ -44,9 +44,9 @@
 #include "llresmgr.h"
 #include "lluictrlfactory.h"
 
-const U32 MAX_STRING_LENGTH = 255;
-
-static LLDefaultChildRegistry::Register<LLSpinCtrl> r2("spinner");
+namespace llspinctrl {
+	static LLDefaultChildRegistry::Register<LLSpinCtrl> r2("spinner");
+}
 
 LLSpinCtrl::Params::Params()
 :	label_width("label_width"),

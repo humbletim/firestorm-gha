@@ -39,7 +39,9 @@
 #include "llspeakers.h"		// <FS:Zi> Add new control to have a nearby voice output monitor
 
 // default options set in output_monitor.xml
+namespace lloutputmonitorctrl {
 static LLDefaultChildRegistry::Register<LLOutputMonitorCtrl> r("output_monitor");
+}
 
 // The defaults will be initialized in the constructor.
 //LLColor4	LLOutputMonitorCtrl::sColorMuted;

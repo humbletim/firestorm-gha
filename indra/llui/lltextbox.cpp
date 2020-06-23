@@ -35,7 +35,9 @@
 #include "llurlregistry.h"
 #include "llstyle.h"
 
-static LLDefaultChildRegistry::Register<LLTextBox> r("text");
+namespace lltextbox {
+	static LLDefaultChildRegistry::Register<LLTextBox> r("text");
+}
 
 // Compiler optimization, generate extern template
 template class LLTextBox* LLView::getChild<class LLTextBox>(

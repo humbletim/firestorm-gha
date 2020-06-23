@@ -1350,7 +1350,9 @@ void LLFloaterTexturePicker::onTextureSelect( const LLTextureEntry& te )
 ///////////////////////////////////////////////////////////////////////
 // LLTextureCtrl
 
+namespace lltexturectrl {
 static LLDefaultChildRegistry::Register<LLTextureCtrl> r("texture_picker");
+}
 
 LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 :	LLUICtrl(p),

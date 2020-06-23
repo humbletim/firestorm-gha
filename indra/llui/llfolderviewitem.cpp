@@ -44,7 +44,9 @@
 /// Class LLFolderViewItem
 ///----------------------------------------------------------------------------
 
-static LLDefaultChildRegistry::Register<LLFolderViewItem> r("folder_view_item");
+namespace llfolderviewitem {
+	static LLDefaultChildRegistry::Register<LLFolderViewItem> r("folder_view_item");
+}
 
 // statics 
 std::map<U8, LLFontGL*> LLFolderViewItem::sFonts; // map of styles to fonts

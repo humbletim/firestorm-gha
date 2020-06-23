@@ -41,13 +41,7 @@
 #include "llexception.h"
 #include "llmemory.h"
 
-namespace
-{
-
-static const char * const LOG_CORE("CoreHttp");
-
-} // end anonymous namespace
-
+extern const char * const LOG_CORE;
 
 namespace LLCore
 {

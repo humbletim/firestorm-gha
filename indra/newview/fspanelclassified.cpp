@@ -64,8 +64,9 @@ const S32 MINIMUM_PRICE_FOR_LISTING = 50;	// L$
 //static
 FSPanelClassifiedInfo::panel_list_t FSPanelClassifiedInfo::sAllPanels;
 
+namespace fspanelclassifieds {
 static FSDispatchClassifiedClickThrough sClassifiedClickThrough;
-
+}
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -160,7 +161,8 @@ void FSPanelClassifiedInfo::reshape(S32 width, S32 height, BOOL called_from_pare
 }
 
 void FSPanelClassifiedInfo::onOpen(const LLSD& key)
-{
+{using namespace fspanelclassifieds;
+
 	LLUUID avatar_id = key["classified_creator_id"];
 	if(avatar_id.isNull())
 	{

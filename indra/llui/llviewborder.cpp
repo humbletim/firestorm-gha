@@ -30,7 +30,9 @@
 #include "lluictrlfactory.h"
 #include "lluiimage.h"
 
-static LLDefaultChildRegistry::Register<LLViewBorder> r("view_border");
+namespace llviewborder {
+	static LLDefaultChildRegistry::Register<LLViewBorder> r("view_border");
+}
 
 void LLViewBorder::BevelValues::declareValues()
 {

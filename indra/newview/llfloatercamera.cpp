@@ -43,10 +43,13 @@
 #include "llfirstuse.h"
 #include "llhints.h"
 
+namespace llfloatercamera {
 static LLDefaultChildRegistry::Register<LLPanelCameraItem> r("panel_camera_item");
 
 const F32 NUDGE_TIME = 0.25f;		// in seconds
 const F32 ORBIT_NUDGE_RATE = 0.05f; // fraction of normal speed
+
+}
 
 // constants
 #define ORBIT "cam_rotate_stick"
@@ -216,6 +219,7 @@ void LLPanelCameraZoom::onCameraRotate()
 
 F32 LLPanelCameraZoom::getOrbitRate(F32 time)
 {
+using namespace llfloatercamera;
 	if( time < NUDGE_TIME )
 	{
 		F32 rate = ORBIT_NUDGE_RATE + time * (1 - ORBIT_NUDGE_RATE)/ NUDGE_TIME;
@@ -763,3 +767,9 @@ void LLFloaterCamera::fromFreeToPresets()
 		switchMode(CAMERA_CTRL_MODE_PRESETS);
 	}
 }
+
+#undef ORBIT
+#undef PAN
+#undef ZOOM
+#undef PRESETS
+#undef CONTROLS

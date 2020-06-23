@@ -29,7 +29,9 @@
 
 #include "llscrollingpanellist.h"
 
+namespace llscrollingpanellist {
 static LLDefaultChildRegistry::Register<LLScrollingPanelList> r("scrolling_panel_list");
+}
 
 
 /////////////////////////////////////////////////////////////////////

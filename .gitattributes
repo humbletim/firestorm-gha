@@ -28,8 +28,8 @@ indra/tools/vstool/* -text
 *.exe binary
 
 # Files with Windows line endings
-VivoxAUP.txt text eol=crlf
-FILES_ARE_UNICODE_UTF-16LE.txt text eol=crlf
+VivoxAUP.txt binary
+FILES_ARE_UNICODE_UTF-16LE.txt binary
 
 # Windows Manifest files
 *.manifest text eol=crlf

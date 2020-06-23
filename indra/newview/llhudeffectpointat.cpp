@@ -38,6 +38,7 @@
 #include "llvoavatar.h"
 #include "message.h"
 
+namespace llhudeffectpointat {
 // packet layout
 const S32 SOURCE_AVATAR = 0;
 const S32 TARGET_OBJECT = 16;
@@ -70,6 +71,7 @@ const S32 POINTAT_PRIORITIES[POINTAT_NUM_TARGETS] =
 	3, //POINTAT_TARGET_CLEAR
 };
 
+}//ns
 // statics
 
 BOOL LLHUDEffectPointAt::sDebugPointAt;
@@ -97,7 +99,8 @@ LLHUDEffectPointAt::~LLHUDEffectPointAt()
 // packData()
 //-----------------------------------------------------------------------------
 void LLHUDEffectPointAt::packData(LLMessageSystem *mesgsys)
-{
+{using namespace llhudeffectpointat;
+
 	LLViewerObject* source_object = (LLViewerObject*)mSourceObject; 
 	if (!source_object)  
 	{ 
@@ -163,7 +166,7 @@ void LLHUDEffectPointAt::packData(LLMessageSystem *mesgsys)
 // unpackData()
 //-----------------------------------------------------------------------------
 void LLHUDEffectPointAt::unpackData(LLMessageSystem *mesgsys, S32 blocknum)
-{
+{using namespace llhudeffectpointat;
 	LLVector3d new_target;
 	U8 packed_data[PKT_SIZE];
 
@@ -244,7 +247,7 @@ void LLHUDEffectPointAt::setTargetPosGlobal(const LLVector3d &target_pos_global)
 // called by agent logic to set look at behavior locally, and propagate to sim
 //-----------------------------------------------------------------------------
 BOOL LLHUDEffectPointAt::setPointAt(EPointAtType target_type, LLViewerObject *object, LLVector3 position)
-{
+{using namespace llhudeffectpointat;
 	if (!mSourceObject)
 	{
 		return FALSE;
@@ -309,7 +312,7 @@ BOOL LLHUDEffectPointAt::setPointAt(EPointAtType target_type, LLViewerObject *ob
 // clearPointAtTarget()
 //-----------------------------------------------------------------------------
 void LLHUDEffectPointAt::clearPointAtTarget()
-{
+{using namespace llhudeffectpointat;
 	mTargetObject = NULL;
 	mTargetOffsetGlobal.clearVec();
 	mTargetType = POINTAT_TARGET_NONE;
@@ -342,7 +345,7 @@ void LLHUDEffectPointAt::setSourceObject(LLViewerObject* objectp)
 // render()
 //-----------------------------------------------------------------------------
 void LLHUDEffectPointAt::render()
-{
+{using namespace llhudeffectpointat;
 	update();
 	if (sDebugPointAt && mTargetType != POINTAT_TARGET_NONE)
 	{
@@ -373,7 +376,7 @@ void LLHUDEffectPointAt::render()
 // update()
 //-----------------------------------------------------------------------------
 void LLHUDEffectPointAt::update()
-{
+{using namespace llhudeffectpointat;
 	// If the target object is dead, set the target object to NULL
 	if (!mTargetObject.isNull() && mTargetObject->isDead())
 	{

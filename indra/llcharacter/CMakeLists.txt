@@ -22,28 +22,31 @@ include_directories(SYSTEM
     )
 
 set(llcharacter_SOURCE_FILES
-    llanimationstates.cpp
-    llbvhloader.cpp
-    llcharacter.cpp
-    lleditingmotion.cpp
-    llgesture.cpp
-    llhandmotion.cpp
-    llheadrotmotion.cpp
-    lljoint.cpp
-    lljointsolverrp3.cpp
-    llkeyframefallmotion.cpp
-    llkeyframemotion.cpp
-    llkeyframemotionparam.cpp
-    llkeyframestandmotion.cpp
-    llkeyframewalkmotion.cpp
-    llmotioncontroller.cpp
-    llmotion.cpp
-    llmultigesture.cpp
-    llpose.cpp
-    llstatemachine.cpp
-    lltargetingmotion.cpp
-    llvisualparam.cpp
+    # llanimationstates.cpp
+    # llbvhloader.cpp
+    # llcharacter.cpp
+    # lleditingmotion.cpp
+    # llgesture.cpp
+    # llhandmotion.cpp
+    # llheadrotmotion.cpp
+    # lljoint.cpp
+    # lljointsolverrp3.cpp
+    # llkeyframefallmotion.cpp
+    # llkeyframemotion.cpp
+    # llkeyframemotionparam.cpp
+    # llkeyframestandmotion.cpp
+    # llkeyframewalkmotion.cpp
+    # llmotioncontroller.cpp
+    # llmotion.cpp
+    # llmultigesture.cpp
+    # llpose.cpp
+    # llstatemachine.cpp
+    # lltargetingmotion.cpp
+    # llvisualparam.cpp
+    llcharacter_star.cpp
     )
+
+  set_source_files_properties(llcharacter_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 
 set(llcharacter_HEADER_FILES
     CMakeLists.txt

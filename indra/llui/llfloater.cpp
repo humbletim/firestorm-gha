@@ -2378,8 +2378,9 @@ std::string LLFloater::getButtonTooltip(const Params& p, EFloaterButton e, bool 
 /////////////////////////////////////////////////////
 // LLFloaterView
 
+namespace llfloater {
 static LLDefaultChildRegistry::Register<LLFloaterView> r("floater_view");
-
+}
 LLFloaterView::LLFloaterView (const Params& p)
 :	LLUICtrl (p),
 	mFocusCycleMode(FALSE),

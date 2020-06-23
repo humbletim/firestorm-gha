@@ -38,7 +38,9 @@
 #include "llxorcipher.h"
 #include "llviewerobjectlist.h"
 
+namespace fsassetblacklist {
 const LLUUID MAGIC_ID("3c115e51-04f4-523c-9fa6-98aff1034730");
+}
 
 LLAssetType::EType S32toAssetType(S32 assetindex)
 {
@@ -222,7 +224,7 @@ bool FSAssetBlacklist::addEntryToBlacklistMap(const LLUUID& id, LLAssetType::ETy
 }
 
 void FSAssetBlacklist::loadBlacklist()
-{
+{using namespace fsassetblacklist;
 	if (gDirUtilp->fileExists(mBlacklistFileName))
 	{
 		llifstream blacklist_data_stream(mBlacklistFileName.c_str());
@@ -306,7 +308,7 @@ void FSAssetBlacklist::loadBlacklist()
 }
 
 void FSAssetBlacklist::saveBlacklist()
-{
+{using namespace fsassetblacklist;
 	llofstream save_file(mBlacklistFileName.c_str());
 	LLSD savedata;
 

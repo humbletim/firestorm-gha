@@ -37,7 +37,9 @@
 #include "llstring.h"
 #include "llui.h"
 
+namespace llnameeditor {
 static LLDefaultChildRegistry::Register<LLNameEditor> r("name_editor");
+}
 
 // statics
 std::set<LLNameEditor*> LLNameEditor::sInstances;

@@ -57,8 +57,9 @@ static const std::string PICK_NAME("pick_name");
 static const std::string CLASSIFIED_ID("classified_id");
 static const std::string CLASSIFIED_NAME("classified_name");
 
+namespace fspanelprofileclassifieds {
 static FSDispatchClassifiedClickThrough sClassifiedClickThrough;
-
+}
 static LLPanelInjector<FSPanelClassifieds> t_panel_fs_classifieds("panel_fs_profile_classified");
 
 //////////////////////////////////////////////////////////////////////////
@@ -222,7 +223,7 @@ bool FSPanelClassifieds::isClassifiedPublished(FSClassifiedItem* c_item)
 }
 
 void FSPanelClassifieds::onOpen(const LLSD& key)
-{
+{using namespace fspanelprofileclassifieds;
 	const LLUUID id(key.asUUID());
 	BOOL self = (gAgentID == id);
 

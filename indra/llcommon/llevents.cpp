@@ -319,7 +319,7 @@ void LLEventPump::reset()
     //mDeps.clear();
 }
 
-LLBoundListener LLEventPump::listen_impl(const std::string& name, const LLEventListener& listener,
+LLBoundListener LLEventPump::listen_impl(const std::string& name, const llevents_LLEventListener& listener,
                                          const NameList& after,
                                          const NameList& before)
 {
@@ -567,7 +567,7 @@ bool LLEventMailDrop::post(const LLSD& event)
 }
 
 LLBoundListener LLEventMailDrop::listen_impl(const std::string& name,
-                                    const LLEventListener& listener,
+                                    const llevents_LLEventListener& listener,
                                     const NameList& after,
                                     const NameList& before)
 {

@@ -188,7 +188,9 @@ private:
 //============================================================================
 
 
+namespace lllocationinputctrl {
 static LLDefaultChildRegistry::Register<LLLocationInputCtrl> r("location_input");
+}
 
 LLLocationInputCtrl::Params::Params()
 :	icon_maturity_general("icon_maturity_general"),

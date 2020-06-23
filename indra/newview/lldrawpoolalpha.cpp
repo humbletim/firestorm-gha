@@ -51,7 +51,9 @@
 
 BOOL LLDrawPoolAlpha::sShowDebugAlpha = FALSE;
 
+namespace lldrawpoolalpha {
 static BOOL deferred_render = FALSE;
+}
 
 LLDrawPoolAlpha::LLDrawPoolAlpha(U32 type) :
 		LLRenderPass(type), current_shader(NULL), target_shader(NULL),
@@ -93,7 +95,8 @@ S32 LLDrawPoolAlpha::getNumPostDeferredPasses()
 }
 
 void LLDrawPoolAlpha::beginPostDeferredPass(S32 pass) 
-{ 
+{ using namespace lldrawpoolalpha;
+
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_ALPHA);
 
 	if (pass == 0)
@@ -166,7 +169,7 @@ void LLDrawPoolAlpha::beginPostDeferredPass(S32 pass)
 }
 
 void LLDrawPoolAlpha::endPostDeferredPass(S32 pass) 
-{ 
+{ using namespace lldrawpoolalpha;
 	if (pass == 1 && !LLPipeline::sImpostorRender)
 	{
 		gPipeline.mDeferredDepth.flush();
@@ -227,7 +230,7 @@ void LLDrawPoolAlpha::endRenderPass( S32 pass )
 }
 
 void LLDrawPoolAlpha::render(S32 pass)
-{
+{ using namespace lldrawpoolalpha;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_ALPHA);
 
 	LLGLSPipelineAlpha gls_pipeline_alpha;
@@ -381,7 +384,7 @@ static LLTrace::BlockTimerStatHandle FTM_RENDER_ALPHA_PUSH("Alpha Push Verts");
 static LLTrace::BlockTimerStatHandle FTM_RENDER_ALPHA_GLOW("Alpha Glow");
 
 void LLDrawPoolAlpha::renderAlpha(U32 mask, S32 pass)
-{
+{ using namespace lldrawpoolalpha;
 	BOOL initialized_lighting = FALSE;
 	BOOL light_enabled = TRUE;
 	

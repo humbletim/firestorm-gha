@@ -43,7 +43,9 @@
 #include "llresmgr.h"
 #include "lluictrlfactory.h"
 
-static LLDefaultChildRegistry::Register<LLSliderCtrl> r("slider");
+namespace llsliderctrl {
+	static LLDefaultChildRegistry::Register<LLSliderCtrl> r("slider");
+}
 
 LLSliderCtrl::LLSliderCtrl(const LLSliderCtrl::Params& p)
 :	LLF32UICtrl(p),

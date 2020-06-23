@@ -41,7 +41,9 @@
 #include "lltextbox.h"
 #include "llkeyboard.h"
 
+namespace llcheckboxctrl {
 static LLDefaultChildRegistry::Register<LLCheckBoxCtrl> r("check_box");
+}
 
 // Compiler optimization, generate extern template
 template class LLCheckBoxCtrl* LLView::getChild<class LLCheckBoxCtrl>(

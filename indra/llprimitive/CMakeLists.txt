@@ -33,21 +33,24 @@ include_directories(SYSTEM
     )
 
 set(llprimitive_SOURCE_FILES
-    lldaeloader.cpp
-    llmaterialid.cpp
-    llmaterial.cpp
-    llmaterialtable.cpp
-    llmediaentry.cpp
-    llmodel.cpp
-    llmodelloader.cpp
-    llprimitive.cpp
-    llprimtexturelist.cpp
-    lltextureanim.cpp
-    lltextureentry.cpp
-    lltreeparams.cpp
-    llvolumemessage.cpp
-    material_codes.cpp
+    # lldaeloader.cpp
+    # llmaterialid.cpp
+    # llmaterial.cpp
+    # llmaterialtable.cpp
+    # llmediaentry.cpp
+    # llmodel.cpp
+    # llmodelloader.cpp
+    # llprimitive.cpp
+    # llprimtexturelist.cpp
+    # lltextureanim.cpp
+    # lltextureentry.cpp
+    # lltreeparams.cpp
+    # llvolumemessage.cpp
+    # material_codes.cpp
+    llprimitive_star.cpp
     )
+
+  set_source_files_properties(llprimitive_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj /I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5 /I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5/1.4")
 
 set(llprimitive_HEADER_FILES
     CMakeLists.txt
@@ -70,6 +73,13 @@ set(llprimitive_HEADER_FILES
     material_codes.h
     object_flags.h
     )
+
+  set_source_files_properties(
+    lldaeloader.cpp
+    PROPERTIES
+      COMPILE_FLAGS "/I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5 /I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5/1.4"
+  )
+
         
 set_source_files_properties(${llprimitive_HEADER_FILES}
                             PROPERTIES HEADER_FILE_ONLY TRUE)

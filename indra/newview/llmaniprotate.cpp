@@ -63,6 +63,7 @@
 #include "llvoavatarself.h"
 #include "llhudrender.h"
 
+namespace llmaniprotate {
 const F32 RADIUS_PIXELS = 100.f;		// size in screen space
 const F32 SQ_RADIUS = RADIUS_PIXELS * RADIUS_PIXELS;
 const F32 WIDTH_PIXELS = 8;
@@ -79,7 +80,7 @@ const F32 SNAP_GUIDE_INNER_RADIUS = 2.f;
 const F32 AXIS_ONTO_CAM_TOLERANCE = cos( 80.f * DEG_TO_RAD );
 const F32 SELECTED_MANIPULATOR_SCALE = 1.05f;
 const F32 MANIPULATOR_SCALE_HALF_LIFE = 0.07f;
-
+}
 extern void handle_reset_rotation(void*);  // in LLViewerWindow
 
 LLManipRotate::LLManipRotate( LLToolComposite* composite )
@@ -110,7 +111,7 @@ void LLManipRotate::handleSelect()
 }
 
 void LLManipRotate::render()
-{
+{using namespace llmaniprotate;
 	LLGLSUIDefault gls_ui;
 	gGL.getTexUnit(0)->bind(LLViewerFetchedTexture::sWhiteImagep);
 	LLGLDepthTest gls_depth(GL_TRUE);
@@ -391,7 +392,7 @@ BOOL LLManipRotate::handleMouseDown(S32 x, S32 y, MASK mask)
 
 // Assumes that one of the parts of the manipulator was hit.
 BOOL LLManipRotate::handleMouseDownOnPart( S32 x, S32 y, MASK mask )
-{
+{using namespace llmaniprotate;
 	BOOL can_rotate = canAffectSelection();
 	if (!can_rotate)
 	{
@@ -535,7 +536,7 @@ BOOL LLManipRotate::handleHover(S32 x, S32 y, MASK mask)
 
 
 LLVector3 LLManipRotate::projectToSphere( F32 x, F32 y, BOOL* on_sphere ) 
-{
+{using namespace llmaniprotate;
 	F32 z = 0.f;
 	F32 dist_squared = x*x + y*y;
 
@@ -732,7 +733,7 @@ void LLManipRotate::drag( S32 x, S32 y )
 }
 
 void LLManipRotate::renderActiveRing( F32 radius, F32 width, const LLColor4& front_color, const LLColor4& back_color)
-{
+{using namespace llmaniprotate;
 	LLGLEnable cull_face(GL_CULL_FACE);
 	{
 		gl_ring(radius, width, back_color, back_color * 0.5f, CIRCLE_STEPS, FALSE);
@@ -746,7 +747,7 @@ void LLManipRotate::renderActiveRing( F32 radius, F32 width, const LLColor4& fro
 }
 
 void LLManipRotate::renderSnapGuides()
-{
+{using namespace llmaniprotate;
 	static LLCachedControl<bool> snap_enabled(gSavedSettings, "SnapEnabled", true);
 	if (!snap_enabled)
 	{
@@ -1144,7 +1145,7 @@ void LLManipRotate::renderSnapGuides()
 
 // Returns TRUE if center of sphere is visible.  Also sets a bunch of member variables that are used later (e.g. mCenterToCam)
 BOOL LLManipRotate::updateVisiblity()
-{
+{using namespace llmaniprotate;
 	// Don't want to recalculate the center of the selection during a drag.
 	// Due to packet delays, sometimes half the objects in the selection have their
 	// new position and half have their old one.  This creates subtle errors in the
@@ -1233,7 +1234,7 @@ BOOL LLManipRotate::updateVisiblity()
 }
 
 LLQuaternion LLManipRotate::dragUnconstrained( S32 x, S32 y )
-{
+{using namespace llmaniprotate;
 	LLVector3 cam = gAgentCamera.getCameraPositionAgent();
 	LLVector3 center =  gAgent.getPosAgentFromGlobal( mRotationCenter );
 
@@ -1332,7 +1333,7 @@ LLVector3 LLManipRotate::getConstraintAxis()
 }
 
 LLQuaternion LLManipRotate::dragConstrained( S32 x, S32 y )
-{
+{using namespace llmaniprotate;
 	LLSelectNode* first_object_node = mObjectSelection->getFirstMoveableNode(TRUE);
 	LLVector3 constraint_axis = getConstraintAxis();
 	LLVector3 center = gAgent.getPosAgentFromGlobal( mRotationCenter );
@@ -1722,7 +1723,7 @@ void LLManipRotate::mouseToRay( S32 x, S32 y, LLVector3* ray_pt, LLVector3* ray_
 }
 
 void LLManipRotate::highlightManipulators( S32 x, S32 y )
-{
+{using namespace llmaniprotate;
 	mHighlightedPart = LL_NO_PART;
 
 	//LLBBox bbox = LLSelectMgr::getInstance()->getBBoxOfSelection();

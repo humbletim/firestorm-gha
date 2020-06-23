@@ -49,9 +49,9 @@ void check_curl_multi_setopt(CURLM* handle, CURLMoption option, ARG argument)
     check_curl_multi_code(code, option);
 }
 
-static const char * const LOG_CORE("CoreHttp");
-
 } // end anonymous namespace
+
+extern const char * const LOG_CORE;
 
 
 namespace LLCore

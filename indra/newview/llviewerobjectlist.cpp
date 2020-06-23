@@ -331,7 +331,9 @@ void LLViewerObjectList::processUpdateCore(LLViewerObject* objectp,
 	}
 }
 
+namespace llviewerobjectlist {
 static LLTrace::BlockTimerStatHandle FTM_PROCESS_OBJECTS("Process Objects");
+}
 
 LLViewerObject* LLViewerObjectList::processObjectUpdateFromCache(LLVOCacheEntry* entry, LLViewerRegion* regionp)
 {
@@ -444,7 +446,7 @@ void LLViewerObjectList::processObjectUpdate(LLMessageSystem *mesgsys,
 											 void **user_data,
 											 const EObjectUpdateType update_type,
 											 bool compressed)
-{
+{using namespace llviewerobjectlist;
 	LL_RECORD_BLOCK_TIME(FTM_PROCESS_OBJECTS);	
 	
 	LLViewerObject *objectp;

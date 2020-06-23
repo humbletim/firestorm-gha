@@ -67,11 +67,12 @@ const U32 VERTEX_MASK_BUMP = LLVertexBuffer::MAP_VERTEX |LLVertexBuffer::MAP_TEX
 
 U32 LLDrawPoolBump::sVertexMask = VERTEX_MASK_SHINY;
 
-
+namespace lldrawpoolbump {
 static LLGLSLShader* shader = NULL;
 static S32 cube_channel = -1;
 static S32 diffuse_channel = -1;
 static S32 bump_channel = -1;
+}
 
 // static 
 void LLStandardBumpmap::init()
@@ -331,7 +332,7 @@ void LLDrawPoolBump::endRenderPass(S32 pass)
 
 //static
 void LLDrawPoolBump::beginShiny(bool invisible)
-{
+{using namespace lldrawpoolbump;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_SHINY);
 	if ((!invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_SHINY))|| 
 		(invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_INVISI_SHINY)))
@@ -485,7 +486,7 @@ void LLDrawPoolBump::unbindCubeMap(LLGLSLShader* shader, S32 shader_level, S32& 
 }
 
 void LLDrawPoolBump::endShiny(bool invisible)
-{
+{using namespace lldrawpoolbump;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_SHINY);
 	if ((!invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_SHINY))|| 
 		(invisible && !gPipeline.hasRenderBatches(LLRenderPass::PASS_INVISI_SHINY)))
@@ -505,7 +506,7 @@ void LLDrawPoolBump::endShiny(bool invisible)
 }
 
 void LLDrawPoolBump::beginFullbrightShiny()
-{
+{using namespace lldrawpoolbump;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_SHINY);
 	if (!gPipeline.hasRenderBatches(LLRenderPass::PASS_FULLBRIGHT_SHINY))
 	{
@@ -590,7 +591,7 @@ void LLDrawPoolBump::renderFullbrightShiny()
 }
 
 void LLDrawPoolBump::endFullbrightShiny()
-{
+{using namespace lldrawpoolbump;
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_SHINY);
 	if (!gPipeline.hasRenderBatches(LLRenderPass::PASS_FULLBRIGHT_SHINY))
 	{
@@ -829,7 +830,7 @@ S32 LLDrawPoolBump::getNumDeferredPasses()
 }
 
 void LLDrawPoolBump::beginDeferredPass(S32 pass)
-{
+{using namespace lldrawpoolbump;
 	if (!gPipeline.hasRenderBatches(LLRenderPass::PASS_BUMP))
 	{
 		return;
@@ -858,7 +859,7 @@ void LLDrawPoolBump::endDeferredPass(S32 pass)
 }
 
 void LLDrawPoolBump::renderDeferred(S32 pass)
-{
+{using namespace lldrawpoolbump;
 	if (!gPipeline.hasRenderBatches(LLRenderPass::PASS_BUMP))
 	{
 		return;
@@ -1494,7 +1495,7 @@ void LLDrawPoolBump::renderBump(U32 type, U32 mask)
 }
 
 void LLDrawPoolBump::pushBatch(LLDrawInfo& params, U32 mask, BOOL texture, BOOL batch_textures)
-{
+{using namespace lldrawpoolbump;
 	applyModelMatrix(params);
 
 	bool tex_setup = false;

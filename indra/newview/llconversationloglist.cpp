@@ -38,10 +38,13 @@
 #include "llviewerwindow.h"
 #include "llwindow.h"
 
+namespace llconversationloglist {
 static LLDefaultChildRegistry::Register<LLConversationLogList> r("conversation_log_list");
+
 
 static LLConversationLogListNameComparator NAME_COMPARATOR;
 static LLConversationLogListDateComparator DATE_COMPARATOR;
+}
 
 LLConversationLogList::LLConversationLogList(const Params& p)
 :	LLFlatListViewEx(p),
@@ -122,13 +125,13 @@ bool LLConversationLogList::findInsensitive(std::string haystack, const std::str
 }
 
 void LLConversationLogList::sortByName()
-{
+{using namespace llconversationloglist;
 	setComparator(&NAME_COMPARATOR);
 	sort();
 }
 
 void LLConversationLogList::sortByDate()
-{
+{using namespace llconversationloglist;
 	setComparator(&DATE_COMPARATOR);
 	sort();
 }

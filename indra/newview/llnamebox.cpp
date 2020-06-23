@@ -40,8 +40,9 @@
 // statics
 std::set<LLNameBox*> LLNameBox::sInstances;
 
+namespace llnamebox {
 static LLDefaultChildRegistry::Register<LLNameBox> r("name_box");
-
+}
 
 LLNameBox::LLNameBox(const Params& p)
 :	LLTextBox(p)

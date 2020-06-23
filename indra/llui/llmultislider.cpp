@@ -38,8 +38,9 @@
 #include "lluiimage.h"
 
 #include <sstream>
-
+namespace llmultislider {
 static LLDefaultChildRegistry::Register<LLMultiSlider> r("multi_slider_bar");
+}
 
 const F32 FLOAT_THRESHOLD = 0.00001f;
 

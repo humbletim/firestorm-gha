@@ -143,7 +143,9 @@ private:
 	bool				mHidden;
 };
 
+namespace llhints {
 static LLDefaultChildRegistry::Register<LLHintPopup> r("hint_popup");
+}
 
 
 LLHintPopup::LLHintPopup(const LLHintPopup::Params& p)

@@ -22,20 +22,23 @@ include_directories(SYSTEM
     )
 
 set(llinventory_SOURCE_FILES
-    llcategory.cpp
-    lleconomy.cpp #<FS:Ansariel> OpenSim legacy economy
-    llfoldertype.cpp
-    llinventory.cpp
-    llinventorydefines.cpp
-    llinventorytype.cpp
-    lllandmark.cpp
-    llnotecard.cpp
-    llparcel.cpp
-    llpermissions.cpp
-    llsaleinfo.cpp
-    lltransactionflags.cpp
-    lluserrelations.cpp
+    # llcategory.cpp
+    # lleconomy.cpp #<FS:Ansariel> OpenSim legacy economy
+    # llfoldertype.cpp
+    # llinventory.cpp
+    # llinventorydefines.cpp
+    # llinventorytype.cpp
+    # lllandmark.cpp
+    # llnotecard.cpp
+    # llparcel.cpp
+    # llpermissions.cpp
+    # llsaleinfo.cpp
+    # lltransactionflags.cpp
+    # lluserrelations.cpp
+    llinventory_star.cpp
     )
+
+  set_source_files_properties(llinventory_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
     
 set(llinventory_HEADER_FILES
     CMakeLists.txt

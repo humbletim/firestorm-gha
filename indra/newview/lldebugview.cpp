@@ -49,7 +49,9 @@ LLDebugView* gDebugView = NULL;
 //
 // Methods
 //
+namespace lldebugview {
 static LLDefaultChildRegistry::Register<LLDebugView> r("debug_view");
+}
 
 LLDebugView::LLDebugView(const LLDebugView::Params& p)
 :	LLView(p),

@@ -88,6 +88,7 @@
 #include "llcombobox.h"
 #include "lllayoutstack.h"
 
+namespace llpanelpeople {
 const F32 FRIEND_LIST_UPDATE_TIMEOUT =	0.5f;
 const F32 NEARBY_LIST_UPDATE_INTERVAL =	1.f;
 const U32 MAX_SELECTIONS = 20;
@@ -99,6 +100,8 @@ static const std::string RECENT_TAB_NAME	= "recent_panel";
 static const std::string BLOCKED_TAB_NAME	= "blocked_panel"; // blocked avatars
 static const std::string CONTACT_SETS_TAB_NAME = "contact_sets_panel";	// [FS:CR] Contact sets
 static const std::string COLLAPSED_BY_USER  = "collapsed_by_user";
+
+}//ns
 
 // [FS] FIRE-12229
 //extern S32 gMaxAgentGroups;
@@ -352,7 +355,7 @@ class LLFriendListUpdater : public LLAvatarListUpdater, public LLFriendObserver
 public: 
 	friend class LLInventoryFriendCardObserver;
 	LLFriendListUpdater(callback_t cb)
-	:	LLAvatarListUpdater(cb, FRIEND_LIST_UPDATE_TIMEOUT)
+	:	LLAvatarListUpdater(cb, llpanelpeople::FRIEND_LIST_UPDATE_TIMEOUT)
 	,	mIsActive(false)
 	{
 		LLAvatarTracker::instance().addObserver(this);
@@ -506,7 +509,7 @@ class LLNearbyListUpdater : public LLAvatarListUpdater
 
 public:
 	LLNearbyListUpdater(callback_t cb)
-	:	LLAvatarListUpdater(cb, NEARBY_LIST_UPDATE_INTERVAL)
+	:	LLAvatarListUpdater(cb, llpanelpeople::NEARBY_LIST_UPDATE_INTERVAL)
 	{
 		setActive(false);
 	}
@@ -658,7 +661,7 @@ void LLPanelPeople::removePicker()
 }
 
 BOOL LLPanelPeople::postBuild()
-{
+{using namespace llpanelpeople;
 	// <FS:Ansariel> Don't bother with "want more?" advertisement
 	//S32 max_premium = LLAgentBenefitsMgr::get("Premium").getGroupMembershipLimit();
 	// </FS:Ansariel>
@@ -972,7 +975,7 @@ void LLPanelPeople::updateRecentList()
 }
 
 void LLPanelPeople::updateButtons()
-{
+{using namespace llpanelpeople;
 	std::string cur_tab		= getActiveTabName();
 // [RLVa:KB] - Checked: RLVa-1.4.9
 	bool nearby_tab_active = (cur_tab == NEARBY_TAB_NAME);
@@ -1050,7 +1053,7 @@ std::string LLPanelPeople::getActiveTabName() const
 }
 
 LLUUID LLPanelPeople::getCurrentItemID() const
-{
+{using namespace llpanelpeople;
 	std::string cur_tab = getActiveTabName();
 
 	if (cur_tab == FRIENDS_TAB_NAME) // this tab has two lists
@@ -1087,7 +1090,7 @@ LLUUID LLPanelPeople::getCurrentItemID() const
 }
 
 void LLPanelPeople::getCurrentItemIDs(uuid_vec_t& selected_uuids) const
-{
+{using namespace llpanelpeople;
 	std::string cur_tab = getActiveTabName();
 
 	if (cur_tab == FRIENDS_TAB_NAME)
@@ -1189,7 +1192,7 @@ void LLPanelPeople::setSortOrder(LLAvatarList* list, ESortOrder order, bool save
 }
 
 void LLPanelPeople::onFilterEdit(const std::string& search_string)
-{
+{using namespace llpanelpeople;
 	const S32 cur_tab_idx = mTabContainer->getCurrentPanelIndex();
 	std::string& filter = mSavedOriginalFilters[cur_tab_idx];
 	std::string& saved_filter = mSavedFilters[cur_tab_idx];
@@ -1268,7 +1271,7 @@ void LLPanelPeople::onGroupLimitInfo()
 }
 
 void LLPanelPeople::onTabSelected(const LLSD& param)
-{
+{using namespace llpanelpeople;
 	std::string tab_name = getChild<LLPanel>(param.asString())->getName();
 	updateButtons();
 
@@ -1321,7 +1324,7 @@ void LLPanelPeople::onAvatarListDoubleClicked(LLUICtrl* ctrl)
 
 
 void LLPanelPeople::onAvatarListCommitted(LLAvatarList* list)
-{
+{using namespace llpanelpeople;
 	if (getActiveTabName() == NEARBY_TAB_NAME)
 	{
 		uuid_vec_t selected_uuids;
@@ -1414,7 +1417,7 @@ void LLPanelPeople::onChatButtonClicked()
 }
 
 void LLPanelPeople::onGearButtonClicked(LLUICtrl* btn)
-{
+{using namespace llpanelpeople;
 	uuid_vec_t selected_uuids;
 	getCurrentItemIDs(selected_uuids);
 	// Spawn at bottom left corner of the button.
@@ -1642,7 +1645,7 @@ void LLPanelPeople::onMoreButtonClicked()
 }
 
 void LLPanelPeople::onOpen(const LLSD& key)
-{
+{using namespace llpanelpeople;
 	std::string tab_name = key["people_panel_tab_name"];
 	if (!tab_name.empty())
 	{
@@ -1705,7 +1708,7 @@ void LLPanelPeople::showAccordion(const std::string name, bool show)
 }
 
 void LLPanelPeople::showFriendsAccordionsIfNeeded()
-{
+{using namespace llpanelpeople;
 	if(FRIENDS_TAB_NAME == getActiveTabName())
 	{
 		// <FS:Ansariel> Friend list accordion replacement
@@ -1740,7 +1743,7 @@ void LLPanelPeople::onFriendListRefreshComplete(LLUICtrl*ctrl, const LLSD& param
 }
 
 void LLPanelPeople::setAccordionCollapsedByUser(LLUICtrl* acc_tab, bool collapsed)
-{
+{using namespace llpanelpeople;
 	if(!acc_tab)
 	{
 		LL_WARNS() << "Invalid parameter" << LL_ENDL;
@@ -1758,7 +1761,7 @@ void LLPanelPeople::setAccordionCollapsedByUser(const std::string& name, bool co
 }
 
 bool LLPanelPeople::isAccordionCollapsedByUser(LLUICtrl* acc_tab)
-{
+{using namespace llpanelpeople;
 	if(!acc_tab)
 	{
 		LL_WARNS() << "Invalid parameter" << LL_ENDL;
@@ -1878,7 +1881,7 @@ void LLPanelPeople::generateCurrentContactList()
 }
 
 bool LLPanelPeople::onContactSetsEnable(const LLSD& userdata)
-{
+{using namespace llpanelpeople;
 	std::string item = userdata.asString();
 	if (item == "has_mutable_set")
 		return (!LGGContactSets::getInstance()->isInternalSetName(mContactSetCombo->getValue().asString()));
@@ -2076,7 +2079,7 @@ bool LLPanelPeople::onEnableColumnVisibilityChecked(const LLSD& userdata)
 
 // <FS:Ansariel> CTRL-F focusses local search editor
 BOOL LLPanelPeople::handleKeyHere(KEY key, MASK mask)
-{
+{using namespace llpanelpeople;
 	if (FSCommon::isFilterEditorKeyCombo(key, mask))
 	{
 		std::string cur_tab = getActiveTabName();

@@ -37,7 +37,9 @@
 const S32 MIN_NOTIFICATION_AREA_HEIGHT = 30;
 const S32 MAX_NOTIFICATION_AREA_HEIGHT = 100;
 
-static LLDefaultChildRegistry::Register<LLWindowShade> r("window_shade");
+namespace llwindowshade {
+	static LLDefaultChildRegistry::Register<LLWindowShade> r("window_shade");
+}
 
 LLWindowShade::Params::Params()
 :	bg_image("bg_image"),

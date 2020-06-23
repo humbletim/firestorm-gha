@@ -301,10 +301,12 @@ void LLVOWLSky::restoreGL()
 	gPipeline.markRebuild(mDrawable, LLDrawable::REBUILD_ALL, TRUE);
 }
 
+namespace llvowlsky {
 static LLTrace::BlockTimerStatHandle FTM_GEO_SKY("Windlight Sky Geometry");
+}
 
 BOOL LLVOWLSky::updateGeometry(LLDrawable * drawable)
-{
+{using namespace llvowlsky;
 	LL_RECORD_BLOCK_TIME(FTM_GEO_SKY);
 	LLStrider<LLVector3>	vertices;
 	LLStrider<LLVector2>	texCoords;

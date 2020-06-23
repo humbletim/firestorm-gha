@@ -55,12 +55,14 @@
 // </FS:Ansariel>
 
 
+namespace llpanelgroupcreate {
 const S32 MATURE_CONTENT = 1;
 const S32 NON_MATURE_CONTENT = 2;
 const S32 DECLINE_TO_STATE = 0;
 
 static LLPanelInjector<LLPanelGroupCreate> t_panel_group_creation("panel_group_creation_sidetray");
 
+}
 LLPanelGroupCreate::LLPanelGroupCreate()
 :    LLPanel()
 {
@@ -196,7 +198,7 @@ void LLPanelGroupCreate::onBackBtnClick()
 }
 
 bool LLPanelGroupCreate::confirmMatureApply(const LLSD& notification, const LLSD& response)
-{
+{using namespace llpanelgroupcreate;
     S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
     // 0 == Yes
     // 1 == No
@@ -219,7 +221,7 @@ bool LLPanelGroupCreate::confirmMatureApply(const LLSD& notification, const LLSD
 }
 
 void LLPanelGroupCreate::onBtnCreate()
-{
+{using namespace llpanelgroupcreate;
     LL_INFOS() << "Validating group creation" << LL_ENDL;
 
     // Validate the group name length.
@@ -249,7 +251,7 @@ void LLPanelGroupCreate::onBtnCreate()
 }
 
 void LLPanelGroupCreate::createGroup()
-{
+{using namespace llpanelgroupcreate;
     LL_INFOS() << "Creating group" << LL_ENDL;
 
     U32 enrollment_fee = (mCtrlEnrollmentFee->get() ?

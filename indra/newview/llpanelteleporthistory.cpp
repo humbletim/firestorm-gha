@@ -53,11 +53,14 @@
 
 #include "fsfloaterplacedetails.h"
 
+namespace llpanelteleporthistory {
 // Maximum number of items that can be added to a list in one pass.
 // Used to limit time spent for items list update per frame.
 static const U32 ADD_LIMIT = 50;
 
 static const std::string COLLAPSED_BY_USER = "collapsed_by_user";
+
+}
 
 class LLTeleportHistoryFlatItem : public LLPanel
 {
@@ -829,7 +832,7 @@ void LLTeleportHistoryPanel::getNextTab(const LLDate& item_date, S32& tab_idx, L
 
 // Called to add items, no more, than ADD_LIMIT at time
 void LLTeleportHistoryPanel::refresh()
-{
+{using namespace llpanelteleporthistory;
 	if (!mHistoryAccordion)
 	{
 		mDirty = false;
@@ -1317,14 +1320,14 @@ bool LLTeleportHistoryPanel::isActionEnabled(const LLSD& userdata) const
 }
 
 void LLTeleportHistoryPanel::setAccordionCollapsedByUser(LLUICtrl* acc_tab, bool collapsed)
-{
+{using namespace llpanelteleporthistory;
 	LLSD param = acc_tab->getValue();
 	param[COLLAPSED_BY_USER] = collapsed;
 	acc_tab->setValue(param);
 }
 
 bool LLTeleportHistoryPanel::isAccordionCollapsedByUser(LLUICtrl* acc_tab)
-{
+{using namespace llpanelteleporthistory;
 	LLSD param = acc_tab->getValue();
 	if(!param.has(COLLAPSED_BY_USER))
 	{

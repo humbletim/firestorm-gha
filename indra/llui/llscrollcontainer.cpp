@@ -48,23 +48,22 @@
 /// Local function declarations, constants, enums, and typedefs
 ///----------------------------------------------------------------------------
 
-static const S32 VERTICAL_MULTIPLE = 16;
-static const F32 AUTO_SCROLL_RATE_ACCEL = 120.f;
-
 ///----------------------------------------------------------------------------
 /// Class LLScrollContainer
 ///----------------------------------------------------------------------------
 
+namespace llscrollcontainer {
 static LLDefaultChildRegistry::Register<LLScrollContainer> r("scroll_container");
-
+}
 #include "llscrollingpanellist.h"
 #include "llcontainerview.h"
 #include "llpanel.h"
 
+namespace llscrollcontainer {
 static ScrollContainerRegistry::Register<LLScrollingPanelList> r1("scrolling_panel_list");
 static ScrollContainerRegistry::Register<LLContainerView> r2("container_view");
 static ScrollContainerRegistry::Register<LLPanel> r3("panel", &LLPanel::fromXML);
-
+}
 LLScrollContainer::Params::Params()
 :	is_opaque("opaque"),
 	bg_color("color"),

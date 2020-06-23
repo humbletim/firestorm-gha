@@ -51,12 +51,14 @@
 #include "rlvcommon.h"
 // [/RLVa:KB]
 #include <boost/tokenizer.hpp>
+namespace llhudtext {
 const F32 HORIZONTAL_PADDING = 15.f;
 const F32 VERTICAL_PADDING = 12.f;
 const F32 BUFFER_SIZE = 2.f;
 const F32 HUD_TEXT_MAX_WIDTH = 190.f;
 const F32 HUD_TEXT_MAX_WIDTH_NO_BUBBLE = 1000.f;
 const F32 MAX_DRAW_DISTANCE = 300.f;
+}
 
 std::set<LLPointer<LLHUDText> > LLHUDText::sTextObjects;
 std::vector<LLPointer<LLHUDText> > LLHUDText::sVisibleTextObjects;
@@ -115,7 +117,7 @@ void LLHUDText::render()
 }
 
 void LLHUDText::renderText()
-{
+{using namespace llhudtext;
 	if (!mVisible || mHidden)
 	{
 		return;
@@ -297,7 +299,7 @@ void LLHUDText::addLine(const std::string &text_utf8,
 						const LLColor4& color,
 						const LLFontGL::StyleFlags style,
 						const LLFontGL* font)
-{
+{using namespace llhudtext;
 	LLWString wline = utf8str_to_wstring(text_utf8);
 	if (!wline.empty())
 	{
@@ -368,7 +370,7 @@ void LLHUDText::setDoFade(const BOOL do_fade)
 }
 
 void LLHUDText::updateVisibility()
-{
+{using namespace llhudtext;
 	if (mSourceObject)
 	{
 		mSourceObject->updateText();
@@ -485,7 +487,7 @@ void LLHUDText::updateVisibility()
 }
 
 LLVector2 LLHUDText::updateScreenPos(LLVector2 &offset)
-{
+{using namespace llhudtext;
 	LLCoordGL screen_pos;
 	LLVector2 screen_pos_vec;
 	LLVector3 x_pixel_vec;
@@ -526,7 +528,7 @@ LLVector2 LLHUDText::updateScreenPos(LLVector2 &offset)
 }
 
 void LLHUDText::updateSize()
-{
+{using namespace llhudtext;
 	F32 height = 0.f;
 	F32 width = 0.f;
 

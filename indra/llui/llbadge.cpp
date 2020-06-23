@@ -31,7 +31,9 @@
 #include "lluictrlfactory.h"
 
 
-static LLDefaultChildRegistry::Register<LLBadge> r("badge");
+namespace llbadge {
+	static LLDefaultChildRegistry::Register<LLBadge> r("badge");
+}
 
 static const S32 BADGE_OFFSET_NOT_SPECIFIED = 0x7FFFFFFF;
 

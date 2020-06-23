@@ -49,7 +49,9 @@
 #include "llslurl.h"
 #include "llurlaction.h"
 
+namespace llgrouplist {
 static LLDefaultChildRegistry::Register<LLGroupList> r("group_list");
+}
 S32 LLGroupListItem::sIconWidth = 0;
 
 class LLGroupComparator : public LLFlatListView::ItemComparator

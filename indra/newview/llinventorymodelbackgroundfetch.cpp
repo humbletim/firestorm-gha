@@ -176,11 +176,14 @@ private:
 };
 
 
+namespace llinventorymodelbackgroundfetch {
+
 const S32 MAX_FETCH_RETRIES = 10; // <FS:ND/> For legacy inventory
 
-const char * const LOG_INV("Inventory");
+}//ns
 
 } // end of namespace anonymous
+extern const char * const LOG_INV;
 
 
 ///----------------------------------------------------------------------------
@@ -339,7 +342,8 @@ void LLInventoryModelBackgroundFetch::backgroundFetchCB(void *)
 }
 
 void LLInventoryModelBackgroundFetch::backgroundFetch()
-{
+{using namespace llinventorymodelbackgroundfetch;
+
 	if (mBackgroundFetchActive && gAgent.getRegion() && gAgent.getRegion()->capabilitiesReceived())
 	{
 		// If we'll be using the capability, we'll be sending batches and the background thing isn't as important.

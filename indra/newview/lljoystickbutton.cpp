@@ -44,16 +44,15 @@
 
 #include "llglheaders.h"
 
+namespace lljoystickbutton {
 static LLDefaultChildRegistry::Register<LLJoystickAgentSlide> r1("joystick_slide");
 static LLDefaultChildRegistry::Register<LLJoystickAgentTurn> r2("joystick_turn");
 static LLDefaultChildRegistry::Register<LLJoystickCameraRotate> r3("joystick_rotate");
 static LLDefaultChildRegistry::Register<LLJoystickCameraTrack> r5("joystick_track");
 
-
-
 const F32 NUDGE_TIME = 0.25f;		// in seconds
 const F32 ORBIT_NUDGE_RATE = 0.05f; // fraction of normal speed
-
+}
 //
 // Public Methods
 //
@@ -267,7 +266,8 @@ EJoystickQuadrant LLJoystick::quadrantFromName(const std::string& sQuadrant)
 //-------------------------------------------------------------------------------
 
 void LLJoystickAgentTurn::onHeldDown()
-{
+{using namespace lljoystickbutton;
+
 	F32 time = getElapsedHeldDownTime();
 	updateSlop();
 
@@ -331,7 +331,7 @@ void LLJoystickAgentTurn::onHeldDown()
 //-------------------------------------------------------------------------------
 
 void LLJoystickAgentSlide::onMouseUp()
-{
+{using namespace lljoystickbutton;
 	F32 time = getElapsedHeldDownTime();
 	if( time < NUDGE_TIME )
 	{
@@ -505,7 +505,8 @@ void LLJoystickCameraRotate::onHeldDown()
 }
 
 F32 LLJoystickCameraRotate::getOrbitRate()
-{
+{using namespace lljoystickbutton;
+
 	F32 time = getElapsedHeldDownTime();
 	if( time < NUDGE_TIME )
 	{

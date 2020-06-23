@@ -4547,10 +4547,12 @@ void process_terse_object_update_improved(LLMessageSystem *mesgsys, void **user_
 	}
 }
 
+namespace llviewermessage {
 static LLTrace::BlockTimerStatHandle FTM_PROCESS_OBJECTS("Process Kill Objects");
+}
 
 void process_kill_object(LLMessageSystem *mesgsys, void **user_data)
-{
+{using namespace llviewermessage;
 	LL_RECORD_BLOCK_TIME(FTM_PROCESS_OBJECTS);
 
 	LLUUID		id;

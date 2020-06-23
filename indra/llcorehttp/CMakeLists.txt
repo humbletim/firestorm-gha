@@ -27,29 +27,32 @@ include_directories(
     )
 
 set(llcorehttp_SOURCE_FILES
-    bufferarray.cpp
-    bufferstream.cpp
-    httpcommon.cpp
-    llhttpconstants.cpp
-    httpheaders.cpp
-    httpoptions.cpp
-    httprequest.cpp
-    httpresponse.cpp
-    httpstats.cpp
-    _httplibcurl.cpp
-    _httpopcancel.cpp
-    _httpoperation.cpp
-    _httpoprequest.cpp
-    _httpopsetget.cpp
-    _httpopsetpriority.cpp
-    _httppolicy.cpp
-    _httppolicyclass.cpp
-    _httppolicyglobal.cpp
-    _httpreplyqueue.cpp
-    _httprequestqueue.cpp
-    _httpservice.cpp
-    _refcounted.cpp
+    # bufferarray.cpp
+    # bufferstream.cpp
+    # httpcommon.cpp
+    # llhttpconstants.cpp
+    # httpheaders.cpp
+    # httpoptions.cpp
+    # httprequest.cpp
+    # httpresponse.cpp
+    # httpstats.cpp
+    # _httplibcurl.cpp
+    # _httpopcancel.cpp
+    # _httpoperation.cpp
+    # _httpoprequest.cpp
+    # _httpopsetget.cpp
+    # _httpopsetpriority.cpp
+    # _httppolicy.cpp
+    # _httppolicyclass.cpp
+    # _httppolicyglobal.cpp
+    # _httpreplyqueue.cpp
+    # _httprequestqueue.cpp
+    # _httpservice.cpp
+    # _refcounted.cpp
+    llcorehttp_star.cpp
     )
+
+  set_source_files_properties(llcorehttp_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 
 set(llcorehttp_HEADER_FILES
     CMakeLists.txt

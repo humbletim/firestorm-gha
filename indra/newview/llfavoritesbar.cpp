@@ -58,7 +58,9 @@
 #include "fsfloaterplacedetails.h"
 #include "lleventtimer.h"
 
+namespace llfavoritesbar {
 static LLDefaultChildRegistry::Register<LLFavoritesBarCtrl> r("favorites_bar");
+}
 
 const S32 DROP_DOWN_MENU_WIDTH = 250;
 const S32 DROP_DOWN_MENU_TOP_PAD = 13;

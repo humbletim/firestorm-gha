@@ -33,7 +33,9 @@
 
 // linker optimizes this out on Windows until there is a real reference
 // to this file
+namespace lllistview {
 static LLDefaultChildRegistry::Register<LLListView> r("list_view");
+}
 
 LLListView::Params::Params()
 :	bg_color("bg_color"),

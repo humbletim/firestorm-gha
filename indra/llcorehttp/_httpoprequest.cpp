@@ -117,9 +117,8 @@ void check_curl_easy_setopt(CURL* handle, CURLoption option, ARG argument)
     check_curl_easy_code(code, option);
 }
 
-static const char * const LOG_CORE("CoreHttp");
-
 } // end anonymous namespace
+extern const char * const LOG_CORE;
 
 
 namespace LLCore

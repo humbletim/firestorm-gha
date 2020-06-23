@@ -33,10 +33,12 @@
 #include "llfloatersidepanelcontainer.h"
 #include "llviewermenu.h"
 
+namespace llblocklist {
 static LLDefaultChildRegistry::Register<LLBlockList> r("block_list");
 
 static const LLBlockListNameComparator 		NAME_COMPARATOR;
 static const LLBlockListNameTypeComparator	NAME_TYPE_COMPARATOR;
+}
 
 LLBlockList::LLBlockList(const Params& p)
 :	LLFlatListViewEx(p),
@@ -157,13 +159,13 @@ void LLBlockList::setNameFilter(const std::string& filter)
 }
 
 void LLBlockList::sortByName()
-{
+{using namespace llblocklist;
 	setComparator(&NAME_COMPARATOR);
 	sort();
 }
 
 void LLBlockList::sortByType()
-{
+{using namespace llblocklist;
 	setComparator(&NAME_TYPE_COMPARATOR);
 	sort();
 }
@@ -476,7 +478,7 @@ bool LLBlockListNameComparator::doCompare(const LLBlockedListItem* blocked_item1
 }
 
 bool LLBlockListNameTypeComparator::doCompare(const LLBlockedListItem* blocked_item1, const LLBlockedListItem* blocked_item2) const
-{
+{using namespace llblocklist;
 	LLMute::EType type1 = blocked_item1->getType();
 	LLMute::EType type2 = blocked_item2->getType();
 

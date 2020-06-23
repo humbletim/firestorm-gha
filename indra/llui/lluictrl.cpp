@@ -36,7 +36,9 @@
 #include "lltabcontainer.h"
 #include "llaccordionctrltab.h"
 
-static LLDefaultChildRegistry::Register<LLUICtrl> r("ui_ctrl");
+namespace lluictrl {
+	static LLDefaultChildRegistry::Register<LLUICtrl> r("ui_ctrl");
+}
 
 F32 LLUICtrl::sActiveControlTransparency = 1.0f;
 F32 LLUICtrl::sInactiveControlTransparency = 1.0f;

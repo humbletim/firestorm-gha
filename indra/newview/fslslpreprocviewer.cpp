@@ -28,7 +28,9 @@
 #include "llviewerprecompiledheaders.h"
 #include "fslslpreprocviewer.h"
 
+namespace fslslpreprocviewer {
 static LLDefaultChildRegistry::Register<FSLSLPreProcViewer> r("fs_lsl_preproc_viewer");
+}
 
 FSLSLPreProcViewer::FSLSLPreProcViewer(const Params& p)
 :	LLScriptEditor(p)

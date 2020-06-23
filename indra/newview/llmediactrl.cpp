@@ -64,7 +64,9 @@
 
 extern BOOL gRestoreGL;
 
+namespace llmediactrl {
 static LLDefaultChildRegistry::Register<LLMediaCtrl> r("web_browser");
+}
 
 LLMediaCtrl::Params::Params()
 :	start_url("start_url"),

@@ -34,12 +34,12 @@
 #define NF32 (4096.f)
 #define NP 12   /* 2^N */
 #define NM 0xfff
-
+namespace llperlin {
 static S32 p[B + B + 2];
 static F32 g3[B + B + 2][3];
 static F32 g2[B + B + 2][2];
 static F32 g1[B + B + 2];
-
+}
 bool LLPerlinNoise::sInitialized = 0;
 
 static void normalize2(F32 v[2])
@@ -71,7 +71,7 @@ static void fast_setup(F32 vec, U8 &b0, U8 &b1, F32 &r0, F32 &r1)
 
 
 void LLPerlinNoise::init(void)
-{
+{using namespace llperlin;
 	int i, j, k;
 
 	for (i = 0 ; i < B ; i++)
@@ -118,7 +118,7 @@ void LLPerlinNoise::init(void)
 #define lerp_m(t, a, b) ( a + t * (b - a) )
 
 F32 LLPerlinNoise::noise1(F32 x)
-{
+{ using namespace llperlin;
 	int bx0, bx1;
 	F32 rx0, rx1, sx, t, u, v;
 
@@ -145,7 +145,7 @@ static F32 fast_at2(F32 rx, F32 ry, F32 *q)
 }
 
 F32 LLPerlinNoise::noise2(F32 x, F32 y)
-{
+{using namespace llperlin;
 	U8 bx0, bx1, by0, by1;
 	U32 b00, b10, b01, b11;
 	F32 rx0, rx1, ry0, ry1, *q, sx, sy, a, b, u, v;
@@ -190,7 +190,7 @@ static F32 fast_at3(F32 rx, F32 ry, F32 rz, F32 *q)
 }
 
 F32 LLPerlinNoise::noise3(F32 x, F32 y, F32 z)
-{
+{using namespace llperlin;
 	U8 bx0, bx1, by0, by1, bz0, bz1;
 	S32 b00, b10, b01, b11;
 	F32 rx0, rx1, ry0, ry1, rz0, rz1, *q, sy, sz, a, b, c, d, t, u, v;
@@ -292,3 +292,13 @@ F32 LLPerlinNoise::clouds3(F32 x, F32 y, F32 z, F32 freq)
 	}
 	return t;
 }
+
+
+#undef B
+#undef BM
+#undef N
+#undef NF32
+#undef NP
+#undef NM
+#undef lerp_m
+#undef s_curve

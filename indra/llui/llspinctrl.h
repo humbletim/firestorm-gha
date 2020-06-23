@@ -38,6 +38,7 @@
 class LLSpinCtrl
 : public LLF32UICtrl
 {
+	const int MAX_STRING_LENGTH = 255;
 public:
 	struct Params : public LLInitParam::Block<Params, LLF32UICtrl::Params>
 	{

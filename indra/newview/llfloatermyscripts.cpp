@@ -36,7 +36,9 @@
 #include "lltrans.h"
 #include "llviewerregion.h"
 
+namespace llfloatermyscripts {
 const S32 SIZE_OF_ONE_KB = 1024;
+}
 
 LLFloaterMyScripts::LLFloaterMyScripts(const LLSD& seed)
 	: LLFloater(seed), 
@@ -129,7 +131,7 @@ void LLFloaterMyScripts::getAttachmentLimitsCoro(std::string url)
 
 
 void LLFloaterMyScripts::setAttachmentDetails(LLSD content)
-{
+{ using namespace llfloatermyscripts;
 	LLScrollListCtrl *list = getChild<LLScrollListCtrl>("scripts_list");
 	
 	if(!list)
@@ -214,7 +216,7 @@ void LLFloaterMyScripts::clearList()
 }
 
 void LLFloaterMyScripts::setAttachmentSummary(LLSD content)
-{
+{using namespace llfloatermyscripts;
 	if(content["summary"]["used"][0]["type"].asString() == std::string("memory"))
 	{
 		mAttachmentMemoryUsed = content["summary"]["used"][0]["amount"].asInteger() / SIZE_OF_ONE_KB;

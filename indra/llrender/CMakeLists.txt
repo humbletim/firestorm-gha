@@ -31,29 +31,32 @@ include_directories(SYSTEM
     )
 
 set(llrender_SOURCE_FILES
-    llcubemap.cpp
-    llfontbitmapcache.cpp
-    llfontfreetype.cpp
-    llfontgl.cpp
-    llfontregistry.cpp
-    llgl.cpp
-    llgldbg.cpp
-    llglslshader.cpp
-    llgltexture.cpp
-    llimagegl.cpp
-    llpostprocess.cpp
-    llrender.cpp
-    llrender2dutils.cpp
-    llrendernavprim.cpp
-    llrendersphere.cpp
-    llrendertarget.cpp
-    llshadermgr.cpp
-    lltexture.cpp
-    lluiimage.cpp
-    llvertexbuffer.cpp
-    llglcommonfunc.cpp
+    # llcubemap.cpp
+    # llfontbitmapcache.cpp
+    # llfontfreetype.cpp
+    # llfontgl.cpp
+    # llfontregistry.cpp
+    # llgl.cpp
+    # llgldbg.cpp
+    # llglslshader.cpp
+    # llgltexture.cpp
+    # llimagegl.cpp
+    # llpostprocess.cpp
+    # llrender.cpp
+    # llrender2dutils.cpp
+    # llrendernavprim.cpp
+    # llrendersphere.cpp
+    # llrendertarget.cpp
+    # llshadermgr.cpp
+    # lltexture.cpp
+    # lluiimage.cpp
+    # llvertexbuffer.cpp
+    # llglcommonfunc.cpp
+    llrender_star.cpp
     )
-    
+
+  set_source_files_properties(llrender_star.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
+
 set(llrender_HEADER_FILES
     CMakeLists.txt
 

@@ -34,7 +34,9 @@
 #include "llautoreplace.h"
 #include "llfloaterimnearbychathandler.h"
 
+namespace fsnearbychatcontrol {
 static LLDefaultChildRegistry::Register<FSNearbyChatControl> r("fs_nearby_chat_control");
+}
 
 FSNearbyChatControl::FSNearbyChatControl(const FSNearbyChatControl::Params& p) :
 	LLLineEditor(p),

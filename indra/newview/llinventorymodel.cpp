@@ -94,7 +94,7 @@ BOOL LLInventoryModel::sFirstTimeInViewer2 = TRUE;
 //BOOL decompress_file(const char* src_filename, const char* dst_filename);
 static const char PRODUCTION_CACHE_FORMAT_STRING[] = "%s.inv";
 static const char GRID_CACHE_FORMAT_STRING[] = "%s.%s.inv";
-static const char * const LOG_INV("Inventory");
+const char * const LOG_INV("Inventory");
 
 struct InventoryIDPtrLess
 {
