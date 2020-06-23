@@ -193,6 +193,7 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/weak_ptr.hpp"
 #include "boost/function.hpp"
+#include "boost/core/noncopyable.hpp"
 #include <string>
 #include <curl/curl.h>
 

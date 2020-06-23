@@ -739,7 +739,9 @@ namespace snprintf_hack
 	LL_COMMON_API int snprintf(char *str, size_t size, const char *format, ...);
 }
 
-using snprintf_hack::snprintf;
+#if _MSC_VER < 1920
+ using snprintf_hack::snprintf;
+#endif
 
 /**
  * @brief Convert a wide string to std::string

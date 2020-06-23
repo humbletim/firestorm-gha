@@ -2,6 +2,110 @@
 <llsd xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="llsd.xsd">
 <map>
+
+  <!-- non-persisted settings -->
+  <key>$vrEnabled</key>
+  <map>
+    <key>Comment</key><string>[vr-session] Toggles OpenVR enabled state</string>
+    <key>Persist</key><integer>0</integer>
+    <key>Type</key><string>Boolean</string>
+    <key>Value</key><integer>0</integer>
+  </map>
+  <key>$vrActive</key>
+  <map>
+    <key>Comment</key><string>[vr-session] Toggles VR compositor output (only applies when OpenVR is enabled)</string>
+    <key>Persist</key><integer>0</integer>
+    <key>Type</key><string>Boolean</string>
+    <key>Value</key><integer>0</integer>
+  </map>
+  <key>$vrCamRotOffset</key>
+  <map>
+    <key>Comment</key><string>[vr-session] HMD yaw pre-rotation in degrees (only applies when OpenVR is enabled)</string>
+    <key>Persist</key><integer>0</integer>
+    <key>Type</key><string>F32</string>
+    <key>Value</key><real>90.0</real>
+  </map>
+  <key>$vrCopySettingsToClipboard</key>
+  <map>
+    <key>Comment</key><string>[vr-session] (internal) settings trigger for dumping current values to system log and clipboard.</string>
+    <key>Persist</key><integer>0</integer>
+    <key>Type</key><string>Boolean</string>
+    <key>Value</key><integer>0</integer>
+  </map>
+  <key>$vrStatus</key>
+  <map>
+    <key>Comment</key><string>[vr-session] (internal) indicates current VR status (shown in VR Prefs)</string>
+    <key>Persist</key><integer>0</integer>
+    <key>Type</key><string>String</string>
+    <key>Value</key><string></string>
+  </map>
+  
+  <!-- persisted VR settings -->
+
+      <key>$vr_right_toolbar_offset</key>
+      <map>
+        <key>Comment</key><string>[vr] Offset the right toolbar by this percentage of viewport width.</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>0.1</real>
+      </map>
+      <key>$vrCursorZooming</key>
+      <map>
+        <key>Comment</key><string>[vr] Toggles whether the screen auto pans and zooms to follow the mouse cursor (only applies to VR mode).
+  Enable this if you need to access the top menu bar while in HMD.</string>
+        <key>Persist</key><integer>1</integer>
+        <key>Type</key><string>Boolean</string>
+        <key>Value</key><integer>0</integer>
+      </map>
+
+      <key>$vrConfigVersion</key>
+      <map>
+        <key>Comment</key><string>[vr] (internal) tracks changes to legacy vrsettings.ini file</string>
+        <key>Persist</key><integer>1</integer>
+        <key>Type</key><string>F32</string>
+        <key>Value</key><real>0.0</real>
+      </map>
+
+      
+      <key>$vrEyeDistance</key>
+      <map>
+        <key>Comment</key><string>[vr] Distance between left and right camera.
+  Usually the same as the IPD of your HMD.
+  If objects appear too small or too big try other values.</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>64.000000</real>
+      </map>
+      <key>$vrFocusDistance</key>
+      <map>
+        <key>Comment</key><string>[vr] Focus distance of the cameras in meters</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>10.000000</real>
+      </map>
+      <key>$vrTextureShift</key>
+      <map>
+        <key>Comment</key><string>[vr] Applies a texture shift in case your HMD's focus point is not in the center of the texture.</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>14.000000</real>
+      </map>
+      <key>$vrTextureZoom</key>
+      <map>
+        <key>Comment</key><string>[vr] Zooms the view in or out. It may help with wide FOV HMD's like Pimax.
+  Zoom in reduces quality. Zoom out increases quality
+  When this value is changed FOV must also be adjusted.</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>0.000000</real>
+      </map>
+      <key>$vrFieldOfView</key>
+      <map>
+        <key>Comment</key><string>Field of view in degree adjustment. Usually 100 degree is good.
+  It should be adjusted when texture zoom is changed.</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>100.000000</real>
+      </map>
+
+<!-- // vr -->
+
+
+
   <key>FSLandmarkCreatedNotification</key>
   <map>
     <key>Comment</key>

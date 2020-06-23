@@ -1,0 +1,5 @@
+Source: boost-coroutine-160
+Version: 1.60.0
+Build-Depends: boost-context-160, boost-assert, boost-build-160, boost-config, boost-detail, boost-exception, boost-integer, boost-modular-build-helper-160, boost-move, boost-range, boost-system, boost-thread, boost-throw-exception, boost-type-traits, boost-utility, boost-vcpkg-helpers-160
+Homepage: https://github.com/boostorg/coroutine
+Description: Boost coroutine module

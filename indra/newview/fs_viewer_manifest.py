@@ -3,6 +3,12 @@ import subprocess
 import tarfile
 
 class FSViewerManifest:
+    def _artifact_Subdir(self):
+        if self.args.get('vcpkg-build') == 'ON':
+            return '.'
+        else:
+            return self.args['configuration']
+
     def fs_is_opensim(self):
         return self.args['viewer_flavor'] == 'oss' #Havok would be hvk
 
@@ -42,24 +48,25 @@ class FSViewerManifest:
         return self.channel().replace("Firestorm", "").strip()
 
     def fs_sign_win_binaries( self ):
+        print('fs_sign_win_binaries...', self._artifact_Subdir())
         try:
-            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com","/t","http://timestamp.verisign.com/scripts/timstamp.dll",self.args['configuration']+"\\firestorm-bin.exe"],
+            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com","/t","http://timestamp.verisign.com/scripts/timstamp.dll",self._artifact_Subdir()+"\\firestorm-bin.exe"],
                                   stderr=subprocess.PIPE,stdout=subprocess.PIPE)
-            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com","/t","http://timestamp.verisign.com/scripts/timstamp.dll",self.args['configuration']+"\\slplugin.exe"],
+            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com","/t","http://timestamp.verisign.com/scripts/timstamp.dll",self._artifact_Subdir()+"\\slplugin.exe"],
                                   stderr=subprocess.PIPE,stdout=subprocess.PIPE)
-            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com","/t","http://timestamp.verisign.com/scripts/timstamp.dll",self.args['configuration']+"\\SLVoice.exe"],
+            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com","/t","http://timestamp.verisign.com/scripts/timstamp.dll",self._artifact_Subdir()+"\\SLVoice.exe"],
                                   stderr=subprocess.PIPE,stdout=subprocess.PIPE)
-            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com","/t","http://timestamp.verisign.com/scripts/timstamp.dll",self.args['configuration']+"\\"+self.final_exe()],
+            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com","/t","http://timestamp.verisign.com/scripts/timstamp.dll",self._artifact_Subdir()+"\\"+self.final_exe()],
                                   stderr=subprocess.PIPE,stdout=subprocess.PIPE)
         except Exception, e:
-            print "Couldn't sign final binary. Tried to sign %s" % self.args['configuration']+"\\"+self.final_exe()
+            print "Couldn't sign final binary. Tried to sign %s" % self._artifact_Subdir()+"\\"+self.final_exe()
 
     def fs_sign_win_installer( self, substitution_strings ):
         try:
-            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com",self.args['configuration']+"\\"+substitution_strings['installer_file']],stderr=subprocess.PIPE,stdout=subprocess.PIPE)
+            subprocess.check_call(["signtool.exe","sign","/n","Phoenix","/d","Firestorm","/du","http://www.phoenixviewer.com",self._artifact_Subdir()+"\\"+substitution_strings['installer_file']],stderr=subprocess.PIPE,stdout=subprocess.PIPE)
         except Exception, e:
             print "Working directory: %s" % os.getcwd()
-            print "Couldn't sign windows installer. Tried to sign %s" % self.args['configuration']+"\\"+substitution_strings['installer_file']
+            print "Couldn't sign windows installer. Tried to sign %s" % self._artifact_Subdir()+"\\"+substitution_strings['installer_file']
 
     def fs_delete_linux_symbols( self ):
         debugDir = os.path.join( self.get_dst_prefix(), "bin", ".debug" )
@@ -116,8 +123,8 @@ class FSViewerManifest:
         pdbName = "firestorm-bin.pdb"
         try:
             subprocess.check_call( [ "pdbcopy.exe" ,
-                                     self.args['configuration'] + "\\firestorm-bin.pdb", 
-                                     self.args['configuration'] + "\\firestorm-bin-public.pdb",
+                                     self._artifact_Subdir() + "\\firestorm-bin.pdb", 
+                                     self._artifact_Subdir() + "\\firestorm-bin-public.pdb",
                                      "-p"
                                  ], stderr=subprocess.PIPE,stdout=subprocess.PIPE )
             pdbName = "firestorm-bin-public.pdb"
@@ -127,15 +134,15 @@ class FSViewerManifest:
         # Store windows symbols we want to keep for debugging in a tar file, this will be later compressed with xz (lzma)
         # Using tat+xz gives far superior compression than zip (~half the size of the zip archive).
         # Python3 natively supports tar+xz via mode 'w:xz'. But we're stuck with Python2 for now.
-        symbolTar = tarfile.TarFile("%s/Phoenix_%s_%s_%s_pdbsymbols-windows-%d.tar" % (self.args['configuration'].lower(),
+        symbolTar = tarfile.TarFile("%s/Phoenix_%s_%s_%s_pdbsymbols-windows-%d.tar" % (self._artifact_Subdir(),
                                                                                     self.fs_channel_legacy_oneword(),
                                                                                     '-'.join(self.args['version']),
                                                                                     self.args['viewer_flavor'],
                                                                                     self.address_size),
                                                                                     'w')
-        symbolTar.add( "%s/Firestorm-bin.exe" % self.args['configuration'].lower(), "firestorm-bin.exe" )
-        symbolTar.add( "%s/build_data.json" % self.args['configuration'].lower(), "build_data.json" )
-        symbolTar.add( "%s/%s" % (self.args['configuration'].lower(),pdbName), pdbName )
+        symbolTar.add( "%s/Firestorm-bin.exe" % self._artifact_Subdir(), "firestorm-bin.exe" )
+        symbolTar.add( "%s/build_data.json" % self._artifact_Subdir(), "build_data.json" )
+        symbolTar.add( "%s/%s" % (self._artifact_Subdir(),pdbName), pdbName )
         symbolTar.close()
 
     def fs_strip_windows_manifest(self, aFile ):
@@ -151,8 +158,9 @@ class FSViewerManifest:
 
     def fs_copy_windows_manifest(self):
         from shutil import copyfile
-        self.fs_strip_windows_manifest( "%s/slplugin.exe" % self.args['configuration'].lower() )
-        self.fs_strip_windows_manifest( "%s/llplugin/dullahan_host.exe" % self.args['configuration'].lower() )
+
+        self.fs_strip_windows_manifest( "%s/slplugin.exe" % self._artifact_Subdir() )
+        self.fs_strip_windows_manifest( "%s/llplugin/dullahan_host.exe" % self._artifact_Subdir() )
         if self.prefix(src=os.path.join(self.args['build'], os.pardir, os.pardir, 'indra', 'tools', 'manifests')):
             self.path( "compatibility.manifest", "slplugin.exe.manifest" )
             self.end_prefix()
@@ -170,11 +178,11 @@ class FSViewerManifest:
         self.fs_save_symbols("darwin")
 
     def fs_save_symbols(self, osname):
-        if (os.path.exists("%s/firestorm-symbols-%s-%d.tar.bz2" % (self.args['configuration'].lower(),
+        if (os.path.exists("%s/firestorm-symbols-%s-%d.tar.bz2" % (self._artifact_Subdir(),
                                                                        osname,
                                                                        self.address_size))):
             # Rename to add version numbers
-            sName = "%s/Phoenix_%s_%s_%s_symbols-%s-%d.tar.bz2" % (self.args['configuration'].lower(),
+            sName = "%s/Phoenix_%s_%s_%s_symbols-%s-%d.tar.bz2" % (self._artifact_Subdir(),
                                                                        self.fs_channel_legacy_oneword(),
                                                                        '-'.join( self.args['version'] ),
                                                                        self.args['viewer_flavor'],
@@ -184,7 +192,7 @@ class FSViewerManifest:
             if os.path.exists( sName ):
                 os.unlink( sName )
 
-            os.rename("%s/firestorm-symbols-%s-%d.tar.bz2" % (self.args['configuration'].lower(), osname, self.address_size), sName)
+            os.rename("%s/firestorm-symbols-%s-%d.tar.bz2" % (self._artifact_Subdir(), osname, self.address_size), sName)
 
 
     # New llmanifest is braindead and does not allow any optional files. for some files.

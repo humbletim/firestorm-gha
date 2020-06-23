@@ -95,7 +95,7 @@ LLBasicCertificate::LLBasicCertificate(const std::string& pem_cert,
 LLBasicCertificate::LLBasicCertificate(X509* pCert,
                                        const LLSD* validation_params) 
 {
-	if (!pCert || !pCert->cert_info)
+    if (!pCert)
 	{
 		LLTHROW(LLInvalidCertificate(LLSD::emptyMap()));
 	}	
@@ -355,8 +355,20 @@ LLSD cert_name_from_X509_NAME(X509_NAME* name)
 		char buffer[32];
 		X509_NAME_ENTRY *entry = X509_NAME_get_entry(name, entry_index);
 		
-		std::string name_value = std::string((const char*)M_ASN1_STRING_data(X509_NAME_ENTRY_get_data(entry)), 
-											 M_ASN1_STRING_length(X509_NAME_ENTRY_get_data(entry)));
+        ASN1_STRING *tmp = X509_NAME_ENTRY_get_data(entry);
+        
+        std::string name_value;
+        if (ASN1_STRING_type(tmp) != V_ASN1_UTF8STRING)
+        {
+            unsigned char* out_utf8_str;
+            int len = ASN1_STRING_to_UTF8(&out_utf8_str, tmp);
+            name_value = std::string(reinterpret_cast<char*>(out_utf8_str), len);
+            OPENSSL_free(out_utf8_str);
+        }
+        else
+        {
+            name_value = std::string((char*) ASN1_STRING_get0_data(tmp), ASN1_STRING_length(tmp));
+        }
 
 		ASN1_OBJECT* name_obj = X509_NAME_ENTRY_get_object(entry);		
 		OBJ_obj2txt(buffer, sizeof(buffer), name_obj, 0);
@@ -691,29 +703,31 @@ std::string LLBasicCertificateStore::storeId() const
 // LLBasicCertificateChain
 // This class represents a chain of certs, each cert being signed by the next cert
 // in the chain.  Certs must be properly signed by the parent
-LLBasicCertificateChain::LLBasicCertificateChain(const X509_STORE_CTX* store)
+LLBasicCertificateChain::LLBasicCertificateChain(X509_STORE_CTX* store)
 {
 
 	// we're passed in a context, which contains a cert, and a blob of untrusted
 	// certificates which compose the chain.
-	if((store == NULL) || (store->cert == NULL))
+    if((store == NULL) || (X509_STORE_CTX_get0_cert(store) == NULL))
 	{
 		LL_WARNS("SECAPI") << "An invalid store context was passed in when trying to create a certificate chain" << LL_ENDL;
 		return;
 	}
 	// grab the child cert
-	LLPointer<LLCertificate> current = new LLBasicCertificate(store->cert);
+    LLPointer<LLCertificate> current = new LLBasicCertificate(X509_STORE_CTX_get0_cert(store));
 
 	add(current);
-	if(store->untrusted != NULL)
+    stack_st_X509* untrusted = X509_STORE_CTX_get0_untrusted(store);
+    
+    if(untrusted != NULL)
 	{
 		// if there are other certs in the chain, we build up a vector
 		// of untrusted certs so we can search for the parents of each
 		// consecutive cert.
 		LLBasicCertificateVector untrusted_certs;
-		for(int i = 0; i < sk_X509_num(store->untrusted); i++)
+        for(int i = 0; i < sk_X509_num(untrusted); i++)
 		{
-			LLPointer<LLCertificate> cert = new LLBasicCertificate(sk_X509_value(store->untrusted, i));
+            LLPointer<LLCertificate> cert = new LLBasicCertificate(sk_X509_value(untrusted, i));
 			untrusted_certs.add(cert);
 
 		}		
@@ -1310,6 +1324,7 @@ LLSecAPIBasicHandler::~LLSecAPIBasicHandler()
 	//
 	//_writeProtectedData();
 }
+#include "compat/legacy_openssl.hpp"
 
 void LLSecAPIBasicHandler::_readProtectedData()
 {	
@@ -1349,7 +1364,7 @@ void LLSecAPIBasicHandler::_readProtectedData()
 		
 
 		// read in the rest of the file.
-		EVP_CIPHER_CTX ctx;
+		legacy_openssl::EVP_CIPHER_CTX ctx;
 		EVP_CIPHER_CTX_init(&ctx);
 		EVP_DecryptInit(&ctx, EVP_rc4(), salt, NULL);
 		// allocate memory:
@@ -1405,7 +1420,7 @@ void LLSecAPIBasicHandler::_writeProtectedData()
 	try
 	{
 		
-		EVP_CIPHER_CTX ctx;
+		legacy_openssl::EVP_CIPHER_CTX ctx;
 		EVP_CIPHER_CTX_init(&ctx);
 		EVP_EncryptInit(&ctx, EVP_rc4(), salt, NULL);
 		unsigned char unique_id[MAC_ADDRESS_BYTES];
@@ -1492,7 +1507,7 @@ LLPointer<LLCertificate> LLSecAPIBasicHandler::getCertificate(X509* openssl_cert
 }
 		
 // instantiate a chain from an X509_STORE_CTX
-LLPointer<LLCertificateChain> LLSecAPIBasicHandler::getCertificateChain(const X509_STORE_CTX* chain)
+LLPointer<LLCertificateChain> LLSecAPIBasicHandler::getCertificateChain(X509_STORE_CTX* chain)
 {
 	LLPointer<LLCertificateChain> result = new LLBasicCertificateChain(chain);
 	return result;

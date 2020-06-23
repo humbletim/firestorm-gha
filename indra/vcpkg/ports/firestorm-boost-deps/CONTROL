@@ -1,0 +1,4 @@
+Source: firestorm-boost-deps
+Version: 6.3.9
+Build-Depends: boost-asio, boost-assign, boost-graph, boost-thread, boost-regex, boost-system, boost-program-options, boost-wave, boost-filesystem, boost-random, boost-ptr-container, boost-signals2, boost-coroutine-160, boost-context-160
+Description: firestorm vcpkg-variant boost dependencies

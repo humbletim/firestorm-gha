@@ -210,6 +210,7 @@
 #include "NACLfloaterexploresounds.h"
 #include "particleeditor.h"
 #include "quickprefs.h"
+#include "../gVR/vrprefs.h"
 // handle secondlife:///app/openfloater/{NAME} URLs
 class LLFloaterOpenHandler : public LLCommandHandler
 {
@@ -484,6 +485,7 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("phototools_camera", "floater_phototools_camera.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCamera>);
 	LLFloaterReg::add("publish_classified_fs", "floater_publish_classified.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<FSPublishClassifiedFloater>);
 	LLFloaterReg::add("quickprefs", "floater_quickprefs.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<FloaterQuickPrefs>);
+	LLFloaterReg::add("vrprefs", "floater_vrprefs.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<FloaterVRPrefs>);
 	LLFloaterReg::add("region_tracker", "floater_region_tracker.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<ALFloaterRegionTracker>);
 	LLFloaterReg::add("search_replace", "floater_search_replace.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchReplace>);
 	LLFloaterReg::add("secondary_inventory", "floater_my_inventory.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSidePanelContainer>);
