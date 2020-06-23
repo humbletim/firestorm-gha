@@ -1848,7 +1848,6 @@ if (WINDOWS)
             PROPERTIES
             GENERATED TRUE
             COMPILE_FLAGS "/Ycllviewerprecompiledheaders.h"
-        set_source_files_properties(../gVR/vrspinctrl.cpp ../gVR/vrsliderctrl.cpp ../gVR/vrprefs.cpp PROPERTIES COMPILE_FLAGS /Y-)
         )
         add_custom_command(
             OUTPUT pch.cpp
@@ -2268,6 +2267,7 @@ if (WINDOWS)
             PROPERTIES
             COMPILE_FLAGS "/Yullviewerprecompiledheaders.h"
             )
+        set_source_files_properties(../gVR/vrspinctrl.cpp ../gVR/vrsliderctrl.cpp ../gVR/vrprefs.cpp PROPERTIES COMPILE_FLAGS /Y-)
     endif(USE_PRECOMPILED_HEADERS)
 
     # If adding a file to viewer_manifest.py in the WindowsManifest.construct() method, be sure to add the dependency
