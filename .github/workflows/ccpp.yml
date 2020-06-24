@@ -6,16 +6,10 @@ defaults:
     shell: bash
 jobs:
   build:
-    strategy:
-        matrix:
-          os: [windows-latest]
-          build_type: [full]
-    runs-on: ${{matrix.os}}
+    runs-on: windows-latest
     env:
       AUTOBUILD_VSVER: 120
       PreferredToolArchitecture: x64
-      PlatformToolset: v120
-      NINJA_FLAGS: -j4
       VIEWER_CHANNEL: FirestormVR-GUI
       VIEWER_VERSION_REVISION: 58205
     steps:
@@ -23,6 +17,7 @@ jobs:
       with:
         submodules: true
         clean: false
+
     - name: Set VIEWER_VERSION_GITHASH
       shell: bash
       run: |
@@ -33,90 +28,105 @@ jobs:
         git log -n 1
         git log -n 1 | grep "Merge " | awk '{ print $2 }' || true
         echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short || git rev-parse --short HEAD)
+
     - name: Set env
-      if: startsWith(matrix.os, 'windows')
       shell: cmd
       run: |
         echo ::set-env name=AUTOBUILD_ID::-
         echo ::set-env name=AUTOBUILD_INSTALLABLE_CACHE::%cd%\autobuild-cache
         echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
-        echo ::set-env name=NINJA_FLAGS::${{ env.NINJA_FLAGS }} -C build-vc${{ env.AUTOBUILD_VSVER }}-64
 
-    - name: Set env apt
-      if: startsWith(matrix.os, 'ubuntu')
-      shell: bash
-      run: |
-        sudo apt-get install -y -qq libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxinerama-dev libxrender-dev gdb
-        echo ::set-env name=AUTOBUILD_VARIABLES_FILE::$PWD/fs-build-variables/variables
-        echo ::set-env name=LIBRARY_PATH::$PWD/openvr/lib/linux64
-
-    - uses: seanmiddleditch/gha-setup-vsdevenv@master
-
-    - name: cache -- VS2013 Community
-      if: startsWith(matrix.os, 'windows')
-      id: cachedvs2013
+    - name: vs2013packagecache
+      id: vs2013packagecache
       uses: actions/cache@v2
       with:
-        path: |
-           c:/vs2013
-           c:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/V120
-           c:/Program Files (x86)/MSBuild/12.0
-        key: ${{ runner.os }}-vs2013-msbuildstuff
+        path: "C:/ProgramData/Package Cache"
+        key: ${{ runner.os }}-vs2013packagecache-xx
+
+    # - name: vs2013layout
+    #   id: vs2013layout
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: c:/vs2013layout
+    #     key: ${{ runner.os }}-vs2013layout
 
     - name: check disk space
       run: df -h
 
-    - name: VS2013 Community if cached
-      if: startsWith(matrix.os, 'windows') && steps.cachedvs2013.outputs.cache-hit == 'true'
+    - name: vs_community.exe preflight
+      if: false
       shell: cmd
       run: |
-        reg add HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VS7 -v 12.0 -d c:\vs2013\
-        reg add HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\SxS\VC7 -v 12.0 -d c:\vs2013\VC\
+        echo HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Setup
+        reg query HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\VisualStudio\Setup || cd .
+        echo HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VisualStudio\Setup
+        reg query HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\VisualStudio\Setup || cd .
+        echo HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\Setup
+        reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\Setup || cd .
+        echo c:\vs2013
+        dir c:\vs2013 || cd .
+        echo c:\vs2013layout
+        dir c:\vs2013layout || cd .
+        echo c:\vs2013cache
+        dir c:\vs2013cache || cd .
+        echo c:\vs2013cache
+        mkdir c:\vs2013cache || cd .
+        echo reg KeepDownloadedPayloads = 1
+        reg add HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\Setup /f /v KeepDownloadedPayloads /t REG_DWORD /d 1
+        echo reg CachePath = c:\vs2013cache
+        reg add HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\Setup /f /v CachePath /d c:\vs2013cache
+        reg query HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\Setup
+
+    - name: download vs_community.exe
+      shell: powershell
+      run: wget -O vs_community.exe http://download.microsoft.com/download/7/1/B/71BA74D8-B9A0-4E6C-9159-A8335D54437E/vs_community.exe
+
+    - name: rename package cache
+      if: steps.vs2013packagecache.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        @echo on
+        icacls "C:\ProgramData" /grant %username%:(OI)(CI)F
+        icacls "C:\ProgramData\Package Cache" /grant %username%:(OI)(CI)F
+        rename "C:\ProgramData\Package Cache" "Package_Cache_old"
+        mkdir "C:\ProgramData\Package Cache"
+
+    - name: install vs_community.exe
+      shell: cmd
+      run: |
+        echo on
+        dir vs_community.exe
+        reg add HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\Setup /f /v KeepDownloadedPayloads /t REG_DWORD /d 1
+        echo "%cd%\vs_community.exe" /silent /passive /norestart /custominstallpath "c:\vs2013" /adminfile "%cd%\.github\vs2013community.xml" /log "%cd%\vs2013-.log"
+        "%cd%\vs_community.exe" /silent /passive /norestart /custominstallpath "c:\vs2013" /adminfile "%cd%\.github\vs2013community.xml" /log "%cd%\vs2013-.log"
+        echo vs2013packagecache >> vs2013-files.txt
+        rmdir /s /q "C:\ProgramData\Package Cache\.unverified"
+        dir "C:\ProgramData\Package Cache" >> vs2013-files.txt
+        echo vs2013layout >> vs2013-files.txt
+        dir c:\vs2013layout || cd . >> vs2013-files.txt
+        echo vs2013 >> vs2013-files.txt
+        dir "c:\vs2013" || cd . >> vs2013-files.txt
+        icacls "C:\ProgramData\Package Cache" /grant %username%:(OI)(CI)F /T /Q
+
+    - name: check disk space
+      run: df -h
+
+    - name: VS2013 Community checks
+      shell: cmd
+      run: |
         call "c:\vs2013\VC\vcvarsall.bat" amd64
         cl.exe
         which msbuild.exe
         msbuild.exe -version
 
-    - name: allprogs.txt
-      if: startsWith(matrix.os, 'windows') && steps.cachedvs2013.outputs.cache-hit != 'true'
+    - name: disabled
+      if: false
       shell: cmd
       run: |
-        dir "c:/Program Files/" >> allprogs.txt
-        dir "c:/Program Files (x86)/" >> allprogs.txt
-        dir "c:/ProgramData/" >> allprogs.txt
+        REM "%cd%\vs_community.exe" /silent /passive /norestart /layout "c:\vs2013layout" /custominstallpath "c:\vs2013" /adminfile "%cd%\scripts\vs2013community.xml" /log "%cd%\vs2013-.log"
+        "%cd%\vs_community.exe" /createadminfile "%cd%\vs2013community.xml" || cd .
+        type "%cd%\vs2013community.xml" || cd .
 
-    - name: Download VS2013 Community
-      if: startsWith(matrix.os, 'windows') && steps.cachedvs2013.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        mkdir c:\vs2013
-        dir
-        choco install visualstudiocommunity2013 -ia "/CustomInstallPath ""c:\vs2013""" || type C:\Users\runneradmin\AppData\Local\Temp\chocolatey\vs.log
-        dir c:\vs2013
-        call "c:\vs2013\VC\vcvarsall.bat" amd64
-        set
-        cl.exe
-
-    - name: allprogs.txt 2
-      if: startsWith(matrix.os, 'windows') && steps.cachedvs2013.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        dir "c:/Program Files/" >> allprogs2.txt
-        dir "c:/Program Files (x86)/" >> allprogs2.txt
-        dir "c:/ProgramData/" >> allprogs2.txt
-        diff allprogs.txt allprogs2.txt || true
-
-    - name: check disk space
-      run: df -h
-
-    - name: Setup Ninja
-      if: startsWith(matrix.os, 'ubuntu')
-      uses: seanmiddleditch/gha-setup-ninja@master
-    - name: Setup python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 2.7
-        architecture: x64
     - name: Get software versions please
       shell: cmd
       run: |
@@ -125,49 +135,45 @@ jobs:
         git --version
         python --version
         cl.exe
+
     - name: Install autobuild through PIP
+      if: false
       run: pip install git+https://vcs.firestormviewer.org/autobuild-1.1#egg=autobuild
+
     - name: Get autobuild version
+      if: false
       run: autobuild --version
  
     - name: cache -- autobuild downloaded installables
+      if: false
       id: cacheddownloads
       uses: actions/cache@v2
       with:
         path: autobuild-cache
         key: ${{ runner.os }}-cacheddownloads-${{ hashFiles('autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
 
-
     - name: Configure autobuild
-      if: startsWith(matrix.os, 'windows')
+      if: false
       shell: cmd
       run: |
         call "c:\vs2013\VC\vcvarsall.bat" amd64
         autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
-    - name: Configure autobuild
-      if: startsWith(matrix.os, 'ubuntu')
-      shell: bash
-      run: |
-        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE --ninja
+
     - name: Build & Package
-      if: false && startsWith(matrix.os, 'windows')
+      if: false
       shell: cmd
       run: |
         call "c:\vs2013\VC\vcvarsall.bat" amd64
-        #autobuild build -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE --ninja
         msbuild build-vc120-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount /detailedsummary
-    - name: Build & Package
-      if: startsWith(matrix.os, 'ubuntu')
-      shell: bash
-      run: |
-        autobuild build -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE --ninja
+
     - uses: actions/upload-artifact@v2
-      if: startsWith(matrix.os, 'windows')
+      if: true || ${{ failure() }}
       with:
-        name: ${{matrix.os}}-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
+        name: ${{runner.os}}-vs2013-artifacts
+        path: vs2013-*
+
+    - uses: actions/upload-artifact@v2
+      if: startsWith(runner.os, 'windows')
+      with:
+        name: ${{runner.os}}-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
         path: build-vc120-64/newview/Release/*_Setup.exe
-    - uses: actions/upload-artifact@v2
-      if: startsWith(matrix.os, 'ubuntu')
-      with:
-        name: ${{matrix.os}}-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
-        path: build-linux-x86_64/newview/Phoenix*.tar.*
