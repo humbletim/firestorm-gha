@@ -11,19 +11,19 @@
     <key>Type</key><string>Boolean</string>
     <key>Value</key><integer>0</integer>
   </map>
-  <key>$vrActive</key>
+  <key>$vrRecenterHMD</key>
   <map>
-    <key>Comment</key><string>[vr-session] Toggles VR compositor output (only applies when OpenVR is enabled)</string>
+    <key>Comment</key><string>[vr-session] recenter HMD (uses current pos as inverse transform)</string>
     <key>Persist</key><integer>0</integer>
     <key>Type</key><string>Boolean</string>
     <key>Value</key><integer>0</integer>
   </map>
-  <key>$vrCamRotOffset</key>
+  <key>$vrFullscreen</key>
   <map>
-    <key>Comment</key><string>[vr-session] HMD yaw pre-rotation in degrees (only applies when OpenVR is enabled)</string>
+    <key>Comment</key><string>[vr-session] Toggles fullscreen VR window mode.</string>
     <key>Persist</key><integer>0</integer>
-    <key>Type</key><string>F32</string>
-    <key>Value</key><real>90.0</real>
+    <key>Type</key><string>Boolean</string>
+    <key>Value</key><integer>0</integer>
   </map>
   <key>$vrCopySettingsToClipboard</key>
   <map>
@@ -42,7 +42,7 @@
   
   <!-- persisted VR settings -->
 
-      <key>$vr_right_toolbar_offset</key>
+      <key>$vrRightToolbarOffset</key>
       <map>
         <key>Comment</key><string>[vr] Offset the right toolbar by this percentage of viewport width.</string>
         <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
@@ -59,7 +59,7 @@
 
       <key>$vrConfigVersion</key>
       <map>
-        <key>Comment</key><string>[vr] (internal) tracks changes to legacy vrsettings.ini file</string>
+        <key>Comment</key><string>[vr] (internal) tracks changes to vrsettings</string>
         <key>Persist</key><integer>1</integer>
         <key>Type</key><string>F32</string>
         <key>Value</key><real>0.0</real>
@@ -72,19 +72,43 @@
   Usually the same as the IPD of your HMD.
   If objects appear too small or too big try other values.</string>
         <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
-        <real>64.000000</real>
+        <real>32.000000</real>
       </map>
       <key>$vrFocusDistance</key>
       <map>
         <key>Comment</key><string>[vr] Focus distance of the cameras in meters</string>
         <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
-        <real>10.000000</real>
+        <real>3.000000</real>
+      </map>
+      <key>$vrNearClip</key>
+      <map>
+        <key>Comment</key><string>[vr] Distance to near clip plane (VR mode only)</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>0.01</real>
       </map>
       <key>$vrTextureShift</key>
       <map>
         <key>Comment</key><string>[vr] Applies a texture shift in case your HMD's focus point is not in the center of the texture.</string>
         <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
         <real>14.000000</real>
+      </map>
+      <key>$vrUIShift</key>
+      <map>
+        <key>Comment</key><string>[vr] Applies a UI shift (adjusts the effective UI z-depth).</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>0.000000</real>
+      </map>
+      <key>$vrFullscreenUIScale</key>
+      <map>
+        <key>Comment</key><string>[vr] "UIScaleFactor" applied when in VR Fullscreen mode.</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>0.5</real>
+      </map>
+      <key>$vrCursorShift</key>
+      <map>
+        <key>Comment</key><string>[vr]</string>
+        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
+        <real>0.000000</real>
       </map>
       <key>$vrTextureZoom</key>
       <map>
@@ -93,13 +117,6 @@
   When this value is changed FOV must also be adjusted.</string>
         <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
         <real>0.000000</real>
-      </map>
-      <key>$vrFieldOfView</key>
-      <map>
-        <key>Comment</key><string>Field of view in degree adjustment. Usually 100 degree is good.
-  It should be adjusted when texture zoom is changed.</string>
-        <key>Persist</key><integer>1</integer><key>Type</key><string>F32</string><key>Value</key>
-        <real>100.000000</real>
       </map>
 
 <!-- // vr -->

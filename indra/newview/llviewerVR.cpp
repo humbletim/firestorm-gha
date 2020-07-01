@@ -28,7 +28,53 @@
 #define sprintf_s(buffer, buffer_size, stringbuffer, ...) (sprintf(buffer, stringbuffer, __VA_ARGS__))
 #endif
 
-#include "llviewerVR.settings.h"
+#include "../vr/linuxstuff.h"
+#include "../vr/win32stuff.h"
+#include "../vr/matrixstuff.h"
+#include "../vr/timestuff.h"
+#include "../vr/settings.h"
+
+extern llviewerVR gVR;
+extern glh::matrix4f gl_perspective(float fovy, float aspect, float zNear, float zFar);
+namespace vr {
+  bool isRenderingFirstEye = false;
+  bool isEnabled() { return gVR.m_bVrEnabled; }
+  void withUIShift(const std::function<void()>& f, F32 shift) {
+		if (!gVR.m_bVrEnabled) return f();
+		gGL.matrixMode(LLRender::MM_MODELVIEW);
+		gGL.pushMatrix();
+		LLUI::pushMatrix();
+		shift *= (F32)gViewerWindow->getWindowWidthScaled() / (F32)gViewerWindow->getWindowWidthRaw();
+		LLUI::translate(!vr::isRenderingFirstEye ? -shift : +shift, 0.0f);
+		f();
+		LLUI::popMatrix();
+		gGL.popMatrix();
+  }
+  glh::matrix4f gl_perspective(float fovy, float aspect, float zNear, float zFar) {
+		if (gVR.gHMD) {
+		  float l,r,t,b;
+		  gVR.gHMD->GetProjectionRaw( vr::isRenderingFirstEye ? vr::Eye_Left : vr::Eye_Right, &l, &r, &t, &b);
+		  if (t < 0.0f) { std::swap(t, b); }
+		  return tim::calculatePerspectiveMatrixFromHalfTangents(l, r, b, t, zNear, zFar);
+		}
+  	return ::gl_perspective(fovy, aspect, zNear, zFar);
+  }
+	LLMatrix4 calcProjection(float fovy, float aspect, float zNear, float zFar) {
+		return vrx::convert<LLMatrix4>(vr::gl_perspective(fovy, aspect, zNear, zFar));
+	}
+}//ns
+
+void llviewerVR::clearFramebuffers() {
+	if (rightEyeDesc.mFBO) {
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightEyeDesc.mFBO);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+	if (leftEyeDesc.mFBO) {
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, leftEyeDesc.mFBO);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
 
 //#include <time.h>
 //#include <sys/time.h>
@@ -49,6 +95,9 @@ llviewerVR::llviewerVR()
 	m_fTextureShift = 0;
 	m_fTextureZoom = 0;
 	m_fFOV = 100;
+	
+	m_nRenderWidth = 600;
+	m_nRenderHeight = 800;
 
 	/*if (!LLKeyboard::keyFromString("x", &m_kEditKey))
 	{
@@ -435,8 +484,12 @@ bool llviewerVR::gluInvertMatrix(const float m[16], float invOut[16])
 
 void llviewerVR::UpdateHMDMatrixPose()
 {
-	if (gHMD == NULL)
+	if (gHMD == NULL) {
+		hmdViewPlayspace.setIdentity();
+		hmdViewWorld = tim::_openvr_to_sl(hmdViewPlayspace);
+		inverseCamOffsetWorld = LLMatrix4(hmdViewWorld).invert();
 		return;
+	}
 	/// for somebody asking for the default figure out the time from now to photons.
 	/*	float fSecondsSinceLastVsync;
 	gHMD->GetTimeSinceLastVsync(&fSecondsSinceLastVsync, NULL);
@@ -451,6 +504,17 @@ void llviewerVR::UpdateHMDMatrixPose()
 	
 	
 	vr::VRCompositor()->WaitGetPoses(gTrackedDevicePose, vr::k_unMaxTrackedDeviceCount, NULL, 0);
+
+  {
+	if (gTrackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid) {
+	  vr::HmdMatrix34_t headToPlayspace = gTrackedDevicePose[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+	  hmdViewPlayspace = vrx::convert<LLMatrix4>(headToPlayspace);
+	  hmdViewWorld = tim::_openvr_to_sl(hmdViewPlayspace);
+	}
+	if (inverseCamOffsetWorld.isIdentity()) {
+		inverseCamOffsetWorld = LLMatrix4(hmdViewWorld).invert();
+	}
+  }
 
 	m_iValidPoseCount = 0;
 	m_strPoseClasses = "";
@@ -577,8 +641,6 @@ void llviewerVR::vrStartup(bool is_shutdown)
 	hud_textp->setString(str);
 	hud_textp->setHidden(FALSE);*/
 
-	if (!m_bVrEnabled) gSavedSettings.setString("$vrStatus", "(vr disabled)");
-
 	if (m_bVrEnabled && !is_shutdown)
 	{
 		if (gHMD == NULL)
@@ -661,6 +723,11 @@ void llviewerVR::vrStartup(bool is_shutdown)
 				
 				
 				
+			} else if (!gVRInitComplete) {
+				gVRInitComplete = true;
+				m_strHudText += llformat("\nsimulating %dx%d for testing", m_nRenderWidth, m_nRenderHeight);
+				CreateFrameBuffer(m_nRenderWidth, m_nRenderHeight, leftEyeDesc);
+				CreateFrameBuffer(m_nRenderWidth, m_nRenderHeight, rightEyeDesc);
 			}
 			if(gVRInitComplete)
 				m_strHudText.append("\nVR driver ready.\n Enable HMD Output within VR Preferences.");
@@ -674,7 +741,7 @@ void llviewerVR::vrStartup(bool is_shutdown)
 	}
 	else if (gHMD || is_shutdown)
 	{
-		m_bVrActive = FALSE;
+		// m_bVrActive = FALSE;
 		vr::VR_Shutdown();
 		gHMD = NULL;
 		gVRInitComplete = FALSE;
@@ -687,6 +754,9 @@ void llviewerVR::vrStartup(bool is_shutdown)
 
 bool llviewerVR::ProcessVRCamera()
 {
+	if (!vr::settings) {
+		vr::settings = new vr::Settings();
+	}
 	
 	if (hud_textp == NULL)
 	{
@@ -716,18 +786,27 @@ bool llviewerVR::ProcessVRCamera()
 		LLVector3 end = m_vpos + (m_vdir)* 1.0f;
 		hud_textp->setPositionAgent(end);
 	}
+
+  {
+	LLWindow * WI;
+	WI = gViewerWindow->getWindow();
+	LLCoordWindow win;
+	WI->getCursorPosition(&win);
+	m_MousePos = win;//.convert();
+  }
 		
 	
-	if (gHMD == NULL)
+	// if (gHMD == NULL)
+	// {
+	// 	return FALSE;
+	// }
+	if (m_bVrEnabled)//gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK)
 	{
-		return FALSE;
-	}
-	if (m_bVrActive)//gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK)
-	{
-		InitUI();
+		//InitUI();
 		//m_fNearClip = LLViewerCamera::getInstance()->getNear();
 		//m_fFarClip = LLViewerCamera::getInstance()->getFar();
-		LLViewerCamera::getInstance()->setNear(0.001);
+		LLViewerCamera::getInstance()->setNear(m_fNearClip);
+		LLViewerCamera::getInstance()->setFar(m_fFarClip);
 
 		
 
@@ -736,16 +815,14 @@ bool llviewerVR::ProcessVRCamera()
 			
 			
 			//Set the windows max size and aspect ratio to fit with the HMD.
-#ifdef _WIN32
 			int scrsize = GetSystemMetrics(SM_CYSCREEN);
 			if (GetSystemMetrics(SM_CXSCREEN) < scrsize)
 				scrsize = GetSystemMetrics(SM_CXSCREEN);
-#else
-    int scrsize = 1080;
-#endif
 			LLWindow * WI;
 			WI = gViewerWindow->getWindow();
-			WI->getCursorPosition(&m_MousePos);
+			// LLCoordWindow win;
+			// WI->getCursorPosition(&win);
+			// m_MousePos = win.convert();
 			
 			LLCoordWindow m_ScrSize;
 			LLCoordWindow m_ScrSizeOld;
@@ -761,16 +838,20 @@ bool llviewerVR::ProcessVRCamera()
 			{
 				m_ScrSize.set(m_ScrSize.mX, m_ScrSize.mY);
 				WI->setSize(m_ScrSize);
+				WI->setPosition({0,0});
 			}
-			//Constrain the cursor to the viewer window.
-			if (m_MousePos.mX >= m_ScrSize.mX)
-				m_MousePos.mX = m_ScrSize.mX - 1;
-			else if (m_MousePos.mX < 1)
-				m_MousePos.mX = 1;
-			if (m_MousePos.mY >= m_ScrSize.mY)
-				m_MousePos.mY = m_ScrSize.mY - 1;
-			else if (m_MousePos.mY < 1)
-				m_MousePos.mY = 1;
+	  {
+		LLCoordWindow m_ScrSize = { gViewerWindow->getWorldViewWidthRaw(), gViewerWindow->getWorldViewHeightRaw() };
+  			//Constrain the cursor to the viewer window.
+  			if (m_MousePos.mX >= m_ScrSize.mX)
+  				m_MousePos.mX = m_ScrSize.mX - 1;
+  			else if (m_MousePos.mX < 1)
+  				m_MousePos.mX = 1;
+  			if (m_MousePos.mY >= m_ScrSize.mY)
+  				m_MousePos.mY = m_ScrSize.mY - 1;
+  			else if (m_MousePos.mY < 1)
+  				m_MousePos.mY = 1;
+	  }
 
 			m_iHalfWidth = m_ScrSize.mX / 2;
 			m_iHalfHeight = m_ScrSize.mY / 2;
@@ -867,7 +948,43 @@ bool llviewerVR::ProcessVRCamera()
 
 		}
 		
+	{
+	  vr::isRenderingFirstEye = !leftEyeDesc.IsReady;
+	  LLMatrix4 eyeToHeadPlayspace;
+		if (gHMD) {
+			eyeToHeadPlayspace = vrx::convert<LLMatrix4>(gHMD->GetEyeToHeadTransform(vr::isRenderingFirstEye ? vr::EVREye::Eye_Left : vr::EVREye::Eye_Right));
+		} else {
+			// no HMD availabgle, but m_bVrEnabled -- simulate a simple HMD eye-to-head transform for testing
+			eyeToHeadPlayspace = LLMatrix4().translate(LLVector3(!vr::isRenderingFirstEye ? .03f : -.03f, 0, 0));
+		}
+		if (m_fEyeDistance) {
+			// apply addition IPD adjustment
+			eyeToHeadPlayspace.translate({(!vr::isRenderingFirstEye ? m_fEyeDistance : -m_fEyeDistance) / 1000.0f, 0.0f, 0.0f});
+		}
 
+		if (m_fFocusDistance) {
+			// apply "focus point" adjustment (ie: "crosseyedness")
+			LLCoordFrame focus;
+			auto at = LLVector3(0,0,m_fFocusDistance) - eyeToHeadPlayspace.getTranslation();
+			at.normalize();
+			static LLVector3 up_direction(0.0f, 1.0f, 0.0f);
+			focus.lookDir(at, up_direction);
+			auto fwd = LLVector3(0,0,1000.0f) - eyeToHeadPlayspace.getTranslation(); 
+			fwd.normalize();
+			LLCoordFrame ref;
+			ref.lookDir(fwd, up_direction);
+			eyeToHeadPlayspace.rotate(~focus.getQuaternion() * ref.getQuaternion());
+		}
+
+	  tim::setCameraMatrix(tim::calculateViewMatrix(
+			stockViewerCameraWorld,
+			inverseCamOffsetWorld,
+			eyeToHeadPlayspace,
+			hmdViewPlayspace
+	  ));
+	}
+
+#if 0
 		LLVector3 new_dir;
 		if (m_bEditActive)// lock HMD's rotation input for inworls object editing purposes.
 		{
@@ -896,7 +1013,7 @@ bool llviewerVR::ProcessVRCamera()
 				LLViewerCamera::getInstance()->updateCameraLocation(m_vpos - new_dir, m_vup, new_fwd_pos);
 			}
 		}
-		
+#endif		
 		
 
 	}
@@ -905,9 +1022,9 @@ bool llviewerVR::ProcessVRCamera()
 
 void llviewerVR::vrDisplay()
 {
-	if (gHMD != NULL)
+	// if (gHMD != NULL)
 	{
-		if (m_bVrActive)//gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK)
+		if (m_bVrEnabled)//gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK)
 		{
 			
 
@@ -917,6 +1034,8 @@ void llviewerVR::vrDisplay()
 				by = 0;
 				tx = gPipeline.mScreen.getWidth();
 				ty = gPipeline.mScreen.getHeight();
+				int zy = m_fTextureZoom;
+				int zx = m_fTextureZoom * (F32)tx / (F32)ty;
 
 				m_iTextureShift = ((tx / 2) / 100)* m_fTextureShift;
 
@@ -972,10 +1091,10 @@ void llviewerVR::vrDisplay()
 				///Zoom in
 				if (m_iZoomIndex == 0)
 				{
-					bx +=   m_fTextureZoom;
-					by +=   m_fTextureZoom;
-					tx -=   m_fTextureZoom;
-					ty -=   m_fTextureZoom;
+					bx +=   zx;
+					by +=   zy;
+					tx -=   zx;
+					ty -=   zy;
 				}
 				else if (m_iZoomIndex == 4)//up right
 				{
@@ -1040,7 +1159,7 @@ void llviewerVR::vrDisplay()
 				glBlitFramebuffer(bx, by, tx, ty, m_iTextureShift, 0, m_nRenderWidth + m_iTextureShift, m_nRenderHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 				
 			}
-			if ((leftEyeDesc.IsReady && !rightEyeDesc.IsReady) || m_fEyeDistance == 0)//if right camera was active bind left eye buffer for drawing in to
+			if ((leftEyeDesc.IsReady && !rightEyeDesc.IsReady))//if right camera was active bind left eye buffer for drawing in to
 			{
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightEyeDesc.mFBO);
 				if (m_iZoomIndex)
@@ -1054,7 +1173,7 @@ void llviewerVR::vrDisplay()
 			//Remove bindings of read and draw buffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			if (leftEyeDesc.IsReady && (rightEyeDesc.IsReady || m_fEyeDistance == 0))
+			if (leftEyeDesc.IsReady && (rightEyeDesc.IsReady))
 			{
 
 				rightEyeDesc.IsReady = FALSE;
@@ -1069,11 +1188,19 @@ void llviewerVR::vrDisplay()
 				
 				
 				//submit the textures to the HMD
+			if(vr::VRCompositor()) {
 				lEyeTexture = { (void*)(uintptr_t)leftEyeDesc.m_nResolveTextureId, vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 				eError = vr::VRCompositor()->Submit(vr::Eye_Left, &lEyeTexture, 0, (vr::EVRSubmitFlags)(vr::Submit_Default ));
 
 				rEyeTexture = { (void*)(uintptr_t)rightEyeDesc.m_nResolveTextureId, vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 				eError = vr::VRCompositor()->Submit(vr::Eye_Right, &rEyeTexture, 0, (vr::EVRSubmitFlags)(vr::Submit_Default));
+			} else {
+				const bool capslocked = ((GetKeyState(VK_CAPITAL) & 0x0001) != 0);
+				glDrawBuffer(GL_BACK);
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, capslocked ? rightEyeDesc.mFBO : leftEyeDesc.mFBO);
+				glBlitFramebuffer(0, 0, m_nRenderWidth, m_nRenderHeight, 0, 0, gPipeline.mScreen.getWidth(), gPipeline.mScreen.getHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
 
 				//vr::VRCompositor()->PostPresentHandoff();// Here we tell the HMD  that rendering is done and it can render the image in to the HMD
 				//glFinish();
@@ -1125,13 +1252,32 @@ void llviewerVR::ProcessVREvent(const vr::VREvent_t & event)//process vr´events
 	}
 	case vr::VREvent_Quit:
 	{
-		m_bVrActive = FALSE;
+		// m_bVrActive = FALSE;
 		m_bVrEnabled = FALSE;
+		gVRInitComplete = FALSE;
 		gHMD = NULL;
 		vr::VR_Shutdown();
 		if (vr::VRSystem()) vr::VRSystem()->AcknowledgeQuit_Exiting();
 		gSavedSettings.setString("$vrStatus", "vr::VREvent_Quit");
 	}
+  
+  case vr::VREvent_EnterStandbyMode: gSavedSettings.setString("$vrStatus", "vr::VREvent_EnterStandbyMode"); break;
+  case vr::VREvent_LeaveStandbyMode: gSavedSettings.setString("$vrStatus", "vr::VREvent_LeaveStandbyMode"); break;
+  case vr::VREvent_ProcessQuit: gSavedSettings.setString("$vrStatus", "vr::VREvent_ProcessQuit"); break;
+  case vr::VREvent_QuitAcknowledged: gSavedSettings.setString("$vrStatus", "vr::VREvent_QuitAcknowledged"); break;
+  case vr::VREvent_DriverRequestedQuit: gSavedSettings.setString("$vrStatus", "vr::VREvent_DriverRequestedQuit"); break;
+  case vr::VREvent_RestartRequested: gSavedSettings.setString("$vrStatus", "vr::VREvent_RestartRequested"); break;
+  case vr::VREvent_SeatedZeroPoseReset: {
+	gSavedSettings.setString("$vrStatus", llformat("vr::VREvent_SeatedZeroPoseReset bResetBySystemMenu=%s", event.data.seatedZeroPoseReset.bResetBySystemMenu ? "true" : "false"));
+	break;
+  }
+  case vr::VREvent_LensDistortionChanged: gSavedSettings.setString("$vrStatus", "vr::VREvent_LensDistortionChanged"); break;
+  case vr::VREvent_IpdChanged: {
+	gSavedSettings.setString("$vrStatus", llformat("vr::VREvent_IpdChanged %3.2f", event.data.ipd.ipdMeters));
+	break;
+  }
+  case vr::VREvent_SteamVRSectionSettingChanged: gSavedSettings.setString("$vrStatus", "vr::VREvent_SteamVRSectionSettingChanged"); break;
+
 	break;
 	}
 }
@@ -1162,7 +1308,7 @@ void llviewerVR::agentYaw(F32 yaw_inc)  // move avatar forward backward and rota
 bool llviewerVR::HandleInput()// handles controller input for now  only the stick.
 {
 
-	if (gHMD == NULL || !m_bVrActive)
+	if (gHMD == NULL)
 		return FALSE;
 	bool bRet = false;
 
@@ -1280,9 +1426,6 @@ bool llviewerVR::HandleInput()// handles controller input for now  only the stic
 
 void llviewerVR::HandleKeyboard()
 {
-  if (!vr::settings) {
-    vr::settings = new vr::Settings();
-  }
 #if 0
 
 	// Don't attempt to update controllers if input is not available
@@ -1308,7 +1451,7 @@ void llviewerVR::HandleKeyboard()
 			}
 			else
 			{
-				m_bVrActive = FALSE;
+				// m_bVrActive = FALSE;
 				m_bVrEnabled = FALSE;
 				vrStartup(FALSE);
 			}
@@ -1316,10 +1459,10 @@ void llviewerVR::HandleKeyboard()
 		}
 		else if (gHMD)
 		{
-			if (!m_bVrActive)
-				m_bVrActive = TRUE;
-			else
-				m_bVrActive = FALSE;
+			// if (!m_bVrActive)
+			// 	m_bVrActive = TRUE;
+			// else
+			// 	m_bVrActive = FALSE;
 			//LLViewerCamera::getInstance()->setDefaultFOV(1.8);
 			gHmdOffsetPos.mV[2] = 0;
 			INISaveRead(false);
@@ -1408,20 +1551,23 @@ void llviewerVR::HandleKeyboard()
 
 void llviewerVR::DrawCursors()
 {
-	if (!m_bVrActive || !gHMD)
+	if (!m_bVrEnabled)
 		return;
 	gUIProgram.bind();
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//gViewerWindow->setup2DRender();
+	gGL.matrixMode(LLRender::MM_MODELVIEW);
 	gGL.pushMatrix();
-	S32 half_width = (gViewerWindow->getWorldViewWidthScaled() / 2);
-	S32 half_height = (gViewerWindow->getWorldViewHeightScaled() / 2);
+	gGL.loadIdentity();
 
-	S32 wwidth = gViewerWindow->getWindowWidthScaled();
-	S32 wheight = gViewerWindow->getWindowHeightScaled();
+	S32 half_width = (gViewerWindow->getWorldViewWidthRaw() / 2);
+	S32 half_height = (gViewerWindow->getWorldViewHeightRaw() / 2);
+
+	S32 wwidth = gViewerWindow->getWindowWidthRaw();
+	S32 wheight = gViewerWindow->getWindowHeightRaw();
 
 	//translatef moves 0 vector to the pos you specified so oyu can draw fron zero vector there
-	gGL.translatef((F32)half_width, (F32)half_height, 0.f);
+	//gGL.translatef((F32)half_width, (F32)half_height, 0.f);
 	gGL.color4fv(LLColor4::white.mV);
 	//glClear(GL_DEPTH_BUFFER_BIT);
 	//glDisable(GL_DEPTH_TEST);
@@ -1429,14 +1575,15 @@ void llviewerVR::DrawCursors()
 	WI = gViewerWindow->getWindow();
 	LLCoordWindow   mcpos;
 	WI->getCursorPosition(&mcpos);
-	LLCoordGL mpos = gViewerWindow->getCurrentMouse();
+	LLCoordGL mpos = mcpos.convert();//gViewerWindow->getCurrentMouse();
 
+	if (gHMD)
 	for (vr::TrackedDeviceIndex_t unTrackedDevice = vr::k_unTrackedDeviceIndex_Hmd + 1; unTrackedDevice < vr::k_unMaxTrackedDeviceCount; ++unTrackedDevice)
 	{
 		if (gCtrlscreen[unTrackedDevice].mX > -1)
 		{
 
-			gl_circle_2d(gCtrlscreen[unTrackedDevice].mX - half_width, gCtrlscreen[unTrackedDevice].mY - half_height + gCursorDiff, half_width / 200, 8, TRUE);
+			gl_circle_2d(gCtrlscreen[unTrackedDevice].mX, gCtrlscreen[unTrackedDevice].mY + gCursorDiff, half_width / 200, 8, TRUE);
 		}
 
 	}
@@ -1446,16 +1593,19 @@ void llviewerVR::DrawCursors()
 		LLColor4 cl;
 		cl = LLColor4::black.mV;
 
-		S32 mx = mpos.mX - half_width;
-		S32 my = mpos.mY - (half_height);
+		S32 mx = mpos.mX;
+		S32 my = mpos.mY;
 		if (mpos.mX < 0 || mpos.mX > wwidth)
-			mx = half_width;
+			mx = wwidth;
 		if (mpos.mY < 0 || mpos.mY > wheight)
-			my = half_height;
+			my = wheight;
 
-		gl_triangle_2d(mx, my, mx + 8, my - 15, mx + 15, my - 8, cl, TRUE);
-		cl = LLColor4::white.mV;
-		gl_triangle_2d(mx+2, my-2, mx + 9, my - 13, mx + 12, my - 8, cl, TRUE);
+		static LLCachedControl<F32> uiShift(gSavedSettings, "$vrUIShift", 0.0f);
+		vr::withUIShift([&]{
+			gl_triangle_2d(mx, my, mx + 8, my - 15, mx + 15, my - 8, cl, TRUE);
+			cl = LLColor4::white.mV;
+			gl_triangle_2d(mx+2, my-2, mx + 9, my - 13, mx + 12, my - 8, cl, TRUE);
+		}, uiShift * gViewerWindow->getWindowWidthRaw() / gViewerWindow->getWindowWidthScaled());
 	}
 
 	//gl_circle_2d(mpos.mX - half_width, mpos.mY - (half_height)  /*+ gVR.gCursorDiff)*/, half_width / 200, 8, TRUE);
@@ -1476,7 +1626,7 @@ void llviewerVR::RenderControllerAxes()
 	if (gHMD == NULL)
 		return;
 	HandleInput();
-	if (!gHMD->IsInputAvailable() || !m_bVrActive)
+	if (!gHMD->IsInputAvailable())
 		return;
 
 	//std::vector<float> vertdataarray;
@@ -1614,7 +1764,7 @@ void llviewerVR::RenderControllerAxes()
 					}
 					else
 					{
-						m_fCamRotOffset = 90;
+						m_fCamRotOffset = 0;
 						agentYaw(state.rAxis[2].x / 40);
 
 					}
@@ -2248,6 +2398,7 @@ void llviewerVR::Debug()
 
 void llviewerVR::InitUI()
 {
+#if 0
 		if (!m_pCamButtonLeft)
 		{
 			/*LLPanel* panelp = NULL;
@@ -2322,4 +2473,5 @@ void llviewerVR::InitUI()
 				//m_pButton1->
 			}
 		}
+#endif
 }

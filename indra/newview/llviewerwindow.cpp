@@ -283,11 +283,11 @@ BOOL gQuietSnapshot = FALSE;
 const F32 MIN_AFK_TIME = 6.f; // minimum time after setting away state before coming back
 
 // Minimum value for UIScaleFactor, also defined in preferences, ui_scale_slider
-static const F32 MIN_UI_SCALE = 0.75f;
+static const F32 MIN_UI_SCALE = 0.5f;
 // 4.0 in preferences, but win10 supports larger scaling and value is used more as
 // sanity check, so leaving space for larger values from DPI updates.
 static const F32 MAX_UI_SCALE = 7.0f;
-static const F32 MIN_DISPLAY_SCALE = 0.75f;
+static const F32 MIN_DISPLAY_SCALE = 0.5f;
 
 static LLCachedControl<std::string>	sSnapshotBaseName(LLCachedControl<std::string>(gSavedPerAccountSettings, "SnapshotBaseName", "Snapshot"));
 static LLCachedControl<std::string>	sSnapshotDir(LLCachedControl<std::string>(gSavedPerAccountSettings, "SnapshotBaseDir", ""));

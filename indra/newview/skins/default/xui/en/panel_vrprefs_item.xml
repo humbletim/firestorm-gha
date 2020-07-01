@@ -27,11 +27,13 @@
             <line_editor name="option_vr_text_control" layout="topleft" follows="left|right|top" left="0" top="6" height="22" right="-1" visible="false" font="SansSerifMediumBold" />
             <button name="option_vr_checkbox_control" layout="topleft" follows="left|right|top" top="5" right="-1" width="26" height="26" visible="false" is_toggle="true"
               label="☐" label_selected="☑"
-              image_unselected="transparent.j2c" image_selected="transparent.j2c" 
+              image_unselected="transparent.j2c" image_selected="transparent.j2c"
+              image_hover_selected="PushButton_Over"
+              image_hover_unselected="PushButton_Over"
               label_color="1 1 1 .25" hover_glow_amount=".5"
               label_color_selected="white" font="SansSerifHuge" />
-            <button name="option_vr_button_control" layout="topleft" follows="left|right|top" top="5" right="-1" width="26" height="26" visible="false" is_toggle="true"
-              label="" label_selected="" image_color=".5 .5 1 1" label_color=".5 .5 1 .1" hover_glow_amount=".5"
+            <button name="option_vr_button_control" layout="topleft" follows="left|right|top" top="5" right="-1" width="60" height="26" visible="false" is_toggle="true"
+              label="⚡︎" label_selected="⚡︎" image_color=".5 .5 1 1" label_color=".5 .5 1 .1" hover_glow_amount=".5"
               label_color_selected="white" font="SansSerifHuge" />
             <vr_spinner dynamic_button_height="true" height="30" font="SansSerifBold" name="option_vr_spinner_control" layout="topleft" follows="left|right|top" left="-90" top="-8" right="-1" visible="false" label="" />
             <vr_slider name="option_vr_slider_control" layout="topleft" follows="left|right|top" can_edit_text="true" left="0" top="6" height="16" right="-1" visible="false" label="" />
