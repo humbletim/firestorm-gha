@@ -101,10 +101,10 @@ jobs:
     - uses: actions/upload-artifact@v2
       if: startsWith(matrix.os, 'windows')
       with:
-        name: ${{matrix.os}}-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION}}-${{env.VIEWER_VERSION_GITHASH}}
+        name: ${{matrix.os}}-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
         path: build-vc120-64/newview/Release/*_Setup.exe
     - uses: actions/upload-artifact@v2
       if: startsWith(matrix.os, 'ubuntu')
       with:
-        name: ${{matrix.os}}-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION}}-${{env.VIEWER_VERSION_GITHASH}}
+        name: ${{matrix.os}}-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
         path: build-linux-x86_64/newview/Phoenix*.tar.*
