@@ -20,6 +20,8 @@
              function="Floater.Toggle"
              parameter="preferences" />
         </menu_item_call>
+        <menu_item_call label="QuickPreferences..." name="QuickPreferences..."><menu_item_call.on_click function="Floater.Toggle" parameter="quickprefs" /></menu_item_call>
+        <menu_item_call label="VRPreferences..." name="VRPreferences..."><menu_item_call.on_click function="Floater.Toggle" parameter="vrprefs" /></menu_item_call>
         <menu_item_call
          label="Close Window"
          name="Close Window"
