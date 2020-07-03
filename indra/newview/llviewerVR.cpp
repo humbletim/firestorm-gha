@@ -32,6 +32,7 @@
 #include "../vr/win32stuff.h"
 #include "../vr/matrixstuff.h"
 #include "../vr/timestuff.h"
+#include "../vr/openvrstuff.h"
 #include "../vr/settings.h"
 
 extern llviewerVR gVR;
@@ -44,7 +45,8 @@ namespace vr {
 		gGL.matrixMode(LLRender::MM_MODELVIEW);
 		gGL.pushMatrix();
 		LLUI::pushMatrix();
-		shift *= (F32)gViewerWindow->getWindowWidthScaled() / (F32)gViewerWindow->getWindowWidthRaw();
+		shift *= ((F32)gViewerWindow->getWindowWidthScaled() / (F32)gViewerWindow->getWindowWidthRaw());
+		shift = llfloor(shift);
 		LLUI::translate(!vr::isRenderingFirstEye ? -shift : +shift, 0.0f);
 		f();
 		LLUI::popMatrix();
@@ -62,6 +64,41 @@ namespace vr {
 	LLMatrix4 calcProjection(float fovy, float aspect, float zNear, float zFar) {
 		return vrx::convert<LLMatrix4>(vr::gl_perspective(fovy, aspect, zNear, zFar));
 	}
+	void initFirestormIntegration() {
+		LL_WARNS("llviewerVR") << "=== initFirestormIntegration() ===" << LL_ENDL;
+		vr::settings = new vr::Settings();
+		// toggle VR toolbar button
+		LLUICtrl::EnableCallbackRegistry::currentRegistrar()
+			.add("VR.IsEnabled", [](const LLUICtrl* ctrl, const LLSD& param) { return gSavedSettings.getBOOL("$vrEnabled"); });
+		LLUICtrl::CommitCallbackRegistry::currentRegistrar()
+			.add("VR.ToggleOpenVR", [](const LLUICtrl* ctrl, const LLSD& param) {
+				gSavedSettings.setBOOL("$vrEnabled", !gSavedSettings.getBOOL("$vrEnabled"));
+			});
+		// recenter toolbar button
+		LLUICtrl::CommitCallbackRegistry::currentRegistrar()
+			.add("VR.RecenterHMD", [](const LLUICtrl* ctrl, const LLSD& param) {
+				gVR.recenterHMD();
+        gVR.clearFramebuffers();
+        gVR.hideHUD();
+
+        std::stringstream s;
+        F32 roll, pitch, yaw;
+        gVR.inverseCamOffsetWorld.quaternion().getEulerAngles(&roll, &pitch, &yaw);
+        LLVector3 deg = LLVector3{ pitch, yaw, roll } * RAD_TO_DEG;
+        s << "HMD recentered\n";
+        s << "trans: " << gVR.inverseCamOffsetWorld.getTranslation() << "\n";
+        s << "rot: " << deg << "\n";
+        gSavedSettings.setString("$vrStatus", s.str());
+		});
+		LLUICtrl::CommitCallbackRegistry::currentRegistrar()
+			.add("VR.RecenterHMD", [](const LLUICtrl* ctrl, const LLSD& param) {
+				LLNotificationsUtil::add("GenericAlertYesCancel", LLSD().with("MESSAGE", "reset VR settings to their values at application startup?"), LLSD(), [](const LLSD& notification, const LLSD& response) {
+					LL_WARNS("vr::Settings") << "notifictaion=" << notification << " response=" << response << " selected=" << LLNotificationsUtil::getSelectedOption(notification, response) << LL_ENDL;
+					vr::settings->resetToDefaults();
+					return false;
+				});
+		});
+	}
 }//ns
 
 void llviewerVR::clearFramebuffers() {
@@ -74,6 +111,34 @@ void llviewerVR::clearFramebuffers() {
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+}
+
+LLMatrix4 llviewerVR::getEyeToHeadTransform(vr::EVREye eye) {
+	LLMatrix4 eyeToHeadPlayspace;
+	if (gHMD) {
+		eyeToHeadPlayspace = vrx::convert<LLMatrix4>(gHMD->GetEyeToHeadTransform(eye));
+	} else {
+		// no HMD available -- simulate a simple HMD eye-to-head transform for testing
+		eyeToHeadPlayspace = LLMatrix4().translate(LLVector3(eye == vr::Eye_Left ? -.03f : .03f, 0, 0));
+	}
+	if (m_fEyeDistance) {
+		// apply addition IPD adjustment
+		eyeToHeadPlayspace.translate({(eye == vr::Eye_Left ? -m_fEyeDistance : m_fEyeDistance) / 1000.0f, 0.0f, 0.0f});
+	}
+	if (m_fFocusDistance) {
+		// apply "focus point" adjustment (ie: "crosseyedness")
+		LLCoordFrame focus;
+		auto at = LLVector3(0,0,m_fFocusDistance) - eyeToHeadPlayspace.getTranslation();
+		at.normalize();
+		static LLVector3 up_direction(0.0f, 1.0f, 0.0f);
+		focus.lookDir(at, up_direction);
+		auto fwd = LLVector3(0,0,1000.0f) - eyeToHeadPlayspace.getTranslation(); 
+		fwd.normalize();
+		LLCoordFrame ref;
+		ref.lookDir(fwd, up_direction);
+		eyeToHeadPlayspace.rotate(~focus.getQuaternion() * ref.getQuaternion());
+	}
+	return eyeToHeadPlayspace;
 }
 
 //#include <time.h>
@@ -749,15 +814,11 @@ void llviewerVR::vrStartup(bool is_shutdown)
 		//m_tTimer1.stop();
 		//m_tTimer1.cleanupClass();
 	}
-	
+	updateEyeToHeadTransforms();
 }
 
 bool llviewerVR::ProcessVRCamera()
 {
-	if (!vr::settings) {
-		vr::settings = new vr::Settings();
-	}
-	
 	if (hud_textp == NULL)
 	{
 		
@@ -802,6 +863,7 @@ bool llviewerVR::ProcessVRCamera()
 	// }
 	if (m_bVrEnabled)//gAgentCamera.getCameraMode() == CAMERA_MODE_MOUSELOOK)
 	{
+		vr::isRenderingFirstEye = !leftEyeDesc.IsReady;
 		//InitUI();
 		//m_fNearClip = LLViewerCamera::getInstance()->getNear();
 		//m_fFarClip = LLViewerCamera::getInstance()->getFar();
@@ -818,6 +880,14 @@ bool llviewerVR::ProcessVRCamera()
 			int scrsize = GetSystemMetrics(SM_CYSCREEN);
 			if (GetSystemMetrics(SM_CXSCREEN) < scrsize)
 				scrsize = GetSystemMetrics(SM_CXSCREEN);
+
+#if _WIN32
+			auto desktop = vr::win32::_getPrimaryWorkareaSize();
+			scrsize = std::min(desktop.getHeight(), desktop.getWidth());
+#else
+			scrsize *= 0.9;
+#endif
+
 			LLWindow * WI;
 			WI = gViewerWindow->getWindow();
 			// LLCoordWindow win;
@@ -832,8 +902,8 @@ bool llviewerVR::ProcessVRCamera()
 			if (m_nRenderHeight<m_nRenderWidth)
 			mult = (float)m_nRenderHeight / (float)m_nRenderWidth;
 			
-			m_ScrSize.mX = (scrsize*mult)*0.95;
-			m_ScrSize.mY = (scrsize)*0.95;
+			m_ScrSize.mX = (scrsize*mult);
+			m_ScrSize.mY = (scrsize);
 			if (m_ScrSizeOld.mX != m_ScrSize.mX || m_ScrSizeOld.mY != m_ScrSize.mY)
 			{
 				m_ScrSize.set(m_ScrSize.mX, m_ScrSize.mY);
@@ -949,37 +1019,12 @@ bool llviewerVR::ProcessVRCamera()
 		}
 		
 	{
-	  vr::isRenderingFirstEye = !leftEyeDesc.IsReady;
-	  LLMatrix4 eyeToHeadPlayspace;
-		if (gHMD) {
-			eyeToHeadPlayspace = vrx::convert<LLMatrix4>(gHMD->GetEyeToHeadTransform(vr::isRenderingFirstEye ? vr::EVREye::Eye_Left : vr::EVREye::Eye_Right));
-		} else {
-			// no HMD availabgle, but m_bVrEnabled -- simulate a simple HMD eye-to-head transform for testing
-			eyeToHeadPlayspace = LLMatrix4().translate(LLVector3(!vr::isRenderingFirstEye ? .03f : -.03f, 0, 0));
-		}
-		if (m_fEyeDistance) {
-			// apply addition IPD adjustment
-			eyeToHeadPlayspace.translate({(!vr::isRenderingFirstEye ? m_fEyeDistance : -m_fEyeDistance) / 1000.0f, 0.0f, 0.0f});
-		}
-
-		if (m_fFocusDistance) {
-			// apply "focus point" adjustment (ie: "crosseyedness")
-			LLCoordFrame focus;
-			auto at = LLVector3(0,0,m_fFocusDistance) - eyeToHeadPlayspace.getTranslation();
-			at.normalize();
-			static LLVector3 up_direction(0.0f, 1.0f, 0.0f);
-			focus.lookDir(at, up_direction);
-			auto fwd = LLVector3(0,0,1000.0f) - eyeToHeadPlayspace.getTranslation(); 
-			fwd.normalize();
-			LLCoordFrame ref;
-			ref.lookDir(fwd, up_direction);
-			eyeToHeadPlayspace.rotate(~focus.getQuaternion() * ref.getQuaternion());
-		}
-
+		static LLCachedControl<bool> yawOnly(gSavedSettings, "$vrMouselookYawOnly", false);
+		bool filteredMouselook = yawOnly && gAgentCamera.cameraMouselook();
 	  tim::setCameraMatrix(tim::calculateViewMatrix(
-			stockViewerCameraWorld,
+			filteredMouselook ? tim::yawOnly(stockViewerCameraWorld) : stockViewerCameraWorld,
 			inverseCamOffsetWorld,
-			eyeToHeadPlayspace,
+			vr::isRenderingFirstEye ? leftEyeToHeadPlayspace : rightEyeToHeadPlayspace,
 			hmdViewPlayspace
 	  ));
 	}
@@ -1032,8 +1077,10 @@ void llviewerVR::vrDisplay()
 			{
 				bx = 0;
 				by = 0;
-				tx = gPipeline.mScreen.getWidth();
-				ty = gPipeline.mScreen.getHeight();
+				// tx = gPipeline.mScreen.getWidth();
+				// ty = gPipeline.mScreen.getHeight();
+				tx = gViewerWindow->getWindowWidthRaw();
+				ty = gViewerWindow->getWindowHeightRaw();
 				int zy = m_fTextureZoom;
 				int zx = m_fTextureZoom * (F32)tx / (F32)ty;
 
@@ -1145,6 +1192,7 @@ void llviewerVR::vrDisplay()
 					tx += thirdx;
 				}
 			}
+			glFlush();
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			glReadBuffer(GL_BACK);
 		
@@ -1186,7 +1234,6 @@ void llviewerVR::vrDisplay()
 				//Update HMD . !!!!!  This calls waitGetPoses() which is essential to start the rendering process in the HMD after Submit and gets the current HMD pose(rotation location matrix)
 				//if you do not call that anywhere no image will be processed. 
 				
-				
 				//submit the textures to the HMD
 			if(vr::VRCompositor()) {
 				lEyeTexture = { (void*)(uintptr_t)leftEyeDesc.m_nResolveTextureId, vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
@@ -1194,18 +1241,23 @@ void llviewerVR::vrDisplay()
 
 				rEyeTexture = { (void*)(uintptr_t)rightEyeDesc.m_nResolveTextureId, vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
 				eError = vr::VRCompositor()->Submit(vr::Eye_Right, &rEyeTexture, 0, (vr::EVRSubmitFlags)(vr::Submit_Default));
-			} else {
+
+				vr::VRCompositor()->PostPresentHandoff();// Here we tell the HMD  that rendering is done and it can render the image in to the HMD
+			}
+			{
 				const bool capslocked = ((GetKeyState(VK_CAPITAL) & 0x0001) != 0);
-				glDrawBuffer(GL_BACK);
 				glBindFramebuffer(GL_READ_FRAMEBUFFER, capslocked ? rightEyeDesc.mFBO : leftEyeDesc.mFBO);
-				glBlitFramebuffer(0, 0, m_nRenderWidth, m_nRenderHeight, 0, 0, gPipeline.mScreen.getWidth(), gPipeline.mScreen.getHeight(), GL_COLOR_BUFFER_BIT, GL_LINEAR);
+				static LLCachedControl<F32> uiShift(gSavedSettings, "$vrUIShift", 0.0f);
+				auto shift = (capslocked ? +uiShift : -uiShift);
+				//glViewport(0, 0, gPipeline.mScreen.getWidth()/2, gPipeline.mScreen.getHeight());
+				glClear(GL_COLOR_BUFFER_BIT);
+				glBlitFramebuffer(0, 0, m_nRenderWidth, m_nRenderHeight, (int)shift, 0, gViewerWindow->getWindowWidthRaw() + (int)shift, gViewerWindow->getWindowHeightRaw(), GL_COLOR_BUFFER_BIT, GL_LINEAR);
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			}
-
-				//vr::VRCompositor()->PostPresentHandoff();// Here we tell the HMD  that rendering is done and it can render the image in to the HMD
 				//glFinish();
 				
 				gViewerWindow->getWindow()->swapBuffers();
+				//clearFramebuffers();
 				
 				
 				//glFlush();
@@ -1605,7 +1657,7 @@ void llviewerVR::DrawCursors()
 			gl_triangle_2d(mx, my, mx + 8, my - 15, mx + 15, my - 8, cl, TRUE);
 			cl = LLColor4::white.mV;
 			gl_triangle_2d(mx+2, my-2, mx + 9, my - 13, mx + 12, my - 8, cl, TRUE);
-		}, uiShift * gViewerWindow->getWindowWidthRaw() / gViewerWindow->getWindowWidthScaled());
+		}, uiShift * (F32)gViewerWindow->getWindowWidthRaw() / (F32)gViewerWindow->getWindowWidthScaled());
 	}
 
 	//gl_circle_2d(mpos.mX - half_width, mpos.mY - (half_height)  /*+ gVR.gCursorDiff)*/, half_width / 200, 8, TRUE);

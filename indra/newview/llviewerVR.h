@@ -24,6 +24,13 @@ class llviewerVR
 public:
   LLMatrix4 stockViewerCameraWorld;
   LLMatrix4 inverseCamOffsetWorld;
+  LLMatrix4 leftEyeToHeadPlayspace;
+  LLMatrix4 rightEyeToHeadPlayspace;
+  LLMatrix4 getEyeToHeadTransform(vr::EVREye eye);
+  void updateEyeToHeadTransforms() {
+    leftEyeToHeadPlayspace = getEyeToHeadTransform(vr::Eye_Left);
+    rightEyeToHeadPlayspace = getEyeToHeadTransform(vr::Eye_Right);
+  }
   LLMatrix4 hmdViewPlayspace;
   LLMatrix4 hmdViewWorld;
   void recenterHMD() {
@@ -37,6 +44,13 @@ public:
     hud_textp->setString(m_strHudText);
     hud_textp->setDoFade(FALSE);
     hud_textp->setHidden(TRUE);
+  }
+  void loadFromSettings() {
+    m_fEyeDistance = gSavedSettings.getF32("$vrEyeDistance");
+    m_fFocusDistance = gSavedSettings.getF32("$vrFocusDistance");
+    m_fNearClip = gSavedSettings.getF32("$vrNearClip");
+    // m_fTextureShift = gSavedSettings.getF32("$vrTextureShift");
+    // m_fTextureZoom = gSavedSettings.getF32("$vrTextureZoom");
   }
 // </VR:humbletim>
 

@@ -849,7 +849,7 @@ void fast_exit(int rc)
 
 }
 
-
+namespace vr { extern void initFirestormIntegration(); }
 bool LLAppViewer::init()
 {
 	setupErrorHandling(mSecondInstance);
@@ -972,6 +972,10 @@ bool LLAppViewer::init()
 
 	if (!initConfiguration())
 		return false;
+
+	// <VR:humbletim> early init for UI commands and custom global settings
+	vr::initFirestormIntegration();
+	// </VR:humbletim>
 
 	LL_INFOS("InitInfo") << "Configuration initialized." << LL_ENDL ;
 

@@ -13,25 +13,35 @@ extern llviewerVR gVR;
 namespace vr {
   struct Settings;
   Settings* settings{ nullptr };
+  static LLSD viewerInfoAsLLSD();
   
   // map gVR.m_f* values to conventional Firestorm global settings
   struct Settings {
     std::map<std::string, LLControlVariablePtr> settings;
-    LLControlVariablePtr addSetting(std::string name, std::function<void(LLSD newValue)> onchange = [](LLSD){});
+    LLControlVariablePtr _addSetting(std::string name, std::function<void(LLSD newValue)> onchange = [](LLSD){});
+    LLControlVariablePtr addSetting(std::string name, std::function<void(LLSD newValue)> onchange = [](LLSD){}) { return settings[name] = _addSetting(name, onchange); }
     LLControlVariablePtr addButtonlikeSetting(std::string name, std::function<void()> onclick);
-    static LLSD asLLSD();
+    LLSD asLLSD();
+    void resetToDefaults();
     Settings();
   };
 }
 
 namespace vr {
-  LLControlVariablePtr Settings::addSetting(std::string name, std::function<void(LLSD newValue)> onchange) {
+  void Settings::resetToDefaults() {
+    for (auto &kv : settings) {
+      if (kv.second) {
+        LL_WARNS("vr::Settings") << "resetting " << kv.first << " = " << kv.second->getDefault() << LL_ENDL;
+        kv.second->resetToDefault(true);
+      }
+    }
+  }
+  LLControlVariablePtr Settings::_addSetting(std::string name, std::function<void(LLSD newValue)> onchange) {
     auto ptr = gSavedSettings.getControl(name);
     if (ptr) {
       ptr->getSignal()->connect([onchange](LLControlVariable *control, const LLSD& newValue, const LLSD& oldValue) {
         onchange(newValue);
       });
-      settings[name] = ptr;
     } else {
       LL_WARNS("vr::Settings") << name << " control not found" << LL_ENDL;
     }
@@ -39,24 +49,37 @@ namespace vr {
   }
   
   LLControlVariablePtr Settings::addButtonlikeSetting(std::string name, std::function<void()> onclick) {
-    return addSetting(name, [name, onclick](LLSD newValue) {
+    auto ptr = _addSetting(name, [name, onclick](LLSD newValue) {
       if (newValue.asBoolean()) {
         tim::setImmediate([name]{ gSavedSettings.getControl(name)->setValue(false); });
         onclick();
       }
     });
+    return ptr;
   }
 
   Settings::Settings() {
       // OpenVR toggle
-      addSetting("$vrEnabled", [this](LLSD newValue) {
+      // static tim::TimerListener cursorHider{ [](tim::TimerListener* self) {
+      //   auto win = gViewerWindow->getWindow();
+      //   auto visible = !gViewerWindow->getCursorHidden() || !win->isCursorHidden();
+      //   LL_WARNS("vr::Settings") << "cursorHider m_bVrEnabled: " << gVR.m_bVrEnabled << " visible: " << visible << LL_ENDL;
+      //   if (!gVR.m_bVrEnabled) {
+      //     gViewerWindow->showCursor();
+      //     return;
+      //   }
+      //   if (gVR.m_bVrEnabled && visible) {
+      //     gViewerWindow->hideCursor();
+      //   }
+      //   self->restart();
+      // }, 1000};
+      _addSetting("$vrEnabled", [this](LLSD newValue) {
         LL_WARNS("vr::Settings") << "gVR.m_bVrEnabled = " << newValue.asBoolean() << LL_ENDL;
         gVR.m_bVrEnabled = newValue.asBoolean();
 
         if (gVR.m_bVrEnabled) {
           LL_WARNS("vr::Settings") << "trigger vrStartup" << LL_ENDL;
           gVR.vrStartup(FALSE);
-          gViewerWindow->hideCursor();
           tim::setImmediate([]{
               gSavedSettings.setString("$vrStatus", 
                 llformat("HMD output [%ux%u]\nmScreen [%ux%u]", 
@@ -69,8 +92,8 @@ namespace vr {
           LL_WARNS("vr::Settings") << "trigger vr shutdown" << LL_ENDL;
           gVR.vrStartup(TRUE);
           gVR.hideHUD();
-          gViewerWindow->showCursor();
         }
+        // cursorHider.restart();
       });
 
       // kludge for supporting a fullscreen-specific UI scaling factor
@@ -108,7 +131,7 @@ namespace vr {
         gViewerWindow->handleWindowDidChangeScreen(gViewerWindow->getWindow());
       }, 1000};
 
-      addSetting("$vrFullscreen", [](LLSD newValue) {
+      _addSetting("$vrFullscreen", [](LLSD newValue) {
         applyVRUIScale(newValue.asBoolean());
         vr::toggleFullscreen();
         gViewerWindow->handleWindowDidChangeScreen(gViewerWindow->getWindow());
@@ -116,8 +139,14 @@ namespace vr {
 
       addSetting("$vrFullscreenUIScale", [](LLSD newValue) { uiscale_debouncer.restart(); });
 
-      addSetting("$vrEyeDistance", [](LLSD newValue) { gVR.m_fEyeDistance = newValue.asReal(); });
-      addSetting("$vrFocusDistance", [](LLSD newValue) { gVR.m_fFocusDistance = newValue.asReal(); });
+      addSetting("$vrEyeDistance", [](LLSD newValue) {
+        gVR.m_fEyeDistance = newValue.asReal();
+        gVR.updateEyeToHeadTransforms();
+      });
+      addSetting("$vrFocusDistance", [](LLSD newValue) {
+        gVR.m_fFocusDistance = newValue.asReal();
+        gVR.updateEyeToHeadTransforms();
+      });
       // addSetting("$vrTextureShift", [](LLSD newValue) {
       //   gVR.m_fTextureShift = newValue.asReal();
       //   gVR.clearFramebuffers();
@@ -128,24 +157,30 @@ namespace vr {
       // });
       addSetting("$vrNearClip", [](LLSD newValue) { gVR.m_fNearClip = newValue.asReal(); });
 
+      addSetting("$vrUIShift");
+      addSetting("$vrFullscreenUIScale");
+      addSetting("$vrConfigVersion");
+      addSetting("$vrMouselookYawOnly");
+      addSetting("$vrRightToolbarOffset");
+      addSetting("$vrCursorZooming");
+      
       // virtual command buttons
       addButtonlikeSetting("$vrRecenterHMD", []{
-          gVR.recenterHMD();
-          gVR.clearFramebuffers();
-          gVR.hideHUD();
-
-          std::stringstream s;
-          F32 roll, pitch, yaw;
-          gVR.inverseCamOffsetWorld.quaternion().getEulerAngles(&roll, &pitch, &yaw);
-          LLVector3 deg = LLVector3{ pitch, yaw, roll } * RAD_TO_DEG;
-          s << "HMD recentered\n";
-          s << "trans: " << gVR.inverseCamOffsetWorld.getTranslation() << "\n";
-          s << "rot: " << deg << "\n";
-          gSavedSettings.setString("$vrStatus", s.str());
+        if (auto func = LLUICtrl::CommitCallbackRegistry::getValue("VR.RecenterHMD")) {
+          (*func)(nullptr, LLSD());
+        }
       });
 
       addButtonlikeSetting("$vrCopySettingsToClipboard", [this]{
-          auto json = Json::StyledWriter().write(LlsdToJson(asLLSD()));
+          auto json = Json::StyledWriter().write(LlsdToJson(
+            LLSD()
+              .with("FirestormVR", asLLSD()
+                .with("renderBuffer", LLVector2(gVR.m_nRenderWidth, gVR.m_nRenderHeight).getValue())
+                .with("scrSize", LLVector2(gVR.m_ScrSize.mX, gVR.m_ScrSize.mY).getValue())
+              )
+              .with("openvr", vr::infoAsLLSD())
+              .with("viewer", viewerInfoAsLLSD())
+          ));
           LL_WARNS("vr::Settings") << json << LL_ENDL;
           //gSavedSettings.setString("$vrStatus", json);
           LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(json));
@@ -154,88 +189,55 @@ namespace vr {
             return false;
           });
       });
+      
+      addButtonlikeSetting("$vrResetDefaults", [this]{
+        if (auto func = LLUICtrl::CommitCallbackRegistry::getValue("VR.ResetDefaults")) {
+          (*func)(nullptr, LLSD());
+        }
+      });
 
-      // restore member values from existing settings
-      {
-        gVR.m_fEyeDistance = gSavedSettings.getF32("$vrEyeDistance");
-        gVR.m_fFocusDistance = gSavedSettings.getF32("$vrFocusDistance");
-        // gVR.m_fTextureShift = gSavedSettings.getF32("$vrTextureShift");
-        // gVR.m_fTextureZoom = gSavedSettings.getF32("$vrTextureZoom");
-        gVR.m_fNearClip = gSavedSettings.getF32("$vrNearClip");
-      }
+      gVR.loadFromSettings();
     }
 
     LLSD Settings::asLLSD() {
-      uint32_t pnWidth = 0;
-      uint32_t pnHeight = 0;
-      LLSD leftEye, rightEye;
-      if (auto sys = vr::VRSystem()) {
-        sys->GetRecommendedRenderTargetSize( &pnWidth, &pnHeight );
-        {
-          float l,r,t,b;
-          sys->GetProjectionRaw( vr::Eye_Left, &l, &r, &t, &b);
-          if (t < 0.0f) { std::swap(t, b); }
-          leftEye["projection"] = LLSD().with("l", l).with("r",r).with("b",b).with("t",t);
-          leftEye["fieldOfView"] = (LLVector2(atan(r-l), atan(t-b)) * RAD_TO_DEG).getValue();
-          leftEye["uvCenter"] = LLVector2(
-            sys->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_LensCenterLeftU_Float),
-            sys->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_LensCenterLeftV_Float)
-          ).getValue();
-        }
-        {
-          float l,r,t,b;
-          sys->GetProjectionRaw( vr::Eye_Right, &l, &r, &t, &b);
-          if (t < 0.0f) { std::swap(t, b); }
-          rightEye["projection"] = LLSD().with("l", l).with("r",r).with("b",b).with("t",t);
-          rightEye["fieldOfView"] = (LLVector2(atan(r-l), atan(t-b)) * RAD_TO_DEG).getValue();
-          rightEye["uvCenter"] = LLVector2(
-            sys->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_LensCenterRightU_Float),
-            sys->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_LensCenterRightV_Float)
-          ).getValue();
-        }
+      LLSD out;
+      for (auto& kv : settings) {
+        if (kv.second) out[kv.first] = kv.second->getValue();
       }
-      
+      return out;
+    }
+    
+    static LLSD viewerInfoAsLLSD() {
       std::string timeStr = "[hour12, datetime, slt]:[min, datetime, slt]:[second, datetime, slt] [ampm, datetime, slt] [timezone,datetime, slt]";
       LLStringUtil::format(timeStr, LLSD().with("datetime", (S32) time_corrected()));
 
       return LLSD()
-        .with("viewer", LLSD()
-          .with("version", LLVersionInfo::getVersion())
-          .with("channel", LLVersionInfo::getChannel())
-          .with("hash", LLVersionInfo::getGitHash())
-          .with("sltime", timeStr)
-          .with("window_raw", llformat("%dx%d", gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw()))
-          .with("window_scaled", llformat("%dx%d", gViewerWindow->getWindowWidthScaled(), gViewerWindow->getWindowHeightScaled()))
-          .with("uiShift", gSavedSettings.getF32("$vrUIShift"))
-          .with("uiScaleFactor", gSavedSettings.getF32("UIScaleFactor"))
-          .with("displayScale", gViewerWindow->getDisplayScale().mV[VX])
-  #ifdef SM_CXSCREEN
-          .with("screen", llformat("%dx%d", GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)))
-  #endif
-  #ifdef _WIN32
-          .with("monitor", vr::win32::_getPrimaryMonitorSize().getValue())
-  #endif
-  #ifdef VK_CAPITAL
-          .with("capslock", ((GetKeyState(VK_CAPITAL) & 0x0001) != 0))
-  #endif
-        )
-        .with("openvr", LLSD()
-          .with("version", vr::VRSystem() ? vr::VRSystem()->GetRuntimeVersion() : "(n/a)")
-          .with("model", gVR.gHMD ? gVR.GetTrackedDeviceString(gVR.gHMD, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_ModelNumber_String) : "(n/a)")
-          .with("ipd", gVR.gHMD ? gVR.gHMD->GetFloatTrackedDeviceProperty(vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_UserIpdMeters_Float) : NAN)
-          .with("leftEye", leftEye)
-          .with("rightEye", rightEye)
-          .with("recommended_size", llformat("%ux%u", pnWidth, pnHeight))
-          .with("render_size", llformat("%ux%u", gVR.m_nRenderWidth, gVR.m_nRenderHeight))
-          .with("GL_RENDERER", ((const char *)glGetString(GL_RENDERER)))
-          .with("GL_VERSION", ((const char *)glGetString(GL_VERSION)))
-        )
-        .with("EyeDistance", gVR.m_fEyeDistance)
-        .with("FocusDistance", gVR.m_fFocusDistance)
-        .with("TextureShift", gVR.m_fTextureShift)
-        .with("TextureZoom", gVR.m_fTextureZoom)
-        // .with("FieldOfView", gVR.m_fFOV);
-        ;
-  }
+        .with("version", LLVersionInfo::getVersion())
+        .with("channel", LLVersionInfo::getChannel())
+        .with("hash", LLVersionInfo::getGitHash())
+        .with("sltime", timeStr)
+        .with("window_raw", llformat("%dx%d", gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw()))
+        .with("window_scaled", llformat("%dx%d", gViewerWindow->getWindowWidthScaled(), gViewerWindow->getWindowHeightScaled()))
+        .with("mScreen", llformat("%dx%d", gPipeline.mScreen.getWidth(), gPipeline.mScreen.getHeight()))
+      #ifdef SM_CXSCREEN
+        .with("screen", llformat("%dx%d", GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)))
+      #endif
+      #ifdef _WIN32
+        .with("monitor", vr::win32::_getPrimaryMonitorSize().getValue())
+        .with("desktop", vr::win32::_getPrimaryWorkareaSize().getValue())
+      #endif
+      #ifdef __linux__
+        .with("desktop", _getPrimaryWorkareaSize().getValue())
+      #endif
+        .with("UIScaleFactor", gSavedSettings.getF32("UIScaleFactor"))
+        .with("displayScale", gViewerWindow->getDisplayScale().mV[VX])
+        .with("scaled_vs_raw", (F32)gViewerWindow->getWindowWidthScaled() / (F32)gViewerWindow->getWindowWidthRaw())
+        .with("raw_vs_scaled", (F32)gViewerWindow->getWindowWidthRaw() / (F32)gViewerWindow->getWindowWidthScaled())
+      #ifdef VK_CAPITAL
+        .with("capslock", ((GetKeyState(VK_CAPITAL) & 0x0001) != 0))
+      #endif
+      ;
+    }
+
 }//ns
 

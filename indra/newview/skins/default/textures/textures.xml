@@ -29,6 +29,11 @@ with the same filename but different name
 -->
 
 <textures version="101">
+  <!-- <VR:humbletim> VR icons -->
+  <texture name="vr_preferences" file_name="toolbar_icons/vr_preferences.png" preload="true" />
+  <texture name="vr_toggle" file_name="toolbar_icons/vr_toggle.png" preload="true" />
+  <texture name="vr_recenter" file_name="toolbar_icons/vr_recenter.png" preload="true" />
+  <!-- </VR:humbletim> -->
   <!-- Please add new files alphabetically to prevent merge conflicts. JC -->
   <texture name="Accordion_ArrowClosed_Off" file_name="containers/Accordion_ArrowClosed_Off.png" preload="false" />
   <texture name="Accordion_ArrowClosed_Press" file_name="containers/Accordion_ArrowClosed_Press.png" preload="false" />
@@ -768,7 +773,6 @@ with the same filename but different name
   <texture name="nearbychat_18" file_name="toolbar_icons/nearbychat.png" preload="true" />
   <texture name="ao_toggle_18" file_name="toolbar_icons/animation_override.png" preload="true" />
   <texture name="phoenix_18" file_name="toolbar_icons/phoenix.png" preload="true" />
-  <texture name="vr" file_name="toolbar_icons/vr.png" preload="true" />
   <texture name="www_18" file_name="toolbar_icons/www.png" preload="true" />
   <texture name="areasearch" file_name="toolbar_icons/areasearch.png" preload="true" />
   <texture name="settings_debug" file_name="toolbar_icons/settings_debug.png" preload="true" />

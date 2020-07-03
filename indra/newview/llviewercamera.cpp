@@ -407,7 +407,7 @@ void LLViewerCamera::setPerspective(BOOL for_selection,
 	calcProjection(z_far); // Update the projection matrix cache
 
 	// <VR:humbletim> VR -- use openvr matrices
-	proj_mat *= vr::gl_perspective(fov_y,aspect,z_near,z_far);
+	proj_mat *= for_selection ? gl_perspective(fov_y,aspect,z_near,z_far) : vr::gl_perspective(fov_y,aspect,z_near,z_far);
 	// </VR:humbletim>
 
 	gGL.loadMatrix(proj_mat.m);

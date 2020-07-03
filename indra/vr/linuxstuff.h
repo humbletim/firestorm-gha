@@ -5,7 +5,7 @@
 #ifdef __linux__
 
 namespace vr {
-  bool toggleFullscreen() { LL_WARNS() << "TODO: Linux Fullscreen support" << LL_ENDL; return false; }
+	bool toggleFullscreen() { LL_WARNS() << "TODO: Linux Fullscreen support" << LL_ENDL; return false; }
 }
 
 	#include <X11/Xlib.h>
@@ -37,6 +37,34 @@ namespace vr {
 		if (name == "VK_CAPITAL" && _linux_iscapslocked()) return 0x0001;
 		return 0;
 	}
+
+namespace vr {
+	LLRect _getPrimaryWorkareaSize() {
+		LLRect rect;
+		unsigned char *prop_return = nullptr;
+		int32_t *return_words;
+		Atom property, actual_type_return;
+		int actual_format_return;
+		unsigned long bytes_after_return, nitems_return;
+
+		auto result = XGetWindowProperty(
+			_display, DefaultRootWindow(_display),
+			XInternAtom(_display, "_NET_WORKAREA", False), 
+			0, 32 * 4,
+			False,	/* delete */
+			AnyPropertyType,	/* req_type */
+			&actual_type_return, &actual_format_return,
+			&nitems_return, &bytes_after_return,
+			&prop_return
+		);
+		if (prop_return) {
+			return_words = (int32_t *) prop_return;
+			rect = { return_words[0], return_words[1], return_words[2]+return_words[0], -(return_words[3]+return_words[1]) };
+			XFree(prop_return);
+		}
+		return rect;
+	}
+}//ns
 
 #endif // linux
 
