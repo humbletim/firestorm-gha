@@ -3,7 +3,14 @@
 
 namespace tim {
   LLQuaternion fromPitchYawRollDegrees(F32 pitch, F32 yaw, F32 roll) {
+    //return LLQuaternion().mayaQ(pitch, yaw, roll, LLQuaternion::XYZ);
     return LLQuaternion().setEulerAngles(roll * DEG_TO_RAD, pitch * DEG_TO_RAD, yaw * DEG_TO_RAD);
+  }
+  LLMatrix4 yawOnly(const LLMatrix4& mat) {
+    auto tmp = mat.quaternion();
+    tmp.mQ[VX] = tmp.mQ[VY] = 0.0f;
+    tmp.normalize();
+    return LLMatrix4(tmp, LLVector4(mat.getTranslation()));
   }
 }
 namespace vrx {

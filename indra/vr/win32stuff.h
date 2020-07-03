@@ -10,17 +10,22 @@ namespace win32 {
   struct _workaround : public LLWindowWin32 {
   public:
     static HWND _gethwnd(LLWindowWin32* other) {
-      return reinterpret_cast<_workaround*>(other)->mWindowHandle;
+      return other ? reinterpret_cast<_workaround*>(other)->mWindowHandle : 0;
     }
   };
   HWND _getNativeAppWindow() {
     return _workaround::_gethwnd(dynamic_cast<LLWindowWin32*>(gViewerWindow->getWindow()));
   }
-  LLRect _getPrimaryMonitorSize(HWND hwnd = 0) {
+  LLRect _getPrimaryMonitorSize(HWND hwnd = _getNativeAppWindow()) {
     MONITORINFO mi = { sizeof(mi) };
     ::GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi);
-    
     return { mi.rcMonitor.left, -mi.rcMonitor.top, mi.rcMonitor.right, -mi.rcMonitor.bottom };
+  }
+  LLRect _getPrimaryWorkareaSize(HWND hwnd = _getNativeAppWindow()) {
+    MONITORINFO mi = { sizeof(mi) };
+    mi.cbSize = sizeof(mi);
+    ::GetMonitorInfo(::MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mi);
+    return { mi.rcWork.left, -mi.rcWork.top, mi.rcWork.right, -mi.rcWork.bottom ;
   }
     // main screen native resolution
     int __cdecl WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
