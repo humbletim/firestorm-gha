@@ -13,9 +13,47 @@
 //#include "llagent.h"
 //#include "llviewerwindow.h"
 
+namespace vr {
+  extern bool isRenderingFirstEye;
+  extern void withUIShift(const std::function<void()>& f, F32 shift);
+}
 
 class llviewerVR
 {
+// <VR:humbletim> openvr matrices revamp
+public:
+  LLMatrix4 stockViewerCameraWorld;
+  LLMatrix4 inverseCamOffsetWorld;
+  LLMatrix4 leftEyeToHeadPlayspace;
+  LLMatrix4 rightEyeToHeadPlayspace;
+  LLMatrix4 getEyeToHeadTransform(vr::EVREye eye);
+  void updateEyeToHeadTransforms() {
+    leftEyeToHeadPlayspace = getEyeToHeadTransform(vr::Eye_Left);
+    rightEyeToHeadPlayspace = getEyeToHeadTransform(vr::Eye_Right);
+  }
+  LLMatrix4 hmdViewPlayspace;
+  LLMatrix4 hmdViewWorld;
+  void recenterHMD() {
+    inverseCamOffsetWorld = LLMatrix4(hmdViewWorld).invert();
+    gHmdOffsetPos.mV[VZ] = 0;
+  }
+  void clearFramebuffers();
+  void hideHUD() {
+    m_strHudText = "";
+    if (!hud_textp) return;
+    hud_textp->setString(m_strHudText);
+    hud_textp->setDoFade(FALSE);
+    hud_textp->setHidden(TRUE);
+  }
+  void loadFromSettings() {
+    m_fEyeDistance = gSavedSettings.getF32("$vrEyeDistance");
+    m_fFocusDistance = gSavedSettings.getF32("$vrFocusDistance");
+    m_fNearClip = gSavedSettings.getF32("$vrNearClip");
+    // m_fTextureShift = gSavedSettings.getF32("$vrTextureShift");
+    // m_fTextureZoom = gSavedSettings.getF32("$vrTextureZoom");
+  }
+// </VR:humbletim>
+
 public:
 	vr::IVRSystem *gHMD = 0;
 	vr::IVRCompositor* gCompositor = 0;
@@ -40,7 +78,7 @@ public:
 
 	bool m_bVrEnabled = 0;
 	
-	bool m_bVrActive = 0;
+	// bool m_bVrActive = 0;
 	bool m_bVrKeyDown = 0;
 	
 	bool m_bEditKeyDown = 0;
@@ -65,7 +103,7 @@ public:
 		GLuint m_nRenderTextureId;
 		GLuint m_nRenderFramebufferId;
 		GLuint m_nResolveTextureId;
-		GLuint mFBO;
+		GLuint mFBO = 0;
 		GLuint IsReady;
 	};
 	FramebufferDesc leftEyeDesc;
@@ -80,7 +118,7 @@ public:
 	U64 m_iClockCount;
 	U64 m_iClockCount2;
 	LLTimer m_tTimer1;
-	F32 m_fCamRotOffset = 90;
+	F32 m_fCamRotOffset = 0;
 	F32 m_fCamPosOffset = 0;
 
 	LLVector3 m_vdir_orig;
@@ -121,8 +159,8 @@ public:
 	unsigned int m_uiControllerVertcount;
 	//vr::TrackedDevicePose_t m_rTrackedDevicePose[vr::k_unMaxTrackedDeviceCount];
 
-	float m_fNearClip;
-	float m_fFarClip;
+	float m_fNearClip{ MIN_NEAR_PLANE };
+	float m_fFarClip{ MAX_FAR_CLIP };
 
 	std::string m_strPoseClasses;
 	std::string m_strDriver;

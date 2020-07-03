@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <commands>
+  <!-- <VR:humbletim> custom toolbar buttons -->
+  <command name="vrprefs"
+           available_in_toybox="true"
+           icon="vr_preferences"
+           label_ref="Command_VRPrefs_Label"
+           tooltip_ref="Command_VRPrefs_Tooltip"
+           execute_function="Floater.Toggle"
+           execute_parameters="vrprefs"
+           is_running_function="Floater.IsOpen"
+           is_running_parameters="vrprefs"
+           checkbox_control="$vrEnabled"
+           />
+  <command name="vr_toggle"
+           available_in_toybox="true"
+           icon="vr_toggle"
+           execute_function="VR.ToggleOpenVR"
+           label_ref="Command_ToggleVR_Label"
+           tooltip_ref="Command_ToggleVR_Tooltip"
+           is_running_function="VR.IsEnabled"
+           />
+  <command name="vr_recenter"
+           available_in_toybox="true"
+           icon="vr_recenter"
+           label_ref="Command_RecenterHMD_Label"
+           tooltip_ref="Command_RecenterHMD_Tooltip"
+           execute_function="VR.RecenterHMD"
+           is_enabled_function="VR.IsEnabled"
+           />
+  <!-- </VR:humbletim> -->
   <command name="aboutland"
            available_in_toybox="true"
            icon="Command_AboutLand_Icon"
@@ -622,16 +651,5 @@
            execute_parameters="fs_discord"
            is_running_function="Floater.IsOpen"
            is_running_parameters="fs_discord"
-           />
-
-  <command name="vrprefs"
-           available_in_toybox="true"
-           icon="vr"
-           label_ref="Command_VRPrefs_Label"
-           tooltip_ref="Command_VRPrefs_Tooltip"
-           execute_function="Floater.Toggle"
-           execute_parameters="vrprefs"
-           is_running_function="Floater.IsOpen"
-           is_running_parameters="vrprefs"
            />
 </commands>

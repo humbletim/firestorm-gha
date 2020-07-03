@@ -616,6 +616,7 @@ void LLToolBarView::onToolBarButtonRemoved(LLView* button)
 	// </FS:Ansariel>
 }
 
+namespace vr { extern bool isEnabled(); }
 void LLToolBarView::draw()
 {
 	LLRect toolbar_rects[LLToolBarEnums::TOOLBAR_COUNT];
@@ -633,6 +634,14 @@ void LLToolBarView::draw()
 			else
 			{
 				mToolbars[i]->getParent()->reshape(mToolbars[i]->getRect().getWidth(), mToolbars[i]->getParent()->getRect().getHeight());
+				// <VR:humbletim> Offsetable Rightside Toolbar
+				if (i == LLToolBarEnums::TOOLBAR_RIGHT && vr::isEnabled()) {
+					static LLCachedControl<F32> right_toolbar_offset(gSavedSettings, "$vrRightToolbarOffset", 0.0f);
+					auto viewRect = mToolbars[i]->getParent()->getParent()->getRect();
+					S32 left = viewRect.getWidth() * (1.0f - llclamp(+right_toolbar_offset, 0.0f, 0.99f));
+					mToolbars[i]->getParent()->setOrigin(left - mToolbars[i]->getRect().getWidth(), 0);
+				}
+				// </VR:humbletim>
 			}
 
 			mToolbars[i]->localRectToOtherView(mToolbars[i]->getLocalRect(), &toolbar_rects[i], this);

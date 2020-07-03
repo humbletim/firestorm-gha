@@ -196,8 +196,12 @@ const LLMatrix4 &LLViewerCamera::getModelview() const
 	return mModelviewMatrix;
 }
 
+namespace vr { extern LLMatrix4 calcProjection(float fovy, float aspect, float zNear, float zFar); }
 void LLViewerCamera::calcProjection(const F32 far_distance) const
 {
+	// <VR:humbletim> VR -- use openvr matrices
+	mProjectionMatrix = vr::calcProjection(getView(), getAspect(), getNear(), far_distance);
+#if 0
 	F32 fov_y, z_far, z_near, aspect, f;
 	fov_y = getView();
 	z_far = far_distance;
@@ -212,6 +216,8 @@ void LLViewerCamera::calcProjection(const F32 far_distance) const
 	mProjectionMatrix.mMatrix[2][2] = (z_far + z_near)/(z_near - z_far);
 	mProjectionMatrix.mMatrix[3][2] = (2*z_far*z_near)/(z_near - z_far);
 	mProjectionMatrix.mMatrix[2][3] = -1;
+#endif
+	// </VR:humbletim>
 }
 
 // Sets up opengl state for 3D drawing.  If for selection, also
@@ -316,6 +322,7 @@ void LLViewerCamera::updateFrustumPlanes(LLCamera& camera, BOOL ortho, BOOL zfli
 	camera.calcAgentFrustumPlanes(frust);
 }
 
+namespace vr { extern glh::matrix4f gl_perspective(float fovy, float aspect, float zNear, float zFar); }
 void LLViewerCamera::setPerspective(BOOL for_selection,
 									S32 x, S32 y_from_bot, S32 width, S32 height,
 									BOOL limit_select_distance,
@@ -399,7 +406,9 @@ void LLViewerCamera::setPerspective(BOOL for_selection,
 
 	calcProjection(z_far); // Update the projection matrix cache
 
-	proj_mat *= gl_perspective(fov_y,aspect,z_near,z_far);
+	// <VR:humbletim> VR -- use openvr matrices
+	proj_mat *= for_selection ? gl_perspective(fov_y,aspect,z_near,z_far) : vr::gl_perspective(fov_y,aspect,z_near,z_far);
+	// </VR:humbletim>
 
 	gGL.loadMatrix(proj_mat.m);
 

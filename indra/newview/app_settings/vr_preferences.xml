@@ -9,69 +9,61 @@
      max="1"
      min="0" />
     <entries
-     control_name="$vrActive"
-     control_type="100"
-     increment="1"
+     control_name="$vrRecenterHMD"
+     control_type="204"
+     increment="0"
      integer="0"
-     label="HMD Output"
+     label="Recenter HMD"
      max="1"
      min="0" />
     <entries
-     control_name="$vrCamRotOffset"
-     control_type="102"
-     increment="5.0"
-     integer="0"
-     label="&lt;&lt; HMD Offset &gt;&gt;"
-     max="360.0"
-     min="-360.0" />
-    <entries
      control_name="$vrEyeDistance"
      control_type="102"
-     increment="1.0"
+     increment="1"
      integer="0"
      label="EyeDistance"
      max="200"
-     min="0" />
-    <entries
-     control_name="$vrFieldOfView"
-     control_type="102"
-     increment="0.5"
-     integer="0"
-     label="Field Of View"
-     max="175"
-     min="50" />
+     min="-100" />
     <entries
      control_name="$vrFocusDistance"
      control_type="102"
-     increment="0.25"
+     increment="0.1"
      integer="0"
      label="Focus Distance"
-     max="10.0"
+     max="10"
      min="0.5" />
     <entries
-     control_name="$vrTextureShift"
-     control_type="102"
-     increment="0.5"
-     integer="0"
-     label="Texture Shift"
-     max="100.0"
-     min="-100.0" />
-    <entries
-     control_name="$vrTextureZoom"
-     control_type="102"
-     increment="1.0"
-     integer="0"
-     label="Texture Zoom"
-     max="200.0"
-     min="-200.0" />
-    <entries
-     control_name="$vr_right_toolbar_offset"
+     control_name="$vrRightToolbarOffset"
      control_type="102"
      increment="0.01"
      integer="0"
      label="Toolbar Offset"
      max="0.5"
      min="0" />
+    <entries
+     control_name="$vrUIShift"
+     control_type="102"
+     increment="1"
+     integer="1"
+     label="UI Shift"
+     max="256"
+     min="-128" />
+    <entries
+     control_name="$vrFullscreen"
+     control_type="100"
+     increment="1"
+     integer="0"
+     label="Fullscreen"
+     max="1"
+     min="0" />
+    <entries
+     control_name="$vrFullscreenUIScale"
+     control_type="102"
+     increment="0.05"
+     integer="0"
+     label="Fullscreen UI Scale"
+     max="1.5"
+     min="0.5" />
     <entries
      control_name="$vrCursorZooming"
      control_type="100"
@@ -86,6 +78,14 @@
      increment="1"
      integer="0"
      label="EnableMouselook"
+     max="1"
+     min="0" />
+    <entries
+     control_name="$vrMouselookYawOnly"
+     control_type="100"
+     increment="0.1"
+     integer="0"
+     label="MouselookYawOnly"
      max="1"
      min="0" />
     <entries
@@ -110,7 +110,7 @@
      increment="1"
      integer="1"
      label="Max Distance"
-     max="128"
+     max="512"
      min="32" />
     <entries
      control_name="IndirectMaxNonImpostors"

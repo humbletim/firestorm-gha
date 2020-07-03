@@ -1844,7 +1844,7 @@ if (LINUX)
     LIST(APPEND viewer_SOURCE_FILES desktopnotifierlinux.cpp growlmanager.cpp)
 # [FS] Growl support
 
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed -fuse-ld=gold")
 
     set(viewer_LIBRARIES
         Xinerama

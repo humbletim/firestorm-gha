@@ -266,7 +266,7 @@
          layout="topleft"
          left_pad="0"
          max_val="2.0"
-         min_val="0.75"
+         min_val="0.5"
          name="ui_scale_slider"
          top_pad="-14"
          width="390" />

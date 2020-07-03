@@ -86,7 +86,7 @@
 #include "fsdata.h"
 
 //################################### P373R ######################################
-#include "llviewerVR.cpp"
+#include "./llviewerVR.cpp"
 llviewerVR gVR;
 //################################### END P373R ##################################
 
@@ -745,6 +745,8 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 
 		//upkeep gl name pools
 		LLGLNamePool::upkeepPools();
+		gVR.stockViewerCameraWorld = { LLViewerCamera::getInstance()->getQuaternion(), LLVector4(LLViewerCamera::getInstance()->getOrigin()) };
+
 		//################################### P373R ######################################
 		sec:
 		gVR.ProcessVRCamera();
@@ -1177,7 +1179,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 			//################################### END P373R ######################################
 			//swap();
 			//################################### P373R ######################################
-			if (gVR.leftEyeDesc.IsReady  && !gVR.rightEyeDesc.IsReady && gVR.m_fEyeDistance > 0)
+			if (gVR.leftEyeDesc.IsReady  && !gVR.rightEyeDesc.IsReady)
 			{
 				goto sec;
 
@@ -1188,7 +1190,7 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 				//gVR.HandleInput();
 
 			}
-			if (!gVR.m_bVrActive)
+			if (!gVR.m_bVrEnabled)
 				swap();
 
 			//################################### END P373R ##################################
@@ -1752,7 +1754,10 @@ void render_ui_2d()
 	}
 	else
 	{
+		static LLCachedControl<F32> uiShift(gSavedSettings, "$vrUIShift", 0.0f);
+		vr::withUIShift([&]{
 		gViewerWindow->draw();
+		}, uiShift);
 	}
 	//################################### P373R ######################################
 	gVR.DrawCursors();
