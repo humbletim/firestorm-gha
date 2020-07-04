@@ -2491,6 +2491,9 @@ if (WINDOWS)
     target_link_libraries(${VIEWER_BINARY_NAME}
     ${GROWL_LIBRARY}
     )
+    find_library(OPENVR_LIB NAMES openvr_api PATHS ../../openvr/lib/win64 ../openvr/lib/win64)
+    message(STATUS "OPENVR_LIB = ${OPENVR_LIB}")
+    target_link_libraries(${VIEWER_BINARY_NAME} ${OPENVR_LIB})
 endif (WINDOWS)
 
 if (LINUX)
