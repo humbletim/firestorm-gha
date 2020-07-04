@@ -8,7 +8,7 @@ namespace tim {
     LLTempBoundListener listener;
     std::function<void()> callback;
     int ms;
-    TimerListener(std::function<void(TimerListener* self)> callback, int ms) : TimerListener([this,callback]{ callback(this); }, ms) {}
+    // TimerListener(std::function<void(TimerListener* self)> callback, int ms) : TimerListener([this,callback]{ callback(this); }, ms) {}
     TimerListener(std::function<void()> callback, int ms) :  callback(callback), ms(ms) {}
     virtual ~TimerListener() {}
     virtual bool expired() const { return timer.getElapsedTimeF32() >= ms/1000.0f; }

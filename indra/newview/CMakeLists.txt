@@ -1751,21 +1751,8 @@ set_source_files_properties(
     llfloaterone_star.cpp llfloateroneb_star.cpp  llfloateronec_star.cpp llfloatertwo_star.cpp llfloaterthree_star.cpp llpanelone_star.cpp llpaneltwo_star.cpp llinventory_star.cpp llpathfinding_star.cpp llac_star.cpp llde_star.cpp llfh_star.cpp llin_star.cpp llor_star.cpp lls_star.cpp llt_star.cpp
     llvavl_star.cpp llvmvz_star.cpp llvo_star.cpp lluwz_star.cpp llmisc_star.cpp
     PROPERTIES
-      COMPILE_FLAGS "/bigobj"
+      COMPILE_FLAGS "/bigobj /I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5 /I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5/1.4"
   )
-
-if (VCPKG_TOOLCHAIN)
-  set_source_files_properties(
-    daeexport.cpp llviewerfloaterreg.cpp llfloatermodelpreview.cpp llmeshrepository.cpp llviewermenufile.cpp
-    PROPERTIES
-      COMPILE_FLAGS "/I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5 /I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5/1.4"
-  )
-  set_source_files_properties(
-    fslslpreproc.cpp
-    PROPERTIES
-      #COMPILE_FLAGS "-D_GLIBCXX_USE_CXX11_ABI=0"
-  )
-endif()
 
 if (DARWIN)
   LIST(APPEND viewer_SOURCE_FILES llappviewermacosx.cpp)
@@ -1917,9 +1904,40 @@ if (WINDOWS)
             PROPERTIES
             GENERATED TRUE
             COMPILE_FLAGS "/Ycllviewerprecompiledheaders.h"
-            )
-        set(viewer_SOURCE_FILES "${viewer_SOURCE_FILES}" llviewerprecompiledheaders.cpp)
-        set_source_files_properties(../gVR/vrspinctrl.cpp ../gVR/vrsliderctrl.cpp ../gVR/vrprefs.cpp PROPERTIES COMPILE_FLAGS /Y-)
+        )
+        add_custom_command(
+            OUTPUT pch.cpp
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/llviewerprecompiledheaders.cpp pch.cpp
+            DEPENDS llviewerprecompiledheaders.cpp
+            COMMENT "generating pch.cpp"
+        )
+        add_library(pchlib STATIC pch.cpp)
+        add_custom_target(xprecompiled ALL DEPENDS pchlib)
+        
+add_custom_command(OUTPUT pch.stamp
+  COMMAND ${CMAKE_COMMAND} -E remove ../llviewerprecompiledheaders.pch
+  COMMAND ${CMAKE_COMMAND} -E remove pch.cpp
+  COMMAND ${CMAKE_COMMAND} -E touch pch.stamp
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMENT "Creating pch.stamp"
+  VERBATIM)
+
+  add_custom_command(OUTPUT ../llviewerprecompiledheaders.pch
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMENT "generated .pch"
+    DEPENDS xprecompiled
+    VERBATIM)
+
+add_custom_target(xprecompiled_stamp DEPENDS pch.stamp)
+
+        # add_custom_command(
+        #   COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj
+        #   DEPENDS $<TARGET_OBJECTS:xprecompiled>
+        # )
+        #add_dependencies(xxprecompiled ${CMAKE_CURRENT_BINARY_DIR}/../llviewerprecompiledheaders.pch xprecompiled)
+        # set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/../llviewerprecompiledheaders.pch PROPERTIES GENERATED TRUE)
+        # set_source_files_properties(${viewer_SOURCE_FILES} PROPERTIES OBJECT_DEPENDS xprecompiled)
+        #set(viewer_SOURCE_FILES "${viewer_SOURCE_FILES}" llviewerprecompiledheaders.cpp)
     endif(USE_PRECOMPILED_HEADERS)
 
     # Replace the icons with the appropriate ones for the channel
@@ -2305,6 +2323,7 @@ if (WINDOWS)
             PROPERTIES
             COMPILE_FLAGS "/Yullviewerprecompiledheaders.h"
             )
+        set_source_files_properties(../gVR/vrspinctrl.cpp ../gVR/vrsliderctrl.cpp ../gVR/vrprefs.cpp PROPERTIES COMPILE_FLAGS /Y-)
     endif(USE_PRECOMPILED_HEADERS)
 
     # If adding a file to viewer_manifest.py in the WindowsManifest.construct() method, be sure to add the dependency

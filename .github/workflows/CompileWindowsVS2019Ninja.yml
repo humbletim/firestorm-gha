@@ -1,6 +1,6 @@
 name: CompileWindowsVS2019Ninja
 
-on: [pull_request]
+on: [push]
 
 defaults:
   run:
@@ -14,7 +14,7 @@ jobs:
       PreferredToolArchitecture: x64
       NINJA_FLAGS: -j4
       VIEWER_VERSION_REVISION: 58205
-      FSCHANNEL: FirestormVR-GHA-VS2019
+      VIEWER_CHANNEL: FirestormVR-GUI-VS2019
       CXX: cl.exe
       CC: cl.exe
       CPP_OBJ_CACHE_REV: 2
@@ -30,13 +30,21 @@ jobs:
           openvr/.git*
           fs-build-variables/.git*
           vcpkg/.git*
-        key: ${{ runner.os }}-gittest-1-${{ env.FSCHANNEL }}
+        key: ${{ runner.os }}-gittest-1-${{ env.VIEWER_CHANNEL }}
     - uses: actions/checkout@v2
       with:
         clean: false
         submodules: true
         # include branch tag histories (for timesync)
         fetch-depth: 0
+
+    - name: detect VIEWER_VERSION_STR
+      shell: bash
+      run: |
+        majorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 1`
+        minorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 2`
+        patchVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 3`
+        echo ::set-env name=VIEWER_VERSION_STR::${majorVer}.${minorVer}.${patchVer}.${VIEWER_VERSION_REVISION}
 
     - name: fetch git-restore-mtime
       shell: powershell
@@ -84,8 +92,7 @@ jobs:
         echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
         echo ::set-env name=AUTOBUILD_CONFIG_FILE::%cd%\vs2019_autobuild.xml
         echo ::set-env name=BUILD_DIR::build-vc${{ env.AUTOBUILD_VSVER }}-64
-        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep Merge | awk '{ print $2 }' | xargs git rev-parse --short)
-        
+        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short || git rev-parse --short HEAD || true)
         echo ::set-env name=NINJA_FLAGS::${{ env.NINJA_FLAGS }} -C build-vc${{ env.AUTOBUILD_VSVER }}-64
         echo github.workspace = ${{ github.workspace }}
         echo cd = %cd%
@@ -130,14 +137,14 @@ jobs:
       uses: actions/cache@v2
       with:
         path: autobuild-cache
-        key: ${{ runner.os }}-cacheddownloads-${{ hashFiles('vs2019_autobuild.xml') }}-${{ env.FSCHANNEL }}
+        key: ${{ runner.os }}-cacheddownloads-${{ hashFiles('vs2019_autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
 
     - name: cache -- autobuild installed packages
       id: cachedpackages
       uses: actions/cache@v2
       with:
         path: ${{ env.BUILD_DIR }}/packages
-        key: ${{ runner.os }}-cachedpackages-${{ hashFiles('vs2019_autobuild.xml') }}-${{ env.FSCHANNEL }}
+        key: ${{ runner.os }}-cachedpackages-${{ hashFiles('vs2019_autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
 
     - name: cache -- autobuild installed packages detection
       if: steps.cachedpackages.outputs.cache-hit == 'true'
@@ -147,10 +154,11 @@ jobs:
     - name: autobuild -- configure
       run: |
         autobuild configure -A 64 -c ReleaseFS_open -- \
-          --package --openal --openvr --vcpkg --ninja --chan ${{ env.FSCHANNEL }} \
+          --package --openal --openvr --vcpkg --ninja --chan ${{ env.VIEWER_CHANNEL }} \
           ${{ env.AUTOBUILD_CACHE_HIT }} -DGENERATE_DEBUG_SYMBOLS:BOOL=OFF
 
     - name: cache -- lllibs.cpp.obj
+      if: false
       id: cachedllibs
       uses: actions/cache@v2
       with:
@@ -159,21 +167,24 @@ jobs:
           !${{ env.BUILD_DIR }}/newview/**/*.cpp.obj
           ${{ env.BUILD_DIR }}/.ninja_log
           ${{ env.BUILD_DIR }}/.ninja_deps
-        key: ${{ runner.os }}-cachedllibs-${{ env.CPP_OBJ_CACHE_REV }}-${{ env.FSCHANNEL }}
+        key: ${{ runner.os }}-cachedllibs-${{ env.CPP_OBJ_CACHE_REV }}-${{ env.VIEWER_CHANNEL }}
 
     - name: Build ll* libs
+      if: false
       run: |
         ninja ${{ env.NINJA_FLAGS }} -n -d explain llappearance llaudio llcharacter llcommon llcorehttp llcrashlogger llimage llimagej2coj llinventory llmath llmessage llplugin llprimitive llrender llui llvfs llwindow llxml
         ninja ${{ env.NINJA_FLAGS }} llappearance llaudio llcharacter llcommon llcorehttp llcrashlogger llimage llimagej2coj llinventory llmath llmessage llplugin llprimitive llrender llui llvfs llwindow llxml
         du -hsc ${{ env.BUILD_DIR }}/*
 
     - name: generate llviewerprecompiledheaders.i
+      if: false
       run: |
         cl.exe -DWIN32 -D_WINDOWS -DADDRESS_SIZE=64 -DLL_WINDOWS \
           -Ivcpkg/installed/x64-windows/include -Iindra/llcommon -Iindra/llmessage -Iindra/llvfs -Iindra/llmath \
           -EP -E -C indra/newview/llviewerprecompiledheaders.h > ${{ env.BUILD_DIR }}/llviewerprecompiledheaders.i
 
     - name: cache -- .pch
+      if: false
       id: cachedpch
       uses: actions/cache@v2
       with:
@@ -181,32 +192,36 @@ jobs:
           ${{ env.BUILD_DIR }}/**/*.pch
           ${{ env.BUILD_DIR }}/newview/pch.stamp
           ${{ env.BUILD_DIR }}/newview/pch.cpp
-        key: ${{ runner.os }}-cachedpch-2-${{ hashFiles(format('{0}{1}', env.BUILD_DIR, '/llviewerprecompiledheaders.i')) }}-${{ env.FSCHANNEL }}
+        key: ${{ runner.os }}-cachedpch-2-${{ hashFiles(format('{0}{1}', env.BUILD_DIR, '/llviewerprecompiledheaders.i')) }}-${{ env.VIEWER_CHANNEL }}
 
     - name: Generate precompiled headers
-      if: steps.cachedpch.outputs.cache-hit != 'true'
+      if: false && steps.cachedpch.outputs.cache-hit != 'true'
       run: |
         ninja ${{ env.NINJA_FLAGS }} xprecompiled_stamp
         ninja ${{ env.NINJA_FLAGS }} xprecompiled
 
     - name: cache -- newview* .cpp.obj
+      if: false
       id: cachednewview
       uses: actions/cache@v2
       with:
         path: |
           ${{ env.BUILD_DIR }}/newview/**/*.cpp.obj
-        key: ${{ runner.os }}-cachednewview-${{ env.CPP_OBJ_CACHE_REV }}-${{ env.FSCHANNEL }}
+        key: ${{ runner.os }}-cachednewview-${{ env.CPP_OBJ_CACHE_REV }}-${{ env.VIEWER_CHANNEL }}
 
     - name: Build firestorm executable
+      if: false
       run: ninja ${{ env.NINJA_FLAGS }} firestorm-bin
     
     - name: Generate installer
+      if: false
       run: ninja ${{ env.NINJA_FLAGS }} llpackage
 
     - name: Upload Artifact
+      if: false
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ env.FSCHANNEL }}-artifact
+        name: ${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
         path: ${{ env.BUILD_DIR }}/newview/Phoenix*_Setup.exe
 
     - name: cache autobuild xml file
@@ -214,6 +229,6 @@ jobs:
     - name: Upload Autobuild Dependency Set
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ env.FSCHANNEL }}-autobuild-deps
+        name: ${{ env.VIEWER_CHANNEL }}-autobuild-deps
         path: ${{ env.AUTOBUILD_INSTALLABLE_CACHE }}
   
