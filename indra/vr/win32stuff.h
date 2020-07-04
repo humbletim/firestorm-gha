@@ -25,7 +25,7 @@ namespace win32 {
     MONITORINFO mi = { sizeof(mi) };
     mi.cbSize = sizeof(mi);
     ::GetMonitorInfo(::MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mi);
-    return { mi.rcWork.left, -mi.rcWork.top, mi.rcWork.right, -mi.rcWork.bottom ;
+    return { mi.rcWork.left, -mi.rcWork.top, mi.rcWork.right, -mi.rcWork.bottom };
   }
     // main screen native resolution
     int __cdecl WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
