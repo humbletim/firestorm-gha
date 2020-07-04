@@ -205,15 +205,12 @@ jobs:
         key: ${{ runner.os }}-cachednewview-${{ env.CPP_OBJ_CACHE_REV }}-${{ env.VIEWER_CHANNEL }}
 
     - name: Build firestorm executable
-      if: false
       run: ninja ${{ env.NINJA_FLAGS }} firestorm-bin
     
     - name: Generate installer
-      if: false
       run: ninja ${{ env.NINJA_FLAGS }} llpackage
 
     - name: Upload Artifact
-      if: false
       uses: actions/upload-artifact@v2
       with:
         name: ${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
