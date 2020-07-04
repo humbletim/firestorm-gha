@@ -158,7 +158,6 @@ jobs:
           ${{ env.AUTOBUILD_CACHE_HIT }} -DGENERATE_DEBUG_SYMBOLS:BOOL=OFF
 
     - name: cache -- lllibs.cpp.obj
-      if: false
       id: cachedllibs
       uses: actions/cache@v2
       with:
@@ -170,21 +169,18 @@ jobs:
         key: ${{ runner.os }}-cachedllibs-${{ env.CPP_OBJ_CACHE_REV }}-${{ env.VIEWER_CHANNEL }}
 
     - name: Build ll* libs
-      if: false
       run: |
         ninja ${{ env.NINJA_FLAGS }} -n -d explain llappearance llaudio llcharacter llcommon llcorehttp llcrashlogger llimage llimagej2coj llinventory llmath llmessage llplugin llprimitive llrender llui llvfs llwindow llxml
         ninja ${{ env.NINJA_FLAGS }} llappearance llaudio llcharacter llcommon llcorehttp llcrashlogger llimage llimagej2coj llinventory llmath llmessage llplugin llprimitive llrender llui llvfs llwindow llxml
         du -hsc ${{ env.BUILD_DIR }}/*
 
     - name: generate llviewerprecompiledheaders.i
-      if: false
       run: |
         cl.exe -DWIN32 -D_WINDOWS -DADDRESS_SIZE=64 -DLL_WINDOWS \
           -Ivcpkg/installed/x64-windows/include -Iindra/llcommon -Iindra/llmessage -Iindra/llvfs -Iindra/llmath \
           -EP -E -C indra/newview/llviewerprecompiledheaders.h > ${{ env.BUILD_DIR }}/llviewerprecompiledheaders.i
 
     - name: cache -- .pch
-      if: false
       id: cachedpch
       uses: actions/cache@v2
       with:
@@ -195,13 +191,12 @@ jobs:
         key: ${{ runner.os }}-cachedpch-2-${{ hashFiles(format('{0}{1}', env.BUILD_DIR, '/llviewerprecompiledheaders.i')) }}-${{ env.VIEWER_CHANNEL }}
 
     - name: Generate precompiled headers
-      if: false && steps.cachedpch.outputs.cache-hit != 'true'
+      if: steps.cachedpch.outputs.cache-hit != 'true'
       run: |
         ninja ${{ env.NINJA_FLAGS }} xprecompiled_stamp
         ninja ${{ env.NINJA_FLAGS }} xprecompiled
 
     - name: cache -- newview* .cpp.obj
-      if: false
       id: cachednewview
       uses: actions/cache@v2
       with:
@@ -227,6 +222,7 @@ jobs:
     - name: cache autobuild xml file
       run: cp -av '${{ env.AUTOBUILD_CONFIG_FILE }}' '${{ env.AUTOBUILD_INSTALLABLE_CACHE }}/'
     - name: Upload Autobuild Dependency Set
+      if: steps.cacheddownloads.outputs.cache-hit != 'true'
       uses: actions/upload-artifact@v2
       with:
         name: ${{ env.VIEWER_CHANNEL }}-autobuild-deps
