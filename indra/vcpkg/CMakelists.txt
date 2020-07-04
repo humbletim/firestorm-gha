@@ -1,0 +1,27 @@
+project(vcpkg)
+
+message(STATUS "vcpkg-cmakelists.txt......................")
+if (NOT WINDOWS)
+    message(FATAL_ERROR "VCPKG_TOOLCHAIN only supported on WINDOWS at the moment...")
+endif()
+
+add_custom_target(vcpkg_boostrap
+    BYPRODUCTS ${CMAKE_SOURCE_DIR}/vcpkg/vcpkg.exe
+    COMMAND boostrap-vcpkg.bat
+    ARGS -disableMetrics
+    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/vcpkg"
+    COMMENT "calling bootstrap-vcpkg.bat"
+)
+
+add_custom_target(vcpkg_install
+    OUTPUT installed/vcpkg/info/firestorm-deps_6.3.9_x64-windows.list
+    COMMAND vcpkg.exe
+    ARGS install --overlay-ports=${CMAKE_SOURCE_DIR}/indra/vcpkg/ports --overlay-triplets=${CMAKE_SOURCE_DIR}/indra/vcpkg/triplets --triplet x64-windows firestorm-deps
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/vcpkg
+    COMMENT "calling vcpkg --install firestorm-deps"
+)
+
+add_subdirectory(boost_filesystem_codecvt_patch)
+
+add_custom_target(vcpkg ALL DEPENDS vcpkg_bootstrap vcpkg_install boost_filesystem_codecvt_patch)
+

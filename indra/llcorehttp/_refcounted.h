@@ -33,7 +33,7 @@
 #include "fix_macros.h"
 #include <boost/thread.hpp>
 #include <boost/intrusive_ptr.hpp>
-
+#include <boost/core/noncopyable.hpp>
 #include "llatomic.h"
 
 

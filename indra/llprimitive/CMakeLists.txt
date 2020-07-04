@@ -74,11 +74,13 @@ set(llprimitive_HEADER_FILES
     object_flags.h
     )
 
+if (VCPKG_TOOLCHAIN)
   set_source_files_properties(
     lldaeloader.cpp
     PROPERTIES
       COMPILE_FLAGS "/I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5 /I${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/collada-dom2.5/1.4"
   )
+endif()
 
         
 set_source_files_properties(${llprimitive_HEADER_FILES}

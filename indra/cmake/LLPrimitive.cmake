@@ -4,6 +4,15 @@
 include(Prebuilt)
 include(Boost)
 
+if (VCPKG_TOOLCHAIN)
+  link_libraries( llprimitive )
+  configure_vcpkg_dependency(pcre LLPrimitive)
+  configure_vcpkg_dependency(libxml2 LLPrimitive)
+  configure_vcpkg_dependency(colladadom LLPrimitive)
+  set(LLPRIMITIVE_INCLUDE_DIRS ${LIBS_OPEN_DIR}/llprimitive)
+  return()
+endif()
+
 use_prebuilt_binary(colladadom)
 use_prebuilt_binary(pcre)
 use_prebuilt_binary(libxml2)

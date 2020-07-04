@@ -33,7 +33,7 @@ FOREACH(SRC ${ARGN})
         OUTPUT  "${TO}"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FROM} ${TO}
         DEPENDS ${FROM}
-        COMMENT "Copying ${SRCFILE} ${TO_DIR}"
+        COMMENT "Copying ${FROM} ${TO}"
         )
     SET(AddTargets ${AddTargets} ${TO})
 ENDFOREACH(SRC ${ARGN})

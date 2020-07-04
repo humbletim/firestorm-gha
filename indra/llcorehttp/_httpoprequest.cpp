@@ -507,7 +507,11 @@ HttpStatus HttpOpRequest::prepareRequest(HttpService * service)
 	check_curl_easy_setopt(mCurlHandle, CURLOPT_NOPROGRESS, 1);
 	check_curl_easy_setopt(mCurlHandle, CURLOPT_URL, mReqURL.c_str());
 	check_curl_easy_setopt(mCurlHandle, CURLOPT_PRIVATE, getHandle());
-	check_curl_easy_setopt(mCurlHandle, CURLOPT_ENCODING, "");
+#if LIBCURL_VERSION_NUM < 0x073e00
+		check_curl_easy_setopt(mCurlHandle, CURLOPT_ENCODING, "");
+#else
+		check_curl_easy_setopt(mCurlHandle, CURLOPT_ACCEPT_ENCODING, NULL);
+#endif
 
 	check_curl_easy_setopt(mCurlHandle, CURLOPT_AUTOREFERER, 1);
 	check_curl_easy_setopt(mCurlHandle, CURLOPT_MAXREDIRS, HTTP_REDIRECTS_DEFAULT);

@@ -929,12 +929,12 @@ bool LLDAELoader::OpenFile(const std::string& filename)
 	domCOLLADA* dom;
 	if (mPreprocessDAE)
 	{
-		dom = dae.openFromMemory(uri_filename, preprocessDAE(filename).c_str());
+		dom = static_cast<domCOLLADA*>(dae.openFromMemory(uri_filename, preprocessDAE(filename).c_str()));
 	}
 	else
 	{
 		LL_INFOS() << "Skipping dae preprocessing" << LL_ENDL;
-		dom = dae.open(uri_filename);
+		dom = static_cast<domCOLLADA*>(dae.open(uri_filename));
 	}
 	
 	if (!dom)
@@ -2639,3 +2639,19 @@ bool LLDAELoader::createVolumeFacesFromDomMesh(LLModel* pModel, domMesh* mesh)
 
 	return false;
 }
+
+#if VCPKG_TOOLCHAIN
+namespace ColladaDOM141 {
+    daeString COMMON_PROFILE_INPUT_INV_BIND_MATRIX = "INV_BIND_MATRIX";
+    daeString COMMON_PROFILE_INPUT_JOINT = "JOINT";
+    daeString COMMON_PROFILE_INPUT_NORMAL = "NORMAL";
+    daeString COMMON_PROFILE_INPUT_POSITION = "POSITION";
+    daeString COMMON_PROFILE_INPUT_TEXCOORD = "TEXCOORD";
+    daeString COMMON_PROFILE_INPUT_VERTEX = "VERTEX";
+    daeString COMMON_PROFILE_INPUT_WEIGHT = "WEIGHT";
+    daeString COLLADA_TYPE_MESH = "mesh";
+    daeString COLLADA_TYPE_IMAGE = "image";
+    daeString COLLADA_TYPE_IMAGER = "imager";
+    daeString COLLADA_TYPE_SKIN = "skin";
+}
+#endif

@@ -93,6 +93,13 @@ if (WINDOWS AND EXISTS ${LIBS_CLOSED_DIR}copy_win_scripts)
 endif (WINDOWS AND EXISTS ${LIBS_CLOSED_DIR}copy_win_scripts)
 
 add_custom_target(viewer)
+
+option(GENERATE_DEBUG_SYMBOLS "generate debug symbols (eg: for msvc /Z[i7o] / gcc -g)" ON)
+if (VCPKG_TOOLCHAIN)
+  add_subdirectory(vcpkg/boost_filesystem_codecvt_patch)
+  add_dependencies(viewer boost_filesystem_patch)
+endif()
+
 add_subdirectory(${LIBS_OPEN_PREFIX}llcrashlogger)
 add_subdirectory(${LIBS_OPEN_PREFIX}llplugin)
 add_subdirectory(${LIBS_OPEN_PREFIX}llui)

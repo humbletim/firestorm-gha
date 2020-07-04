@@ -36,6 +36,7 @@ WANTS_KDU=$FALSE
 WANTS_FMODSTUDIO=$FALSE
 WANTS_FMODEX=$FALSE
 WANTS_OPENAL=$FALSE
+WANTS_OPENVR=$FALSE
 WANTS_OPENSIM=$TRUE
 WANTS_SINGLEGRID=$FALSE
 WANTS_AVX=$FALSE
@@ -49,6 +50,7 @@ CHANNEL="" # will be overwritten later with platform-specific values unless manu
 LL_ARGS_PASSTHRU=""
 JOBS="0"
 WANTS_NINJA=$FALSE
+WANTS_VCPKG=$FALSE
 TESTBUILD_PERIOD="0"
 SINGLEGRID_URI=""
 
@@ -74,6 +76,7 @@ showUsage()
     echo "  --fmodstudio             : Build with FMOD Studio"
     echo "  --fmodex                 : Build with FMOD Ex"
     echo "  --openal                 : Build with OpenAL"
+    echo "  --openvr                 : Build with OpenVR"
     echo "  --opensim                : Build with OpenSim support (Disables Havok features)"
     echo "  --no-opensim             : Build without OpenSim support (Overrides --opensim)"
     echo "  --singlegrid <login_uri> : Build for single grid usage (Requires --opensim)"
@@ -83,7 +86,8 @@ showUsage()
     echo "  --testbuild <days>       : Create time-limited test build (build date + <days>)"
     echo "  --platform <platform>    : Build for specified platform (darwin | windows | linux)"
     echo "  --jobs <num>             : Build with <num> jobs in parallel (Linux and Darwin only)"
-    echo "  --ninja                  : Build using Ninja (Linux only)"
+    echo "  --ninja                  : Build using Ninja (Linux and Windows only)"
+    echo "  --vcpkg                  : Build using VCPKG deps (Windows only)"
     echo
     echo "All arguments not in the above list will be passed through to LL's configure/build."
     echo
@@ -93,7 +97,7 @@ getArgs()
 # $* = the options passed in from main
 {
     if [ $# -gt 0 ]; then
-      while getoptex "clean build config version package no-package fmodstudio fmodex openal ninja jobs: platform: kdu opensim no-opensim singlegrid: avx avx2 crashreporting testbuild: help chan: btype:" "$@" ; do
+      while getoptex "clean build config version package no-package fmodstudio fmodex openal openvr ninja vcpkg jobs: platform: kdu opensim no-opensim singlegrid: avx avx2 crashreporting testbuild: help chan: btype:" "$@" ; do
 
           #ensure options are valid
           if [  -z "$OPTOPT"  ] ; then
@@ -114,6 +118,7 @@ getArgs()
           fmodstudio)     WANTS_FMODSTUDIO=$TRUE;;
           fmodex)         WANTS_FMODEX=$TRUE;;
           openal)         WANTS_OPENAL=$TRUE;;
+          openvr)         WANTS_OPENVR=$TRUE;;
           opensim)        WANTS_OPENSIM=$TRUE;;
           no-opensim)     WANTS_OPENSIM=$FALSE;;
           singlegrid)     WANTS_SINGLEGRID=$TRUE
@@ -131,6 +136,7 @@ getArgs()
           platform)       PLATFORM="$OPTARG";;
           jobs)           JOBS="$OPTARG";;
           ninja)          WANTS_NINJA=$TRUE;;
+          vcpkg)          WANTS_VCPKG=$TRUE;;
 
           help)           showUsage && exit 0;;
 
@@ -302,6 +308,7 @@ echo -e "            KDU: `b2a $WANTS_KDU`"                                    |
 echo -e "     FMODSTUDIO: `b2a $WANTS_FMODSTUDIO`"                             | tee -a $LOG
 echo -e "         FMODEX: `b2a $WANTS_FMODEX`"                                 | tee -a $LOG
 echo -e "         OPENAL: `b2a $WANTS_OPENAL`"                                 | tee -a $LOG
+echo -e "         OPENVR: `b2a $WANTS_OPENVR`"                                 | tee -a $LOG
 echo -e "        OPENSIM: `b2a $WANTS_OPENSIM`"                                | tee -a $LOG
 if [ $WANTS_SINGLEGRID -eq $TRUE ] ; then
     echo -e "     SINGLEGRID: `b2a $WANTS_SINGLEGRID` ($SINGLEGRID_URI)"       | tee -a $LOG
@@ -321,8 +328,15 @@ echo -e "          CLEAN: `b2a $WANTS_CLEAN`"                                  |
 echo -e "          BUILD: `b2a $WANTS_BUILD`"                                  | tee -a $LOG
 echo -e "         CONFIG: `b2a $WANTS_CONFIG`"                                 | tee -a $LOG
 echo -e "          NINJA: `b2a $WANTS_NINJA`"                                  | tee -a $LOG
+echo -e "          VCPKG: `b2a $WANTS_VCPKG`"                                  | tee -a $LOG
 echo -e "       PASSTHRU: $LL_ARGS_PASSTHRU"                                   | tee -a $LOG
 echo -e "          BTYPE: $BTYPE"                                              | tee -a $LOG
+
+echo -e "AUTOBUILD: ...                   "                                    | tee -a $LOG
+echo -e "         _VSVER: $AUTOBUILD_VSVER"                                    | tee -a $LOG
+echo -e "_VARIABLES_FILE: $AUTOBUILD_VARIABLES_FILE"                           | tee -a $LOG
+echo -e "   _CONFIG_FILE: $AUTOBUILD_CONFIG_FILE"                              | tee -a $LOG
+
 if [ $PLATFORM == "linux" -o $PLATFORM == "darwin" ] ; then
     echo -e "           JOBS: $JOBS"                                           | tee -a $LOG
 fi
@@ -378,8 +392,8 @@ if [ \( $WANTS_CLEAN -eq $TRUE \) -a \( $WANTS_BUILD -eq $FALSE \) ] ; then
         fi
 
     elif [ $PLATFORM == "windows" ] ; then
-        rm -rf build-vc120-${AUTOBUILD_ADDRSIZE}
-        mkdir -p build-vc120-${AUTOBUILD_ADDRSIZE}/logs
+        rm -rf build-vc${AUTOBUILD_VSVER}-${AUTOBUILD_ADDRSIZE}
+        mkdir -p build-vc${AUTOBUILD_VSVER}-${AUTOBUILD_ADDRSIZE}/logs
 
     elif [ $PLATFORM == "linux32" ] ; then
         if [ "${AUTOBUILD_ADDRSIZE}" == "64" ]
@@ -441,6 +455,11 @@ if [ $WANTS_CONFIG -eq $TRUE ] ; then
     else
         OPENAL="-DOPENAL:BOOL=OFF"
     fi
+    if [ $WANTS_OPENVR -eq $TRUE ] ; then
+        OPENAL="-DOPENVR:BOOL=ON"
+    else
+        OPENAL="-DOPENVR:BOOL=OFF"
+    fi
     if [ $WANTS_OPENSIM -eq $TRUE ] ; then
         OPENSIM="-DOPENSIM:BOOL=ON"
     else
@@ -480,12 +499,12 @@ if [ $WANTS_CONFIG -eq $TRUE ] ; then
     else
         PACKAGE="-DPACKAGE:BOOL=OFF"
     fi
+    if [ $PLATFORM == "windows" ] ; then
+        BUILD_DIR=`cygpath -w $(pwd)`
+    else
+        BUILD_DIR=`pwd`
+    fi
     if [ $WANTS_CRASHREPORTING -eq $TRUE ] ; then
-        if [ $PLATFORM == "windows" ] ; then
-            BUILD_DIR=`cygpath -w $(pwd)`
-        else
-            BUILD_DIR=`pwd`
-        fi
         # This name is consumed by indra/newview/CMakeLists.txt
         if [ $PLATFORM == "linux" ] ; then
             VIEWER_SYMBOL_FILE="${BUILD_DIR}/newview/firestorm-symbols-${PLATFORM}-${AUTOBUILD_ADDRSIZE}.tar.bz2"
@@ -519,11 +538,32 @@ if [ $WANTS_CONFIG -eq $TRUE ] ; then
         UNATTENDED="-DUNATTENDED=ON"
     fi
 
-    cmake -G "$TARGET" ../indra $CHANNEL ${GITHASH} $FMODSTUDIO $FMODEX $OPENAL $KDU $OPENSIM $SINGLEGRID $AVX_OPTIMIZATION $AVX2_OPTIMIZATION $TESTBUILD $PACKAGE \
+    if [ $PLATFORM == "windows" ] ; then
+        if [ $WANTS_NINJA -eq $TRUE ] ; then
+            TARGET="Ninja"
+        else
+            CXXPATHS=""
+        fi
+        if [ $WANTS_VCPKG -eq $TRUE ] ; then
+            test -d sharedlibs/Release || mkdir -p sharedlibs/Release
+            cp -av c:/windows/system32/msvcr120.dll c:/windows/system32/msvcp120.dll sharedlibs/Release
+            pushd ../vcpkg
+            test -e vcpkg.exe || ./bootstrap-vcpkg.bat -disableMetrics
+            ./vcpkg.exe install @../indra/vcpkg/install_args.txt
+            test -e installed/vcpkg/info/firestorm-deps_*_x64-windows.list || exit 1
+            VCPKG="-DCMAKE_TOOLCHAIN_FILE=$PWD/scripts/buildsystems/vcpkg.cmake"
+            popd
+        fi
+    fi
+    echo "TARGET : ${TARGET}"
+
+
+    cmake -G "${TARGET}" ../indra $VCPKG $CHANNEL ${GITHASH} $FMODSTUDIO $FMODEX $OPENAL $KDU $OPENSIM $SINGLEGRID $AVX_OPTIMIZATION $AVX2_OPTIMIZATION $TESTBUILD $PACKAGE \
           $UNATTENDED -DLL_TESTS:BOOL=OFF -DADDRESS_SIZE:STRING=$AUTOBUILD_ADDRSIZE -DCMAKE_BUILD_TYPE:STRING=$BTYPE \
+          -DAUTOBUILD_CONFIG_FILE:STRING="$PWD/../$AUTOBUILD_CONFIG_FILE" \
           $CRASH_REPORTING -DVIEWER_SYMBOL_FILE:STRING="${VIEWER_SYMBOL_FILE:-}" -DROOT_PROJECT_NAME:STRING=Firestorm $LL_ARGS_PASSTHRU | tee $LOG
 
-    if [ $PLATFORM == "windows" ] ; then
+    if [ $PLATFORM == "windows" -a $WANTS_NINJA -eq $FALSE ] ; then
         ../indra/tools/vstool/VSTool.exe --solution Firestorm.sln --startup firestorm-bin --workingdir firestorm-bin "..\\..\\indra\\newview" --config $BTYPE
     fi
 fi
@@ -547,9 +587,17 @@ if [ $WANTS_BUILD -eq $TRUE ] ; then
             make -j $JOBS | tee -a $LOG
         fi
     elif [ $PLATFORM == "windows" ] ; then
-        msbuild.exe Firestorm.sln /p:Configuration=${BTYPE} /flp:LogFile="logs\\FirestormBuild_win-${AUTOBUILD_ADDRSIZE}.log" \
+        if [ $WANTS_NINJA -eq $TRUE ] ; then
+            if [ $JOBS == "0" ] ; then
+                ninja | tee -a $LOG
+            else
+                ninja -j $JOBS | tee -a $LOG
+            fi
+        else
+            msbuild.exe Firestorm.sln /p:Configuration=${BTYPE} /flp:LogFile="logs\\FirestormBuild_win-${AUTOBUILD_ADDRSIZE}.log" \
                     /flp1:"errorsonly;LogFile=logs\\FirestormBuild_win-${AUTOBUILD_ADDRSIZE}.err" /p:Platform=${AUTOBUILD_WIN_VSPLATFORM} /t:Build /p:useenv=true \
                     /verbosity:normal /toolsversion:12.0 /p:"VCBuildAdditionalOptions= /incremental"
+        fi
     fi
 fi
 

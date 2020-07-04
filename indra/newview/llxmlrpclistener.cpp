@@ -378,7 +378,9 @@ public:
 		switch (curlcode)
 		{
 			case CURLE_SSL_PEER_CERTIFICATE:
+#if LIBCURL_VERSION_NUM < 0x073e00
 			case CURLE_SSL_CACERT:
+#endif
                 data["certificate"] = mTransaction->getErrorCertData();
 				break;
 

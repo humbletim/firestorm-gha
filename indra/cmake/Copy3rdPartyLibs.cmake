@@ -37,6 +37,7 @@ if(WINDOWS)
     #*******************************
     # Misc shared libs 
 
+    if (NOT VCPKG_TOOLCHAIN)
     set(release_src_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
     set(release_files
         openjpeg.dll
@@ -49,6 +50,13 @@ if(WINDOWS)
         glod.dll
         libhunspell.dll
         )
+    else()
+      set(release_src_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
+      set(release_files
+          openjpeg.dll
+          glod.dll
+      )
+    endif()
 
     # Filenames are different for 32/64 bit BugSplat file and we don't
     # have any control over them so need to branch.
@@ -93,6 +101,15 @@ if(WINDOWS)
     elseif (MSVC_VERSION EQUAL 1800) # VisualStudio 2013, which is (sigh) VS 12
         list(APPEND LMSVC_VER 120)
         list(APPEND LMSVC_VERDOT 12.0)
+    elseif (MSVC_VERSION GREATER 1919) # VS2019
+        list(APPEND LMSVC_VER 141)
+        list(APPEND LMSVC_VERDOT 16.0)
+    elseif (MSVC_VERSION GREATER 1909) # VS2017
+        list(APPEND LMSVC_VER 141)
+        list(APPEND LMSVC_VERDOT 15.0)
+    elseif (MSVC_VERSION GREATER 1899) # VS2015
+        list(APPEND LMSVC_VER 140)
+        list(APPEND LMSVC_VERDOT 14.0)
     else (MSVC80)
         MESSAGE(WARNING "New MSVC_VERSION ${MSVC_VERSION} of MSVC: adapt Copy3rdPartyLibs.cmake")
     endif (MSVC80)
@@ -101,13 +118,24 @@ if(WINDOWS)
     # maint-7360 CP
     # list(APPEND LMSVC_VER 100)
     # list(APPEND LMSVC_VERDOT 10.0)
-    
+
+  if (VCPKG_TOOLCHAIN)
+        file(TO_CMAKE_PATH "$ENV{VCToolsRedistDir}x64\\Microsoft.VC142.CRT" VC142CRT_PATH)
+        message(STATUS "VC142CRT_PATH=${VC142CRT_PATH}")
+        copy_if_different(
+            ${VC142CRT_PATH}
+            "${SHARED_LIB_STAGING_DIR_RELEASE}"
+            out_targets
+            "msvcp140.dll" "vcruntime140.dll" "vcruntime140_1.dll" "concrt140.dll"
+        )
+        set(third_party_targets ${third_party_targets} ${out_targets})
+        message(STATUS "//VC142CRT ${out_targets}")
+  else()
     list(LENGTH LMSVC_VER count)
     math(EXPR count "${count}-1")
     foreach(i RANGE ${count})
         list(GET LMSVC_VER ${i} MSVC_VER)
         list(GET LMSVC_VERDOT ${i} MSVC_VERDOT)
-        MESSAGE(STATUS "Copying redist libs for VC ${MSVC_VERDOT}")
         FIND_PATH(debug_msvc_redist_path NAME msvcr${MSVC_VER}d.dll
             PATHS            
             [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${MSVC_VERDOT}\\Setup\\VC;ProductDir]/redist/Debug_NonRedist/x86/Microsoft.VC${MSVC_VER}.DebugCRT
@@ -169,11 +197,14 @@ if(WINDOWS)
                 ${release_msvc_files}
                 )
             set(third_party_targets ${third_party_targets} ${out_targets})
+            message(STATUS "//${MSVC_VER} ${out_targets}")
 
             unset(release_msvc_redist_path CACHE)
+        else()
+            MESSAGE(STATUS "WARNING: could not find msvcr${MSVC_VER}.dll in release_msvc_redist_path: ${release_msvc_redist_path}")
         endif()
     endforeach()
-
+  endif()
 elseif(DARWIN)
     set(SHARED_LIB_STAGING_DIR_DEBUG            "${SHARED_LIB_STAGING_DIR}/Debug/Resources")
     set(SHARED_LIB_STAGING_DIR_RELWITHDEBINFO   "${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/Resources")

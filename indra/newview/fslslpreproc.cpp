@@ -98,13 +98,14 @@ std::map<std::string,LLUUID> FSLSLPreprocessor::cached_assetids;
 #endif
 //#define BOOST_SPIRIT_THREADSAFE
 
+#include <boost/filesystem.hpp>
+namespace filesystem = boost::filesystem;
 #include <boost/assert.hpp>
 #include <boost/wave.hpp>
 #include <boost/wave/cpplexer/cpp_lex_token.hpp>    // token class
 #include <boost/wave/cpplexer/cpp_lex_iterator.hpp> // lexer class
 #include <boost/wave/preprocessing_hooks.hpp>
 #include <boost/regex.hpp>
-#include <boost/filesystem.hpp>
 
 using namespace boost::regex_constants;
 
@@ -547,7 +548,7 @@ struct ProcCacheInfo
 
 static inline std::string shortfile(std::string in)
 {
-	return boost::filesystem::path(std::string(in)).filename().string();
+	return filesystem::path(std::string(in)).filename().string();
 }
 
 
@@ -744,7 +745,7 @@ void FSLSLPreprocessor::FSProcCacheCallback(LLVFS *vfs, const LLUUID& iuuid, LLA
 			content += "\n#define __ITEMID__ __UP_ITEMID__\n";*/
 			//prolly wont work and ill have to be not lazy, but worth a try
 
-			if (boost::filesystem::native(name))
+			if (!name.empty())
 			{
 				LL_DEBUGS("FSLSLPreprocessor") << "native name of " << name << LL_ENDL;
 				LLStringUtil::format_map_t args;

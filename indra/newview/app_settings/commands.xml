@@ -652,4 +652,15 @@
            is_running_function="Floater.IsOpen"
            is_running_parameters="fs_discord"
            />
+
+  <command name="vrprefs"
+           available_in_toybox="true"
+           icon="vr"
+           label_ref="Command_VRPrefs_Label"
+           tooltip_ref="Command_VRPrefs_Tooltip"
+           execute_function="Floater.Toggle"
+           execute_parameters="vrprefs"
+           is_running_function="Floater.IsOpen"
+           is_running_parameters="vrprefs"
+           />
 </commands>

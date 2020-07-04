@@ -20,6 +20,9 @@
     <file name="QuickPreferences"
           file_name="quick_preferences.xml"
           required="false"/>
+    <file name="VRPreferences"
+          file_name="vr_preferences.xml"
+          required="false"/>
     <!-- </FS:Zi> -->
     <!-- <VR:humbletim> VR preferences -->
     <file name="Global" file_name="settings_vr.xml" required="false" />

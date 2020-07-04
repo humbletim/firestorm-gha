@@ -4,3 +4,6 @@
 [submodule "fs-build-variables"]
 	path = fs-build-variables
 	url = https://vcs.firestormviewer.org/fs-build-variables
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/microsoft/vcpkg.git
