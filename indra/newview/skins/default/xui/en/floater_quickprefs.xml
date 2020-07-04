@@ -519,6 +519,13 @@ Type:
  name="Color 4"
  value="6" />
 </combo_box>
+<combo_box.item type="string" label="VR Checkbox" name="VR Checkbox" value="100" />
+<combo_box.item type="string" label="VR Text" name="VR Text" value="101" />
+<combo_box.item type="string" label="VR Spinner" name="VR Spinner" value="102" />
+<combo_box.item type="string" label="VR Slider" name="VR Slider" value="103" />
+<combo_box.item type="string" label="VR Radio" name="VR Radio" value="104" />
+<combo_box.item type="string" label="VR Label" name="VR Label" value="201" />
+<combo_box.item type="string" label="VR Button" name="VR Button" value="204" />
 
 <!-- enable/disable done in code depending on the type of control chosen -->
 <check_box

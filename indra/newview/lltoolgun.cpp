@@ -113,6 +113,10 @@ BOOL LLToolGun::handleHover(S32 x, S32 y, MASK mask)
 			// <FS:Ansariel> Use faster LLCachedControl
 			//if (gSavedSettings.getBOOL("InvertMouse"))
 			static LLCachedControl<bool> invertMouse(gSavedSettings, "InvertMouse");
+			// <VR:humbletim> restrict mouse look in VR mode
+			static LLCachedControl<bool> yawOnly(gSavedSettings, "$vrMouselookYawOnly", false);
+			static LLCachedControl<bool> vrEnabled(gSavedSettings, "$vrEnabled", false);
+			if (!vrEnabled || !yawOnly) {
 			if (invertMouse)
 			{
 				gAgent.pitch(mouse_sensitivity * -dy);
@@ -121,6 +125,8 @@ BOOL LLToolGun::handleHover(S32 x, S32 y, MASK mask)
 			{
 				gAgent.pitch(mouse_sensitivity * dy);
 			}
+			}
+			// </VR:humbletim>
 			LLVector3 skyward = gAgent.getReferenceUpVector();
 			gAgent.rotate(mouse_sensitivity * dx, skyward.mV[VX], skyward.mV[VY], skyward.mV[VZ]);
 

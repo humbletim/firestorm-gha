@@ -16,6 +16,14 @@
  save_visibility="true"
  single_instance="true" 
  width="650">
+ <view_border layout="topleft" follows="left|right|bottom" top_pad="0" left="2" height="1" right="-2" border_thickness="1" shadow_light_color="0 0 0 0" shadow_dark_color="0 0 0 0" highlight_light_color="1 1 1 .05" highlight_dark_color="1 1 1 0"/>
+         <line_editor name="option_vr_text_control" layout="topleft" follows="left|right|top" left="0" top="6" height="22" right="-1" visible="true" font="SansSerifLargeBold" value="Asdfasdf" />
+ <button name="option_vr_button_control" layout="topleft" follows="left|right|top" top="5" right="-1" width="26" height="26" visible="true" is_toggle="true"
+   label="☐" label_selected="☑"
+   image_unselected="transparent.j2c" image_selected="transparent.j2c" 
+   label_color="1 1 1 .25" hover_glow_amount=".5"
+   label_color_selected="white" font="SansSerifHuge" />
+
   <text left="0"
         follows="left|top|bottom"
         top="5"

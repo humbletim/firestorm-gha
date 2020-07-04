@@ -851,6 +851,9 @@ set(viewer_SOURCE_FILES
     pipeline.cpp
     qtoolalign.cpp
     quickprefs.cpp
+    ../gVR/vrprefs.cpp
+    ../gVR/vrsliderctrl.cpp
+    ../gVR/vrspinctrl.cpp
     rlvactions.cpp
     rlvhandler.cpp
     rlvhelper.cpp
@@ -1620,6 +1623,9 @@ set(viewer_HEADER_FILES
     roles_constants.h
     qtoolalign.h
     quickprefs.h
+    ../gVR/vrprefs.h
+    ../gVR/vrsliderctrl.h
+    ../gVR/vrspinctrl.h
     sanitycheck.h
     streamtitledisplay.h
     utilitybar.h
@@ -1769,7 +1775,7 @@ if (LINUX)
     LIST(APPEND viewer_SOURCE_FILES desktopnotifierlinux.cpp growlmanager.cpp)
 # [FS] Growl support
 
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed -fuse-ld=gold")
 
     set(viewer_LIBRARIES
         Xinerama
@@ -1826,6 +1832,7 @@ if (WINDOWS)
             COMPILE_FLAGS "/Ycllviewerprecompiledheaders.h"
             )
         set(viewer_SOURCE_FILES "${viewer_SOURCE_FILES}" llviewerprecompiledheaders.cpp)
+        set_source_files_properties(../gVR/vrspinctrl.cpp ../gVR/vrsliderctrl.cpp ../gVR/vrprefs.cpp PROPERTIES COMPILE_FLAGS /Y-)
     endif(USE_PRECOMPILED_HEADERS)
 
     # Replace the icons with the appropriate ones for the channel
@@ -2484,10 +2491,14 @@ if (WINDOWS)
     target_link_libraries(${VIEWER_BINARY_NAME}
     ${GROWL_LIBRARY}
     )
+    find_library(OPENVR_LIB NAMES openvr_api PATHS ../../openvr/lib/win64 ../openvr/lib/win64)
+    message(STATUS "OPENVR_LIB = ${OPENVR_LIB}")
+    target_link_libraries(${VIEWER_BINARY_NAME} ${OPENVR_LIB})
 endif (WINDOWS)
 
 if (LINUX)
     target_link_libraries(${VIEWER_BINARY_NAME} "dl" )
+    target_link_libraries(${VIEWER_BINARY_NAME} openvr_api)
 endif (LINUX)
 
 set(ARTWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH

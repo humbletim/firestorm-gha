@@ -161,6 +161,11 @@ Settings groups to be restored (backup will always save all):
             <column name="restore_global_files_label">Quick Preferences</column>
             <column name="value">quick_preferences.xml</column>
         </row>
+        <row name="restore_global_row_vrprefs">
+            <column type="checkbox" name="restore_global_files_check" value="true" />
+            <column name="restore_global_files_label">VR Preferences</column>
+            <column name="value">vr_preferences.xml</column>
+        </row>
         <row name="restore_global_row_favorites">
             <column type="checkbox" name="restore_global_files_check" value="true" />
             <column name="restore_global_files_label">Favorites</column>

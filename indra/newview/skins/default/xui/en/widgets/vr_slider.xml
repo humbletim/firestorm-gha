@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<vr_slider name="vr_slider" can_edit_text="false" font="SansSerifSmall" volume="false" mouse_opaque="true" show_text="true"  text_color="LabelTextColor" text_disabled_color="LabelDisabledColor">
+    <vr_slider.value_editor name="slider editor" max_length_chars="10" follows="left|bottom" />
+    <vr_slider.value_text name="slider text"  follows="left|bottom"/>
+    <vr_slider.slider_label name="slider label"/>
+    <vr_slider.vr_slider_bar thumb_outline_color="1 0 1 1" />
+</vr_slider>

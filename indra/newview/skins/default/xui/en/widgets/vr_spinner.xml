@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<vr_spinner text_enabled_color="LabelTextColor" text_disabled_color="LabelDisabledColor" font="SansSerifSmall"  decimal_digits="3" label_width="40">
+    <vr_spinner.up_button name="SpinCtrl Up" image_unselected="Stepper_Up_Off" image_selected="Stepper_Up_Press" tab_stop="false" follows="right|bottom" />
+    <vr_spinner.down_button name="SpinCtrl Down" image_unselected="Stepper_Down_Off" image_selected="Stepper_Down_Press" tab_stop="false" follows="right|bottom" />
+</vr_spinner>

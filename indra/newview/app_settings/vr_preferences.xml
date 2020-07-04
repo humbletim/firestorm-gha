@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<vrprefs>
+    <entries
+     control_name="$vrEnabled"
+     control_type="100"
+     increment="1"
+     integer="0"
+     label="OpenVR"
+     max="1"
+     min="0" />
+    <entries
+     control_name="$vrRecenterHMD"
+     control_type="204"
+     increment="0"
+     integer="0"
+     label="Recenter HMD"
+     max="1"
+     min="0" />
+    <entries
+     control_name="$vrEyeDistance"
+     control_type="102"
+     increment="1"
+     integer="0"
+     label="EyeDistance"
+     max="200"
+     min="-100" />
+    <entries
+     control_name="$vrFocusDistance"
+     control_type="102"
+     increment="0.1"
+     integer="0"
+     label="Focus Distance"
+     max="10"
+     min="0.5" />
+    <entries
+     control_name="$vrRightToolbarOffset"
+     control_type="102"
+     increment="0.01"
+     integer="0"
+     label="Toolbar Offset"
+     max="0.5"
+     min="0" />
+    <entries
+     control_name="$vrUIShift"
+     control_type="102"
+     increment="1"
+     integer="1"
+     label="UI Shift"
+     max="256"
+     min="-128" />
+    <entries
+     control_name="$vrFullscreen"
+     control_type="100"
+     increment="1"
+     integer="0"
+     label="Fullscreen"
+     max="1"
+     min="0" />
+    <entries
+     control_name="$vrFullscreenUIScale"
+     control_type="102"
+     increment="0.05"
+     integer="0"
+     label="Fullscreen UI Scale"
+     max="1.5"
+     min="0.5" />
+    <entries
+     control_name="$vrCursorZooming"
+     control_type="100"
+     increment="1"
+     integer="0"
+     label="Follow Cursor"
+     max="1"
+     min="0" />
+    <entries
+     control_name="EnableMouselook"
+     control_type="100"
+     increment="1"
+     integer="0"
+     label="EnableMouselook"
+     max="1"
+     min="0" />
+    <entries
+     control_name="$vrMouselookYawOnly"
+     control_type="100"
+     increment="0.1"
+     integer="0"
+     label="MouselookYawOnly"
+     max="1"
+     min="0" />
+    <entries
+     control_name="ShowHoverTips"
+     control_type="100"
+     increment="1"
+     integer="0"
+     label="ShowHoverTips"
+     max="1"
+     min="0" />
+    <entries
+     control_name="AgentPause"
+     control_type="100"
+     increment="1"
+     integer="0"
+     label="AgentPause"
+     max="1"
+     min="0" />
+    <entries
+     control_name="RenderFarClip"
+     control_type="103"
+     increment="1"
+     integer="1"
+     label="Max Distance"
+     max="512"
+     min="32" />
+    <entries
+     control_name="IndirectMaxNonImpostors"
+     control_type="103"
+     increment="1"
+     integer="1"
+     label="Max Avatars"
+     max="32"
+     min="1" />
+    <entries
+     control_name="$vrCopySettingsToClipboard"
+     control_type="204"
+     increment="0.1"
+     integer="0"
+     label="Copy Settings"
+     max="1"
+     min="0" />
+</vrprefs>

@@ -15,6 +15,8 @@ if(WINDOWS)
     set(SHARED_LIB_STAGING_DIR_RELWITHDEBINFO   "${SHARED_LIB_STAGING_DIR}/RelWithDebInfo")
     set(SHARED_LIB_STAGING_DIR_RELEASE          "${SHARED_LIB_STAGING_DIR}/Release")
 
+    set(openvr_src_dir ${CMAKE_SOURCE_DIR}/../openvr/bin/win64)
+    set(openvr_files openvr_api.dll)
     #*******************************
     # VIVOX - *NOTE: no debug version
     set(vivox_lib_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
@@ -220,6 +222,9 @@ elseif(LINUX)
     set(SHARED_LIB_STAGING_DIR_RELWITHDEBINFO   "${SHARED_LIB_STAGING_DIR}")
     set(SHARED_LIB_STAGING_DIR_RELEASE          "${SHARED_LIB_STAGING_DIR}")
 
+    set(openvr_src_dir ${CMAKE_SOURCE_DIR}/../openvr/bin/linux64)
+    set(openvr_files libopenvr_api.so)
+
     set(vivox_lib_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
     set(vivox_libs
         libsndfile.so.1
@@ -334,6 +339,14 @@ copy_if_different(
     "${SHARED_LIB_STAGING_DIR_RELWITHDEBINFO}"
     out_targets
     ${vivox_libs}
+    )
+set(third_party_targets ${third_party_targets} ${out_targets})
+
+copy_if_different(
+    ${openvr_src_dir}
+    "${SHARED_LIB_STAGING_DIR_RELEASE}"
+    out_targets
+    ${openvr_files}
     )
 set(third_party_targets ${third_party_targets} ${out_targets})
 
