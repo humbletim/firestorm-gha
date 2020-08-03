@@ -12,14 +12,26 @@ jobs:
     env:
       AUTOBUILD_VSVER: 120
       PreferredToolArchitecture: x64
+      VIEWER_CHANNEL: FirestormVR-GHA
+      VIEWER_VERSION_REVISION: 60799
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
+    - name: Set VIEWER_VERSION_GITHASH
+      shell: bash
+      run: |
+        majorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 1`
+        minorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 2`
+        patchVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 3`
+        echo ::set-env name=VIEWER_VERSION_STR::${majorVer}.${minorVer}.${patchVer}.${VIEWER_VERSION_REVISION}
+        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short || git rev-parse --short HEAD)
     - name: Set env
       shell: cmd
-      run: echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
+      run: |
+        echo ::set-env name=AUTOBUILD_ID::-
+        echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
     - name: Download VS2013 Community
       run: choco install visualstudiocommunity2013
     - name: Setup python
@@ -39,7 +51,7 @@ jobs:
       run: |
         call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
         autobuild --version
-        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan FirestormVR-GHA -DLL_TESTS:BOOL=FALSE
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE
     - name: Build & Package
       shell: cmd
       run: |
@@ -48,5 +60,5 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: fs-windows-gha-artifact
+        name: windows-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
         path: build-vc120-64/newview/Release/*_Setup.exe
