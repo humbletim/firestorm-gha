@@ -2032,7 +2032,7 @@ F32 llviewerVR::Modify(F32 val, F32 step, F32 min, F32 max)
 std::string llviewerVR::INISaveRead(bool save)
 {
 	std::string path = getenv("APPDATA");
-	path.append("\\Firestorm_x64\\vrconfig.ini");
+	path.append("\\FirestormVR_x64\\vrconfig.ini");
 	std::string ret;
 	ret.append(path);
 	ret.append("\n");
