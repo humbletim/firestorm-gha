@@ -2823,7 +2823,7 @@ if (PACKAGE AND (RELEASE_CRASH_REPORTING OR NON_RELEASE_CRASH_REPORTING) AND VIE
 
   else (NOT BUGSPLAT_DB)
     # BugSplat symbol-file generation
-    if (WINDOWS)
+    if (NO) #WINDOWS)
       # Just pack up a tarball containing only the .pdb file for the
       # executable. Because we intend to use cygwin tar, we must render
       # VIEWER_SYMBOL_FILE in cygwin path syntax.
@@ -2849,7 +2849,7 @@ if (PACKAGE AND (RELEASE_CRASH_REPORTING OR NON_RELEASE_CRASH_REPORTING) AND VIE
         )
       add_custom_target(generate_symbols DEPENDS "${VIEWER_SYMBOL_FILE}" ${VIEWER_BINARY_NAME})
       add_dependencies(generate_symbols ${VIEWER_BINARY_NAME})
-    endif (WINDOWS)
+    endif()
     if (DARWIN)
       # Have to run dsymutil first, then pack up the resulting .dSYM directory
       add_custom_command(OUTPUT "${VIEWER_APP_DSYM}"
