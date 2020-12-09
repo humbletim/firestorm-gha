@@ -27,13 +27,13 @@ jobs:
         majorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 1`
         minorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 2`
         patchVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 3`
-        echo ::set-env name=VIEWER_VERSION_STR::${majorVer}.${minorVer}.${patchVer}.${VIEWER_VERSION_REVISION}
-        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short || git rev-parse --short HEAD)
+        echo VIEWER_VERSION_STR=${majorVer}.${minorVer}.${patchVer}.${VIEWER_VERSION_REVISION} >> $GITHUB_ENV
+        echo VIEWER_VERSION_GITHASH=$(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short || git rev-parse --short HEAD) >> $GITHUB_ENV
     - name: Set env
       shell: cmd
       run: |
-        echo ::set-env name=AUTOBUILD_ID::-
-        echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
+        echo AUTOBUILD_ID=- >> $GITHUB_ENV
+        echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables >> $GITHUB_ENV
     - name: Setup python
       uses: actions/setup-python@v2
       with:
