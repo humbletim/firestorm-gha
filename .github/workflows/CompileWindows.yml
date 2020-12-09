@@ -10,55 +10,94 @@ jobs:
   windows_build:
     runs-on: windows-latest
     env:
-      AUTOBUILD_VSVER: 120
+      FSVS_TARGET: 'Visual Studio 16 2019'
+      AUTOBUILD_VSVER: 164
       PreferredToolArchitecture: x64
       VIEWER_CHANNEL: FirestormVR-GHA
-      VIEWER_VERSION_REVISION: 60799
-
+      VIEWER_VERSION_REVISION: 64531
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
+    - name: Set env
+      shell: cmd
+      run: |
+        echo %cd%
+        df -h
+        mkdir c:\cache
+        mkdir c:\cache\autobuild
+
+        mkdir build-vc${{ env.AUTOBUILD_VSVER }}-64
+        cd build-vc${{ env.AUTOBUILD_VSVER }}-64
+        mkdir c:\cache\packages
+        mklink /j packages c:\cache\packages
+
+        mkdir c:\build
+        mkdir c:\build\newview
+        mklink /j newview c:\build\newview
+        cd ..
+
+        dir build-vc${{ env.AUTOBUILD_VSVER }}-64
+        dir
+        echo AUTOBUILD_ID=->> %GITHUB_ENV%
+        echo AUTOBUILD_INSTALLABLE_CACHE=c:\cache\autobuild>> %GITHUB_ENV%
+        echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables>> %GITHUB_ENV%
     - name: Set VIEWER_VERSION_GITHASH
       shell: bash
       run: |
         majorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 1`
         minorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 2`
         patchVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 3`
-        echo ::set-env name=VIEWER_VERSION_STR::${majorVer}.${minorVer}.${patchVer}.${VIEWER_VERSION_REVISION}
-        echo ::set-env name=VIEWER_VERSION_GITHASH::$(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short || git rev-parse --short HEAD)
-    - name: Set env
-      shell: cmd
-      run: |
-        echo ::set-env name=AUTOBUILD_ID::-
-        echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
-    - name: Download VS2013 Community
-      run: choco install visualstudiocommunity2013
+        echo VIEWER_VERSION_STR=${majorVer}.${minorVer}.${patchVer}.${VIEWER_VERSION_REVISION} >> $GITHUB_ENV
+        echo VIEWER_VERSION_GITHASH=$(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short || git rev-parse --short HEAD) >> $GITHUB_ENV
+        df -h
+    - name: Setup vsdevenv
+      uses: seanmiddleditch/gha-setup-vsdevenv@master
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.2
     - name: Setup python
       uses: actions/setup-python@v2
       with:
         python-version: 2.7
         architecture: x64
     - name: Get software versions please
+      shell: cmd
       run: |
+        echo AUTOBUILD_INSTALLABLE_CACHE='%AUTOBUILD_INSTALLABLE_CACHE%'
         cmake --version
         git --version
         python --version
+        cl.exe
+        MSBuild.exe -version
+        echo " "
+        df -h
     - name: Install autobuild through PIP
-      run: pip install git+https://vcs.firestormviewer.org/autobuild-1.1#egg=autobuild
+      run: pip install git+https://github.com/humbletim/autobuild-1.1#egg=autobuild
+
+    - name: cache -- autobuild downloaded installables
+      id: cacheddownloads
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.AUTOBUILD_INSTALLABLE_CACHE }}
+        key: ${{ runner.os }}-cacheddownloads-${{ hashFiles('autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
+    - name: cache -- packages cache
+      id: cachedpackages
+      uses: actions/cache@v2
+      with:
+        path: c:\cache\packages
+        key: ${{ runner.os }}-cachedpackages-${{ hashFiles('autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
+
     - name: Configure autobuild
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
         autobuild --version
-        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE
+        autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{ env.VIEWER_CHANNEL }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
     - name: Build & Package
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        msbuild build-vc120-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
+        msbuild build-vc${{ env.AUTOBUILD_VSVER }}-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: windows-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
-        path: build-vc120-64/newview/Release/*_Setup.exe
+        name: windows-${{ env.VIEWER_CHANNEL }}-${{ env.VIEWER_VERSION_STR }}-${{ env.VIEWER_VERSION_GITHASH }}
+        path: build-vc${{ env.AUTOBUILD_VSVER }}-64/newview/Release/*_Setup.exe
