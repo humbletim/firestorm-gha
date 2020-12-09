@@ -33,6 +33,7 @@ jobs:
       run: |
         echo AUTOBUILD_ID=- >> $GITHUB_ENV
         echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables >> $GITHUB_ENV
+        echo AUTOBUILD_INSTALLABLE_CACHE=%cd%\autobuild-cache >> $GITHUB_ENV
     - name: Setup python
       uses: actions/setup-python@v2
       with:
@@ -41,6 +42,7 @@ jobs:
     - name: install vs2017 community
       run: choco install visualstudio2017community
     - name: Get software versions please
+      shell: cmd
       run: |
         cmake --version
         git --version
@@ -50,6 +52,14 @@ jobs:
         MSBuild.exe -version
     - name: Install autobuild through PIP
       run: pip install git+https://github.com/humbletim/autobuild-1.1#egg=autobuild
+
+    - name: cache -- autobuild downloaded installables
+      id: cacheddownloads
+      uses: actions/cache@v2
+      with:
+        path: autobuild-cache
+        key: ${{ runner.os }}-cacheddownloads-${{ hashFiles('autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
+
     - name: Configure autobuild
       shell: cmd
       run: |
