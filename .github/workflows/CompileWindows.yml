@@ -10,12 +10,14 @@ jobs:
   windows_build:
     runs-on: windows-latest
     env:
-      AUTOBUILD_VSVER: 120
+      FSVS_TARGET: 'Visual Studio 16 2019'
+      AUTOBUILD_VSVER: 164
       PreferredToolArchitecture: x64
       VIEWER_CHANNEL: FirestormVR-GHA
-      VIEWER_VERSION_REVISION: 60799
+      VIEWER_VERSION_REVISION: 62831
 
     steps:
+    - uses: seanmiddleditch/gha-setup-vsdevenv@master
     - uses: actions/checkout@v2
       with:
         submodules: true
@@ -32,8 +34,6 @@ jobs:
       run: |
         echo ::set-env name=AUTOBUILD_ID::-
         echo ::set-env name=AUTOBUILD_VARIABLES_FILE::%cd%\fs-build-variables\variables
-    - name: Download VS2013 Community
-      run: choco install visualstudiocommunity2013
     - name: Setup python
       uses: actions/setup-python@v2
       with:
@@ -49,16 +49,14 @@ jobs:
     - name: Configure autobuild
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
         autobuild --version
         autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE
     - name: Build & Package
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
-        msbuild build-vc120-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
+        msbuild build-vc${{env.AUTOBUILD_VSVER}}-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
       with:
         name: windows-${{env.VIEWER_CHANNEL}}-${{env.VIEWER_VERSION_STR}}-${{env.VIEWER_VERSION_GITHASH}}
-        path: build-vc120-64/newview/Release/*_Setup.exe
+        path: build-vc${{env.AUTOBUILD_VSVER}}-64/newview/Release/*_Setup.exe
