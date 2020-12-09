@@ -45,7 +45,7 @@ jobs:
         git --version
         python --version
     - name: Install autobuild through PIP
-      run: pip install git+https://vcs.firestormviewer.org/autobuild-1.1#egg=autobuild
+      run: pip install git+https://github.com/humbletim/autobuild-1.1#egg=autobuild
     - name: Configure autobuild
       shell: cmd
       run: |
