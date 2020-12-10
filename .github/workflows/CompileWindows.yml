@@ -10,8 +10,8 @@ jobs:
   windows_build:
     runs-on: windows-latest
     env:
-      # FSVS_TARGET: 'Visual Studio 16 2019'
-      AUTOBUILD_VSVER: 140
+      FSVS_TARGET: 'Visual Studio 16 2019'
+      AUTOBUILD_VSVER: 164
       PreferredToolArchitecture: x64
       VIEWER_CHANNEL: FirestormVR-GHA
       VIEWER_VERSION_REVISION: 62831
@@ -39,19 +39,18 @@ jobs:
       with:
         python-version: 2.7
         architecture: x64
-    - name: install vs2017 community
-      shell: cmd
-      run: |
-        choco install visualstudio2017community
-        choco install visualstudio2017-workload-nativedesktop
-        echo %ProgramFiles(x86)%\msbuild\14.0\Bin >> %GITHUB_PATH%
+    # - name: install vs2017 community
+    #   shell: cmd
+    #   run: |
+    #     choco install visualstudio2017community
+    #     choco install visualstudio2017-workload-nativedesktop
+    #     echo %ProgramFiles(x86)%\msbuild\14.0\Bin >> %GITHUB_PATH%
     - name: Get software versions please
       shell: cmd
       run: |
         cmake --version
         git --version
         python --version
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
         cl.exe
         MSBuild.exe -version
     - name: Install autobuild through PIP
@@ -67,13 +66,11 @@ jobs:
     - name: Configure autobuild
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
         autobuild --version
         autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE
     - name: Build & Package
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
         msbuild build-vc${{env.AUTOBUILD_VSVER}}-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
