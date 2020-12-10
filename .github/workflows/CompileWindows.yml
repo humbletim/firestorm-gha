@@ -49,7 +49,7 @@ jobs:
         cmake --version
         git --version
         python --version
-        call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+        call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat"
         cl.exe
         MSBuild.exe -version
     - name: Install autobuild through PIP
@@ -65,13 +65,13 @@ jobs:
     - name: Configure autobuild
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+        call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat"
         autobuild --version
         autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{env.VIEWER_CHANNEL}} -DLL_TESTS:BOOL=FALSE
     - name: Build & Package
       shell: cmd
       run: |
-        call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+        call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat"
         msbuild build-vc${{env.AUTOBUILD_VSVER}}-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
     - name: Upload Artifact
       uses: actions/upload-artifact@v2
