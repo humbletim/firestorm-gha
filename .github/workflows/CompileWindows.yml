@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-latest
     env:
       # FSVS_TARGET: 'Visual Studio 16 2019'
-      AUTOBUILD_VSVER: 141
+      AUTOBUILD_VSVER: 140
       PreferredToolArchitecture: x64
       VIEWER_CHANNEL: FirestormVR-GHA
       VIEWER_VERSION_REVISION: 62831
