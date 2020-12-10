@@ -52,6 +52,7 @@ jobs:
     - name: Get software versions please
       shell: cmd
       run: |
+        echo AUTOBUILD_INSTALLABLE_CACHE='%AUTOBUILD_INSTALLABLE_CACHE%'
         cmake --version
         git --version
         python --version
