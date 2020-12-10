@@ -15,7 +15,7 @@ jobs:
       PreferredToolArchitecture: x64
       VIEWER_CHANNEL: FirestormVR-GHA
       VIEWER_VERSION_REVISION: 62831
-
+      VCTargetsPath: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets'
     steps:
     - uses: actions/checkout@v2
       with:
@@ -40,9 +40,11 @@ jobs:
         python-version: 2.7
         architecture: x64
     - name: install vs2017 community
+      shell: cmd
       run: |
         choco install visualstudio2017community
         choco install visualstudio2017-workload-nativedesktop
+        echo C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin >> %GITHUB_PATH%
     - name: Get software versions please
       shell: cmd
       run: |
