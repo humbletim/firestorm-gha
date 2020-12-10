@@ -40,7 +40,9 @@ jobs:
         python-version: 2.7
         architecture: x64
     - name: install vs2017 community
-      run: choco install visualstudio2017community
+      run: |
+        choco install visualstudio2017community
+        choco install visualstudio2017-workload-nativedesktop
     - name: Get software versions please
       shell: cmd
       run: |
