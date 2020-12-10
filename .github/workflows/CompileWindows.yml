@@ -17,21 +17,16 @@ jobs:
       VIEWER_VERSION_REVISION: 62831
       #VCTargetsPath: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets'
     steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
     - name: Set env
       shell: cmd
       run: |
-        echo AUTOBUILD_ID=->> %GITHUB_ENV%
+        echo %cd%
         df -h
         mkdir c:\cache
         mkdir c:\cache\autobuild
-        echo AUTOBUILD_INSTALLABLE_CACHE=c:\cache\autobuild>> %GITHUB_ENV%
-
-        mkdir c:\cache\openvr
-        mklink /j openvr c:\cache\openvr
-
-        mkdir c:\cache\fs-build-variables
-        mklink /j fs-build-variables c:\cache\fs-build-variables
-        echo AUTOBUILD_VARIABLES_FILE=c:\cache\fs-build-variables\variables>> %GITHUB_ENV%
 
         mkdir build-vc${{ env.AUTOBUILD_VSVER }}-64
         cd build-vc${{ env.AUTOBUILD_VSVER }}-64
@@ -42,12 +37,12 @@ jobs:
         mkdir c:\build\newview
         mklink /j newview c:\build\newview
         cd ..
+
         dir build-vc${{ env.AUTOBUILD_VSVER }}-64
         dir
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-        clean: false
+        echo AUTOBUILD_ID=->> %GITHUB_ENV%
+        echo AUTOBUILD_INSTALLABLE_CACHE=c:\cache\autobuild>> %GITHUB_ENV%
+        echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables>> %GITHUB_ENV%
     - name: Set VIEWER_VERSION_GITHASH
       shell: bash
       run: |
@@ -81,6 +76,7 @@ jobs:
         python --version
         cl.exe
         MSBuild.exe -version
+        echo " "
         df -h
     - name: Install autobuild through PIP
       run: pip install git+https://github.com/humbletim/autobuild-1.1#egg=autobuild
