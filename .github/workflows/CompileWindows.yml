@@ -44,7 +44,7 @@ jobs:
       run: |
         choco install visualstudio2017community
         choco install visualstudio2017-workload-nativedesktop
-        echo C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin >> %GITHUB_PATH%
+        echo %ProgramFiles(x86)%\msbuild\14.0\Bin >> %GITHUB_PATH%
     - name: Get software versions please
       shell: cmd
       run: |
