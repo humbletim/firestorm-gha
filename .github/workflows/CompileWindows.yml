@@ -43,6 +43,12 @@ jobs:
         echo AUTOBUILD_ID=->> %GITHUB_ENV%
         echo AUTOBUILD_INSTALLABLE_CACHE=c:\cache\autobuild>> %GITHUB_ENV%
         echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables>> %GITHUB_ENV%
+
+        wmic.exe pagefile list /format:list
+        wmic.exe computersystem where name=”%computername%” set AutomaticManagedPagefile=False
+        wmic pagefileset where name=”C:\\pagefile.sys” set InitialSize=8192,MaximumSize=16384
+        wmic.exe pagefile list /format:list
+
     - name: Set VIEWER_VERSION_GITHASH
       shell: bash
       run: |
