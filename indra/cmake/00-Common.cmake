@@ -80,10 +80,10 @@ if (WINDOWS)
   #endif()
 
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO 
-      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Z7"
+      "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Zo"
       CACHE STRING "C++ compiler release-with-debug options" FORCE)
   set(CMAKE_CXX_FLAGS_RELEASE
-      "${CMAKE_CXX_FLAGS_RELEASE} ${LL_CXX_FLAGS} /Z7"
+      "${CMAKE_CXX_FLAGS_RELEASE} ${LL_CXX_FLAGS} /Zo"
       CACHE STRING "C++ compiler release options" FORCE)
   # zlib has assembly-language object files incompatible with SAFESEH
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE /SAFESEH:NO /NODEFAULTLIB:LIBCMT /IGNORE:4099")
@@ -106,8 +106,6 @@ if (WINDOWS)
       /Zc:forScope
       /nologo
       /Oy-
-      /Oi
-      /Ot
       /arch:AVX
       /fp:fast
       )
@@ -120,8 +118,6 @@ if (WINDOWS)
       /Zc:forScope
       /nologo
       /Oy-
-      /Oi
-      /Ot
       /arch:AVX2
       /fp:fast
       )
@@ -135,8 +131,6 @@ if (WINDOWS)
       /Zc:forScope
       /nologo
       /Oy-
-      /Oi
-      /Ot
 #      /arch:SSE2
       /fp:fast
       )
@@ -292,5 +286,26 @@ else (USESYSTEMLIBS)
       pango-1.0
       )
 endif (USESYSTEMLIBS)
+
+  if (NOT GENERATE_DEBUG_SYMBOLS)
+    message(WARNING "DISENGAGING DEBUG SYMBOL GENERATION (removing /Z[oiI7]..)")
+      #string(REGEX REPLACE "/Z[oiI7]" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+      string(REGEX REPLACE "/Z[oiI7]|/DEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+      string(REGEX REPLACE "/Z[oiI7]|/DEBUG" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+      message(WARNING "CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
+
+      string(REGEX REPLACE "/DEBUG(:[A-Z]+)?" "" CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
+      string(REGEX REPLACE "/DEBUG(:[A-Z]+)?" "" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
+      string(REGEX REPLACE "/DEBUG(:[A-Z]+)?" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG:NONE /INCREMENTAL:NO")
+      set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} /DEBUG:NONE /INCREMENTAL:NO")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEBUG:NONE /INCREMENTAL:NO")
+
+      message(WARNING "== CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS}")
+      message(WARNING "== CMAKE_CXX_LINKER_FLAGS ${CMAKE_CXX_LINKER_FLAGS}")
+      message(WARNING "== CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}")
+  endif()
+  
+
 
 endif(NOT DEFINED ${CMAKE_CURRENT_LIST_FILE}_INCLUDED)

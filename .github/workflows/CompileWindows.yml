@@ -43,6 +43,9 @@ jobs:
         echo AUTOBUILD_ID=->> %GITHUB_ENV%
         echo AUTOBUILD_INSTALLABLE_CACHE=c:\cache\autobuild>> %GITHUB_ENV%
         echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables>> %GITHUB_ENV%
+    - name: Enable-MMAgent -MemoryCompression
+      shell: powershell
+      run: Enable-MMAgent -MemoryCompression
     - name: increase pagefile size
       shell: cmd
       run: |
