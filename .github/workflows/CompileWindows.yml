@@ -52,10 +52,12 @@ jobs:
 
         echo wmic computersystem set AutomaticManagedPagefile=False
         wmic computersystem set AutomaticManagedPagefile=False
+        echo wmic pagefileset where name="D:\pagefile.sys" delete
+        wmic pagefileset where name="D:\pagefile.sys" delete
         echo wmic pagefileset create name="C:\pagefile.sys"
         wmic pagefileset create name="C:\pagefile.sys"
-        echo wmic pagefileset where name="C:\pagefile.sys" set InitialSize=4096,MaximumSize=16384
-        wmic pagefileset where name="C:\pagefile.sys" set InitialSize=4096,MaximumSize=16384
+        echo wmic pagefileset set InitialSize=8192,MaximumSize=16384
+        wmic pagefileset set InitialSize=8192,MaximumSize=16384
 
         wmic.exe pagefile
         wmic.exe pagefileset
