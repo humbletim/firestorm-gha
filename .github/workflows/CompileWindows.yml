@@ -59,6 +59,8 @@ jobs:
         echo wmic pagefileset set InitialSize=8192,MaximumSize=16384
         wmic pagefileset set InitialSize=8192,MaximumSize=16384
 
+        wmic process where name="explorer.exe" call terminate
+        RUNDLL32.EXE USER32.DLL,UpdatePerUserSystemParameters ,1 ,True
         wmic.exe pagefile
         wmic.exe pagefileset
         systeminfo | grep Memory
