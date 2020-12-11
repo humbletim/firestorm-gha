@@ -45,13 +45,20 @@ jobs:
         echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables>> %GITHUB_ENV%
 
 
+        systeminfo | grep Memory
         wmic pagefile
         wmic pagefileset
+
+        echo wmic computersystem set AutomaticManagedPagefile=False
         wmic computersystem set AutomaticManagedPagefile=False
+        echo wmic pagefileset create name="c:\\pagefile2.sys"
         wmic pagefileset create name="c:\\pagefile2.sys"
+        echo wmic pagefileset where name="c:\\pagefile2.sys" set InitialSize=1024,MaximumSize=16384
         wmic pagefileset where name="c:\\pagefile2.sys" set InitialSize=1024,MaximumSize=16384
+
         wmic.exe pagefile
         wmic.exe pagefileset
+        systeminfo | grep Memory
 
     - name: Set VIEWER_VERSION_GITHASH
       shell: bash
