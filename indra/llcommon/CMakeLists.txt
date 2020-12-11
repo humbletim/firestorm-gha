@@ -302,7 +302,7 @@ if(LLCOMMON_LINK_SHARED)
   endif(NOT ADDRESS_SIZE EQUAL 32)
   if(WINDOWS)
     # always generate llcommon.pdb, even for "Release" builds
-    set_target_properties(llcommon PROPERTIES LINK_FLAGS "/DEBUG")
+    #set_target_properties(llcommon PROPERTIES LINK_FLAGS "/DEBUG")
   endif(WINDOWS)
   ll_stage_sharedlib(llcommon)
 else(LLCOMMON_LINK_SHARED)
