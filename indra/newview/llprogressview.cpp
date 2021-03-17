@@ -463,10 +463,7 @@ void LLProgressView::initLogos()
     const S32 default_height = 28;
     const S32 default_pad = 15;
 
-	S32 icon_width;
-#if defined(LL_FMODSTUDIO) || defined(LL_HAVOK)
-	S32 icon_height;
-#endif // defined(LL_FMODSTUDIO) || defined(LL_HAVOK)
+    S32 icon_width, icon_height;
 
     // We don't know final screen rect yet, so we can't precalculate position fully
     LLTextBox *logos_label = getChild<LLTextBox>("logos_lbl");
