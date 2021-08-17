@@ -1920,7 +1920,7 @@ std::string llviewerVR::Settings()
 		str.append(std::to_string(m_fTextureZoom));
 		str.append("\nFOV = ");
 		str.append(std::to_string(m_fFOV));
-		str.append("\n \nDistance between left and right camera.\nUsually the same as the IPD of your HMD.\nIf objects appear too small or too big try other values. ");
+		str.append("\n \nDistance between left and right camera.\nUsually the same as the IPD of your HMD.\nIf objects appear too small or too big try other values.\nSgeo is testing");
 	}
 	else if (m_iMenuIndex == 2)
 	{
