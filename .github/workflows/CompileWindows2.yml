@@ -86,6 +86,12 @@ jobs:
       with:
         path: c:\cache\packages
         key: ${{ runner.os }}-cachedpackages-${{ hashFiles('autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
+    - name: cache -- build cache
+      id: cachedbuilds
+      uses: actions/cache@v2
+      with:
+        path: D:\a\firestorm-gha\firestorm-gha\build-vc${{ env.AUTOBUILD_VSVER }}-64
+        key: ${{ runner.os }}-cachedbuilds-${{ hashFiles('autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
 
     - name: Configure autobuild
       shell: cmd
