@@ -174,6 +174,39 @@ glh::matrix4f llviewerVR::GetHMDMatrixPoseEye(vr::Hmd_Eye nEye)
 	//return matrixObj;
 }
 
+void llviewerVR::calcUVBounds(vr::EVREye eye, F32 *uMin, F32 *uMax, F32 *vMin, F32 *vMax) {
+	// Relevant code with useful math:
+	// https://github.com/LibreVR/Revive/blob/4843c1bed72c9c7888e6bfa429f263584c7586c1/Revive/CompositorBase.cpp#L481
+	// https://github.com/ValveSoftware/steamvr_unity_plugin/blob/9442d7d7d447e07aa21c64746633dcb5977bdd1e/Assets/SteamVR/Scripts/SteamVR.cs#L696
+	// Some more clarity:
+	// https://steamcommunity.com/app/358720/discussions/0/343786746000217310/
+
+	F32 fov_y = LLViewerCamera::getInstance()->getView();
+	F32 fov_x = fov_y * LLViewerCamera::getInstance()->getAspect();
+	F32 orig_left_tan = tan(fov_x/2);
+	F32 orig_right_tan = orig_left_tan;
+	F32 orig_up_tan = tan(fov_y/2);
+	F32 orig_down_tan = orig_up_tan;
+	F32 vr_left_tan = 0.0;
+	F32 vr_right_tan = 0.0;
+	F32 vr_up_tan = 0.0;
+	F32 vr_down_tan = 0.0;
+	gHMD->GetProjectionRaw(eye, &vr_left_tan, &vr_right_tan, &vr_up_tan, &vr_down_tan);
+	vr_left_tan = abs(vr_left_tan);
+	vr_right_tan = abs(vr_right_tan);
+	vr_up_tan = abs(vr_up_tan);
+	vr_down_tan = abs(vr_down_tan);
+	// *uMin = 0.5f - 0.5f * vr_left_tan / orig_left_tan;
+	// *uMax = 0.5f + 0.5f * vr_right_tan / orig_right_tan;
+	// *vMin = 0.5f - 0.5f * vr_up_tan / orig_up_tan;
+	// *vMax = 0.5f + 0.5f * vr_down_tan / orig_down_tan;
+	*uMin = 0.5f - 0.5f * orig_left_tan / vr_left_tan;
+	*uMax = 0.5f + 0.5f * orig_right_tan / vr_right_tan;
+	*vMin = 0.5f - 0.5f * orig_up_tan / vr_up_tan;
+	*vMax = 0.5f + 0.5f * orig_down_tan / vr_down_tan;
+
+}
+
 //unused Gives the projection matrix for an eye  with HMD and IPD offsets. Add positional camera offset????
 
 //Copy both matrices at startup?????
@@ -1022,8 +1055,15 @@ void llviewerVR::vrDisplay()
 				if (m_iZoomIndex)
 					glClear(GL_COLOR_BUFFER_BIT);
 				//leftEyeDesc.IsReady = TRUE;
+
+				F32 uMin;
+				F32 uMax;
+				F32 vMin;
+				F32 vMax;
+
+				calcUVBounds(vr::EVREye::Eye_Left, &uMin, &uMax, &vMin, &vMax);
 				
-				glBlitFramebuffer(bx, by, tx, ty, m_iTextureShift, 0, m_nRenderWidth + m_iTextureShift, m_nRenderHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+				glBlitFramebuffer(bx, by, tx, ty, m_nRenderWidth * uMin, m_nRenderHeight * vMin, m_nRenderWidth * uMax, m_nRenderHeight * vMax, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 				
 			}
 			if ((leftEyeDesc.IsReady && !rightEyeDesc.IsReady) || m_fEyeDistance == 0)//if right camera was active bind left eye buffer for drawing in to
@@ -1032,7 +1072,15 @@ void llviewerVR::vrDisplay()
 				if (m_iZoomIndex)
 					glClear(GL_COLOR_BUFFER_BIT);
 				rightEyeDesc.IsReady = TRUE;
-				glBlitFramebuffer(bx, by, tx, ty, -m_iTextureShift, 0, m_nRenderWidth - m_iTextureShift, m_nRenderHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+				F32 uMin;
+				F32 uMax;
+				F32 vMin;
+				F32 vMax;
+
+				calcUVBounds(vr::EVREye::Eye_Right, &uMin, &uMax, &vMin, &vMax);
+
+				glBlitFramebuffer(bx, by, tx, ty, m_nRenderWidth * uMin, m_nRenderHeight * vMin, m_nRenderWidth * uMax, m_nRenderHeight * vMax, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 			}
 			if (!leftEyeDesc.IsReady)
 				leftEyeDesc.IsReady = TRUE;

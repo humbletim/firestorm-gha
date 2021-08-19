@@ -212,6 +212,8 @@ public:
 	void Debug();
 	void InitUI();
 
+	void calcUVBounds(vr::EVREye eye, F32 *uMin, F32 *uMax, F32 *vMin, F32 *vMax);
+
 	
 	llviewerVR();
 
