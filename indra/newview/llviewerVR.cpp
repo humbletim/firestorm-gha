@@ -182,11 +182,11 @@ void llviewerVR::calcUVBounds(vr::EVREye eye, F32 *uMin, F32 *uMax, F32 *vMin, F
 	// https://steamcommunity.com/app/358720/discussions/0/343786746000217310/
 
 	F32 fov_y = LLViewerCamera::getInstance()->getView();
-	F32 fov_x = fov_y * LLViewerCamera::getInstance()->getAspect();
-	F32 orig_left_tan = tan(fov_x/2);
-	F32 orig_right_tan = orig_left_tan;
+	//F32 fov_x = fov_y * LLViewerCamera::getInstance()->getAspect();
 	F32 orig_up_tan = tan(fov_y/2);
 	F32 orig_down_tan = orig_up_tan;
+	F32 orig_left_tan = orig_up_tan * LLViewerCamera::getInstance()->getAspect();
+	F32 orig_right_tan = orig_left_tan;
 	F32 vr_left_tan = 0.0;
 	F32 vr_right_tan = 0.0;
 	F32 vr_up_tan = 0.0;
@@ -204,6 +204,13 @@ void llviewerVR::calcUVBounds(vr::EVREye eye, F32 *uMin, F32 *uMax, F32 *vMin, F
 	*uMax = 0.5f + 0.5f * orig_right_tan / vr_right_tan;
 	*vMin = 0.5f - 0.5f * orig_up_tan / vr_up_tan;
 	*vMax = 0.5f + 0.5f * orig_down_tan / vr_down_tan;
+
+	// Fix FOV for next frame
+	F32 tan_half_fov_x = std::max(vr_left_tan, vr_right_tan);
+	F32 tan_half_fov_y = std::max(vr_up_tan, vr_down_tan);
+	LLViewerCamera::getInstance()->setDefaultFOV(2.0f * atan(tan_half_fov_x));
+	m_fFOV = 2.0f * atan(tan_half_fov_x) * RAD_TO_DEG;
+	LLViewerCamera::getInstance()->setAspect(tan_half_fov_x / tan_half_fov_y);
 
 }
 
