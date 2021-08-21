@@ -2022,7 +2022,7 @@ std::string llviewerVR::Settings()
 		str.append(std::to_string(m_fTextureZoom));
 		str.append("\nFOV = ");
 		str.append(std::to_string(m_fFOV));
-		str.append("\n \nApplies a texture shift in case your HMD's focus point is not in the center of the texture.");
+		str.append("\n \nDoes nothing.");
 	}
 	else if (m_iMenuIndex == 4)
 	{
@@ -2057,7 +2057,7 @@ std::string llviewerVR::Settings()
 		str.append("FOV = ");
 		str.append(std::to_string(m_fFOV));
 		str.append(sep2);
-		str.append("\n \nField of view in degree adjustment. Usually 100 degree is good.\n It should be adjusted when texture zoom is changed.");
+		str.append("\n \nField of view in degree adjustment.");
 	}
 	return str;
 }
