@@ -181,36 +181,48 @@ void llviewerVR::calcUVBounds(vr::EVREye eye, F32 *uMin, F32 *uMax, F32 *vMin, F
 	// Some more clarity:
 	// https://steamcommunity.com/app/358720/discussions/0/343786746000217310/
 
-	F32 fov_y = LLViewerCamera::getInstance()->getView();
-	//F32 fov_x = fov_y * LLViewerCamera::getInstance()->getAspect();
-	F32 orig_up_tan = tan(fov_y/2);
-	F32 orig_down_tan = orig_up_tan;
-	F32 orig_left_tan = orig_up_tan * LLViewerCamera::getInstance()->getAspect();
-	F32 orig_right_tan = orig_left_tan;
-	F32 vr_left_tan = 0.0;
-	F32 vr_right_tan = 0.0;
-	F32 vr_up_tan = 0.0;
-	F32 vr_down_tan = 0.0;
-	gHMD->GetProjectionRaw(eye, &vr_left_tan, &vr_right_tan, &vr_up_tan, &vr_down_tan);
-	vr_left_tan = abs(vr_left_tan);
-	vr_right_tan = abs(vr_right_tan);
-	vr_up_tan = abs(vr_up_tan);
-	vr_down_tan = abs(vr_down_tan);
-	// *uMin = 0.5f - 0.5f * vr_left_tan / orig_left_tan;
-	// *uMax = 0.5f + 0.5f * vr_right_tan / orig_right_tan;
-	// *vMin = 0.5f - 0.5f * vr_up_tan / orig_up_tan;
-	// *vMax = 0.5f + 0.5f * vr_down_tan / orig_down_tan;
-	*uMin = 0.5f - 0.5f * orig_left_tan / vr_left_tan;
-	*uMax = 0.5f + 0.5f * orig_right_tan / vr_right_tan;
-	*vMin = 0.5f - 0.5f * orig_up_tan / vr_up_tan;
-	*vMax = 0.5f + 0.5f * orig_down_tan / vr_down_tan;
+	// https://github.com/KhronosGroup/OpenXR-SDK/blob/960c4a6aa8cc9f47e357c696b5377d817550bf88/src/common/xr_linear.h#L482
+	// Normal projection (but shouldn't matter)
+	// Each group of 4 lines represents the output of a coordinate. First group of 4 is new x, second group is new y, third is new z, fourth is new w
+	// Each line in a group is a former coordinate's contribution to the new coordinate. So first line N is x*N getting added to new x
+	// We project the old FOV by multiplying the coordinates (tans) by this projection matrix
+	// Left bound for example is (gameTanAngleLeft, 0, -1, 1)
+	// Note the negative z!
 
-	// Fix FOV for next frame
-	F32 tan_half_fov_x = std::max(vr_left_tan, vr_right_tan);
-	F32 tan_half_fov_y = std::max(vr_up_tan, vr_down_tan);
-	LLViewerCamera::getInstance()->setDefaultFOV(2.0f * atan(tan_half_fov_x));
-	m_fFOV = 2.0f * atan(tan_half_fov_x) * RAD_TO_DEG;
-	LLViewerCamera::getInstance()->setAspect(tan_half_fov_x / tan_half_fov_y);
+
+	F32 gameTanAngleHeight = 2.0f * tan(LLViewerCamera::getInstance()->getView()/2.0f);
+	F32 gameTanAngleUp = gameTanAngleHeight/2.0f;
+	F32 gameTanAngleDown = -gameTanAngleUp;
+	F32 gameTanAngleWidth = gameTanAngleHeight * LLViewerCamera::getInstance()->getAspect();
+	F32 gameTanAngleRight = gameTanAngleWidth/2.0f;
+	F32 gameTanAngleLeft = -gameTanAngleRight;
+
+	F32 vrTanAngleLeft = 0.0;
+	F32 vrTanAngleRight = 0.0;
+	F32 vrTanAngleUp = 0.0;
+	F32 vrTanAngleDown = 0.0;
+	gHMD->GetProjectionRaw(eye, &vrTanAngleLeft, &vrTanAngleRight, &vrTanAngleDown, &vrTanAngleUp); // Valve documentation backwards?
+	F32 vrTanAngleWidth = vrTanAngleRight - vrTanAngleLeft;
+	F32 vrTanAngleHeight = vrTanAngleUp - vrTanAngleDown;
+
+	*uMin = gameTanAngleLeft * (2.0f / vrTanAngleWidth) - (vrTanAngleRight + vrTanAngleLeft) / vrTanAngleWidth;
+	*uMax = gameTanAngleRight * (2.0f / vrTanAngleWidth) - (vrTanAngleRight + vrTanAngleLeft) / vrTanAngleWidth;
+	*vMin = gameTanAngleDown * (2.0f / vrTanAngleHeight) - (vrTanAngleUp + vrTanAngleDown) / vrTanAngleHeight;
+	*vMax = gameTanAngleUp * (2.0f / vrTanAngleHeight) - (vrTanAngleUp + vrTanAngleDown) / vrTanAngleHeight;
+
+	// Convert [-1,1] to [0,1]
+
+	*uMin = *uMin * 0.5f + 0.5f;
+	*uMax = *uMax * 0.5f + 0.5f;
+	*vMin = *vMin * 0.5f + 0.5f;
+	*vMax = *vMax * 0.5f + 0.5f;
+
+	// // Fix FOV for next frame
+	// F32 tan_half_fov_x = std::max(vr_left_tan, vr_right_tan);
+	// F32 tan_half_fov_y = std::max(vr_up_tan, vr_down_tan);
+	// LLViewerCamera::getInstance()->setDefaultFOV(2.0f * atan(tan_half_fov_x));
+	// m_fFOV = 2.0f * atan(tan_half_fov_x) * RAD_TO_DEG;
+	// LLViewerCamera::getInstance()->setAspect(tan_half_fov_x / tan_half_fov_y);
 
 }
 
