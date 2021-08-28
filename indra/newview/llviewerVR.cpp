@@ -217,6 +217,7 @@ void llviewerVR::calcUVBounds(vr::EVREye eye, F32 *uMin, F32 *uMax, F32 *vMin, F
 	*vMin = *vMin * 0.5f + 0.5f;
 	*vMax = *vMax * 0.5f + 0.5f;
 
+
 	// // Fix FOV for next frame
 	// F32 tan_half_fov_x = std::max(vr_left_tan, vr_right_tan);
 	// F32 tan_half_fov_y = std::max(vr_up_tan, vr_down_tan);
@@ -1370,8 +1371,24 @@ void llviewerVR::HandleKeyboard()
 			//LLViewerCamera::getInstance()->setDefaultFOV(1.8);
 			gHmdOffsetPos.mV[2] = 0;
 			INISaveRead(false);
-			if (m_fFOV > 20)
-				LLViewerCamera::getInstance()->setDefaultFOV(m_fFOV * DEG_TO_RAD);
+			// if (m_fFOV > 20)
+			// 	LLViewerCamera::getInstance()->setDefaultFOV(m_fFOV * DEG_TO_RAD);
+
+			// Determine maximum FOV and aspect ratio values
+			// Assume left eye and right are sufficiently similar to use left
+			// Not important for correct 3D, but an ideal value is convenient
+			// UI issues make FOV adjustability still useful.
+			F32 tanLeft;
+			F32 tanRight;
+			F32 tanUp;
+			F32 tanDown;
+			gHMD->GetProjectionRaw(vr::Eye_Left, &tanLeft, &tanRight, &tanDown, &tanUp);
+			// Maximize instead of add so full view is covered
+			F32 maxTanWidth = 2.0 * std::max(tanRight, -tanLeft);
+			F32 maxTanHeight = 2.0 * std::max(tanUp, -tanDown);
+			m_fFOV = 2 * atan(maxTanHeight/2.0) * RAD_TO_DEG;
+			LLViewerCamera::getInstance()->setDefaultFOV(m_fFOV * DEG_TO_RAD);
+			LLViewerCamera::getInstance()->setAspect(maxTanWidth/maxTanHeight);
 			
 			/*LLCoordWindow cpos;
 			cpos.mX = m_nRenderWidth / 2;
