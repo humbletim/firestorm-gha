@@ -112,33 +112,65 @@ LLMatrix4 llviewerVR::ConvertGLHMatrix4ToLLMatrix4(glh::matrix4f m)
 
 glh::matrix4f llviewerVR::ConvertSteamVRMatrixToMatrix42(const vr::HmdMatrix34_t &matPose)
 {
-	//vr::HmdQuaternion_t q = GetRotation(matPose);
+	// SteamVR: x = right, y = up, z = backwards
+	// SL (Cory's Favorite): x = forward, y = left, z = up (http://wiki.secondlife.com/wiki/How_the_camera_works)
 
-	//gHMDQuat.set(q.x,q.y,q.z,q.w);
+	// Convert SL -> SteamVR: x' = -y; y' = z; z' = -x
+	// Convert SteamVR -> SL: x' = -z; y' = -x; z' = y
+
+	// SL -> SteamVR matrix:
+	//  0 -1  0  0
+	//  0  0  1  0
+	// -1  0  0  0
+	//  0  0  0  1
+
+	// SteamVR -> SL matrix (inverse of above, and matches OGL_TO_CFR_ROTATION)
+	//  0  0 -1  0
+	// -1  0  0  0
+	//  0  1  0  0
+	//  0  0  0  1
+
+	// Change of basis: SL-based matrix = (SteamVR -> SL) * (SteamVR-based matrix) * (SL -> SteamVR)
+	// (Incoming SL coordinates get changed to SteamVR coordinates, SteamVR-based matrix transforms SteamVR coords, outgoing SteamVR coordinates get changed back to SL)
+	// (See https://www.youtube.com/watch?v=P2LTAUO1TdA)
+
+	// Argument:
+	//  m_11  m_12  m_13  m_14
+	//  m_21  m_22  m_23  m_24
+	//  m_31  m_32  m_33  m_34
+	//  m_41  m_42  m_43  m_44
+
+	// (Note that HmdMatrix34_t omits the last row, which is always 0 0 0 1)
+	
+	// https://www.wolframalpha.com/input/?i=matrix+multiplication+calculator&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix3%22%7D+-%3E%22%7B%7B0%2C+-1%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+1%2C+0%7D%2C+%7B-1%2C+0%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+0%2C+1%7D%7D%22&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix2%22%7D+-%3E%22%7B%7B11%2C+12%2C+13%2C+14%7D%2C+%7B21%2C+22%2C+23%2C+24%7D%2C+%7B31%2C+32%2C+33%2C+34%7D%2C+%7B41%2C+42%2C+43%2C+44%7D%7D%22&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix1%22%7D+-%3E%22%7B%7B0%2C+0%2C+-1%2C+0%7D%2C+%7B-1%2C+0%2C+0%2C+0%7D%2C+%7B0%2C+1%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+0%2C+1%7D%7D%22
+
+	// Result:
+	//  m_33  m_31 -m_32 -m_34
+	//  m_13  m_11 -m_12 -m_14
+	// -m_23 -m_21  m_22  m_24
+	// -m_43 -m_41  m_42  m_44
+	
+	// Below constructor is ROW major. It should look as above
+	// Also array indices are -1 from math indices
+
 
 	glh::matrix4f matrixObj(
-		matPose.m[0][0], matPose.m[1][0], matPose.m[2][0], 0.0,
-		matPose.m[0][1], matPose.m[1][1], matPose.m[2][1], 0.0,
-		matPose.m[0][2], matPose.m[1][2], matPose.m[2][2], 0.0,
-		matPose.m[0][3], matPose.m[1][3], matPose.m[2][3], 1.0
-		//0, 0, 0, 1.0f
+		 matPose.m[2][2],  matPose.m[2][0], -matPose.m[2][1], -matPose.m[2][3],
+		 matPose.m[0][2],  matPose.m[0][0], -matPose.m[0][1], -matPose.m[0][3],
+		-matPose.m[1][2], -matPose.m[1][0],  matPose.m[1][1],  matPose.m[1][3],
+		             0.0,              0.0,              0.0,              1.0
 		);
-
-	//LLMatrix4  mat((F32*)matPose.m);
-	//gHMDQuat.setQuat(mat);
-
-
-	//m_nPos.v[0] = matPose.m[0][3];
-	//m_nPos.v[1] = matPose.m[2][3];
-	//m_nPos.v[2] = matPose.m[1][3];
-
-	//gHMDAxes.mV[0] = atan2(matPose.m[1][0], matPose.m[0][0]);// *57.2957795;//yaw
-	//gHMDAxes.mV[2] = atan2(matPose.m[2][1], matPose.m[2][2]);// *57.2957795;//pitch
-
-	//gHMDAxes.mV[0] = matPose.m[2][0];
-	//gHMDAxes.mV[1] = matPose.m[2][1];
-	//gHMDAxes.mV[2] = matPose.m[2][2];
 	return matrixObj;
+}
+
+LLVector3 llviewerVR::TransformLLVector(glh::matrix4f transform, LLVector3 vector, F32 w) {
+	// w = 1.0 for position, 0.0 for direction
+	glh::vec4f glhvec(vector[0], vector[1], vector[2], w);
+	glh::vec4f glhresult;
+	transform.mult_matrix_vec(&glhvec, &glhresult);
+	LLVector3 result(glhresult.v[0], glhresult.v[1], glhresult.v[2]);
+	return result;
+
 }
 
 glh::matrix4f llviewerVR::GetHMDMatrixProjectionEye(vr::Hmd_Eye nEye)
