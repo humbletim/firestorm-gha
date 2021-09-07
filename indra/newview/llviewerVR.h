@@ -140,7 +140,7 @@ public:
 
 
 	glh::matrix4f ConvertSteamVRMatrixToMatrix4(const vr::HmdMatrix34_t &matPose);
-	LLVector3 llviewerVR::TransformLLVector(glh::matrix4f transform, LLVector3 vector, F32 w)
+	LLVector3 llviewerVR::TransformLLVector(glh::matrix4f transform, LLVector3 vector, F32 w);
 	glh::matrix4f GetHMDMatrixProjectionEye(vr::Hmd_Eye nEye);
 	glh::matrix4f GetHMDMatrixPoseEye(vr::Hmd_Eye nEye);
 	glh::matrix4f GetCurrentViewProjectionMatrix(vr::Hmd_Eye nEye);

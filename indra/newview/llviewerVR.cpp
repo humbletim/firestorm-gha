@@ -167,7 +167,7 @@ LLVector3 llviewerVR::TransformLLVector(glh::matrix4f transform, LLVector3 vecto
 	// w = 1.0 for position, 0.0 for direction
 	glh::vec4f glhvec(vector[0], vector[1], vector[2], w);
 	glh::vec4f glhresult;
-	transform.mult_matrix_vec(&glhvec, &glhresult);
+	//transform.mult_matrix_vec(&glhvec, &glhresult);
 	LLVector3 result(glhresult.v[0], glhresult.v[1], glhresult.v[2]);
 	return result;
 
@@ -857,60 +857,39 @@ bool llviewerVR::ProcessVRCamera()
 
 			//Store current camera values
 			m_vdir_orig = LLViewerCamera::getInstance()->getAtAxis();
-			m_vup_orig = LLViewerCamera::getInstance()->getUpAxis();
 			m_vleft_orig = LLViewerCamera::getInstance()->getLeftAxis();
+			m_vup_orig = LLViewerCamera::getInstance()->getUpAxis();
 			m_vpos_orig = LLViewerCamera::getInstance()->getOrigin();
 			
 			if (!m_bEditActive)// unlock HMD's rotation input.
 			{
-				//convert HMD matrix in to direction vectors that work with SL
-				glh::ns_float::vec4 row = m_mat4HMDPose.get_row(2);
-				m_vdir.setVec(row.v[0], -row.v[2], row.v[1]);
-				
-				row = m_mat4HMDPose.get_row(1);
-				m_vup.setVec(row.v[0], -row.v[2], row.v[1]);
-				
-				row = m_mat4HMDPose.get_row(0);
-				m_vleft.setVec(row.v[0], -row.v[2], row.v[1]);
-				
-				row = m_mat4HMDPose.get_row(3);
-				gHmdPos.setVec(row.v[0], -row.v[2], row.v[1]);
+				glh::matrix4f slCameraMatrix(
+					m_vdir_orig[0], m_vleft_orig[0], m_vup_orig[0], m_vpos_orig[0],
+					m_vdir_orig[1], m_vleft_orig[1], m_vup_orig[1], m_vpos_orig[1],
+					m_vdir_orig[2], m_vleft_orig[2], m_vup_orig[2], m_vpos_orig[2],
+					           0.0,             0.0,           0.0,            1.0
+				);
 
-				if (gHmdOffsetPos.mV[VZ] == 0)
+				glh::matrix4f eyeLocation = glh::matrix4f::identity();
+				if (!leftEyeDesc.IsReady) // Rendering left eye
 				{
-					gHmdOffsetPos = gHmdPos;
+					eyeLocation = ConvertSteamVRMatrixToMatrix42(gHMD->GetEyeToHeadTransform(vr::Eye_Left));
+				}
+				else if (!rightEyeDesc.IsReady) // Rendering right eye
+				{
+					eyeLocation = ConvertSteamVRMatrixToMatrix42(gHMD->GetEyeToHeadTransform(vr::Eye_Right));
 				}
 
-				LLQuaternion qCameraOrig(m_vdir_orig, m_vleft_orig, m_vup_orig);
-				float r3;
-				float p3;
-				float y3;
-				qCameraOrig.getEulerAngles(&r3, &p3, &y3);
+				glh::matrix4f newCameraMatrix = slCameraMatrix * m_mat4HMDPose * eyeLocation;
 
-				//convert HMD euler angles to   to quat rotation
-				LLQuaternion qHMDRot(m_vdir, m_vleft, m_vup);
-				float r1;
-				float p1;
-				float y1;
-				qHMDRot.getEulerAngles(&r1, &p1, &y1);
-
-				//make a quat of the sl camera rotation
-				LLQuaternion qCameraOffset;
-				qCameraOffset.setEulerAngles(r3, p3, y3 - (m_fCamRotOffset * DEG_TO_RAD));
-				//Offset player camera with the HMD rotation
-				qHMDRot = qHMDRot*qCameraOffset;
-				gHMDQuat = qHMDRot;
-				
-
-				LLMatrix3 m3 = qHMDRot.getMatrix3();
-				m_vdir = -m3.getFwdRow();
-				m_vup = m3.getUpRow();
-				m_vleft = m3.getLeftRow();
-				m_vdir.normalize();
-				m_vup.normalize();
-				m_vleft.normalize();
-
-				m_vpos = m_vpos_orig + (((gHmdPos - gHmdOffsetPos))* (qCameraOffset));
+				LLViewerCamera::getInstance()->setAxes(
+					LLVector3(newCameraMatrix.element(0, 0), newCameraMatrix.element(1, 0), newCameraMatrix.element(2, 0)),
+					LLVector3(newCameraMatrix.element(0, 1), newCameraMatrix.element(1, 1), newCameraMatrix.element(2, 1)),
+					LLVector3(newCameraMatrix.element(0, 2), newCameraMatrix.element(1, 2), newCameraMatrix.element(2, 2))
+				);
+				LLViewerCamera::getInstance()->setOrigin(
+					newCameraMatrix.element(0, 3), newCameraMatrix.element(1, 3), newCameraMatrix.element(2, 3)
+				);
 			}
 			else //lock HMD's rotation input for inworld object editing purposes.
 			{
@@ -963,11 +942,11 @@ bool llviewerVR::ProcessVRCamera()
 			
 			if (!leftEyeDesc.IsReady)//change pos for rendering the left eye texture.Move half IPD distance to the left
 			{
-				LLViewerCamera::getInstance()->updateCameraLocation(m_vpos + new_dir, m_vup, new_fwd_pos);
+				//LLViewerCamera::getInstance()->updateCameraLocation(m_vpos + new_dir, m_vup, new_fwd_pos);
 			}
 			else if (!rightEyeDesc.IsReady)//change pos for rendering the right eye texture. Move full IPD distance to the right since we were on the left eye position.
 			{
-				LLViewerCamera::getInstance()->updateCameraLocation(m_vpos - new_dir, m_vup, new_fwd_pos);
+				//LLViewerCamera::getInstance()->updateCameraLocation(m_vpos - new_dir, m_vup, new_fwd_pos);
 			}
 		}
 		
