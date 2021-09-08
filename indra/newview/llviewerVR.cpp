@@ -921,34 +921,38 @@ bool llviewerVR::ProcessVRCamera()
 		}
 		
 
-		LLVector3 new_dir;
-		if (m_bEditActive)// lock HMD's rotation input for inworls object editing purposes.
-		{
-			if (m_fEyeDistance == 0)
-				LLViewerCamera::getInstance()->lookDir(m_vdir_orig, m_vup_orig);
-			new_dir = (m_vleft * (m_fEyeDistance / 1000));
-		}
-		else
-		{
-			if (m_fEyeDistance == 0)
-				LLViewerCamera::getInstance()->lookDir(m_vdir, m_vup);
-			new_dir = (-m_vleft * (m_fEyeDistance / 1000));
-		}
+
+		// Below code is mostly obsolete
+		// It might make sense to examine to repair HMD lock.
+
+		// LLVector3 new_dir;
+		// if (m_bEditActive)// lock HMD's rotation input for inworls object editing purposes.
+		// {
+		// 	if (m_fEyeDistance == 0)
+		// 		LLViewerCamera::getInstance()->lookDir(m_vdir_orig, m_vup_orig);
+		// 	new_dir = (m_vleft * (m_fEyeDistance / 1000));
+		// }
+		// else
+		// {
+		// 	if (m_fEyeDistance == 0)
+		// 		LLViewerCamera::getInstance()->lookDir(m_vdir, m_vup);
+		// 	new_dir = (-m_vleft * (m_fEyeDistance / 1000));
+		// }
 			
 		
-		if (m_fEyeDistance > 0)
-		{	
-			LLVector3 new_fwd_pos = m_vpos + (m_vdir * m_fFocusDistance);
+		// if (m_fEyeDistance > 0)
+		// {	
+		// 	LLVector3 new_fwd_pos = m_vpos + (m_vdir * m_fFocusDistance);
 			
-			if (!leftEyeDesc.IsReady)//change pos for rendering the left eye texture.Move half IPD distance to the left
-			{
-				//LLViewerCamera::getInstance()->updateCameraLocation(m_vpos + new_dir, m_vup, new_fwd_pos);
-			}
-			else if (!rightEyeDesc.IsReady)//change pos for rendering the right eye texture. Move full IPD distance to the right since we were on the left eye position.
-			{
-				//LLViewerCamera::getInstance()->updateCameraLocation(m_vpos - new_dir, m_vup, new_fwd_pos);
-			}
-		}
+		// 	if (!leftEyeDesc.IsReady)//change pos for rendering the left eye texture.Move half IPD distance to the left
+		// 	{
+		// 		//LLViewerCamera::getInstance()->updateCameraLocation(m_vpos + new_dir, m_vup, new_fwd_pos);
+		// 	}
+		// 	else if (!rightEyeDesc.IsReady)//change pos for rendering the right eye texture. Move full IPD distance to the right since we were on the left eye position.
+		// 	{
+		// 		//LLViewerCamera::getInstance()->updateCameraLocation(m_vpos - new_dir, m_vup, new_fwd_pos);
+		// 	}
+		// }
 		
 		
 
@@ -1097,7 +1101,7 @@ void llviewerVR::vrDisplay()
 				glBlitFramebuffer(bx, by, tx, ty, m_nRenderWidth * uMin, m_nRenderHeight * vMin, m_nRenderWidth * uMax, m_nRenderHeight * vMax, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 				
 			}
-			if ((leftEyeDesc.IsReady && !rightEyeDesc.IsReady) || m_fEyeDistance == 0)//if right camera was active bind left eye buffer for drawing in to
+			if ((leftEyeDesc.IsReady && !rightEyeDesc.IsReady))//if right camera was active bind left eye buffer for drawing in to
 			{
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightEyeDesc.mFBO);
 				if (m_iZoomIndex)
@@ -1119,7 +1123,7 @@ void llviewerVR::vrDisplay()
 			//Remove bindings of read and draw buffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			if (leftEyeDesc.IsReady && (rightEyeDesc.IsReady || m_fEyeDistance == 0))
+			if (leftEyeDesc.IsReady && (rightEyeDesc.IsReady))
 			{
 
 				rightEyeDesc.IsReady = FALSE;
@@ -2015,7 +2019,7 @@ std::string llviewerVR::Settings()
 		str.append(std::to_string(m_fTextureZoom));
 		str.append("\nFOV = ");
 		str.append(std::to_string(m_fFOV));
-		str.append("\n \nDistance between left and right camera.\nUsually the same as the IPD of your HMD.\nIf objects appear too small or too big try other values.\nSgeo is testing");
+		str.append("\n \nDoes nothing. Used to represent the distance between eyes, but that is currently incorporated already. Replace with scale adjustment?");
 	}
 	else if (m_iMenuIndex == 2)
 	{
@@ -2033,7 +2037,7 @@ std::string llviewerVR::Settings()
 		str.append("\nFOV = ");
 		str.append(std::to_string(m_fFOV));
 
-		str.append("\n \nFocus distance of the cameras in meters");
+		str.append("\n \nDoes nothing.");
 	}
 	else if (m_iMenuIndex == 3)
 	{
