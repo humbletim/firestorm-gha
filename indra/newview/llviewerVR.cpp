@@ -1417,8 +1417,12 @@ void llviewerVR::HandleKeyboard()
 			m_fFOV = 2 * atan(maxTanHeight/2.0) * RAD_TO_DEG;
 			LLViewerCamera::getInstance()->setDefaultFOV(m_fFOV * DEG_TO_RAD);
 			LLViewerCamera::getInstance()->setAspect(maxTanWidth/maxTanHeight);
-			
-			/*LLCoordWindow cpos;
+
+			gHMD->ResetSeatedZeroPose();
+
+
+
+            /*LLCoordWindow cpos;
 			cpos.mX = m_nRenderWidth / 2;
 			cpos.mY = m_nRenderHeight / 2;
 			LLWindow * WI;
