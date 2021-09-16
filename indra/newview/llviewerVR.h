@@ -110,6 +110,7 @@ public:
 	
 	S32 m_iMenuIndex;
 	F32 m_fEyeDistance;
+	F32 m_fWorldScale;
 	F32 m_fFocusDistance;
 	F32 m_fTextureShift;
 	F32 m_fFOV;

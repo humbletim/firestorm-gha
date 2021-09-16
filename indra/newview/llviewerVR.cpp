@@ -43,6 +43,7 @@ llviewerVR::llviewerVR()
 	m_kPlusKey = KEY_F6;
 	m_kMinusKey = KEY_F7;
 	m_fEyeDistance = 40;
+	m_fWorldScale = 1.0;
 	m_fFocusDistance = 10;
 	m_fTextureShift = 0;
 	m_fTextureZoom = 0;
@@ -130,6 +131,8 @@ glh::matrix4f llviewerVR::ConvertSteamVRMatrixToMatrix42(const vr::HmdMatrix34_t
 	//  0  1  0  0
 	//  0  0  0  1
 
+	// Scale: x y and z on SL->SteamVR multiplied by m_fWorldScale, SteamVR->SL divided by m_fWorldScale
+
 	// Change of basis: SL-based matrix = (SteamVR -> SL) * (SteamVR-based matrix) * (SL -> SteamVR)
 	// (Incoming SL coordinates get changed to SteamVR coordinates, SteamVR-based matrix transforms SteamVR coords, outgoing SteamVR coordinates get changed back to SL)
 	// (See https://www.youtube.com/watch?v=P2LTAUO1TdA)
@@ -149,6 +152,16 @@ glh::matrix4f llviewerVR::ConvertSteamVRMatrixToMatrix42(const vr::HmdMatrix34_t
 	//  m_13  m_11 -m_12 -m_14
 	// -m_23 -m_21  m_22  m_24
 	// -m_43 -m_41  m_42  m_44
+
+	// Scaled version:
+	// https://www.wolframalpha.com/input/?i=matrix+multiplication+calculator&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix3%22%7D+-%3E%22%7B%7B0%2C+-10%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+10%2C+0%7D%2C+%7B-10%2C+0%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+0%2C+1%7D%7D%22&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix2%22%7D+-%3E%22%7B%7B11%2C+12%2C+13%2C+14%7D%2C+%7B21%2C+22%2C+23%2C+24%7D%2C+%7B31%2C+32%2C+33%2C+34%7D%2C+%7B41%2C+42%2C+43%2C+44%7D%7D%22&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix1%22%7D+-%3E%22%7B%7B0%2C+0%2C+-.1%2C+0%7D%2C+%7B-.1%2C+0%2C+0%2C+0%7D%2C+%7B0%2C+.1%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+0%2C+1%7D%7D%22
+	
+	// Result
+
+	//  m_33        m_31      -m_32       m_34/scale
+	//  m_13        m_11      -m_12      -m_14/scale
+	// -m_23       -m_21       m_22       m_24/scale
+	// -m_43*scale -m_41*scale m_42*scale m_44
 	
 	// Below constructor is ROW major. It should look as above
 	// Also array indices are -1 from math indices
