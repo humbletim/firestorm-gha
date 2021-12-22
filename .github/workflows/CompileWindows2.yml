@@ -1,6 +1,6 @@
 name: CompileWindows
 
-on: [push]
+on: [push, workflow_dispatch]
 
 defaults:
   run:
