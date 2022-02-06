@@ -14,7 +14,7 @@ jobs:
       AUTOBUILD_VSVER: 164
       PreferredToolArchitecture: x64
       VIEWER_CHANNEL: FirestormVR-GHA
-      VIEWER_VERSION_REVISION: 64531
+      VIEWER_VERSION_REVISION: 65541
     steps:
     - uses: actions/checkout@v2
       with:
