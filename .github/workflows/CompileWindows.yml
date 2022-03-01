@@ -23,10 +23,9 @@ jobs:
     - name: Set env
       shell: cmd
       run: |
+        dir autobuild-cache-windows64
         echo %cd%
         df -h
-        mkdir c:\cache
-        mkdir c:\cache\autobuild
 
         mkdir build-vc${{ env.AUTOBUILD_VSVER }}-64
         cd build-vc${{ env.AUTOBUILD_VSVER }}-64
@@ -41,7 +40,7 @@ jobs:
         dir build-vc${{ env.AUTOBUILD_VSVER }}-64
         dir
         echo AUTOBUILD_ID=->> %GITHUB_ENV%
-        echo AUTOBUILD_INSTALLABLE_CACHE=c:\cache\autobuild>> %GITHUB_ENV%
+        echo AUTOBUILD_INSTALLABLE_CACHE=%cd%\autobuild-cache-windows64 >> %GITHUB_ENV%
         echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables>> %GITHUB_ENV%
     - name: Set VIEWER_VERSION_GITHASH
       shell: bash
@@ -75,12 +74,6 @@ jobs:
     - name: Install autobuild through PIP
       run: pip install git+https://github.com/humbletim/autobuild-1.1#egg=autobuild
 
-    - name: cache -- autobuild downloaded installables
-      id: cacheddownloads
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.AUTOBUILD_INSTALLABLE_CACHE }}
-        key: ${{ runner.os }}-cacheddownloads-${{ hashFiles('autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
     - name: cache -- packages cache
       id: cachedpackages
       uses: actions/cache@v2
