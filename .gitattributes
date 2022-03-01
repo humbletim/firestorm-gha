@@ -33,3 +33,4 @@ FILES_ARE_UNICODE_UTF-16LE.txt text eol=crlf
 
 # Windows Manifest files
 *.manifest text eol=crlf
+autobuild-cache-windows64/*.bz2 filter=lfs diff=lfs merge=lfs -text

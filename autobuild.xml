@@ -24,7 +24,7 @@
               <key>hash</key>
               <string>1f887cbafc0fe2af1e85783de0f14102</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/jemalloc-5.2.1-linux64-210451204.tar.bz2</string>
+              <string>autobuild-cache-linux64/jemalloc-5.2.1-linux64-210451204.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -62,7 +62,7 @@
               <key>hash</key>
               <string>c266a8d6124fc11e41a82c288f2bf8e4</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/ndPhysicsStub-1.202321033-linux64-202321033.tar.bz2</string>
+              <string>autobuild-cache-linux64/ndPhysicsStub-1.202321033-linux64-202321033.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -86,7 +86,7 @@
               <key>hash</key>
               <string>02f70159e14c7b7213b22a0225508c46</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/ndPhysicsStub-1.0-windows64-202121823.tar.bz2</string>
+              <string>autobuild-cache-windows64/ndPhysicsStub-1.0-windows64-202121823.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -148,7 +148,7 @@
               <key>hash</key>
               <string>a333b335104b3d0df14b9be005ef1571</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/gntp_growl-1.0-windows64-vs2017-1906061512.tar.bz2</string>
+              <string>autobuild-cache-windows64/gntp_growl-1.0-windows64-vs2017-1906061512.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -188,7 +188,7 @@
               <key>hash</key>
               <string>f63f07d4c87fbbb698b9039583f08b76</string>
               <key>url</key>
-              <uri>http://3p.firestormviewer.org/discord_rpc-3.4.0-windows64-192581529.tar.bz2</uri>
+              <uri>autobuild-cache-windows64/discord_rpc-3.4.0-windows64-192581529.tar.bz2</uri>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -200,7 +200,7 @@
               <key>hash</key>
               <string>cefa1cdb50a85e36114ca89df66c0b5a</string>
               <key>url</key>
-              <uri>http://3p.firestormviewer.org/discord_rpc-3.4.0-linux64-192540843.tar.bz2</uri>
+              <uri>autobuild-cache-linux64/discord_rpc-3.4.0-linux64-192540843.tar.bz2</uri>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -252,7 +252,7 @@
               <key>hash</key>
               <string>64c1dff0e19792acec7fd32556bf4d7b</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/SDL-1.2.15-linux64-181411635.tar.bz2</string>
+              <string>autobuild-cache-linux64/SDL-1.2.15-linux64-181411635.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -348,7 +348,7 @@
               <key>hash</key>
               <string>5c3c29851edd837d5f9518618c4a303b</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/apr_suite-1.4.5.180841559-linux64-180841559.tar.bz2</string>
+              <string>autobuild-cache-linux64/apr_suite-1.4.5.180841559-linux64-180841559.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -372,7 +372,7 @@
               <key>hash</key>
               <string>646dc3828d9c39fb1e77c4eec44ed739</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/80555/759709/apr_suite-1.4.5.558565-windows64-558565.tar.bz2</string>
+              <string>autobuild-cache-windows64/apr_suite-1.4.5.558565-windows64-558565.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -426,7 +426,7 @@
               <key>hash</key>
               <string>29eb0d338020242454b77b278c11d3e7</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/boost-1.72-linux64-202021511.tar.bz2</string>
+              <string>autobuild-cache-linux64/boost-1.72-linux64-202021511.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -450,7 +450,7 @@
               <key>hash</key>
               <string>a79511c9d8b956767ebaa405155d4238</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/78584/743961/boost-1.72-windows64-557045.tar.bz2</string>
+              <string>autobuild-cache-windows64/boost-1.72-windows64-557045.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -568,7 +568,7 @@
               <key>hash</key>
               <string>df6fe4c80b96ec20b5ee6f56419e6b9f</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/colladadom-2.3.202021526-linux64-202021526.tar.bz2</string>
+              <string>autobuild-cache-linux64/colladadom-2.3.202021526-linux64-202021526.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -592,7 +592,7 @@
               <key>hash</key>
               <string>7e63a212c8909a25236138422fe01298</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/78636/744273/colladadom-2.3.557064-windows64-557064.tar.bz2</string>
+              <string>autobuild-cache-windows64/colladadom-2.3.557064-windows64-557064.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -620,7 +620,7 @@
               <key>hash</key>
               <string>eb62a7040c7579569e06e5a61a7831d5</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/cubemaptoequirectangular-1.1.0-linux64-213500938.tar.bz2</string>
+              <string>autobuild-cache-linux64/cubemaptoequirectangular-1.1.0-linux64-213500938.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -656,7 +656,7 @@
               <key>hash</key>
               <string>ac54672e0b38f52726f5c99047c913e4</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/89306/815431/cubemaptoequirectangular-1.1.0-windows64-564841.tar.bz2</string>
+              <string>autobuild-cache-windows64/cubemaptoequirectangular-1.1.0-windows64-564841.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -722,7 +722,7 @@
               <key>hash</key>
               <string>96dd770f246917589b776300a2d07f9e</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/curl-7.54.1.212891029-linux64-212891029.tar.bz2</string>
+              <string>autobuild-cache-linux64/curl-7.54.1.212891029-linux64-212891029.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -748,7 +748,7 @@
               <key>hash</key>
               <string>50db2a9e6b74ec4b0c38b1ea8f135735</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/82638/774608/curl-7.54.1.560191-windows64-560191.tar.bz2</string>
+              <string>autobuild-cache-windows64/curl-7.54.1.560191-windows64-560191.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -820,7 +820,7 @@
               <key>hash</key>
               <string>5a685a65a7066937ef580dcd5a90f9dc</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/dbus_glib-0.76-linux64-180841549.tar.bz2</string>
+              <string>autobuild-cache-linux64/dbus_glib-0.76-linux64-180841549.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -850,7 +850,7 @@
               <key>hash</key>
               <string>2d59bb6f4bd38a18d9250ff010a13b59</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/dictionaries-2.46203-common-46203.tar.bz2</string>
+              <string>autobuild-cache-windows64/dictionaries-2.46203-common-46203.tar.bz2</string>
             </map>
             <key>name</key>
             <string>common</string>
@@ -904,7 +904,7 @@
               <key>hash</key>
               <string>d9030d7a7390b3bda7de2adcc27e535a</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/90200/821876/dullahan-1.12.3.202111032221_91.1.21_g9dd45fe_chromium-91.0.4472.114-windows64-565428.tar.bz2</string>
+              <string>autobuild-cache-windows64/dullahan-1.12.3.202111032221_91.1.21_g9dd45fe_chromium-91.0.4472.114-windows64-565428.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -916,7 +916,7 @@
               <key>hash</key>
               <string>2f8fdc6950620cee3a526ede27e068aa</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/dullahan-1.12.2.202109282040_91.1.23_g04c8d56_chromium-91.0.4472.164-linux64-212711840.tar.bz2</string>
+              <string>autobuild-cache-linux64/dullahan-1.12.2.202109282040_91.1.23_g04c8d56_chromium-91.0.4472.164-linux64-212711840.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1006,7 +1006,7 @@
               <key>hash</key>
               <string>bbcfe77b920fb7f00c7f2a494ffc6c43</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/expat-2.1.1.180841547-linux64-180841547.tar.bz2</string>
+              <string>autobuild-cache-linux64/expat-2.1.1.180841547-linux64-180841547.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1030,7 +1030,7 @@
               <key>hash</key>
               <string>d2d74d73b914150982b1883a3b96e60b</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/76344/727279/expat-2.1.1.555519-windows64-555519.tar.bz2</string>
+              <string>autobuild-cache-windows64/expat-2.1.1.555519-windows64-555519.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -1146,7 +1146,7 @@
               <key>hash</key>
               <string>5818ed2d9b29bad00878f3e26b09b7f9</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/fontconfig-2.11.0-linux64-180841833.tar.bz2</string>
+              <string>autobuild-cache-linux64/fontconfig-2.11.0-linux64-180841833.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1212,7 +1212,7 @@
               <key>hash</key>
               <string>0dab99c682433145aa8f5e26d8940afd</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/freetype-2.4.4.180841832-linux64-180841832.tar.bz2</string>
+              <string>autobuild-cache-linux64/freetype-2.4.4.180841832-linux64-180841832.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1236,7 +1236,7 @@
               <key>hash</key>
               <string>1b3ace03dcd61fa800a186213477a5fb</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/freetype-2.3.9.210761652-windows64-210761652.tar.bz2</string>
+              <string>autobuild-cache-windows64/freetype-2.3.9.210761652-windows64-210761652.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -1290,7 +1290,7 @@
               <key>hash</key>
               <string>12b2d643a013be8297bbbe37743abe94</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/glext-68-linux64-180841554.tar.bz2</string>
+              <string>autobuild-cache-linux64/glext-68-linux64-180841554.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1314,7 +1314,7 @@
               <key>hash</key>
               <string>daf619dab1cf7518af6532b18800c4b0</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/54924/511490/glext-68-windows64-538965.tar.bz2</string>
+              <string>autobuild-cache-windows64/glext-68-windows64-538965.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -1344,7 +1344,7 @@
               <key>hash</key>
               <string>650e836255b6c2ecb93d3f1f7220051c</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/55011/511905/glh_linear-0.0.0-common-538981.tar.bz2</string>
+              <string>autobuild-cache-windows64/glh_linear-0.0.0-common-538981.tar.bz2</string>
             </map>
             <key>name</key>
             <string>common</string>
@@ -1412,7 +1412,7 @@
               <key>hash</key>
               <string>acc1181cd31ef32c3724eda84ae4b580</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/glod-1.0pre3.180990827-linux64-180990827.tar.bz2</string>
+              <string>autobuild-cache-linux64/glod-1.0pre3.180990827-linux64-180990827.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1438,7 +1438,7 @@
               <key>hash</key>
               <string>e906cf08bfbfbd9d4fc78557e021e7d0</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/glod-1.0pre3.vs2017-1906061512-windows64-vs2017-1906061512.tar.bz2</string>
+              <string>autobuild-cache-windows64/glod-1.0pre3.vs2017-1906061512-windows64-vs2017-1906061512.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -1608,7 +1608,7 @@
               <key>hash</key>
               <string>d918d894430c1d1d869b9f2e06570c65</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/gtk_atk_pango_glib-2.1-linux64-180841902.tar.bz2</string>
+              <string>autobuild-cache-linux64/gtk_atk_pango_glib-2.1-linux64-180841902.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1726,7 +1726,7 @@
               <key>hash</key>
               <string>fd8060aa3c920e0fc63e7ecbea67bc5e</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/jpegencoderbasic-1.0-linux64-213500937.tar.bz2</string>
+              <string>autobuild-cache-linux64/jpegencoderbasic-1.0-linux64-213500937.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -1762,7 +1762,7 @@
               <key>hash</key>
               <string>e70898903475d8ac2e81ff33278fc987</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/89309/815433/jpegencoderbasic-1.0-windows64-564842.tar.bz2</string>
+              <string>autobuild-cache-windows64/jpegencoderbasic-1.0-windows64-564842.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -1828,7 +1828,7 @@
               <key>hash</key>
               <string>324bb9deb00d256a12f8cbf686f413f0</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/jpeglib-8c.180841548-linux64-180841548.tar.bz2</string>
+              <string>autobuild-cache-linux64/jpeglib-8c.180841548-linux64-180841548.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1852,7 +1852,7 @@
               <key>hash</key>
               <string>6f40620e86f3c9b91b6b5fe3c81776fc</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/54991/511847/jpeglib-8c.538977-windows64-538977.tar.bz2</string>
+              <string>autobuild-cache-windows64/jpeglib-8c.538977-windows64-538977.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -1918,7 +1918,7 @@
               <key>hash</key>
               <string>352ab340f2091c93eb313cf80ac0c8cc</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/jsoncpp-0.5.0.202052209-linux64-202052209.tar.bz2</string>
+              <string>autobuild-cache-linux64/jsoncpp-0.5.0.202052209-linux64-202052209.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -1942,7 +1942,7 @@
               <key>hash</key>
               <string>1b9ac5708cc526d2c5358ef0a427109d</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/54989/511833/jsoncpp-0.5.0.538976-windows64-538976.tar.bz2</string>
+              <string>autobuild-cache-windows64/jsoncpp-0.5.0.538976-windows64-538976.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2074,7 +2074,7 @@
               <key>hash</key>
               <string>6555f040c686d8c1dec8e6264c2d3672</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/libhunspell-1.3.2.180841552-linux64-180841552.tar.bz2</string>
+              <string>autobuild-cache-linux64/libhunspell-1.3.2.180841552-linux64-180841552.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -2098,7 +2098,7 @@
               <key>hash</key>
               <string>858d1708f6b3a74738a3d57a5387e20f</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/76370/727413/libhunspell-1.3.2.555528-windows64-555528.tar.bz2</string>
+              <string>autobuild-cache-windows64/libhunspell-1.3.2.555528-windows64-555528.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2164,7 +2164,7 @@
               <key>hash</key>
               <string>cbc033ae3b034b992b59f6de1034247c</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/76355/727341/libndofdev-0.1.555523-windows64-555523.tar.bz2</string>
+              <string>autobuild-cache-windows64/libndofdev-0.1.555523-windows64-555523.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2230,7 +2230,7 @@
               <key>hash</key>
               <string>83ae55031f81dace9dcf688cc5510010</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/libpng-1.6.8.180841558-linux64-180841558.tar.bz2</string>
+              <string>autobuild-cache-linux64/libpng-1.6.8.180841558-linux64-180841558.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -2254,7 +2254,7 @@
               <key>hash</key>
               <string>d1cc8354ac4e877eefedf16b1be3aac6</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/78589/743991/libpng-1.6.8.557046-windows64-557046.tar.bz2</string>
+              <string>autobuild-cache-windows64/libpng-1.6.8.557046-windows64-557046.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2296,7 +2296,7 @@
               <key>hash</key>
               <string>f3cc32c84b99f1277370ce88a0faf40e</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/libuuid-1.6.2-linux64-180841554.tar.bz2</string>
+              <string>autobuild-cache-linux64/libuuid-1.6.2-linux64-180841554.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -2362,7 +2362,7 @@
               <key>hash</key>
               <string>0bc56fa68f59537486c75b04646d65a9</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/libxml2-2.9.4.180841555-linux64-180841555.tar.bz2</string>
+              <string>autobuild-cache-linux64/libxml2-2.9.4.180841555-linux64-180841555.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -2386,7 +2386,7 @@
               <key>hash</key>
               <string>6b5bb230684ecf28386d7c91c47bb6e1</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/78634/744240/libxml2-2.9.4.557062-windows64-557062.tar.bz2</string>
+              <string>autobuild-cache-windows64/libxml2-2.9.4.557062-windows64-557062.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2447,7 +2447,7 @@
               <key>hash_algorithm</key>
               <string>md5</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/87228/802959/llca-202109010216.563493-common-563493.tar.bz2</string>
+              <string>autobuild-cache-windows64/llca-202109010216.563493-common-563493.tar.bz2</string>
             </map>
             <key>name</key>
             <string>common</string>
@@ -2696,7 +2696,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>b460d5bac2d20b38cb73b54d0ab1b6e3</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/nghttp2-1.25.0.180841549-linux64-180841549.tar.bz2</string>
+              <string>autobuild-cache-linux64/nghttp2-1.25.0.180841549-linux64-180841549.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -2720,7 +2720,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>5a55cede40eef16b9d1e47c418a2b77a</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/76358/727359/nghttp2-1.40.0.555524-windows64-555524.tar.bz2</string>
+              <string>autobuild-cache-windows64/nghttp2-1.40.0.555524-windows64-555524.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2764,7 +2764,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>25c8ac919f24b8952653d38ec43640e5</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/54945/511697/nvapi-352.539058-windows64-539058.tar.bz2</string>
+              <string>autobuild-cache-windows64/nvapi-352.539058-windows64-539058.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2830,7 +2830,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>03b7df0406d7588c4fb49c2ddf0d8264</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/ogg_vorbis-1.3.3-1.3.6.202241500-linux64-202241500.tar.bz2</string>
+              <string>autobuild-cache-linux64/ogg_vorbis-1.3.3-1.3.6.202241500-linux64-202241500.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -2854,7 +2854,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>ec4a657fe639bb458ee5132062146a7a</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/54980/511782/ogg_vorbis-1.3.3-1.3.6.538971-windows64-538971.tar.bz2</string>
+              <string>autobuild-cache-windows64/ogg_vorbis-1.3.3-1.3.6.538971-windows64-538971.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -2884,7 +2884,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>88fb222412b98a7f371d6bf2ff42a973</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/open_libndofdev-0.13.211211036-linux64-211211036.tar.bz2</string>
+              <string>autobuild-cache-linux64/open_libndofdev-0.13.211211036-linux64-211211036.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -2928,7 +2928,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>4f36ae378593240701fd4453bd6074c8</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/openal-1.12.854-1.1.0.180841552-linux64-180841552.tar.bz2</string>
+              <string>autobuild-cache-linux64/openal-1.12.854-1.1.0.180841552-linux64-180841552.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -2954,7 +2954,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>e0fdd9394a8cd8c6360b922f6f237e57</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/hg/repo/p64_3p-openal/rev/314223/arch/CYGWIN/installer/openal-1.12.854-1.1.0.314223-windows64-314223.tar.bz2</string>
+              <string>autobuild-cache-windows64/openal-1.12.854-1.1.0.314223-windows64-314223.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3008,7 +3008,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>b7be1d6116fb5848ab2beef19b6a8b15</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/openjpeg-2.3.1.202991551-linux64-202991551.tar.bz2</string>
+              <string>autobuild-cache-linux64/openjpeg-2.3.1.202991551-linux64-202991551.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -3032,7 +3032,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>d7ac606703a9330a2d8a3f7276cb6894</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/openjpeg-2.4.0.211361407-windows64-211361407.tar.bz2</string>
+              <string>autobuild-cache-windows64/openjpeg-2.4.0.211361407-windows64-211361407.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3098,7 +3098,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>ea82e634334bccf088daf3d15eab07b7</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/openssl-1.1.1l.212872015-linux64-212872015.tar.bz2</string>
+              <string>autobuild-cache-linux64/openssl-1.1.1l.212872015-linux64-212872015.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -3122,7 +3122,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>f40b8622ba38084b0962e273988d748f</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/82624/774520/openssl-1.1.1l.560177-windows64-560177.tar.bz2</string>
+              <string>autobuild-cache-windows64/openssl-1.1.1l.560177-windows64-560177.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3188,7 +3188,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>742a145c1518b9dc195ae0862828e6ae</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/pcre-8.35.202021522-linux64-202021522.tar.bz2</string>
+              <string>autobuild-cache-linux64/pcre-8.35.202021522-linux64-202021522.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -3212,7 +3212,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>cdee8e8b48a66266550bf279c40abc22</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/55038/511992/pcre-8.35.538986-windows64-538986.tar.bz2</string>
+              <string>autobuild-cache-windows64/pcre-8.35.538986-windows64-538986.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3266,7 +3266,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>05c4debd4cccfea620fc7e6f9a190924</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/slvoice-3.2.0002.10426.302004-linux64-212691952.tar.bz2</string>
+              <string>autobuild-cache-linux64/slvoice-3.2.0002.10426.302004-linux64-212691952.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -3290,7 +3290,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>9ee8f3cbc5369c598a998c61961ed16d</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/80381/758551/slvoice-4.10.0000.32327.5fc3fe7c.558436-windows64-558436.tar.bz2</string>
+              <string>autobuild-cache-windows64/slvoice-4.10.0000.32327.5fc3fe7c.558436-windows64-558436.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3318,7 +3318,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>d37be064bd851276dab423d723cb9b7d</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/threejs-0.132.2-linux64-213500940.tar.bz2</string>
+              <string>autobuild-cache-linux64/threejs-0.132.2-linux64-213500940.tar.bz2</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -3354,7 +3354,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>46edf0f55417f8ef0d33a5c007bc3644</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/89310/815451/threejs-0.132.2-windows64-564843.tar.bz2</string>
+              <string>autobuild-cache-windows64/threejs-0.132.2-windows64-564843.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3384,7 +3384,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>64e1c979aea2f74fe9c2d9d04573336d</string>
               <key>url</key>
-              <string>http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/55001/511871/tut-2008.11.30-common-539059.tar.bz2</string>
+              <string>autobuild-cache-windows64/tut-2008.11.30-common-539059.tar.bz2</string>
             </map>
             <key>name</key>
             <string>common</string>
@@ -3450,7 +3450,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>0d6832fd958ec127f089e683c9b67169</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/uriparser-0.9.4-linux64-211210958.tar.bz2</string>
+              <string>autobuild-cache-linux64/uriparser-0.9.4-linux64-211210958.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -3474,7 +3474,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>962c01d553f286c430102998129fb0d6</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/81324/765527/uriparser-0.9.4-windows64-559132.tar.bz2</string>
+              <string>autobuild-cache-windows64/uriparser-0.9.4-windows64-559132.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3596,7 +3596,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>5eace400c487011a678493fc520be24d</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/vlc_bin-2.2.3-linux-x64-201610182130-r16.tar.bz2</string>
+              <string>autobuild-cache-linux64/vlc_bin-2.2.3-linux-x64-201610182130-r16.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -3620,7 +3620,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>7f66982d6edf3c38f3493e28826d58e8</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/90006/820713/vlc_bin-3.0.16.565299-windows64-565299.tar.bz2</string>
+              <string>autobuild-cache-windows64/vlc_bin-3.0.16.565299-windows64-565299.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3686,7 +3686,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>f810193590cae9b35a1c77b6c72bfb01</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/xmlrpc_epi-0.54.1.180841935-linux64-180841935.tar.bz2</string>
+              <string>autobuild-cache-linux64/xmlrpc_epi-0.54.1.180841935-linux64-180841935.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -3710,7 +3710,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>8fbe7c4ea22bb7f23a93c73884ebb34c</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/76373/727435/xmlrpc_epi-0.54.1.555529-windows64-555529.tar.bz2</string>
+              <string>autobuild-cache-windows64/xmlrpc_epi-0.54.1.555529-windows64-555529.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -3778,7 +3778,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>15a645809cb2f14074f22e7848bb42cf</string>
               <key>url</key>
-              <string>http://3p.firestormviewer.org/zlib-1.2.8.180841547-linux64-180841547.tar.bz2</string>
+              <string>autobuild-cache-linux64/zlib-1.2.8.180841547-linux64-180841547.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -3802,7 +3802,7 @@ Copyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors</string>
               <key>hash</key>
               <string>36bdc34f67d3ad3c57125dc1b16a3129</string>
               <key>url</key>
-              <string>https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/78577/743920/zlib-1.2.11.557041-windows64-557041.tar.bz2</string>
+              <string>autobuild-cache-windows64/zlib-1.2.11.557041-windows64-557041.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows64</string>

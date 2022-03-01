@@ -8,6 +8,7 @@
 *.rej
 *.swp
 *.tar.bz2
+!autobuild-cache-windows64/*.bz2
 *.code-workspace
 *~
 
