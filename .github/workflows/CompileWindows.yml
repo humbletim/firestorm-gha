@@ -85,7 +85,7 @@ jobs:
       shell: cmd
       run: |
         autobuild --version
-        autobuild configure -v -A 64 -c ReleaseFS_open -- --package --openal --chan ${{ env.VIEWER_CHANNEL }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
+        autobuild configure -v -A 64 -c ReleaseFS_open -- --avx2 --package --openal --chan ${{ env.VIEWER_CHANNEL }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
     - name: Build & Package
       shell: cmd
       run: |

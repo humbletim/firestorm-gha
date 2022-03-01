@@ -132,6 +132,7 @@ if (WINDOWS)
       /Ot
       /arch:AVX2
       /fp:fast
+      /Ob3 # more aggressive inlining; available VS2019+
       )
   else (USE_AVX_OPTIMIZATION)
   # </FS:Ansariel> AVX/AVX2 support
