@@ -40,7 +40,7 @@ jobs:
         dir build-vc${{ env.AUTOBUILD_VSVER }}-64
         dir
         echo AUTOBUILD_ID=->> %GITHUB_ENV%
-        echo AUTOBUILD_INSTALLABLE_CACHE=%cd%\autobuild-cache-windows64 >> %GITHUB_ENV%
+        echo AUTOBUILD_INSTALLABLE_CACHE=%cd%\autobuild-cache-windows64>> %GITHUB_ENV%
         echo AUTOBUILD_VARIABLES_FILE=%cd%\fs-build-variables\variables>> %GITHUB_ENV%
     - name: Set VIEWER_VERSION_GITHASH
       shell: bash
