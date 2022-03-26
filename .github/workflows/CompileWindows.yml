@@ -23,6 +23,7 @@ jobs:
     env:
       FSVS_TARGET: 'Visual Studio 16 2019'
       AUTOBUILD_VSVER: 164
+      AUTOBUILD_LOGLEVEL: '--verbose'
       PreferredToolArchitecture: x64
       VIEWER_CHANNEL: FirestormVR-GHA
       VIEWER_VERSION_REVISION: 65659
