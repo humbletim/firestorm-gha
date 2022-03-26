@@ -1,0 +1,22 @@
+name: CompileWindows
+
+on:
+  # pull_request:
+  workflow_dispatch:
+      inputs:
+        buildsys:
+          description: 'ninja or msbuild'
+          required: true
+          default: msbuild
+        llpackage:
+          description: 'build/package/upload firestorm installer (if false only autobuild configure and caching is performed)'
+          required: true
+          default: false
+
+jobs:
+  windows_build:
+    runs-on: windows-2019
+    steps:
+    - name: placeholder
+      run: |
+        echo "placeholder to enable workflow dispatch (see latest gha/Firestorm_X.Y.Z_VR branch)"
