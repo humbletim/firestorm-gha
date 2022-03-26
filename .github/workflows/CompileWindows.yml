@@ -1,6 +1,17 @@
 name: CompileWindows
 
-on: [pull_request]
+on:
+  # pull_request:
+  workflow_dispatch:
+      inputs:
+        buildsys:
+          description: 'ninja or msbuild'
+          required: true
+          default: msbuild
+        llpackage:
+          description: 'build/package/upload firestorm installer (if false only autobuild configure and caching is performed)'
+          required: true
+          default: false
 
 defaults:
   run:
@@ -8,13 +19,13 @@ defaults:
 
 jobs:
   windows_build:
-    runs-on: windows-latest
+    runs-on: windows-2019
     env:
       FSVS_TARGET: 'Visual Studio 16 2019'
       AUTOBUILD_VSVER: 164
       PreferredToolArchitecture: x64
       VIEWER_CHANNEL: FirestormVR-GHA
-      VIEWER_VERSION_REVISION: 64531
+      VIEWER_VERSION_REVISION: 65659
     steps:
     - uses: actions/checkout@v2
       with:
@@ -54,7 +65,11 @@ jobs:
     - name: Setup vsdevenv
       uses: seanmiddleditch/gha-setup-vsdevenv@master
     - name: Setup MSBuild
+      if: ${{ github.event.inputs.buildsys == 'msbuild' }}
       uses: microsoft/setup-msbuild@v1.0.2
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+      if: ${{ github.event.inputs.buildsys == 'ninja' }}
     - name: Setup python
       uses: actions/setup-python@v2
       with:
@@ -68,7 +83,7 @@ jobs:
         git --version
         python --version
         cl.exe
-        MSBuild.exe -version
+        ${{ github.event.inputs.buildsys }}.exe -version
         echo " "
         df -h
     - name: Install autobuild through PIP
@@ -87,17 +102,38 @@ jobs:
         path: c:\cache\packages
         key: ${{ runner.os }}-cachedpackages-${{ hashFiles('autobuild.xml') }}-${{ env.VIEWER_CHANNEL }}
 
-    - name: Configure autobuild
+    - name: Configure autobuild (msbuild)
+      if: ${{ github.event.inputs.buildsys == 'msbuild' }}
       shell: cmd
       run: |
         autobuild --version
         autobuild configure -A 64 -c ReleaseFS_open -- --package --openal --chan ${{ env.VIEWER_CHANNEL }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
-    - name: Build & Package
+    - name: Build & Package (msbuild)
+      if: ${{ github.event.inputs.buildsys == 'msbuild' && github.event.inputs.llpackage == 'true' }}
       shell: cmd
       run: |
         msbuild build-vc${{ env.AUTOBUILD_VSVER }}-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
-    - name: Upload Artifact
+    - name: Upload Artifact (msbuild)
+      if: ${{ github.event.inputs.buildsys == 'msbuild' && github.event.inputs.llpackage == 'true' }}
       uses: actions/upload-artifact@v2
       with:
         name: windows-${{ env.VIEWER_CHANNEL }}-${{ env.VIEWER_VERSION_STR }}-${{ env.VIEWER_VERSION_GITHASH }}
         path: build-vc${{ env.AUTOBUILD_VSVER }}-64/newview/Release/*_Setup.exe
+
+    - name: Configure autobuild (ninja)
+      if: ${{ github.event.inputs.buildsys == 'ninja' }}
+      shell: bash
+      run: |
+        autobuild --version
+        autobuild configure -A 64 -c ReleaseFS_open -- --ninja --package --openal --chan ${{ env.VIEWER_CHANNEL }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
+    - name: Build & Package (ninja)
+      if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
+      shell: bash
+      run: |
+        ninja -C build-vc${{ env.AUTOBUILD_VSVER }}-64 llpackage
+    - name: Upload Artifact (ninja)
+      if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: windows-${{ env.VIEWER_CHANNEL }}-${{ env.VIEWER_VERSION_STR }}-${{ env.VIEWER_VERSION_GITHASH }}
+        path: build-vc${{ env.AUTOBUILD_VSVER }}-64/newview/*_Setup.exe
