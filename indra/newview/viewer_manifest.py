@@ -575,7 +575,7 @@ class WindowsManifest(ViewerManifest):
 
         if self.is_packaging_viewer():
             # Find firestorm-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
-            self.path(src='%s/firestorm-bin.exe' % self.args['configuration'], dst=self.final_exe())
+            self.path(src='%s/firestorm-bin.exe' % '.' or self.args['configuration'], dst=self.final_exe())
 
             # <FS:Ansariel> Remove VMP
             #with self.prefix(src=os.path.join(pkgdir, "VMP")):
@@ -596,13 +596,16 @@ class WindowsManifest(ViewerManifest):
         self.path2basename(os.path.join(os.pardir,
                                         'llplugin', 'slplugin', self.args['configuration']),
                            "slplugin.exe")
-        
-        with self.prefix(src=os.path.join(pkgdir, os.pardir, os.pardir, 'openvr', 'bin', 'win64')):
-            self.path("openvr_api.dll")
+
+        with self.prefix(src=os.path.join(relpkgdir)):
+            self.path("discord-rpc.dll")
 
         # Get shared libs from the shared libs staging directory
         with self.prefix(src=os.path.join(self.args['build'], os.pardir,
                                           'sharedlibs', self.args['configuration'])):
+
+            # OpenVR
+            self.path("openvr_api.dll")
 
             # Mesh 3rd party libs needed for auto LOD and collada reading
             try:
