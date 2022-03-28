@@ -94,6 +94,7 @@ if(WINDOWS)
     endif (USE_BUGSPLAT)
 
     set(release_files ${release_files} growl++.dll growl.dll )
+    set(release_files ${release_files} openvr_api.dll )
     if (FMODSTUDIO)
       set(debug_files ${debug_files} fmodL.dll)
       set(release_files ${release_files} fmod.dll)
@@ -224,8 +225,7 @@ elseif(LINUX)
     set(SHARED_LIB_STAGING_DIR_DEBUG            "${SHARED_LIB_STAGING_DIR}")
     set(SHARED_LIB_STAGING_DIR_RELWITHDEBINFO   "${SHARED_LIB_STAGING_DIR}")
     set(SHARED_LIB_STAGING_DIR_RELEASE          "${SHARED_LIB_STAGING_DIR}")
-    set(openvr_src_dir ${CMAKE_SOURCE_DIR}/../openvr/bin/linux64)
-    set(openvr_files libopenvr_api.so)
+
 
     set(vivox_lib_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
     set(vivox_libs
@@ -254,6 +254,7 @@ elseif(LINUX)
         #libGLOD.so
         libhunspell-1.3.so.0.0.0
         libopenal.so
+        libopenvr_api.so
         #libopenjpeg.so
         libuuid.so.16
         libuuid.so.16.0.22
@@ -263,6 +264,7 @@ elseif(LINUX)
     else (NOT USESYSTEMLIBS)
       set(release_files
         libGLOD.so
+        libopenvr_api.so
        )
     endif (NOT USESYSTEMLIBS)
 
@@ -295,13 +297,7 @@ endif(WINDOWS)
 ################################################################
 # Done building the file lists, now set up the copy commands.
 ################################################################
-copy_if_different(
-    ${openvr_src_dir}
-    "${SHARED_LIB_STAGING_DIR_RELEASE}"
-    out_targets
-    ${openvr_files}
-    )
-set(third_party_targets ${third_party_targets} ${out_targets})
+
 
 # Curiously, slvoice_files are only copied to SHARED_LIB_STAGING_DIR_RELEASE.
 # It's unclear whether this is oversight or intentional, but anyway leave the

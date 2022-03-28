@@ -1,6 +1,7 @@
 # -*- cmake -*-
 
 project(viewer)
+set(CMAKE_CFG_INTDIR .)
 
 include(00-Common)
 # DON'T move Linking.cmake to its place in the alphabetized list below: it
@@ -60,6 +61,8 @@ include(Growl)
 include(ColladaDom)
 include(jemalloc)
 include(Discord)
+
+use_prebuilt_binary(openvr)
 
 # <FS:ND> if using ndPhysicsstub this variable will be unset, we don't need to build any stub code viewer side in that case
 if( LLPHYSICSEXTENSIONS_SRC_DIR )
@@ -2265,34 +2268,34 @@ if (WINDOWS)
     # stores a list in the variable myfile in which each item is a line from the input file."
     # And of course it's straightforward to read a text file in Python.
 
-    set(COPY_INPUT_DEPENDENCIES
+    set(xCOPY_INPUT_DEPENDENCIES
       # The following commented dependencies are determined at variably at build time. Can't do this here.
       ${CMAKE_SOURCE_DIR}/../etc/message.xml
       ${CMAKE_SOURCE_DIR}/../scripts/messages/message_template.msg
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/llcommon.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libapr-1.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libaprutil-1.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libapriconv-1.dll
+      # ${SHARED_LIB_STAGING_DIR}/Release/llcommon.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/libapr-1.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/libaprutil-1.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/libapriconv-1.dll
       ${SHARED_LIB_STAGING_DIR}/Release/glod.dll
-      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/glod.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/glod.dll
+#      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/glod.dll
+#      ${SHARED_LIB_STAGING_DIR}/Debug/glod.dll
       ${SHARED_LIB_STAGING_DIR}/Release/libcollada14dom22.dll
-      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libcollada14dom22.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/libcollada14dom22-d.dll
+     # ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libcollada14dom22.dll
+ #     ${SHARED_LIB_STAGING_DIR}/Debug/libcollada14dom22-d.dll
       # <FS:Ansariel> Only copy OpenJPEG dll if needed
       #${SHARED_LIB_STAGING_DIR}/Release/openjp2.dll
       #${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/openjp2.dll
       #${SHARED_LIB_STAGING_DIR}/Debug/openjp2.dll
       # </FS:Ansariel>
       ${SHARED_LIB_STAGING_DIR}/Release/libhunspell.dll
-      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libhunspell.dll
-      ${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
+    #  ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libhunspell.dll
+  #    ${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
       ${SHARED_LIB_STAGING_DIR}/Release/uriparser.dll
-      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/uriparser.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/SLVoice.exe
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libsndfile-1.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxoal.dll
-      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ca-bundle.crt
+   #   ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/uriparser.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/SLVoice.exe
+      ${SHARED_LIB_STAGING_DIR}/Release/libsndfile-1.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/vivoxoal.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/ca-bundle.crt
       ${GOOGLE_PERF_TOOLS_SOURCE}
       ${CMAKE_CURRENT_SOURCE_DIR}/licenses-win32.txt
       ${CMAKE_CURRENT_SOURCE_DIR}/featuretable.txt
@@ -2305,12 +2308,12 @@ if (WINDOWS)
       )
 
     if (NOT USE_BUGSPLAT)
-        LIST(APPEND COPY_INPUT_DEPENDENCIES windows-crash-logger)
+#        LIST(APPEND COPY_INPUT_DEPENDENCIES windows-crash-logger)
     endif (NOT USE_BUGSPLAT)
 
     # <FS:Ansariel> Only copy OpenJPEG dll if needed
     if (NOT USE_KDU)
-        list(APPEND COPY_INPUT_DEPENDENCIES
+        list(APPEND xCOPY_INPUT_DEPENDENCIES
             ${SHARED_LIB_STAGING_DIR}/Release/openjp2.dll
             ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/openjp2.dll
             ${SHARED_LIB_STAGING_DIR}/Debug/openjp2.dll
@@ -2319,16 +2322,16 @@ if (WINDOWS)
     # </FS:Ansariel>
 
     if (ADDRESS_SIZE EQUAL 64)
-        list(APPEND COPY_INPUT_DEPENDENCIES
-            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk_x64.dll
-            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp_x64.dll
+        list(APPEND xCOPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/Release/vivoxsdk_x64.dll
+            ${SHARED_LIB_STAGING_DIR}/Release/ortp_x64.dll
            ${ARCH_PREBUILT_DIRS_RELEASE}/libcrypto-1_1-x64.dll
            ${ARCH_PREBUILT_DIRS_RELEASE}/libssl-1_1-x64.dll
             )
     else (ADDRESS_SIZE EQUAL 64)
-        list(APPEND COPY_INPUT_DEPENDENCIES
-            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk.dll
-            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp.dll
+        list(APPEND xCOPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/Release/vivoxsdk.dll
+            ${SHARED_LIB_STAGING_DIR}/Release/ortp.dll
             ${ARCH_PREBUILT_DIRS_RELEASE}/libcrypto-1_1.dll
             ${ARCH_PREBUILT_DIRS_RELEASE}/libssl-1_1.dll
             )
@@ -2343,9 +2346,9 @@ if (WINDOWS)
     endif (FMODSTUDIO)
 
     if (OPENAL)
-      list(APPEND COPY_INPUT_DEPENDENCIES
-           ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/OpenAL32.dll
-           ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/alut.dll
+      list(APPEND xCOPY_INPUT_DEPENDENCIES
+           ${SHARED_LIB_STAGING_DIR}/Release/OpenAL32.dll
+           ${SHARED_LIB_STAGING_DIR}/Release/alut.dll
           )
     endif (OPENAL)
 
@@ -2363,7 +2366,7 @@ if (WINDOWS)
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
         "--channel=${VIEWER_CHANNEL}"
-        --configuration=${CMAKE_CFG_INTDIR}
+        --configuration=Release
         --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
         --grid=${GRID}
         --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2424,7 +2427,7 @@ if (WINDOWS)
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
           "--channel=${VIEWER_CHANNEL}"
-          --configuration=${CMAKE_CFG_INTDIR}
+          --configuration=Release
           --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
           --grid=${GRID}
           --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2440,7 +2443,7 @@ if (WINDOWS)
 
       add_custom_target(llpackage ALL DEPENDS
         ${CMAKE_CFG_INTDIR}/touched.bat
-        windows-setup-build-all
+        #windows-setup-build-all
         )
         # temporarily disable packaging of event_host until hg subrepos get
         # sorted out on the parabuild cluster...
@@ -2610,7 +2613,7 @@ if (LINUX)
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
         "--channel=${VIEWER_CHANNEL}"
-        --configuration=${CMAKE_CFG_INTDIR}
+        --configuration=Release
         --dest=${CMAKE_CURRENT_BINARY_DIR}/packaged
         --grid=${GRID}
         --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2636,7 +2639,7 @@ if (LINUX)
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
       "--channel=${VIEWER_CHANNEL}"
-      --configuration=${CMAKE_CFG_INTDIR}
+      --configuration=Release
       --dest=${CMAKE_CURRENT_BINARY_DIR}/packaged
       --grid=${GRID}
       --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2731,7 +2734,7 @@ if (DARWIN)
       --buildtype=${CMAKE_BUILD_TYPE}
       --bundleid=${MACOSX_BUNDLE_GUI_IDENTIFIER}
       "--channel=${VIEWER_CHANNEL}"
-      --configuration=${CMAKE_CFG_INTDIR}
+      --configuration=Release
       --dest=${VIEWER_APP_BUNDLE}
       --grid=${GRID}
       --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2766,7 +2769,7 @@ if (DARWIN)
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
           "--channel=${VIEWER_CHANNEL}"
-          --configuration=${CMAKE_CFG_INTDIR}
+          --configuration=Release
           --dest=${VIEWER_APP_BUNDLE}
           --grid=${GRID}
           --source=${CMAKE_CURRENT_SOURCE_DIR}

@@ -21,7 +21,7 @@
 //#include "llrender.h"
 
 #ifdef _WIN32
-#pragma comment(lib, "../../openvr/lib/win64/openvr_api.lib")
+#pragma comment(lib, "openvr_api")
 #endif
 
 #ifndef _WIN32
