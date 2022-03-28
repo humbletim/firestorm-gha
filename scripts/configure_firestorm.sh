@@ -428,12 +428,13 @@ fi
 if [ \( $WANTS_VERSION -eq $TRUE \) -o \( $WANTS_CONFIG -eq $TRUE \) ] ; then
     echo "Versioning..."
     pushd ..
-    if [ "$VIEWER_VERSION_REVISION" -gt 0 ] ; then
-        buildVer=$VIEWER_VERSION_REVISION
+    buildVer=${AUTOBUILD_BUILD_ID:-${VIEWER_VERSION_REVISION:-}}
+    if [ -n $buildVer ] ; then
+      true
     elif [ -d .git ]
     then
         buildVer=`git rev-list --count HEAD`
-    else
+    elif which hg ; then
         buildVer=`hg summary | head -1 | cut -d " "  -f 2 | cut -d : -f 1 | grep "[0-9]*"`
     fi
     export revision=${buildVer}
