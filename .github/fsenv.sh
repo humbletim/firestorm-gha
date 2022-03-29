@@ -33,7 +33,9 @@ function _fsenv() {
   # download prebuilts from 3p.firestormviewer.org
 
   # 3p-<package_name> deps are resolved relative to this URL
-  setenv INLINE_FS3P_GITURL https://vcs.firestormviewer.org/3p-libraries
+  setenv INLINE_FS3P_GITURL https://github.com/holostorm
+  ### :/ also 403's with vcs.firestormviewer.org...
+  ### setenv INLINE_FS3P_GITURL https://vcs.firestormviewer.org/3p-libraries
 
   # format: packagerepo=gitcommit
   setenv INLINE_FS3P_DEPS "
