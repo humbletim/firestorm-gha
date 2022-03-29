@@ -3,7 +3,7 @@
 # -- humbletim 2022.03.27
 
 # usage:
-#     .github/3p/inline-build.sh <builddir> <gitrepo[=gitcommit]>
+#     .github/3p/inline-build.sh <builddir> <gitrepo[@gitcommit][#pkgname]>
 #  or .github/3p/inline-build.sh <builddir> <gitrepo> <gitcommit> [autobuild_package_name]
 
 set -eu
@@ -11,15 +11,22 @@ set -eu
 . .github/3p/_autobuild_prop_as_json.sh
 
 BUILDDIR=$1
-REPO=${2%=*}
-COMMIT=${2#*=}
-if [[ -n "$COMMIT" || "$COMMIT" == "$REPO" ]] ; then
+regex='^([^@]+)@([^#]+)#?([-/_a-zA-Z0-9]*)?$'
+if [[ "$2" =~ $regex ]] ; then
+  REPO=${BASH_REMATCH[1]}
+  COMMIT=${BASH_REMATCH[2]}
+  NAME=${BASH_REMATCH[3]}
+  NAME=${NAME:-${3:-$(basename $REPO)}}
+else
+  REPO=$2
   COMMIT=${3:-master}
+  NAME=${4:-$(basename $REPO)}
 fi
-NAME=${4:-$(basename $REPO)}
+
 srcdir=$BUILDDIR/$NAME
 buildcmd=$(dirname $0)/build-cmds/${NAME}.build-cmd.sh
-assert_defined REPO COMMIT NAME
+echo
+DEBUG=1 assert_defined REPO COMMIT NAME
 
 assert_defined AUTOBUILD_PLATFORM AUTOBUILD_ADDRSIZE AUTOBUILD_VSVER AUTOBUILD_CONFIG_FILE 
 
@@ -35,7 +42,7 @@ function process_results_env() {
       echo -n "=== ADDING NEW PACKAGE $NAME "
       { autobuild installables -a "file:///$autobuild_package_filename" add $autobuild_package_name hash=$autobuild_package_md5 2>&1 ; } >> installables.log \
          || { echo "FAILED TO ADD PACKAGE $NAME"; cat installables.log ; exit 5 ; }
-     echo ...done
+      echo ...done
     else
       echo -n "=== UPDATING PACKAGE $NAME "
       { autobuild installables -a "file:///$autobuild_package_filename" edit $autobuild_package_name hash=$autobuild_package_md5 2>&1 ; } >> installables.log \

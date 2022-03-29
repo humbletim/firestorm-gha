@@ -33,18 +33,19 @@ function _fsenv() {
   # download prebuilts from 3p.firestormviewer.org
 
   # 3p-<package_name> deps are resolved relative to this URL
-  setenv INLINE_FS3P_GITURL https://github.com/holostorm
+  setenv INLINE_FS3P_GITURL https://github.com
   ### :/ also 403's with vcs.firestormviewer.org...
   ### setenv INLINE_FS3P_GITURL https://vcs.firestormviewer.org/3p-libraries
 
   # format: packagerepo=gitcommit
   setenv INLINE_FS3P_DEPS "
-    discord-rpc=a21e3dc
-    ndPhysicsStub=aad4d9e
-    freetype=a8975b6
-    openjpeg2=d23ab9af
-    gntp-growl=7ed68be
-    glod=eecf86f
+    holostorm/3p-discord-rpc@a21e3dc#3p-discord-rpc
+    holostorm/3p-ndPhysicsStub@aad4d9e
+    holostorm/3p-freetype@a8975b6
+    holostorm/3p-openjpeg2@d23ab9af
+    holostorm/3p-gntp-growl@7ed68be
+    holostorm/3p-glod@eecf86f
+    ValveSoftware/openvr@d9cffe2#3p-openvr
   "
 
   # TODO: figure out where firestorm source code for 3p-dictionaries lives...
