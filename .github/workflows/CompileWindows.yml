@@ -101,7 +101,6 @@ jobs:
       with:
         path: ${{ env.AUTOBUILD_INSTALLABLE_CACHE }}
         key: ${{ runner.os }}-downloads-${{ hashFiles('autobuild.xml.sorted.txt') }}-${{ env.VIEWER_CHANNEL }}
-        restore-keys: Windows-downloads-cf779b9b86aceaf3eee860b0c6ffcce1176785053eb05075ed95b8d867963c07-FirestormVR-GHA
 
     - name: cache -- buildir packages
       id: cached-buildir-packages
@@ -109,7 +108,6 @@ jobs:
       with:
         path: c:\cache\packages
         key: ${{ runner.os }}-buildir-packages-${{ hashFiles('autobuild.xml.sorted.txt') }}-${{ env.VIEWER_CHANNEL }}
-        restore-keys: Windows-buildir-packages-cf779b9b86aceaf3eee860b0c6ffcce1176785053eb05075ed95b8d867963c07-FirestormVR-GHA
 
     - name: Reset cached packages sentinels
       # if: steps.cached-buildir-packages.outputs.cache-hit == 'true'
