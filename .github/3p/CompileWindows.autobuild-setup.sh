@@ -11,7 +11,7 @@ assert_defined AUTOBUILD_INSTALLABLE_CACHE AUTOBUILD_CONFIG_FILE \
 
 for x in $INLINE_FS3P_DEPS ; do
   echo "[[ $x ]]"
-  time .github/3p/inline-build.sh 3p-inline $INLINE_FS3P_GITURL/3p-$x
+  time .github/3p/inline-build.sh 3p-inline "$INLINE_FS3P_GITURL/$x"
   echo
 done
 

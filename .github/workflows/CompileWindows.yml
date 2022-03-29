@@ -92,8 +92,6 @@ jobs:
       # if: steps.cached-3p-inline.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        # sideload "3p-openvr"
-        .github/3p/inline-build.sh 3p-inline/ https://github.com/ValveSoftware/openvr d9cffe2 3p-openvr
         .github/3p/CompileWindows.autobuild-setup.sh
         test -f autobuild.xml.sorted.txt
 
@@ -129,7 +127,10 @@ jobs:
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
       shell: bash
       run: |
-        ninja -C ${{ env.FSBUILD_DIR }} newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj llpackage
+        ninja -C ${{ env.FSBUILD_DIR }} SLPlugin media_plugin_cef media_plugin_libvlc 
+        ninja -C ${{ env.FSBUILD_DIR }} newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj
+        ninja -C ${{ env.FSBUILD_DIR }} firestorm-bin
+        ninja -C ${{ env.FSBUILD_DIR }} llpackage
     - name: Upload Artifact (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
       uses: actions/upload-artifact@v2
