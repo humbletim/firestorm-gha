@@ -124,7 +124,7 @@ jobs:
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ join([ runner.os, github.event.inputs.buildsys, env.VIEWER_CHANNEL, env.VIEWER_VERSION_STR, env.VIEWER_VERSION_GITHASH ], '-') }}
+        name: ${{ format('{0}-{1}-{2}-{3}-{4}', runner.os, github.event.inputs.buildsys, env.VIEWER_CHANNEL, env.VIEWER_VERSION_STR, env.VIEWER_VERSION_GITHASH) }}
         path: |
           ${{ env.FSBUILD_DIR }}/newview/*_Setup.exe
           autobuild.xml.sorted.txt
