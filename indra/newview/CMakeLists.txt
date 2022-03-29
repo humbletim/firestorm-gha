@@ -2260,36 +2260,36 @@ if (WINDOWS)
     # stores a list in the variable myfile in which each item is a line from the input file."
     # And of course it's straightforward to read a text file in Python.
 
-    set(xCOPY_INPUT_DEPENDENCIES
+    set(COPY_INPUT_DEPENDENCIES
       # The following commented dependencies are determined at variably at build time. Can't do this here.
       ${CMAKE_SOURCE_DIR}/../etc/message.xml
       ${CMAKE_SOURCE_DIR}/../scripts/messages/message_template.msg
-      # ${SHARED_LIB_STAGING_DIR}/Release/llcommon.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/libapr-1.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/libaprutil-1.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/libapriconv-1.dll
+      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/llcommon.dll
+      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libapr-1.dll
+      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libaprutil-1.dll
+      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libapriconv-1.dll
       # <FS:Beq> Restore GLOD build dependencies
       ${SHARED_LIB_STAGING_DIR}/Release/glod.dll
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/glod.dll
       ${SHARED_LIB_STAGING_DIR}/Debug/glod.dll
       # </FS:Beq>
       ${SHARED_LIB_STAGING_DIR}/Release/libcollada14dom22.dll
-     # ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libcollada14dom22.dll
- #     ${SHARED_LIB_STAGING_DIR}/Debug/libcollada14dom22-d.dll
+      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libcollada14dom22.dll
+      ${SHARED_LIB_STAGING_DIR}/Debug/libcollada14dom22-d.dll
       # <FS:Ansariel> Only copy OpenJPEG dll if needed
       #${SHARED_LIB_STAGING_DIR}/Release/openjp2.dll
       #${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/openjp2.dll
       #${SHARED_LIB_STAGING_DIR}/Debug/openjp2.dll
       # </FS:Ansariel>
       ${SHARED_LIB_STAGING_DIR}/Release/libhunspell.dll
-    #  ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libhunspell.dll
-  #    ${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
+      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libhunspell.dll
+      ${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
       ${SHARED_LIB_STAGING_DIR}/Release/uriparser.dll
-   #   ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/uriparser.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/SLVoice.exe
-      ${SHARED_LIB_STAGING_DIR}/Release/libsndfile-1.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/vivoxoal.dll
-      ${SHARED_LIB_STAGING_DIR}/Release/ca-bundle.crt
+      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/uriparser.dll
+      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/SLVoice.exe
+      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/libsndfile-1.dll
+      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxoal.dll
+      ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ca-bundle.crt
       ${GOOGLE_PERF_TOOLS_SOURCE}
       ${CMAKE_CURRENT_SOURCE_DIR}/licenses-win32.txt
       ${CMAKE_CURRENT_SOURCE_DIR}/featuretable.txt
@@ -2302,12 +2302,12 @@ if (WINDOWS)
       )
 
     if (NOT USE_BUGSPLAT)
-#        LIST(APPEND COPY_INPUT_DEPENDENCIES windows-crash-logger)
+        LIST(APPEND COPY_INPUT_DEPENDENCIES windows-crash-logger)
     endif (NOT USE_BUGSPLAT)
 
     # <FS:Ansariel> Only copy OpenJPEG dll if needed
     if (NOT USE_KDU)
-        list(APPEND xCOPY_INPUT_DEPENDENCIES
+        list(APPEND COPY_INPUT_DEPENDENCIES
             ${SHARED_LIB_STAGING_DIR}/Release/openjp2.dll
             ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/openjp2.dll
             ${SHARED_LIB_STAGING_DIR}/Debug/openjp2.dll
@@ -2316,16 +2316,16 @@ if (WINDOWS)
     # </FS:Ansariel>
 
     if (ADDRESS_SIZE EQUAL 64)
-        list(APPEND xCOPY_INPUT_DEPENDENCIES
-            ${SHARED_LIB_STAGING_DIR}/Release/vivoxsdk_x64.dll
-            ${SHARED_LIB_STAGING_DIR}/Release/ortp_x64.dll
+        list(APPEND COPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk_x64.dll
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp_x64.dll
            ${ARCH_PREBUILT_DIRS_RELEASE}/libcrypto-1_1-x64.dll
            ${ARCH_PREBUILT_DIRS_RELEASE}/libssl-1_1-x64.dll
             )
     else (ADDRESS_SIZE EQUAL 64)
-        list(APPEND xCOPY_INPUT_DEPENDENCIES
-            ${SHARED_LIB_STAGING_DIR}/Release/vivoxsdk.dll
-            ${SHARED_LIB_STAGING_DIR}/Release/ortp.dll
+        list(APPEND COPY_INPUT_DEPENDENCIES
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk.dll
+            ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp.dll
             ${ARCH_PREBUILT_DIRS_RELEASE}/libcrypto-1_1.dll
             ${ARCH_PREBUILT_DIRS_RELEASE}/libssl-1_1.dll
             )
@@ -2340,9 +2340,9 @@ if (WINDOWS)
     endif (FMODSTUDIO)
 
     if (OPENAL)
-      list(APPEND xCOPY_INPUT_DEPENDENCIES
-           ${SHARED_LIB_STAGING_DIR}/Release/OpenAL32.dll
-           ${SHARED_LIB_STAGING_DIR}/Release/alut.dll
+      list(APPEND COPY_INPUT_DEPENDENCIES
+           ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/OpenAL32.dll
+           ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/alut.dll
           )
     endif (OPENAL)
 
@@ -2370,7 +2370,7 @@ if (WINDOWS)
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         stage_third_party_libs
-        ${COPY_INPUT_DEPENDENCIES}
+        # ${COPY_INPUT_DEPENDENCIES}
       COMMENT "Performing viewer_manifest copy"
       )
 
@@ -2432,7 +2432,7 @@ if (WINDOWS)
             ${VIEWER_BINARY_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
             ${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
-            ${COPY_INPUT_DEPENDENCIES}
+            # ${COPY_INPUT_DEPENDENCIES}
         )
 
       add_custom_target(llpackage ALL DEPENDS
