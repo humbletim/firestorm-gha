@@ -22,7 +22,7 @@ jobs:
     runs-on: windows-2019
     env:
        VIEWER_CHANNEL: FirestormVR-GHA
-       AUTOBUILD_BUILD_ID: 65659
+       AUTOBUILD_BUILD_ID: 65658
        AUTOBUILD_CONFIGURATION: ReleaseFS_open
     steps:
     - uses: actions/checkout@v2
@@ -115,9 +115,9 @@ jobs:
       # if: steps.cached-buildir-packages.outputs.cache-hit == 'true'
       shell: bash
       run: |
-        touch ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/sentinel_installed || true
+        sleep 2 && touch ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/sentinel_installed || true
         sleep 2 && touch `ls ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed | fgrep -v sentinel_installed` || true
-        ls -l autobuild.xml ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed || true
+        ls -lrt autobuild.xml ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed || true
 
     - name: Configure autobuild (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' }}
