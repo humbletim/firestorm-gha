@@ -15,7 +15,14 @@ function _fsenv() {
       if [[ $# -lt 2 ]] ; then return 0 ; fi
       eval "export ${1}=\"$2\""
     fi
-    echo "${1}=\"${!1}\""
+    if [[ ${!1} == *$'\n'* ]] ; then
+      # bash and github action multiline env vars compat
+      echo "${1}<<EOF"
+      echo "${!1}"
+      echo "EOF"
+    else
+      echo "${1}=\"${!1}\""
+    fi
   }
 
   setenv _3P_UTILSDIR "$(cd $(dirname $0)/3p && pwd)"
