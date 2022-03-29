@@ -21,10 +21,11 @@ function _fsenv() {
       echo "${!1}"
       echo "EOF"
     else
-      echo "${1}=\"${!1}\""
+      echo "${1}=${!1}"
     fi
   }
 
+  setenv GHA_TEST_WITH_SPACES "testing 1 2 3...tab\t."
   setenv _3P_UTILSDIR "$(cd $(dirname $0)/3p && pwd)"
 
   ############################################################################
