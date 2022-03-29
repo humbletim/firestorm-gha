@@ -125,13 +125,21 @@ jobs:
       run: |
         autobuild --version
         autobuild configure -- --no-vstools --ninja --package --openal --chan ${{ env.VIEWER_CHANNEL }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
-    - name: Build & Package (ninja)
+    - name: Build plugins (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
-      shell: bash
       run: |
         ninja -C ${{ env.FSBUILD_DIR }} SLPlugin media_plugin_cef media_plugin_libvlc 
+    - name: Build precompiled header (ninja)
+      if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
+      run: |
         ninja -C ${{ env.FSBUILD_DIR }} newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj
+    - name: Build firestorm-bin (ninja)
+      if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
+      run: |
         ninja -C ${{ env.FSBUILD_DIR }} firestorm-bin
+    - name: Package (ninja)
+      if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
+      run: |
         ninja -C ${{ env.FSBUILD_DIR }} llpackage
     - name: Upload Artifact (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
