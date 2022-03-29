@@ -32,7 +32,7 @@ def _llsd(level; value):
 def llsd: 
   "<?xml version=\"1.0\" ?>\n"+
   "<llsd>\n" +
-    _pad(1) + _llsd(2; .) + "\n"
+    _pad(1) + _llsd(2; .) + "\n" +
   "</llsd>";
   
 
