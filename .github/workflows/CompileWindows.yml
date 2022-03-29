@@ -115,8 +115,9 @@ jobs:
       # if: steps.cached-buildir-packages.outputs.cache-hit == 'true'
       shell: bash
       run: |
-        touch `ls ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed | fgrep -v sentinel_installed` || true
-        ls -l ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed || true
+        touch ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/sentinel_installed || true
+        sleep 2 && touch `ls ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed | fgrep -v sentinel_installed` || true
+        ls -l autobuild.xml ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed || true
 
     - name: Configure autobuild (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' }}
