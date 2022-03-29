@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../openvr/headers/openvr.h"
+#include <openvr.h>
 #include "llhudtext.h"
 #include "llgl.h"
 #include "string.h"
