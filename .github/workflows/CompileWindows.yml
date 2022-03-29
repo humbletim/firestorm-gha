@@ -112,10 +112,11 @@ jobs:
         restore-keys: Windows-buildir-packages-cf779b9b86aceaf3eee860b0c6ffcce1176785053eb05075ed95b8d867963c07-FirestormVR-GHA
 
     - name: Reset cached packages sentinels
-      if: steps.cached-buildir-packages.outputs.cache-hit == 'true'
+      # if: steps.cached-buildir-packages.outputs.cache-hit == 'true'
       shell: bash
       run: |
-        touch `ls ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed | fgrep -v sentinel_installed`
+        touch `ls ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed | fgrep -v sentinel_installed` || true
+        ls -l ${{ env.FSBUILD_DIR }}/packages/cmake_tracking/*_installed || true
 
     - name: Configure autobuild (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' }}
