@@ -594,7 +594,7 @@ class WindowsManifest(ViewerManifest):
 
         # Plugin host application
         self.path2basename(os.path.join(os.pardir,
-                                        'llplugin', 'slplugin', self.args['configuration']),
+                                        'llplugin', 'slplugin', '.' or self.args['configuration']),
                            "slplugin.exe")
 
         with self.prefix(src=os.path.join(relpkgdir)):
@@ -698,11 +698,11 @@ class WindowsManifest(ViewerManifest):
         # Media plugins - CEF
         with self.prefix(dst="llplugin"):
             with self.prefix(src=os.path.join(self.args['build'], os.pardir, 'media_plugins')):
-                with self.prefix(src=os.path.join('cef', self.args['configuration'])):
+                with self.prefix(src=os.path.join('cef', '.' or self.args['configuration'])):
                     self.path("media_plugin_cef.dll")
 
                 # Media plugins - LibVLC
-                with self.prefix(src=os.path.join('libvlc', self.args['configuration'])):
+                with self.prefix(src=os.path.join('libvlc', '.' or self.args['configuration'])):
                     self.path("media_plugin_libvlc.dll")
 
                 # Media plugins - Example (useful for debugging - not shipped with release viewer)
