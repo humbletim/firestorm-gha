@@ -21,7 +21,7 @@ jobs:
   windows_build:
     runs-on: windows-2019
     env:
-       VIEWER_CHANNEL: FirestormVR-GHA
+       VIEWER_CHANNEL: VR-GHA
        AUTOBUILD_BUILD_ID: 65658
        AUTOBUILD_CONFIGURATION: ReleaseFS_open
     steps:
@@ -84,7 +84,7 @@ jobs:
       id: cached-3p-inline
       uses: actions/cache@v2
       with:
-        key: ${{ runner.os }}-3p-inline-${{ hashFiles('3p-inline.sorted.txt') }}-${{ env.VIEWER_CHANNEL }}
+        key: ${{ runner.os }}-3p-inline-${{ hashFiles('3p-inline.sorted.txt') }}-FirestormVR-GHA
         path: |
           3p-inline/*/_results.env
           3p-inline/*/*.tar.bz2
@@ -100,14 +100,14 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ env.AUTOBUILD_INSTALLABLE_CACHE }}
-        key: ${{ runner.os }}-downloads-${{ hashFiles('autobuild.xml.sorted.txt') }}-${{ env.VIEWER_CHANNEL }}
+        key: ${{ runner.os }}-downloads-${{ hashFiles('autobuild.xml.sorted.txt') }}-FirestormVR-GHA
 
     - name: cache -- buildir packages
       id: cached-buildir-packages
       uses: actions/cache@v2
       with:
         path: c:\cache\packages
-        key: ${{ runner.os }}-buildir-packages-${{ hashFiles('autobuild.xml.sorted.txt') }}-${{ env.VIEWER_CHANNEL }}
+        key: ${{ runner.os }}-buildir-packages-${{ hashFiles('autobuild.xml.sorted.txt') }}-FirestormVR-GHA
 
     - name: Reset cached packages sentinels
       # if: steps.cached-buildir-packages.outputs.cache-hit == 'true'
