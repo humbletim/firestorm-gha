@@ -1,5 +1,5 @@
 # firestorm-gha + vr
-Test to build the [Firestorm Viewer](https://www.firestormviewer.org/about/) + [P373R VR Mod](https://gsgrid.de/firestorm-vr-mod/) using Github Actions.
+Build of the [Firestorm Viewer](https://www.firestormviewer.org/about/) + [P373R VR Mod](https://gsgrid.de/firestorm-vr-mod/) using Github Actions.
 
 <!--![C/C++ CI](../../workflows/C/C++%20CI/badge.svg)-->
 
