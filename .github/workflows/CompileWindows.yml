@@ -30,7 +30,11 @@ jobs:
         submodules: true
     - name: Preset ENV
       shell: bash
-      run: .github/fsenv.sh | tee -a $GITHUB_ENV
+      run: |
+        .github/fsenv.sh | tee -a $GITHUB_ENV
+        if [[ ! ${GITHUB_ACTIONS+x} ]] ; then #dev
+          set -ea && source <( .github/fsenv.sh ) && set +ea && test -n "$VIEWER_CHANNEL" -a -n "$FSBUILD_DIR" -a -n "$AUTOBUILD_VSVER" #dev
+        fi #dev
     - name: Prep build dirs
       shell: cmd
       run: |
@@ -62,10 +66,15 @@ jobs:
       with:
         python-version: 3.8
         architecture: x64
+    - name: Workaround Firestorm Python.cmake 
+      run: |
+        export PYTHON_EXECUTABLE=$(cygpath -ms "`which python`") #dev
+        echo PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} | tee -a $GITHUB_ENV
     - name: Get software versions please
       shell: cmd
       run: |
         echo AUTOBUILD_INSTALLABLE_CACHE='%AUTOBUILD_INSTALLABLE_CACHE%'
+        echo PYTHON_EXECUTABLE='%PYTHON_EXECUTABLE%'
         cmake --version
         git --version
         python --version
@@ -75,10 +84,12 @@ jobs:
         echo " "
         df -h
     - name: Install autobuild through PIP
-      run: pip install 'git+https://bitbucket.org/lindenlab/autobuild.git#egg=autobuild'
+      run: |
+        which autobuild || pip install 'git+https://bitbucket.org/lindenlab/autobuild.git#egg=autobuild' #dev
     - name: generate sorted 3p-inline manifest
       shell: bash
-      run: for x in $INLINE_FS3P_DEPS ; do echo $x ; done | sort -u | tee 3p-inline.sorted.txt
+      run: |
+        for x in $INLINE_FS3P_DEPS ; do echo $x ; done | sort -u | tee 3p-inline.sorted.txt
     - name: cache -- 3p-inline
       id: cached-3p-inline
       uses: actions/cache@v2
@@ -91,7 +102,7 @@ jobs:
       # if: steps.cached-3p-inline.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        .github/3p/CompileWindows.autobuild-setup.sh
+        .github/3p/CompileWindows.autobuild-setup.sh #dev
         test -f autobuild.xml.sorted.txt
 
     - name: cache -- autobuild downloads
@@ -111,38 +122,33 @@ jobs:
     - name: Reset cached packages sentinels
       # if: steps.cached-buildir-packages.outputs.cache-hit == 'true'
       shell: bash
-      working-directory: ${{ env.FSBUILD_DIR }}
       run: |
-        sleep 2 && touch ./packages/cmake_tracking/sentinel_installed || true
-        sleep 2 && touch `ls ./packages/cmake_tracking/*_installed | fgrep -v sentinel_installed` || true
-        ls -lrt ../autobuild.xml ./packages/cmake_tracking/*_installed || true
+        .github/fs_reset_sentinels.sh ${FSBUILD_DIR} #dev
+        ls -lrt autobuild.xml ${FSBUILD_DIR}/packages/cmake_tracking/*_installed || true
 
     - name: Configure autobuild (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' }}
       shell: bash
       run: |
         autobuild --version
-        autobuild configure -- --no-vstools --ninja --package --openal --chan ${VIEWER_CHANNEL} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
+        test -n "${VIEWER_CHANNEL}" && test -n "${PYTHON_EXECUTABLE}" #dev
+        autobuild configure -- --no-vstools --ninja --package --openal --chan "${VIEWER_CHANNEL}" -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON #dev
     - name: Build plugins (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
-      working-directory: ${{ env.FSBUILD_DIR }}
       run: |
-        ninja SLPlugin media_plugin_cef media_plugin_libvlc 
+        ninja -C ${FSBUILD_DIR} SLPlugin media_plugin_cef media_plugin_libvlc #dev
     - name: Build precompiled header (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
-      working-directory: ${{ env.FSBUILD_DIR }}
       run: |
-        ninja newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj
+        ninja -C ${FSBUILD_DIR} newview/CMakeFiles/firestorm-bin.dir/llviewerprecompiledheaders.cpp.obj #dev
     - name: Build firestorm-bin (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
-      working-directory: ${{ env.FSBUILD_DIR }}
       run: |
-        ninja firestorm-bin
+        ninja -C ${FSBUILD_DIR} firestorm-bin #dev
     - name: Package (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
-      working-directory: ${{ env.FSBUILD_DIR }}
       run: |
-        ninja llpackage
+        ninja -C ${FSBUILD_DIR} llpackage #dev
     - name: Upload Artifact (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
       uses: actions/upload-artifact@v2
@@ -158,7 +164,7 @@ jobs:
       shell: cmd
       run: |
         autobuild --version
-        autobuild configure -- --package --no-vstools --openal --chan ${{ env.VIEWER_CHANNEL }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
+        autobuild configure -- --package --no-vstools --openal --chan ${{ env.VIEWER_CHANNEL }} -DPYTHON_EXECUTABLE=${{ env.PYTHON_EXECUTABLE }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
     - name: Build & Package (msbuild)
       if: ${{ github.event.inputs.buildsys == 'msbuild' && github.event.inputs.llpackage == 'true' }}
       shell: cmd
