@@ -83,6 +83,7 @@ function _fsenv() {
 
   ### environment variables specific to github actions / windows builds
   # setenv VIEWER_CHANNEL=FirestormVR-GHA
+  setenv PYTHONUTF8 1
   setenv PreferredToolArchitecture x64
   setenv VIEWER_VERSION_REVISION dev
   setenv FSBUILD_DIR build-vc${AUTOBUILD_VSVER}-${AUTOBUILD_ADDRSIZE}
