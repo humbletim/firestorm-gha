@@ -75,9 +75,7 @@ jobs:
         echo " "
         df -h
     - name: Install autobuild through PIP
-      run: pip install git+https://bitbucket.org/lindenlab/autobuild.git#egg=autobuild'
-      # run: pip install git+https://github.com/humbletim/autobuild-1.1#egg=autobuild
-
+      run: pip install 'git+https://bitbucket.org/lindenlab/autobuild.git#egg=autobuild'
     - name: generate sorted 3p-inline manifest
       shell: bash
       run: for x in $INLINE_FS3P_DEPS ; do echo $x ; done | sort -u | tee 3p-inline.sorted.txt
