@@ -9,24 +9,33 @@ function _fsenv() {
 
   # setenv <name> [default-value]
   #   exports the named variable and emits a key="value" to stdout
-  #   (a no-op when the variable doesn't exist and no default is specified)
+  #   (a no-op when both the variable doesn't exist and no default is specified)
   function setenv() {
     if [[ ! ${!1+x} ]] ; then
       if [[ $# -lt 2 ]] ; then return 0 ; fi
-      eval "export ${1}=\"$2\""
+      # var not present assign to default and export 
+      printf -v "${1}" "%s" "${2}"
     fi
-    if [[ ${!1} == *$'\n'* ]] ; then
-      # bash and github action multiline env vars compat
-      echo "${1}<<EOF"
-      echo "${!1}"
-      echo "EOF"
+    emitvar "$@"
+  }
+
+  function emitvar() {
+    if [[ ${GITHUB_ACTIONS+x} ]] ; then
+      # output github action (GITHUB_ENV) compatible multiline/escaped variables
+      if [[ ${!1} == *$'\n'* ]] ; then
+        echo "${1}<<EOF"
+        echo "${!1}"
+        echo "EOF"
+      else
+        echo "${1}=${!1}"
+      fi
     else
-      echo "${1}=${!1}"
+      # output bash compatible multiline/escaped variables
+      declare -p "${1}"
     fi
   }
 
-  setenv GHA_TEST_WITH_SPACES "testing 1 2 3...tab\t."
-  setenv _3P_UTILSDIR "$(cd $(dirname $0)/3p && pwd)"
+  setenv GHA_TEST_WITH_SPACES "testing \"1\" 2 3...tab\t."
 
   ############################################################################
   # workaround for github actions receiving 403: Forbidden errors when trying to
@@ -37,7 +46,7 @@ function _fsenv() {
   ### :/ also 403's with vcs.firestormviewer.org...
   ### setenv INLINE_FS3P_GITURL https://vcs.firestormviewer.org/3p-libraries
 
-  # format: packagerepo=gitcommit
+  # format: packagerepo@gitcommit[#alias]
   setenv INLINE_FS3P_DEPS "
     holostorm/3p-discord-rpc@a21e3dc#3p-discord-rpc
     holostorm/3p-ndPhysicsStub@aad4d9e
@@ -63,13 +72,16 @@ function _fsenv() {
   # https://bitbucket.org/kokua/3p-ndPhysicsStub/downloads/ndPhysicsStub-1.0-windows64-203290044.tar.bz2=bd172f8cf47ce5ba53a4d4128b2580d5
   ############################################################################
 
-  ### AUTOBUILD_ environment variables
   if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
     case `uname -s` in
       MINGW*) local GITHUB_WORKSPACE=$(pwd -W) ;;
       *) local GITHUB_WORKSPACE=$PWD ;;
     esac
   fi
+  setenv _3P_UTILSDIR ${GITHUB_WORKSPACE}/.github/3p
+
+  ### AUTOBUILD_ environment variables
+
   setenv AUTOBUILD_VARIABLES_FILE ${GITHUB_WORKSPACE}/fs-build-variables/variables
   setenv AUTOBUILD_CONFIG_FILE ${GITHUB_WORKSPACE}/autobuild.xml
   setenv AUTOBUILD_INSTALLABLE_CACHE ${GITHUB_WORKSPACE}/autobuild-cache
