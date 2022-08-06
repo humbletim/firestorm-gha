@@ -16,6 +16,7 @@ function _fsenv() {
       # var not present assign to default and export 
       printf -v "${1}" "%s" "${2}"
     fi
+    eval "export ${1}"
     emitvar "$@"
   }
 
@@ -87,7 +88,7 @@ function _fsenv() {
   setenv AUTOBUILD_INSTALLABLE_CACHE ${GITHUB_WORKSPACE}/autobuild-cache
 
   setenv AUTOBUILD_LOGLEVEL --verbose
-  setenv AUTOBUILD_PLATFORM windows64
+  setenv AUTOBUILD_PLATFORM ${os}64
   setenv AUTOBUILD_ADDRSIZE 64
   setenv AUTOBUILD_VSVER 164
   setenv AUTOBUILD_CONFIGURATION ReleaseFS_open
@@ -98,7 +99,11 @@ function _fsenv() {
   setenv PYTHONUTF8 1
   setenv PreferredToolArchitecture x64
   setenv VIEWER_VERSION_REVISION dev
-  setenv FSBUILD_DIR build-vc${AUTOBUILD_VSVER}-${AUTOBUILD_ADDRSIZE}
+  if [[ $os == windows ]] ; then
+    setenv FSBUILD_DIR build-vc${AUTOBUILD_VSVER}-${AUTOBUILD_ADDRSIZE}
+  else
+    setenv FSBUILD_DIR build-linux-x86_64
+  fi
   setenv FSVS_TARGET Ninja # 'Visual Studio 16 2019'
 
   setenv VIEWER_VERSION_STR `echo $(cat indra/newview/VIEWER_VERSION.txt)`.${AUTOBUILD_BUILD_ID}
@@ -106,8 +111,15 @@ function _fsenv() {
   setenv VIEWER_CHANNEL
   unset _fsenv
 }
-_fsenv
-# exec wrapped command line (if any)
-if [[ -n $# ]] ; then
+
+if (return 0 2>/dev/null) ; then
+  # fsenv.sh was sourced ; export only
+  _fsenv > /dev/null
+elif [[ -n $# ]] ; then
+  # fsenv.sh was passed subcommands ; export and execute
+  _fsenv > /dev/null
   "$@"
+else
+  # fsenv.sh was called without arguments ; export and echo to stdout
+  _fsenv
 fi
