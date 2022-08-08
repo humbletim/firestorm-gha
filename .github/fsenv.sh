@@ -38,6 +38,14 @@ function _fsenv() {
 
   setenv GHA_TEST_WITH_SPACES "testing \"1\" 2 3...tab\t."
 
+  if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
+    case `uname -s` in
+      MINGW*) local os=windows GITHUB_WORKSPACE=$(pwd -W) ;;
+      *) local os=linux GITHUB_WORKSPACE=$PWD ;;
+    esac
+  fi
+  setenv _3P_UTILSDIR ${GITHUB_WORKSPACE}/.github/3p
+
   ############################################################################
   # workaround for github actions receiving 403: Forbidden errors when trying to
   # download prebuilts from 3p.firestormviewer.org
@@ -48,12 +56,16 @@ function _fsenv() {
   ### setenv INLINE_FS3P_GITURL https://vcs.firestormviewer.org/3p-libraries
 
   # format: packagerepo@gitcommit[#alias]
+  local growl=
+  if [[ $os == 'windows' ]] ; then
+    growl="holostorm/3p-gntp-growl@7ed68be"
+  fi
   setenv INLINE_FS3P_DEPS "
     holostorm/3p-discord-rpc@a21e3dc#3p-discord-rpc
     holostorm/3p-ndPhysicsStub@aad4d9e
-    holostorm/3p-freetype@a8975b6
+    holostorm/3p-freetype@577c3bdc
     holostorm/3p-openjpeg2@d23ab9af
-    holostorm/3p-gntp-growl@7ed68be
+    $growl
     holostorm/3p-glod@eecf86f
     ValveSoftware/openvr@d9cffe2#3p-openvr
   "
@@ -72,14 +84,6 @@ function _fsenv() {
   # http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/54974/511767/openjpeg-1.5.1.538970-windows64-538970.tar.bz2=5b5c80807fa8161f3480be3d89fe9516
   # https://bitbucket.org/kokua/3p-ndPhysicsStub/downloads/ndPhysicsStub-1.0-windows64-203290044.tar.bz2=bd172f8cf47ce5ba53a4d4128b2580d5
   ############################################################################
-
-  if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
-    case `uname -s` in
-      MINGW*) local GITHUB_WORKSPACE=$(pwd -W) ;;
-      *) local GITHUB_WORKSPACE=$PWD ;;
-    esac
-  fi
-  setenv _3P_UTILSDIR ${GITHUB_WORKSPACE}/.github/3p
 
   ### AUTOBUILD_ environment variables
 

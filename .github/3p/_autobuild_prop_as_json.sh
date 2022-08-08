@@ -7,7 +7,7 @@ function autobuild_prop_as_json() {
     echo 'import json; print(json.dumps(('
     autobuild installables print $1
     echo '), indent=4))'
-  ) | python | jq -r "(.platforms.windows64//.platforms.common)|$2"
+  ) | python | jq -r "(.platforms.$AUTOBUILD_PLATFORM//.platforms.common)|$2"
 }
 
 function autobuild_jq() {

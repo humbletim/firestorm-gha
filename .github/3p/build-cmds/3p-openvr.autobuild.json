@@ -17,6 +17,12 @@
         "configurations": {"default":{"build":{},"default":"true","name":"default"}},
         "manifest": [ "lib/release/openvr_api.lib", "lib/release/openvr_api.dll" ],
         "name": "windows64"
+      },
+      "linux64": {
+        "build_directory": "stage",
+        "configurations": {"default":{"build":{},"default":"true","name":"default"}},
+        "manifest": [ "lib/release/libopenvr_api.so" ],
+        "name": "linux64"
       }
     },
     "version_file": "VERSION.txt"

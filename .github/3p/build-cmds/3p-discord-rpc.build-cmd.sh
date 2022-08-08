@@ -15,15 +15,26 @@ mkdir -p stage/lib/release
 mkdir -p stage/LICENSES
 mkdir -p stage/include/discord-rpc
 
-wdflags=$(echo "
-  warning C5039: 'TpSetCallbackCleanupGroup': pointer or reference to potentially throwing function passed to 'extern C' function under -EHc.
-  warning C5045: Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
-" | awk '{ print $2 }' | sed -e 's@C@-wd@; s@:$@@;')
+wdflags=
+
+if [[ $AUTOBUILD_PLATFORM == windows* ]] ; then
+  wdflags=$(echo "
+    warning C5039: 'TpSetCallbackCleanupGroup': pointer or reference to potentially throwing function passed to 'extern C' function under -EHc.
+    warning C5045: Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
+  " | awk '{ print $2 }' | sed -e 's@C@-wd@; s@:$@@;')
+fi
 
 cmake -S $DISCORD_SOURCE_DIR -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DCMAKE_CXX_FLAGS="`echo $wdflags`"
 ninja -C build
 
-cp -av build/src/discord-rpc.{lib,dll} stage/lib/release/
+if [[ $AUTOBUILD_PLATFORM == windows* ]] ; then
+  cp -av build/src/discord-rpc.{lib,dll} stage/lib/release/
+fi
+
+if [[ $AUTOBUILD_PLATFORM == linux* ]] ; then
+  cp -av build/src/libdiscord-rpc.so stage/lib/release/
+fi
+
 cp -av $DISCORD_SOURCE_DIR/LICENSE stage/LICENSES/discord-rpc.txt
 cp -av $DISCORD_SOURCE_DIR/include/*.h stage/include/discord-rpc/
 cp -av VERSION.txt stage/

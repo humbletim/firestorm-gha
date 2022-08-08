@@ -17,14 +17,28 @@ mkdir -p $stage/include/freetype2/
 mkdir -p $stage/LICENSES
 mkdir -p $stage/docs/freetype
 
+if [[ $AUTOBUILD_PLATFORM == linux* ]] ; then
+  function cl() {
+    $CXX -fPIC "$@"
+  }
+  function lib() {
+    local args="${@/-out:/-shared -o }"
+    args="${args/freetype.lib/libfreetype.so}"
+    args="${args/.obj/.o}"
+    ld ${args}
+  }
+fi
 pushd $FREETYPELIB_SOURCE_DIR
   SRCS=$(_dsp_sourcefiles builds/win32/visualc/freetype.dsp)
 
-  # tidy up some warnings
-  wdflags=$(echo "
-    warning C4312: 'type cast': conversion from 'unsigned long' to 'void *' of greater size
-    warning C4311: 'type cast': pointer truncation from 'void *' to 'unsigned long'
-  " | awk '{ print $2 }' | sed -e 's@C@-wd@; s@:$@@;')
+  wdflags=
+  if [[ $AUTOBUILD_PLATFORM == windows* ]] ; then
+    # tidy up some warnings
+    wdflags=$(echo "
+      warning C4312: 'type cast': conversion from 'unsigned long' to 'void *' of greater size
+      warning C4311: 'type cast': pointer truncation from 'void *' to 'unsigned long'
+    " | awk '{ print $2 }' | sed -e 's@C@-wd@; s@:$@@;')
+  fi
 
   set -x
     # -I$stage/packages/include/zlib-ng
