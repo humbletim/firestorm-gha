@@ -1912,7 +1912,7 @@ class LinuxManifest(ViewerManifest):
                 self.path("launch_url.sh")
             self.path("install.sh")
 
-        with self.prefix(src=os.path.join(pkgdir, os.pardir, os.pardir, 'openvr', 'bin', 'linux64')):
+        with self.prefix(src=os.path.join(pkgdir, 'lib', 'release'), dst="lib"):
             self.path("libopenvr_api.so")
 
         with self.prefix(dst="bin"):

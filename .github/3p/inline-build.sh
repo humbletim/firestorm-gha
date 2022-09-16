@@ -80,6 +80,7 @@ test -e $srcdir/.git || (
 
 # patch build-cmd.sh
 cp -av $buildcmd $srcdir/build-cmd.sh
+chmod a+x $srcdir/build-cmd.sh
 buildjson=$(dirname $0)/build-cmds/${NAME}.autobuild.json
 if [[ -f $buildjson && ! -f $srcdir/autobuild.xml ]] ; then
   echo "generating $NAME autobuild.xml from $buildjson" >&2

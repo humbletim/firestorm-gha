@@ -16,6 +16,7 @@ function _fsenv() {
       # var not present assign to default and export 
       printf -v "${1}" "%s" "${2}"
     fi
+    eval "export ${1}"
     emitvar "$@"
   }
 
@@ -37,6 +38,14 @@ function _fsenv() {
 
   setenv GHA_TEST_WITH_SPACES "testing \"1\" 2 3...tab\t."
 
+  if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
+    case `uname -s` in
+      MINGW*) local os=windows GITHUB_WORKSPACE=$(pwd -W) ;;
+      *) local os=linux GITHUB_WORKSPACE=$PWD ;;
+    esac
+  fi
+  setenv _3P_UTILSDIR ${GITHUB_WORKSPACE}/.github/3p
+
   ############################################################################
   # workaround for github actions receiving 403: Forbidden errors when trying to
   # download prebuilts from 3p.firestormviewer.org
@@ -47,12 +56,16 @@ function _fsenv() {
   ### setenv INLINE_FS3P_GITURL https://vcs.firestormviewer.org/3p-libraries
 
   # format: packagerepo@gitcommit[#alias]
+  local growl=
+  if [[ $os == 'windows' ]] ; then
+    growl="holostorm/3p-gntp-growl@7ed68be"
+  fi
   setenv INLINE_FS3P_DEPS "
     holostorm/3p-discord-rpc@a21e3dc#3p-discord-rpc
     holostorm/3p-ndPhysicsStub@aad4d9e
-    holostorm/3p-freetype@a8975b6
+    holostorm/3p-freetype@577c3bdc
     holostorm/3p-openjpeg2@d23ab9af
-    holostorm/3p-gntp-growl@7ed68be
+    $growl
     holostorm/3p-glod@eecf86f
     ValveSoftware/openvr@d9cffe2#3p-openvr
   "
@@ -72,14 +85,6 @@ function _fsenv() {
   # https://bitbucket.org/kokua/3p-ndPhysicsStub/downloads/ndPhysicsStub-1.0-windows64-203290044.tar.bz2=bd172f8cf47ce5ba53a4d4128b2580d5
   ############################################################################
 
-  if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
-    case `uname -s` in
-      MINGW*) local GITHUB_WORKSPACE=$(pwd -W) ;;
-      *) local GITHUB_WORKSPACE=$PWD ;;
-    esac
-  fi
-  setenv _3P_UTILSDIR ${GITHUB_WORKSPACE}/.github/3p
-
   ### AUTOBUILD_ environment variables
 
   setenv AUTOBUILD_VARIABLES_FILE ${GITHUB_WORKSPACE}/fs-build-variables/variables
@@ -87,7 +92,7 @@ function _fsenv() {
   setenv AUTOBUILD_INSTALLABLE_CACHE ${GITHUB_WORKSPACE}/autobuild-cache
 
   setenv AUTOBUILD_LOGLEVEL --verbose
-  setenv AUTOBUILD_PLATFORM windows64
+  setenv AUTOBUILD_PLATFORM ${os}64
   setenv AUTOBUILD_ADDRSIZE 64
   setenv AUTOBUILD_VSVER 164
   setenv AUTOBUILD_CONFIGURATION ReleaseFS_open
@@ -98,7 +103,11 @@ function _fsenv() {
   setenv PYTHONUTF8 1
   setenv PreferredToolArchitecture x64
   setenv VIEWER_VERSION_REVISION dev
-  setenv FSBUILD_DIR build-vc${AUTOBUILD_VSVER}-${AUTOBUILD_ADDRSIZE}
+  if [[ $os == windows ]] ; then
+    setenv FSBUILD_DIR build-vc${AUTOBUILD_VSVER}-${AUTOBUILD_ADDRSIZE}
+  else
+    setenv FSBUILD_DIR build-linux-x86_64
+  fi
   setenv FSVS_TARGET Ninja # 'Visual Studio 16 2019'
 
   setenv VIEWER_VERSION_STR `echo $(cat indra/newview/VIEWER_VERSION.txt)`.${AUTOBUILD_BUILD_ID}
@@ -106,8 +115,15 @@ function _fsenv() {
   setenv VIEWER_CHANNEL
   unset _fsenv
 }
-_fsenv
-# exec wrapped command line (if any)
-if [[ -n $# ]] ; then
+
+if (return 0 2>/dev/null) ; then
+  # fsenv.sh was sourced ; export only
+  _fsenv > /dev/null
+elif [[ -n $# ]] ; then
+  # fsenv.sh was passed subcommands ; export and execute
+  _fsenv > /dev/null
   "$@"
+else
+  # fsenv.sh was called without arguments ; export and echo to stdout
+  _fsenv
 fi
