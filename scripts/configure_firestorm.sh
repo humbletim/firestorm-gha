@@ -428,10 +428,13 @@ fi
 if [ \( $WANTS_VERSION -eq $TRUE \) -o \( $WANTS_CONFIG -eq $TRUE \) ] ; then
     echo "Versioning..."
     pushd ..
-    if [ -d .git ]
+    buildVer=${AUTOBUILD_BUILD_ID:-${VIEWER_VERSION_REVISION:-}}
+    if [ -n $buildVer ] ; then
+      true
+    elif [ -d .git ]
     then
         buildVer=`git rev-list --count HEAD`
-    else
+    elif which hg ; then
         buildVer=`hg summary | head -1 | cut -d " "  -f 2 | cut -d : -f 1 | grep "[0-9]*"`
     fi
     export revision=${buildVer}
@@ -439,7 +442,7 @@ if [ \( $WANTS_VERSION -eq $TRUE \) -o \( $WANTS_CONFIG -eq $TRUE \) ] ; then
     majorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 1`
     minorVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 2`
     patchVer=`cat indra/newview/VIEWER_VERSION.txt | cut -d "." -f 3`
-    gitHash=`git describe --always --exclude '*'`
+    gitHash=${VIEWER_VERSION_GITHASH:-`git describe --always --exclude '*'`}
     echo "Channel : ${CHANNEL}"
     echo "Version : ${majorVer}.${minorVer}.${patchVer}.${buildVer} [${gitHash}]"
     GITHASH=-DVIEWER_VERSION_GITHASH=\"${gitHash}\"
@@ -576,7 +579,7 @@ if [ $WANTS_CONFIG -eq $TRUE ] ; then
         fi
     fi
 
-    cmake -G "$TARGET" ../indra $CHANNEL ${GITHASH} $FMODSTUDIO $OPENAL $KDU $OPENSIM $SINGLEGRID $AVX_OPTIMIZATION $AVX2_OPTIMIZATION $TRACY_PROFILER $TESTBUILD $PACKAGE \
+    cmake -G "${FSVS_TARGET:-$TARGET}" ../indra $CHANNEL ${GITHASH} $FMODSTUDIO $OPENAL $KDU $OPENSIM $SINGLEGRID $AVX_OPTIMIZATION $AVX2_OPTIMIZATION $TRACY_PROFILER $TESTBUILD $PACKAGE \
           $UNATTENDED -DLL_TESTS:BOOL=OFF -DADDRESS_SIZE:STRING=$AUTOBUILD_ADDRSIZE -DCMAKE_BUILD_TYPE:STRING=$BTYPE $CACHE_OPT \
           $CRASH_REPORTING -DVIEWER_SYMBOL_FILE:STRING="${VIEWER_SYMBOL_FILE:-}" $LL_ARGS_PASSTHRU ${VSCODE_FLAGS:-} | tee $LOG
 

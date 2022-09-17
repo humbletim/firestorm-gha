@@ -575,7 +575,7 @@ class WindowsManifest(ViewerManifest):
 
         if self.is_packaging_viewer():
             # Find firestorm-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
-            self.path(src='%s/firestorm-bin.exe' % self.args['configuration'], dst=self.final_exe())
+            self.path(src='%s/firestorm-bin.exe' % '.' or self.args['configuration'], dst=self.final_exe())
 
             # <FS:Ansariel> Remove VMP
             #with self.prefix(src=os.path.join(pkgdir, "VMP")):
@@ -594,12 +594,18 @@ class WindowsManifest(ViewerManifest):
 
         # Plugin host application
         self.path2basename(os.path.join(os.pardir,
-                                        'llplugin', 'slplugin', self.args['configuration']),
+                                        'llplugin', 'slplugin', '.' or self.args['configuration']),
                            "slplugin.exe")
-        
+
+        with self.prefix(src=os.path.join(relpkgdir)):
+            self.path("discord-rpc.dll")
+
         # Get shared libs from the shared libs staging directory
         with self.prefix(src=os.path.join(self.args['build'], os.pardir,
                                           'sharedlibs', self.args['configuration'])):
+
+            # OpenVR
+            self.path("openvr_api.dll")
 
             # Mesh 3rd party libs needed for auto LOD and collada reading
             try:
@@ -692,11 +698,11 @@ class WindowsManifest(ViewerManifest):
         # Media plugins - CEF
         with self.prefix(dst="llplugin"):
             with self.prefix(src=os.path.join(self.args['build'], os.pardir, 'media_plugins')):
-                with self.prefix(src=os.path.join('cef', self.args['configuration'])):
+                with self.prefix(src=os.path.join('cef', '.' or self.args['configuration'])):
                     self.path("media_plugin_cef.dll")
 
                 # Media plugins - LibVLC
-                with self.prefix(src=os.path.join('libvlc', self.args['configuration'])):
+                with self.prefix(src=os.path.join('libvlc', '.' or self.args['configuration'])):
                     self.path("media_plugin_libvlc.dll")
 
                 # Media plugins - Example (useful for debugging - not shipped with release viewer)
@@ -1855,6 +1861,26 @@ class Darwin_x86_64_Manifest(DarwinManifest):
 class LinuxManifest(ViewerManifest):
     build_data_json_platform = 'lnx'
 
+    def ccopyfile(self, src, dst):
+        if re.match(".*firestorm-bin.*", src+dst):
+            print("not hardlinking firestorm-bin...", src)
+            super(LinuxManifest, self).ccopyfile(src, dst)
+            return
+        copy2 = shutil.copy2
+        try:
+            shutil.copy2 = os.link
+            super(LinuxManifest, self).ccopyfile(src, dst)
+        finally:
+            shutil.copy2 = copy2
+
+    def ccopytree(self, src, dst):
+        copy2 = shutil.copy2
+        try:
+            shutil.copy2 = os.link
+            super(LinuxManifest, self).ccopytree(src, dst)
+        finally:
+            shutil.copy2 = copy2
+
     def construct(self):
         # <FS:ND> HACK! Force parent to always copy XML/... even when not having configured with --package.
         # This allows build result to be started without always having to --package and thus waiting for the length tar ball generation --package incurs
@@ -1885,6 +1911,9 @@ class LinuxManifest(ViewerManifest):
                 self.path("refresh_desktop_app_entry.sh")
                 self.path("launch_url.sh")
             self.path("install.sh")
+
+        with self.prefix(src=os.path.join(pkgdir, 'lib', 'release'), dst="lib"):
+            self.path("libopenvr_api.so")
 
         with self.prefix(dst="bin"):
             self.path( os.path.join(os.pardir,'build_data.json'), "build_data.json" )
