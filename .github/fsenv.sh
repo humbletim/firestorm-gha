@@ -38,10 +38,16 @@ function _fsenv() {
 
   setenv GHA_TEST_WITH_SPACES "testing \"1\" 2 3...tab\t."
 
+  if [[ ! ${os+x} ]] ; then
+    case `uname -s` in
+      MINGW*) local os=windows ;;
+      *) local os=linux;;
+    esac
+  fi
   if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
     case `uname -s` in
-      MINGW*) local os=windows GITHUB_WORKSPACE=$(pwd -W) ;;
-      *) local os=linux GITHUB_WORKSPACE=$PWD ;;
+      MINGW*) local GITHUB_WORKSPACE=$(pwd -W) ;;
+      *) local GITHUB_WORKSPACE=$PWD ;;
     esac
   fi
   setenv _3P_UTILSDIR ${GITHUB_WORKSPACE}/.github/3p
