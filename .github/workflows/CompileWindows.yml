@@ -107,11 +107,15 @@ jobs:
     - name: Setup Ninja
       uses: seanmiddleditch/gha-setup-ninja@master
       # if: ${{ github.event.inputs.buildsys == 'ninja' }}
+    - name: Setup requirements.txt
+      run: |
+        echo "git+https://bitbucket.org/lindenlab/autobuild.git#egg=autobuild" | tee requirements.txt
     - name: Setup python
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
         architecture: x64
+        cache: 'pip'
     - name: Workaround Firestorm Python.cmake 
       run: |
         export PYTHON_EXECUTABLE=$(cygpath -ms "`which python`") #dev
@@ -125,7 +129,7 @@ jobs:
         git --version
         python --version
         cl.exe
-        ${{ github.event.inputs.buildsys }}.exe -version
+        ${{ github.event.inputs.buildsys }}.exe --version
         ninja --version
         echo " "
         df -h
