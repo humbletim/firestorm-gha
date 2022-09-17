@@ -40,8 +40,8 @@ function _fsenv() {
 
   if [[ ! ${os+x} ]] ; then
     case `uname -s` in
-      MINGW*) local os=windows ;;
-      *) local os=linux;;
+      MINGW*) setenv os windows ;;
+      *) setenv os linux ;;
     esac
   fi
   if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
