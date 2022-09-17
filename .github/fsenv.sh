@@ -2,44 +2,27 @@
 # github actions helper to initialize environment variables for building firestorm
 # -- humbletim 2022.03.27
 
-set -eu
-
 # function wrapper to avoid leaking variables when "sourced" into other scripts
 function _fsenv() {
-  local os
-  if [[ ${RUNNER_OS+x} ]] ; then
-    case $RUNNER_OS in
-	Windows) os=windows ;;
-        Linux) os=linux ;;
-    esac
-  fi
-  if [[ ! ${os+x} ]] ; then
+  set -eu
+  local os= gha= workspace=
+  if [[ ${GITHUB_ACTIONS+x} ]] ; then
+    gha=1
+    workspace=${GITHUB_WORKSPACE}
+    os=${RUNNER_OS,,} # lowercase
+  else
     case `uname -s` in
-      MINGW*) os=windows ;;
-      *) os=linux ;;
+      MINGW*) os=windows workspace=$(pwd -W) ;;
+      *) os=linux workspace=$PWD ;;
     esac
   fi
+  function debug() { if [[ -n "${DEBUG:-}" ]] ; then echo "[_fsenv] $@" >&2 ; fi }
 
-  # setenv <name> [default-value]
-  #   exports the named variable and emits a key="value" to stdout
-  #   (a no-op when both the variable doesn't exist and no default is specified)
-  function setenv() {
-    if [[ ! ${!1+x} ]] ; then
-      if [[ $# -lt 2 ]] ; then
-        echo "# setenv($1) -- no-op" >&2
-        return 0
-      fi
-      # var not present assign to default and export 
-      echo "# setenv($1,$2)" >&2
-      printf -v "${1}" "%s" "${2}"
-    fi
-    echo "# export($1)" >&2
-    [[ ${os} == linux ]] && eval "export ${1}"
-    emitvar "$@"
-  }
+  debug "os=$os | gha=$gha | workspace=$workspace" >&2
 
   function emitvar() {
-    if [[ ${GITHUB_ACTIONS+x} ]] ; then
+    debug "# emitvar($1)" >&2
+    if [[ $gha ]] ; then
       # output github action (GITHUB_ENV) compatible multiline/escaped variables
       if [[ ${!1} == *$'\n'* ]] ; then
         echo "${1}<<EOF"
@@ -50,21 +33,41 @@ function _fsenv() {
       fi
     else
       # output bash compatible multiline/escaped variables
-      declare -p "${1}"
+      debug "# ... emitvar($1)" >&2
+      declare -p "$1"
     fi
   }
 
+  function isset() {
+    if [[ ${!1+x} ]] ; then return 0 ; fi
+    return -1
+  }
+
+  function assign() {
+      if [[ ${2+x} ]] ; then
+        debug "# assign($1,$2)" >&2
+        printf -v "${1}" "%s" "${2}"
+        return 0
+      else
+        debug "# assign($1) -- no-op" >&2
+        return -1
+      fi
+  }
+
+  # setenv <name> [default-value]
+  #   exports the named variable and emits a key="value" to stdout
+  #   (a no-op when both the variable doesn't exist and no default is specified)
+  function setenv() {
+    isset "$@" || assign "$@" || return 0
+    if [[ $os == linux ]] ; then eval "export ${1}" ; fi
+    debug "# setenv($@)" >&2
+    emitvar "${1}"
+  }
+
+
   setenv GHA_TEST_WITH_SPACES "testing \"1\" 2 3...tab\t."
 
-  if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
-    case `uname -s` in
-      MINGW*) local GITHUB_WORKSPACE=$(pwd -W) ;;
-      *) local GITHUB_WORKSPACE=$PWD ;;
-    esac
-  fi
-  echo "os=$os"
-
-  setenv _3P_UTILSDIR ${GITHUB_WORKSPACE}/.github/3p
+  setenv _3P_UTILSDIR ${workspace}/.github/3p
 
   ############################################################################
   # workaround for github actions receiving 403: Forbidden errors when trying to
@@ -107,9 +110,9 @@ function _fsenv() {
 
   ### AUTOBUILD_ environment variables
 
-  setenv AUTOBUILD_VARIABLES_FILE ${GITHUB_WORKSPACE}/fs-build-variables/variables
-  setenv AUTOBUILD_CONFIG_FILE ${GITHUB_WORKSPACE}/autobuild.xml
-  setenv AUTOBUILD_INSTALLABLE_CACHE ${GITHUB_WORKSPACE}/autobuild-cache
+  setenv AUTOBUILD_VARIABLES_FILE ${workspace}/fs-build-variables/variables
+  setenv AUTOBUILD_CONFIG_FILE ${workspace}/autobuild.xml
+  setenv AUTOBUILD_INSTALLABLE_CACHE ${workspace}/autobuild-cache
 
   setenv AUTOBUILD_LOGLEVEL --verbose
   setenv AUTOBUILD_PLATFORM ${os}64
@@ -118,7 +121,7 @@ function _fsenv() {
   setenv AUTOBUILD_CONFIGURATION ReleaseFS_open
   setenv AUTOBUILD_BUILD_ID 0
 
-  ### environment variables specific to github actions / windows builds
+  ### environment variables specific to github actions / mod builds
   # setenv VIEWER_CHANNEL=FirestormVR-GHA
   setenv PYTHONUTF8 1
   setenv PreferredToolArchitecture x64
@@ -128,7 +131,7 @@ function _fsenv() {
   else
     setenv FSBUILD_DIR build-linux-x86_64
   fi
-  setenv FSVS_TARGET Ninja # 'Visual Studio 16 2019'
+  setenv FSVS_TARGET Ninja # for msbuild this would be 'Visual Studio 16 2019'
 
   setenv VIEWER_VERSION_STR `echo $(cat indra/newview/VIEWER_VERSION.txt)`.${AUTOBUILD_BUILD_ID}
   setenv VIEWER_VERSION_GITHASH $(git log -n 1 | grep "Merge " | awk '{ print $2 }' | xargs git rev-parse --short 2>/dev/null || git rev-parse --short HEAD)
@@ -136,16 +139,18 @@ function _fsenv() {
   unset _fsenv
 }
 
-if [[ ! ${GITHUB_ACTIONS+x} ]] ; then
-  if (return 0 2>/dev/null) ; then
-    # fsenv.sh was sourced ; export only
-    _fsenv > /dev/null
-  fi
-elif [[ -n $# ]] ; then
+if [[ ${GITHUB_ACTIONS+x} ]] ; then
+  _fsenv
+elif (return 0 2>/dev/null) ; then
+   echo "[_fsenv] sourced (export only)" >&2
+  _fsenv > /dev/null
+elif [[ $# -gt 0 ]] ; then
+   echo "[_fsenv] export + exec ($@)" >&2
   # fsenv.sh was passed subcommands ; export and execute
   _fsenv > /dev/null
   "$@"
 else
+   echo "[_fsenv] export and echo" >&2
   # fsenv.sh was called without arguments ; export and echo to stdout
   _fsenv
 fi
