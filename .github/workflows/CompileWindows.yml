@@ -22,7 +22,7 @@ jobs:
     runs-on: windows-2019
     env:
        VIEWER_CHANNEL: VR-GHA
-       AUTOBUILD_BUILD_ID: 66221
+       AUTOBUILD_BUILD_ID: 67470
        AUTOBUILD_CONFIGURATION: ReleaseFS_open
     steps:
     - uses: actions/checkout@v2
@@ -132,7 +132,7 @@ jobs:
       run: |
         autobuild --version
         test -n "${VIEWER_CHANNEL}" && test -n "${PYTHON_EXECUTABLE}" #dev
-        autobuild configure -- --no-vstools --ninja --package --openal --chan "${VIEWER_CHANNEL}" -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON #dev
+        autobuild configure -- --ninja --package --openal --chan "${VIEWER_CHANNEL}" -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON #dev
     - name: Build plugins (ninja)
       if: ${{ github.event.inputs.buildsys == 'ninja' && github.event.inputs.llpackage == 'true' }}
       run: |
@@ -164,7 +164,7 @@ jobs:
       shell: cmd
       run: |
         autobuild --version
-        autobuild configure -- --package --no-vstools --openal --chan ${{ env.VIEWER_CHANNEL }} -DPYTHON_EXECUTABLE=${{ env.PYTHON_EXECUTABLE }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
+        autobuild configure -- --package --openal --chan ${{ env.VIEWER_CHANNEL }} -DPYTHON_EXECUTABLE=${{ env.PYTHON_EXECUTABLE }} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON
     - name: Build & Package (msbuild)
       if: ${{ github.event.inputs.buildsys == 'msbuild' && github.event.inputs.llpackage == 'true' }}
       shell: cmd
