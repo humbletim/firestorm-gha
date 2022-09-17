@@ -31,6 +31,10 @@ jobs:
     - name: Preset ENV
       shell: bash
       run: |
+        echo =============================================================
+        .github/fsenv.sh
+        echo =============================================================
+
         .github/fsenv.sh | tee -a $GITHUB_ENV
         if [[ ! ${GITHUB_ACTIONS+x} ]] ; then #dev
           set -ea && source <( .github/fsenv.sh ) && set +ea && test -n "$VIEWER_CHANNEL" -a -n "$FSBUILD_DIR" -a -n "$AUTOBUILD_VSVER" #dev

@@ -6,17 +6,35 @@ set -eu
 
 # function wrapper to avoid leaking variables when "sourced" into other scripts
 function _fsenv() {
+  local os
+  if [[ ${RUNNER_OS+x} ]] ; then
+    case $RUNNER_OS in
+	Windows) os=windows ;;
+        Linux) os=linux ;;
+    esac
+  fi
+  if [[ ! ${os+x} ]] ; then
+    case `uname -s` in
+      MINGW*) os=windows ;;
+      *) os=linux ;;
+    esac
+  fi
 
   # setenv <name> [default-value]
   #   exports the named variable and emits a key="value" to stdout
   #   (a no-op when both the variable doesn't exist and no default is specified)
   function setenv() {
     if [[ ! ${!1+x} ]] ; then
-      if [[ $# -lt 2 ]] ; then return 0 ; fi
+      if [[ $# -lt 2 ]] ; then
+        echo "# setenv($1) -- no-op" >&2
+        return 0
+      fi
       # var not present assign to default and export 
+      echo "# setenv($1,$2)" >&2
       printf -v "${1}" "%s" "${2}"
     fi
-    eval "export ${1}"
+    echo "# export($1)" >&2
+    [[ ${os} == linux ]] && eval "export ${1}"
     emitvar "$@"
   }
 
@@ -38,18 +56,14 @@ function _fsenv() {
 
   setenv GHA_TEST_WITH_SPACES "testing \"1\" 2 3...tab\t."
 
-  if [[ ! ${os+x} ]] ; then
-    case `uname -s` in
-      MINGW*) setenv os windows ;;
-      *) setenv os linux ;;
-    esac
-  fi
   if [[ ! ${GITHUB_WORKSPACE+x} ]] ; then
     case `uname -s` in
       MINGW*) local GITHUB_WORKSPACE=$(pwd -W) ;;
       *) local GITHUB_WORKSPACE=$PWD ;;
     esac
   fi
+  echo "os=$os"
+
   setenv _3P_UTILSDIR ${GITHUB_WORKSPACE}/.github/3p
 
   ############################################################################
@@ -122,9 +136,11 @@ function _fsenv() {
   unset _fsenv
 }
 
-if (return 0 2>/dev/null) ; then
-  # fsenv.sh was sourced ; export only
-  _fsenv > /dev/null
+if [[ ! ${GITHUB_ACTIONS+x} ]] ; then
+  if (return 0 2>/dev/null) ; then
+    # fsenv.sh was sourced ; export only
+    _fsenv > /dev/null
+  fi
 elif [[ -n $# ]] ; then
   # fsenv.sh was passed subcommands ; export and execute
   _fsenv > /dev/null
