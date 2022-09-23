@@ -14,6 +14,7 @@ Download here: [Releases](../../releases/latest)
 Notes:
 * App name has been changed to "FirestormVR" so installation can exist side-by-side with stock Firestorm.
     - app settings stored in user folder `AppData/Roaming/FirestormVR_x64`
+    - cache stored in user folder `AppData/Local/FirestormVROS_x64`
 * Linux build now compiles, but entering into VR mode on Linux via SteamVR has not yet been tested.
 * Special Thanks to @thoys for sharing his Github Action wisdoms!
 
