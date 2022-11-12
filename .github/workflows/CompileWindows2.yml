@@ -1,6 +1,6 @@
 name: CompileWindows
 
-on: [pull_request]
+on: [push, workflow_dispatch]
 
 defaults:
   run:
@@ -95,6 +95,7 @@ jobs:
     - name: Build & Package
       shell: cmd
       run: |
+        dir build-vc${{ env.AUTOBUILD_VSVER }}-64
         msbuild build-vc${{ env.AUTOBUILD_VSVER }}-64/Firestorm.sln /target:llpackage /property:Configuration=Release;Platform=x64 /maxcpucount
     - name: Upload Artifact
       uses: actions/upload-artifact@v2

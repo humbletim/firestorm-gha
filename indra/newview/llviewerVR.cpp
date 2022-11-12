@@ -43,6 +43,7 @@ llviewerVR::llviewerVR()
 	m_kPlusKey = KEY_F6;
 	m_kMinusKey = KEY_F7;
 	m_fEyeDistance = 40;
+	m_fWorldScale = 1.0;
 	m_fFocusDistance = 10;
 	m_fTextureShift = 0;
 	m_fTextureZoom = 0;
@@ -112,33 +113,77 @@ LLMatrix4 llviewerVR::ConvertGLHMatrix4ToLLMatrix4(glh::matrix4f m)
 
 glh::matrix4f llviewerVR::ConvertSteamVRMatrixToMatrix42(const vr::HmdMatrix34_t &matPose)
 {
-	//vr::HmdQuaternion_t q = GetRotation(matPose);
+	// SteamVR: x = right, y = up, z = backwards
+	// SL (Cory's Favorite): x = forward, y = left, z = up (http://wiki.secondlife.com/wiki/How_the_camera_works)
 
-	//gHMDQuat.set(q.x,q.y,q.z,q.w);
+	// Convert SL -> SteamVR: x' = -y; y' = z; z' = -x
+	// Convert SteamVR -> SL: x' = -z; y' = -x; z' = y
+
+	// SL -> SteamVR matrix:
+	//  0 -1  0  0
+	//  0  0  1  0
+	// -1  0  0  0
+	//  0  0  0  1
+
+	// SteamVR -> SL matrix (inverse of above, and matches OGL_TO_CFR_ROTATION)
+	//  0  0 -1  0
+	// -1  0  0  0
+	//  0  1  0  0
+	//  0  0  0  1
+
+	// Scale: x y and z on SL->SteamVR multiplied by m_fWorldScale, SteamVR->SL divided by m_fWorldScale
+
+	// Change of basis: SL-based matrix = (SteamVR -> SL) * (SteamVR-based matrix) * (SL -> SteamVR)
+	// (Incoming SL coordinates get changed to SteamVR coordinates, SteamVR-based matrix transforms SteamVR coords, outgoing SteamVR coordinates get changed back to SL)
+	// (See https://www.youtube.com/watch?v=P2LTAUO1TdA)
+
+	// Argument:
+	//  m_11  m_12  m_13  m_14
+	//  m_21  m_22  m_23  m_24
+	//  m_31  m_32  m_33  m_34
+	//  m_41  m_42  m_43  m_44
+
+	// (Note that HmdMatrix34_t omits the last row, which is always 0 0 0 1)
+	
+	// https://www.wolframalpha.com/input/?i=matrix+multiplication+calculator&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix3%22%7D+-%3E%22%7B%7B0%2C+-1%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+1%2C+0%7D%2C+%7B-1%2C+0%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+0%2C+1%7D%7D%22&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix2%22%7D+-%3E%22%7B%7B11%2C+12%2C+13%2C+14%7D%2C+%7B21%2C+22%2C+23%2C+24%7D%2C+%7B31%2C+32%2C+33%2C+34%7D%2C+%7B41%2C+42%2C+43%2C+44%7D%7D%22&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix1%22%7D+-%3E%22%7B%7B0%2C+0%2C+-1%2C+0%7D%2C+%7B-1%2C+0%2C+0%2C+0%7D%2C+%7B0%2C+1%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+0%2C+1%7D%7D%22
+
+	// Result:
+	//  m_33  m_31 -m_32 -m_34
+	//  m_13  m_11 -m_12 -m_14
+	// -m_23 -m_21  m_22  m_24
+	// -m_43 -m_41  m_42  m_44
+
+	// Scaled version:
+	// https://www.wolframalpha.com/input/?i=matrix+multiplication+calculator&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix3%22%7D+-%3E%22%7B%7B0%2C+-10%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+10%2C+0%7D%2C+%7B-10%2C+0%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+0%2C+1%7D%7D%22&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix2%22%7D+-%3E%22%7B%7B11%2C+12%2C+13%2C+14%7D%2C+%7B21%2C+22%2C+23%2C+24%7D%2C+%7B31%2C+32%2C+33%2C+34%7D%2C+%7B41%2C+42%2C+43%2C+44%7D%7D%22&assumption=%7B%22F%22%2C+%22MatricesOperations%22%2C+%22theMatrix1%22%7D+-%3E%22%7B%7B0%2C+0%2C+-.1%2C+0%7D%2C+%7B-.1%2C+0%2C+0%2C+0%7D%2C+%7B0%2C+.1%2C+0%2C+0%7D%2C+%7B0%2C+0%2C+0%2C+1%7D%7D%22
+	
+	// Result
+
+	//  m_33        m_31      -m_32       m_34/scale
+	//  m_13        m_11      -m_12      -m_14/scale
+	// -m_23       -m_21       m_22       m_24/scale
+	// -m_43*scale -m_41*scale m_42*scale m_44
+	
+	// Below constructor is ROW major. It should look as above
+	// Also array indices are -1 from math indices
+
 
 	glh::matrix4f matrixObj(
-		matPose.m[0][0], matPose.m[1][0], matPose.m[2][0], 0.0,
-		matPose.m[0][1], matPose.m[1][1], matPose.m[2][1], 0.0,
-		matPose.m[0][2], matPose.m[1][2], matPose.m[2][2], 0.0,
-		matPose.m[0][3], matPose.m[1][3], matPose.m[2][3], 1.0
-		//0, 0, 0, 1.0f
+		 matPose.m[2][2],  matPose.m[2][0], -matPose.m[2][1], -matPose.m[2][3],
+		 matPose.m[0][2],  matPose.m[0][0], -matPose.m[0][1], -matPose.m[0][3],
+		-matPose.m[1][2], -matPose.m[1][0],  matPose.m[1][1],  matPose.m[1][3],
+		             0.0,              0.0,              0.0,              1.0
 		);
-
-	//LLMatrix4  mat((F32*)matPose.m);
-	//gHMDQuat.setQuat(mat);
-
-
-	//m_nPos.v[0] = matPose.m[0][3];
-	//m_nPos.v[1] = matPose.m[2][3];
-	//m_nPos.v[2] = matPose.m[1][3];
-
-	//gHMDAxes.mV[0] = atan2(matPose.m[1][0], matPose.m[0][0]);// *57.2957795;//yaw
-	//gHMDAxes.mV[2] = atan2(matPose.m[2][1], matPose.m[2][2]);// *57.2957795;//pitch
-
-	//gHMDAxes.mV[0] = matPose.m[2][0];
-	//gHMDAxes.mV[1] = matPose.m[2][1];
-	//gHMDAxes.mV[2] = matPose.m[2][2];
 	return matrixObj;
+}
+
+LLVector3 llviewerVR::TransformLLVector(glh::matrix4f transform, LLVector3 vector, F32 w) {
+	// w = 1.0 for position, 0.0 for direction
+	glh::vec4f glhvec(vector[0], vector[1], vector[2], w);
+	glh::vec4f glhresult;
+	//transform.mult_matrix_vec(&glhvec, &glhresult);
+	LLVector3 result(glhresult.v[0], glhresult.v[1], glhresult.v[2]);
+	return result;
+
 }
 
 glh::matrix4f llviewerVR::GetHMDMatrixProjectionEye(vr::Hmd_Eye nEye)
@@ -172,6 +217,59 @@ glh::matrix4f llviewerVR::GetHMDMatrixPoseEye(vr::Hmd_Eye nEye)
 	//return matrixObj.inverse();
 	//gluInvertMatrix(matrixObj.m, mt.m);
 	//return matrixObj;
+}
+
+void llviewerVR::calcUVBounds(vr::EVREye eye, F32 *uMin, F32 *uMax, F32 *vMin, F32 *vMax) {
+	// Relevant code with useful math:
+	// https://github.com/LibreVR/Revive/blob/4843c1bed72c9c7888e6bfa429f263584c7586c1/Revive/CompositorBase.cpp#L481
+	// https://github.com/ValveSoftware/steamvr_unity_plugin/blob/9442d7d7d447e07aa21c64746633dcb5977bdd1e/Assets/SteamVR/Scripts/SteamVR.cs#L696
+	// Some more clarity:
+	// https://steamcommunity.com/app/358720/discussions/0/343786746000217310/
+
+	// https://github.com/KhronosGroup/OpenXR-SDK/blob/960c4a6aa8cc9f47e357c696b5377d817550bf88/src/common/xr_linear.h#L482
+	// Normal projection (but shouldn't matter)
+	// Each group of 4 lines represents the output of a coordinate. First group of 4 is new x, second group is new y, third is new z, fourth is new w
+	// Each line in a group is a former coordinate's contribution to the new coordinate. So first line N is x*N getting added to new x
+	// We project the old FOV by multiplying the coordinates (tans) by this projection matrix
+	// Left bound for example is (gameTanAngleLeft, 0, -1, 1)
+	// Note the negative z!
+
+
+	F32 gameTanAngleHeight = 2.0f * tan(LLViewerCamera::getInstance()->getView()/2.0f);
+	F32 gameTanAngleUp = gameTanAngleHeight/2.0f;
+	F32 gameTanAngleDown = -gameTanAngleUp;
+	F32 gameTanAngleWidth = gameTanAngleHeight * LLViewerCamera::getInstance()->getAspect();
+	F32 gameTanAngleRight = gameTanAngleWidth/2.0f;
+	F32 gameTanAngleLeft = -gameTanAngleRight;
+
+	F32 vrTanAngleLeft = 0.0;
+	F32 vrTanAngleRight = 0.0;
+	F32 vrTanAngleUp = 0.0;
+	F32 vrTanAngleDown = 0.0;
+	gHMD->GetProjectionRaw(eye, &vrTanAngleLeft, &vrTanAngleRight, &vrTanAngleDown, &vrTanAngleUp); // Valve documentation backwards?
+	F32 vrTanAngleWidth = vrTanAngleRight - vrTanAngleLeft;
+	F32 vrTanAngleHeight = vrTanAngleUp - vrTanAngleDown;
+
+	*uMin = gameTanAngleLeft * (2.0f / vrTanAngleWidth) - (vrTanAngleRight + vrTanAngleLeft) / vrTanAngleWidth;
+	*uMax = gameTanAngleRight * (2.0f / vrTanAngleWidth) - (vrTanAngleRight + vrTanAngleLeft) / vrTanAngleWidth;
+	*vMin = gameTanAngleDown * (2.0f / vrTanAngleHeight) - (vrTanAngleUp + vrTanAngleDown) / vrTanAngleHeight;
+	*vMax = gameTanAngleUp * (2.0f / vrTanAngleHeight) - (vrTanAngleUp + vrTanAngleDown) / vrTanAngleHeight;
+
+	// Convert [-1,1] to [0,1]
+
+	*uMin = *uMin * 0.5f + 0.5f;
+	*uMax = *uMax * 0.5f + 0.5f;
+	*vMin = *vMin * 0.5f + 0.5f;
+	*vMax = *vMax * 0.5f + 0.5f;
+
+
+	// // Fix FOV for next frame
+	// F32 tan_half_fov_x = std::max(vr_left_tan, vr_right_tan);
+	// F32 tan_half_fov_y = std::max(vr_up_tan, vr_down_tan);
+	// LLViewerCamera::getInstance()->setDefaultFOV(2.0f * atan(tan_half_fov_x));
+	// m_fFOV = 2.0f * atan(tan_half_fov_x) * RAD_TO_DEG;
+	// LLViewerCamera::getInstance()->setAspect(tan_half_fov_x / tan_half_fov_y);
+
 }
 
 //unused Gives the projection matrix for an eye  with HMD and IPD offsets. Add positional camera offset????
@@ -772,60 +870,39 @@ bool llviewerVR::ProcessVRCamera()
 
 			//Store current camera values
 			m_vdir_orig = LLViewerCamera::getInstance()->getAtAxis();
-			m_vup_orig = LLViewerCamera::getInstance()->getUpAxis();
 			m_vleft_orig = LLViewerCamera::getInstance()->getLeftAxis();
+			m_vup_orig = LLViewerCamera::getInstance()->getUpAxis();
 			m_vpos_orig = LLViewerCamera::getInstance()->getOrigin();
 			
 			if (!m_bEditActive)// unlock HMD's rotation input.
 			{
-				//convert HMD matrix in to direction vectors that work with SL
-				glh::ns_float::vec4 row = m_mat4HMDPose.get_row(2);
-				m_vdir.setVec(row.v[0], -row.v[2], row.v[1]);
-				
-				row = m_mat4HMDPose.get_row(1);
-				m_vup.setVec(row.v[0], -row.v[2], row.v[1]);
-				
-				row = m_mat4HMDPose.get_row(0);
-				m_vleft.setVec(row.v[0], -row.v[2], row.v[1]);
-				
-				row = m_mat4HMDPose.get_row(3);
-				gHmdPos.setVec(row.v[0], -row.v[2], row.v[1]);
+				glh::matrix4f slCameraMatrix(
+					m_vdir_orig[0], m_vleft_orig[0], m_vup_orig[0], m_vpos_orig[0],
+					m_vdir_orig[1], m_vleft_orig[1], m_vup_orig[1], m_vpos_orig[1],
+					m_vdir_orig[2], m_vleft_orig[2], m_vup_orig[2], m_vpos_orig[2],
+					           0.0,             0.0,           0.0,            1.0
+				);
 
-				if (gHmdOffsetPos.mV[VZ] == 0)
+				glh::matrix4f eyeLocation = glh::matrix4f::identity();
+				if (!leftEyeDesc.IsReady) // Rendering left eye
 				{
-					gHmdOffsetPos = gHmdPos;
+					eyeLocation = ConvertSteamVRMatrixToMatrix42(gHMD->GetEyeToHeadTransform(vr::Eye_Left));
+				}
+				else if (!rightEyeDesc.IsReady) // Rendering right eye
+				{
+					eyeLocation = ConvertSteamVRMatrixToMatrix42(gHMD->GetEyeToHeadTransform(vr::Eye_Right));
 				}
 
-				LLQuaternion qCameraOrig(m_vdir_orig, m_vleft_orig, m_vup_orig);
-				float r3;
-				float p3;
-				float y3;
-				qCameraOrig.getEulerAngles(&r3, &p3, &y3);
+				glh::matrix4f newCameraMatrix = slCameraMatrix * m_mat4HMDPose * eyeLocation;
 
-				//convert HMD euler angles to   to quat rotation
-				LLQuaternion qHMDRot(m_vdir, m_vleft, m_vup);
-				float r1;
-				float p1;
-				float y1;
-				qHMDRot.getEulerAngles(&r1, &p1, &y1);
-
-				//make a quat of the sl camera rotation
-				LLQuaternion qCameraOffset;
-				qCameraOffset.setEulerAngles(r3, p3, y3 - (m_fCamRotOffset * DEG_TO_RAD));
-				//Offset player camera with the HMD rotation
-				qHMDRot = qHMDRot*qCameraOffset;
-				gHMDQuat = qHMDRot;
-				
-
-				LLMatrix3 m3 = qHMDRot.getMatrix3();
-				m_vdir = -m3.getFwdRow();
-				m_vup = m3.getUpRow();
-				m_vleft = m3.getLeftRow();
-				m_vdir.normalize();
-				m_vup.normalize();
-				m_vleft.normalize();
-
-				m_vpos = m_vpos_orig + (((gHmdPos - gHmdOffsetPos))* (qCameraOffset));
+				LLViewerCamera::getInstance()->setAxes(
+					LLVector3(newCameraMatrix.element(0, 0), newCameraMatrix.element(1, 0), newCameraMatrix.element(2, 0)),
+					LLVector3(newCameraMatrix.element(0, 1), newCameraMatrix.element(1, 1), newCameraMatrix.element(2, 1)),
+					LLVector3(newCameraMatrix.element(0, 2), newCameraMatrix.element(1, 2), newCameraMatrix.element(2, 2))
+				);
+				LLViewerCamera::getInstance()->setOrigin(
+					newCameraMatrix.element(0, 3), newCameraMatrix.element(1, 3), newCameraMatrix.element(2, 3)
+				);
 			}
 			else //lock HMD's rotation input for inworld object editing purposes.
 			{
@@ -857,34 +934,38 @@ bool llviewerVR::ProcessVRCamera()
 		}
 		
 
-		LLVector3 new_dir;
-		if (m_bEditActive)// lock HMD's rotation input for inworls object editing purposes.
-		{
-			if (m_fEyeDistance == 0)
-				LLViewerCamera::getInstance()->lookDir(m_vdir_orig, m_vup_orig);
-			new_dir = (m_vleft * (m_fEyeDistance / 1000));
-		}
-		else
-		{
-			if (m_fEyeDistance == 0)
-				LLViewerCamera::getInstance()->lookDir(m_vdir, m_vup);
-			new_dir = (-m_vleft * (m_fEyeDistance / 1000));
-		}
+
+		// Below code is mostly obsolete
+		// It might make sense to examine to repair HMD lock.
+
+		// LLVector3 new_dir;
+		// if (m_bEditActive)// lock HMD's rotation input for inworls object editing purposes.
+		// {
+		// 	if (m_fEyeDistance == 0)
+		// 		LLViewerCamera::getInstance()->lookDir(m_vdir_orig, m_vup_orig);
+		// 	new_dir = (m_vleft * (m_fEyeDistance / 1000));
+		// }
+		// else
+		// {
+		// 	if (m_fEyeDistance == 0)
+		// 		LLViewerCamera::getInstance()->lookDir(m_vdir, m_vup);
+		// 	new_dir = (-m_vleft * (m_fEyeDistance / 1000));
+		// }
 			
 		
-		if (m_fEyeDistance > 0)
-		{	
-			LLVector3 new_fwd_pos = m_vpos + (m_vdir * m_fFocusDistance);
+		// if (m_fEyeDistance > 0)
+		// {	
+		// 	LLVector3 new_fwd_pos = m_vpos + (m_vdir * m_fFocusDistance);
 			
-			if (!leftEyeDesc.IsReady)//change pos for rendering the left eye texture.Move half IPD distance to the left
-			{
-				LLViewerCamera::getInstance()->updateCameraLocation(m_vpos + new_dir, m_vup, new_fwd_pos);
-			}
-			else if (!rightEyeDesc.IsReady)//change pos for rendering the right eye texture. Move full IPD distance to the right since we were on the left eye position.
-			{
-				LLViewerCamera::getInstance()->updateCameraLocation(m_vpos - new_dir, m_vup, new_fwd_pos);
-			}
-		}
+		// 	if (!leftEyeDesc.IsReady)//change pos for rendering the left eye texture.Move half IPD distance to the left
+		// 	{
+		// 		//LLViewerCamera::getInstance()->updateCameraLocation(m_vpos + new_dir, m_vup, new_fwd_pos);
+		// 	}
+		// 	else if (!rightEyeDesc.IsReady)//change pos for rendering the right eye texture. Move full IPD distance to the right since we were on the left eye position.
+		// 	{
+		// 		//LLViewerCamera::getInstance()->updateCameraLocation(m_vpos - new_dir, m_vup, new_fwd_pos);
+		// 	}
+		// }
 		
 		
 
@@ -1022,17 +1103,32 @@ void llviewerVR::vrDisplay()
 				if (m_iZoomIndex)
 					glClear(GL_COLOR_BUFFER_BIT);
 				//leftEyeDesc.IsReady = TRUE;
+
+				F32 uMin;
+				F32 uMax;
+				F32 vMin;
+				F32 vMax;
+
+				calcUVBounds(vr::EVREye::Eye_Left, &uMin, &uMax, &vMin, &vMax);
 				
-				glBlitFramebuffer(bx, by, tx, ty, m_iTextureShift, 0, m_nRenderWidth + m_iTextureShift, m_nRenderHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+				glBlitFramebuffer(bx, by, tx, ty, m_nRenderWidth * uMin, m_nRenderHeight * vMin, m_nRenderWidth * uMax, m_nRenderHeight * vMax, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 				
 			}
-			if ((leftEyeDesc.IsReady && !rightEyeDesc.IsReady) || m_fEyeDistance == 0)//if right camera was active bind left eye buffer for drawing in to
+			if ((leftEyeDesc.IsReady && !rightEyeDesc.IsReady))//if right camera was active bind left eye buffer for drawing in to
 			{
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rightEyeDesc.mFBO);
 				if (m_iZoomIndex)
 					glClear(GL_COLOR_BUFFER_BIT);
 				rightEyeDesc.IsReady = TRUE;
-				glBlitFramebuffer(bx, by, tx, ty, -m_iTextureShift, 0, m_nRenderWidth - m_iTextureShift, m_nRenderHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+				F32 uMin;
+				F32 uMax;
+				F32 vMin;
+				F32 vMax;
+
+				calcUVBounds(vr::EVREye::Eye_Right, &uMin, &uMax, &vMin, &vMax);
+
+				glBlitFramebuffer(bx, by, tx, ty, m_nRenderWidth * uMin, m_nRenderHeight * vMin, m_nRenderWidth * uMax, m_nRenderHeight * vMax, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 			}
 			if (!leftEyeDesc.IsReady)
 				leftEyeDesc.IsReady = TRUE;
@@ -1040,7 +1136,7 @@ void llviewerVR::vrDisplay()
 			//Remove bindings of read and draw buffer
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			if (leftEyeDesc.IsReady && (rightEyeDesc.IsReady || m_fEyeDistance == 0))
+			if (leftEyeDesc.IsReady && (rightEyeDesc.IsReady))
 			{
 
 				rightEyeDesc.IsReady = FALSE;
@@ -1303,10 +1399,30 @@ void llviewerVR::HandleKeyboard()
 			//LLViewerCamera::getInstance()->setDefaultFOV(1.8);
 			gHmdOffsetPos.mV[2] = 0;
 			INISaveRead(false);
-			if (m_fFOV > 20)
-				LLViewerCamera::getInstance()->setDefaultFOV(m_fFOV * DEG_TO_RAD);
-			
-			/*LLCoordWindow cpos;
+			// if (m_fFOV > 20)
+			// 	LLViewerCamera::getInstance()->setDefaultFOV(m_fFOV * DEG_TO_RAD);
+
+			// Determine maximum FOV and aspect ratio values
+			// Assume left eye and right are sufficiently similar to use left
+			// Not important for correct 3D, but an ideal value is convenient
+			// UI issues make FOV adjustability still useful.
+			F32 tanLeft;
+			F32 tanRight;
+			F32 tanUp;
+			F32 tanDown;
+			gHMD->GetProjectionRaw(vr::Eye_Left, &tanLeft, &tanRight, &tanDown, &tanUp);
+			// Maximize instead of add so full view is covered
+			F32 maxTanWidth = 2.0 * std::max(tanRight, -tanLeft);
+			F32 maxTanHeight = 2.0 * std::max(tanUp, -tanDown);
+			m_fFOV = 2 * atan(maxTanHeight/2.0) * RAD_TO_DEG;
+			LLViewerCamera::getInstance()->setDefaultFOV(m_fFOV * DEG_TO_RAD);
+			LLViewerCamera::getInstance()->setAspect(maxTanWidth/maxTanHeight);
+
+			gHMD->ResetSeatedZeroPose();
+
+
+
+            /*LLCoordWindow cpos;
 			cpos.mX = m_nRenderWidth / 2;
 			cpos.mY = m_nRenderHeight / 2;
 			LLWindow * WI;
@@ -1920,7 +2036,7 @@ std::string llviewerVR::Settings()
 		str.append(std::to_string(m_fTextureZoom));
 		str.append("\nFOV = ");
 		str.append(std::to_string(m_fFOV));
-		str.append("\n \nDistance between left and right camera.\nUsually the same as the IPD of your HMD.\nIf objects appear too small or too big try other values. ");
+		str.append("\n \nDoes nothing. Used to represent the distance between eyes, but that is currently incorporated already. Replace with scale adjustment?");
 	}
 	else if (m_iMenuIndex == 2)
 	{
@@ -1938,7 +2054,7 @@ std::string llviewerVR::Settings()
 		str.append("\nFOV = ");
 		str.append(std::to_string(m_fFOV));
 
-		str.append("\n \nFocus distance of the cameras in meters");
+		str.append("\n \nDoes nothing.");
 	}
 	else if (m_iMenuIndex == 3)
 	{
@@ -1955,7 +2071,7 @@ std::string llviewerVR::Settings()
 		str.append(std::to_string(m_fTextureZoom));
 		str.append("\nFOV = ");
 		str.append(std::to_string(m_fFOV));
-		str.append("\n \nApplies a texture shift in case your HMD's focus point is not in the center of the texture.");
+		str.append("\n \nDoes nothing.");
 	}
 	else if (m_iMenuIndex == 4)
 	{
@@ -1990,7 +2106,7 @@ std::string llviewerVR::Settings()
 		str.append("FOV = ");
 		str.append(std::to_string(m_fFOV));
 		str.append(sep2);
-		str.append("\n \nField of view in degree adjustment. Usually 100 degree is good.\n It should be adjusted when texture zoom is changed.");
+		str.append("\n \nField of view in degree adjustment.");
 	}
 	return str;
 }

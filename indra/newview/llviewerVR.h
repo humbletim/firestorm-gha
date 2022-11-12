@@ -110,6 +110,7 @@ public:
 	
 	S32 m_iMenuIndex;
 	F32 m_fEyeDistance;
+	F32 m_fWorldScale;
 	F32 m_fFocusDistance;
 	F32 m_fTextureShift;
 	F32 m_fFOV;
@@ -140,6 +141,7 @@ public:
 
 
 	glh::matrix4f ConvertSteamVRMatrixToMatrix4(const vr::HmdMatrix34_t &matPose);
+	LLVector3 llviewerVR::TransformLLVector(glh::matrix4f transform, LLVector3 vector, F32 w);
 	glh::matrix4f GetHMDMatrixProjectionEye(vr::Hmd_Eye nEye);
 	glh::matrix4f GetHMDMatrixPoseEye(vr::Hmd_Eye nEye);
 	glh::matrix4f GetCurrentViewProjectionMatrix(vr::Hmd_Eye nEye);
@@ -211,6 +213,8 @@ public:
 	void HandleKeyboard();
 	void Debug();
 	void InitUI();
+
+	void calcUVBounds(vr::EVREye eye, F32 *uMin, F32 *uMax, F32 *vMin, F32 *vMax);
 
 	
 	llviewerVR();
