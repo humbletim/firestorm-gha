@@ -29,6 +29,9 @@
 #ifndef LL_LLVIEWERPRECOMPILEDHEADERS_H
 #define LL_LLVIEWERPRECOMPILEDHEADERS_H
 
+#define _HAS_AUTO_PTR_ETC 1 // vs2019 std::auto_ptr
+#include <memory>
+
 #include "llwin32headers.h"
 
 // This file MUST be the first one included by each .cpp file
