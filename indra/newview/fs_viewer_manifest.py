@@ -97,6 +97,7 @@ class FSViewerManifest:
         return "--exclude=%s/bin/.debug" % installer_name
 
     def fs_save_windows_symbols(self):
+        return
         self.fs_save_symbols("windows")
 
         pdbName = "firestorm-bin.pdb"
@@ -148,6 +149,7 @@ class FSViewerManifest:
         self.fs_save_symbols("darwin")
 
     def fs_save_symbols(self, osname):
+        return
         if (os.path.exists("%s/firestorm-symbols-%s-%d.tar.bz2" % (self.args['configuration'].lower(),
                                                                        osname,
                                                                        self.address_size))):

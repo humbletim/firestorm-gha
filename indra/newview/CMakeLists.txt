@@ -1,6 +1,7 @@
 # -*- cmake -*-
 
 project(viewer)
+set(CMAKE_CFG_INTDIR .)
 
 include(00-Common)
 # DON'T move Linking.cmake to its place in the alphabetized list below: it
@@ -63,6 +64,8 @@ include(Growl)
 include(ColladaDom)
 include(jemalloc)
 include(Discord)
+
+use_prebuilt_binary(openvr)
 
 # <FS:ND> if using ndPhysicsstub this variable will be unset, we don't need to build any stub code viewer side in that case
 if( LLPHYSICSEXTENSIONS_SRC_DIR )
@@ -2302,6 +2305,10 @@ if (WINDOWS)
       #media_plugin_example # <FS:Ansariel> Don't package example plugin
       )
 
+    if (NOT USE_BUGSPLAT)
+        LIST(APPEND COPY_INPUT_DEPENDENCIES windows-crash-logger)
+    endif (NOT USE_BUGSPLAT)
+
     # <FS:Ansariel> Only copy OpenJPEG dll if needed
     if (NOT USE_KDU)
         list(APPEND COPY_INPUT_DEPENDENCIES
@@ -2357,7 +2364,7 @@ if (WINDOWS)
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
         "--channel=${VIEWER_CHANNEL}"
-        --configuration=${CMAKE_CFG_INTDIR}
+        --configuration=Release
         --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
         --grid=${GRID}
         --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2367,7 +2374,7 @@ if (WINDOWS)
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
         stage_third_party_libs
-        ${COPY_INPUT_DEPENDENCIES}
+        # ${COPY_INPUT_DEPENDENCIES}
       COMMENT "Performing viewer_manifest copy"
       )
 
@@ -2418,7 +2425,7 @@ if (WINDOWS)
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
           "--channel=${VIEWER_CHANNEL}"
-          --configuration=${CMAKE_CFG_INTDIR}
+          --configuration=Release
           --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
           --grid=${GRID}
           --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2429,12 +2436,12 @@ if (WINDOWS)
             ${VIEWER_BINARY_NAME}
             ${CMAKE_CURRENT_SOURCE_DIR}/viewer_manifest.py
             ${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
-            ${COPY_INPUT_DEPENDENCIES}
+            # ${COPY_INPUT_DEPENDENCIES}
         )
 
       add_custom_target(llpackage ALL DEPENDS
         ${CMAKE_CFG_INTDIR}/touched.bat
-        windows-setup-build-all
+        #windows-setup-build-all
         )
         # temporarily disable packaging of event_host until hg subrepos get
         # sorted out on the parabuild cluster...
@@ -2559,6 +2566,7 @@ endif (WINDOWS)
 
 if (LINUX)
     target_link_libraries(${VIEWER_BINARY_NAME} "dl" )
+    target_link_libraries(${VIEWER_BINARY_NAME} openvr_api)
 endif (LINUX)
 
 set(ARTWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH
@@ -2605,7 +2613,7 @@ if (LINUX)
         --build=${CMAKE_CURRENT_BINARY_DIR}
         --buildtype=${CMAKE_BUILD_TYPE}
         "--channel=${VIEWER_CHANNEL}"
-        --configuration=${CMAKE_CFG_INTDIR}
+        --configuration=Release
         --dest=${CMAKE_CURRENT_BINARY_DIR}/packaged
         --grid=${GRID}
         --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2631,7 +2639,7 @@ if (LINUX)
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
       "--channel=${VIEWER_CHANNEL}"
-      --configuration=${CMAKE_CFG_INTDIR}
+      --configuration=Release
       --dest=${CMAKE_CURRENT_BINARY_DIR}/packaged
       --grid=${GRID}
       --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2726,7 +2734,7 @@ if (DARWIN)
       --buildtype=${CMAKE_BUILD_TYPE}
       --bundleid=${MACOSX_BUNDLE_GUI_IDENTIFIER}
       "--channel=${VIEWER_CHANNEL}"
-      --configuration=${CMAKE_CFG_INTDIR}
+      --configuration=Release
       --dest=${VIEWER_APP_BUNDLE}
       --grid=${GRID}
       --source=${CMAKE_CURRENT_SOURCE_DIR}
@@ -2761,7 +2769,7 @@ if (DARWIN)
           --build=${CMAKE_CURRENT_BINARY_DIR}
           --buildtype=${CMAKE_BUILD_TYPE}
           "--channel=${VIEWER_CHANNEL}"
-          --configuration=${CMAKE_CFG_INTDIR}
+          --configuration=Release
           --dest=${VIEWER_APP_BUNDLE}
           --grid=${GRID}
           --source=${CMAKE_CURRENT_SOURCE_DIR}
