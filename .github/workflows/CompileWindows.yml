@@ -41,7 +41,7 @@ jobs:
     runs-on: windows-2019
     env:
        VIEWER_CHANNEL: VR-GHA
-       AUTOBUILD_BUILD_ID: 67470
+       AUTOBUILD_BUILD_ID: 68380
        AUTOBUILD_CONFIGURATION: ReleaseFS_open
     steps:
     # - uses: actions/checkout@v2
