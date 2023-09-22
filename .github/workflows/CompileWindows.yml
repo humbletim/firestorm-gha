@@ -55,12 +55,6 @@ jobs:
         git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/${GITHUB_REPOSITORY}.git --branch ${GITHUB_REF_NAME} ${GITHUB_WORKSPACE}
         ls -lrtha
 
-    - name: Setup tmate session
-      if: ${{ inputs.tmate == true }}
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
-
     - name: Preset ENV
       shell: bash
       run: |
@@ -197,6 +191,13 @@ jobs:
       if: ${{ inputs.buildsys == 'ninja' && inputs.depth >= 'fsenv.3p.configure.llcommon.plugins' }}
       run: |
         ninja -C ${FSBUILD_DIR} SLPlugin media_plugin_cef media_plugin_libvlc #dev
+
+    - name: Setup tmate session
+      if: ${{ inputs.tmate == true }}
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: Build firestorm-bin (ninja)
       if: ${{ inputs.buildsys == 'ninja' && inputs.depth >= 'fsenv.3p.configure.llcommon.plugins.firestorm-bin' }}
       run: |
