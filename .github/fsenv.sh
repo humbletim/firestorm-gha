@@ -87,7 +87,6 @@ function _fsenv() {
     holostorm/3p-discord-rpc@a21e3dc#3p-discord-rpc
     holostorm/3p-ndPhysicsStub@aad4d9e
     holostorm/3p-freetype@577c3bdc
-    holostorm/3p-openjpeg2@d23ab9af
     $growl
     holostorm/3p-glod@eecf86f
     ValveSoftware/openvr@d9cffe2#3p-openvr
@@ -101,6 +100,7 @@ function _fsenv() {
     http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/55025/511964/dictionaries-1.538984-common-538984.tar.bz2=d778c6a3475bc35ee8b9615dfc38b4a9
   "
   # unused
+  # holostorm/3p-openjpeg2@d23ab9af
   # http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/55025/511964/dictionaries-1.538984-common-538984.tar.bz2=d778c6a3475bc35ee8b9615dfc38b4a9
   # https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/78593/744010/freetype-2.4.4.557047-windows64-557047.tar.bz2=69307aaba16ac71531c9c4d930ace993
   # http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/55004/511885/glod-1.0pre3.538980-windows64-538980.tar.bz2=6302ee1903ab419e76565d9eb6acd274
