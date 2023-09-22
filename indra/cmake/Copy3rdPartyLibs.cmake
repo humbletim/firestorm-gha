@@ -26,6 +26,9 @@ endmacro()
 # set up platform specific lists of files that need to be copied
 ###################################################################
 if(WINDOWS)
+    set(openvr_src_dir ${CMAKE_SOURCE_DIR}/../openvr/bin/win64)
+    set(openvr_files openvr_api.dll)
+
     #*******************************
     # VIVOX - *NOTE: no debug version
     set(vivox_lib_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
@@ -94,6 +97,7 @@ if(WINDOWS)
     endif (USE_BUGSPLAT)
 
     set(release_files ${release_files} growl++.dll growl.dll )
+    set(release_files ${release_files} openvr_api.dll )
     if (TARGET ll::fmodstudio)
         set(debug_files ${debug_files} fmodL.dll)
         set(release_files ${release_files} fmod.dll)
@@ -251,6 +255,7 @@ elseif(LINUX)
         ${EXPAT_COPY}
         libhunspell-1.3.so.0.0.0
         libopenal.so
+        libopenvr_api.so
         #libopenjp2.so
         libuuid.so.16
         libuuid.so.16.0.22
@@ -262,6 +267,7 @@ elseif(LINUX)
     else (NOT USESYSTEMLIBS)
       set(release_files
         libGLOD.so
+        libopenvr_api.so
        )
     endif (NOT USESYSTEMLIBS)
 

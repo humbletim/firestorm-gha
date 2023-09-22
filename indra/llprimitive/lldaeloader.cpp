@@ -1,3 +1,4 @@
+#define _HAS_AUTO_PTR_ETC 1 // vs2019 std::auto_ptr
 /**
  * @file lldaeloader.cpp
  * @brief LLDAELoader class implementation

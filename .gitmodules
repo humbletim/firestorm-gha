@@ -1,0 +1,3 @@
+[submodule "fs-build-variables"]
+	path = fs-build-variables
+	url = https://github.com/humbletim/fs-build-variables

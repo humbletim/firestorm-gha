@@ -1,0 +1,30 @@
+{
+  "type": "autobuild",
+  "version": "1.3",
+  "package_description": {
+    "name": "openvr",
+    "copyright": "Copyright (c) 2015, Valve Corporation",
+    "description": "OpenVR is an API and runtime that allows access to VR hardware from multiple vendors...",
+    "license": "BSD-3-Clause", "license_file": "LICENSES/openvr.txt",
+    "platforms": {
+      "common": {
+        "configurations": {"default":{"build":{"command":"bash","options":["-c","../build-cmd.sh"]},"name":"default"}},
+        "manifest": [ "include/openvr.h" ],
+        "name": "common"
+      },
+      "windows64": {
+        "build_directory": "stage",
+        "configurations": {"default":{"build":{},"default":"true","name":"default"}},
+        "manifest": [ "lib/release/openvr_api.lib", "lib/release/openvr_api.dll" ],
+        "name": "windows64"
+      },
+      "linux64": {
+        "build_directory": "stage",
+        "configurations": {"default":{"build":{},"default":"true","name":"default"}},
+        "manifest": [ "lib/release/libopenvr_api.so" ],
+        "name": "linux64"
+      }
+    },
+    "version_file": "VERSION.txt"
+  }
+}

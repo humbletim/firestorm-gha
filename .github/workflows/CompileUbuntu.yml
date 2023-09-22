@@ -1,0 +1,135 @@
+name: CompileUbuntu
+
+on:
+  # pull_request:
+  workflow_dispatch:
+      inputs:
+        llpackage:
+          description: 'build/package/upload firestorm installer (if false only autobuild configure and caching is performed)'
+          required: true
+          default: 'false'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  linux_build:
+    runs-on: ubuntu-latest
+    container: ubuntu:16.04
+    env:
+       VIEWER_CHANNEL: VR-GHA
+       AUTOBUILD_BUILD_ID: 66221
+       AUTOBUILD_CONFIGURATION: ReleaseFS_open
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Preset ENV
+      shell: bash
+      run: |
+        .github/fsenv.sh | tee -a $GITHUB_ENV
+        if [[ ! ${GITHUB_ACTIONS+x} ]] ; then #dev
+          set -ea && source <( .github/fsenv.sh ) && set +ea && test -n "$VIEWER_CHANNEL" -a -n "$FSBUILD_DIR" -a -n "$AUTOBUILD_VSVER" #dev
+        fi #dev
+    - name: Prep build dirs
+      shell: bash
+      run: |
+        df -h
+        mkdir $FSBUILD_DIR
+    - name: apt-get install
+      shell: bash
+      run: |
+        sudo apt-get install -y -qq libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxinerama-dev libxrender-dev gdb
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+        architecture: x64
+    - name: Workaround Firestorm Python.cmake 
+      run: |
+        export PYTHON_EXECUTABLE=$(which python) #dev
+        echo PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} | tee -a $GITHUB_ENV
+    - name: Get software versions please
+      shell: bash
+      run: |
+        echo AUTOBUILD_INSTALLABLE_CACHE=$AUTOBUILD_INSTALLABLE_CACHE
+        echo PYTHON_EXECUTABLE=$PYTHON_EXECUTABLE
+        cmake --version
+        git --version
+        python --version
+        ninja --version
+        echo " "
+        df -h
+    - name: Install autobuild through PIP
+      run: |
+        which autobuild || pip install 'git+https://bitbucket.org/lindenlab/autobuild.git#egg=autobuild' #dev
+    - name: generate sorted 3p-inline manifest
+      shell: bash
+      run: |
+        for x in $INLINE_FS3P_DEPS ; do echo $x ; done | sort -u | tee 3p-inline.sorted.txt
+    - name: cache -- 3p-inline
+      id: cached-3p-inline
+      uses: actions/cache@v2
+      with:
+        key: ${{ runner.os }}-3p-inline-${{ hashFiles('3p-inline.sorted.txt') }}-FirestormVR-GHA
+        path: |
+          3p-inline/*/_results.env
+          3p-inline/*/*.tar.bz2
+    - name: Patch and build local 3p packages
+      # if: steps.cached-3p-inline.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        .github/3p/CompileWindows.autobuild-setup.sh #dev
+        test -f autobuild.xml.sorted.txt
+
+    - name: cache -- autobuild downloads
+      id: cached-downloads
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.AUTOBUILD_INSTALLABLE_CACHE }}
+        key: ${{ runner.os }}-downloads-${{ hashFiles('autobuild.xml.sorted.txt') }}-FirestormVR-GHA
+
+    - name: cache -- buildir packages
+      id: cached-buildir-packages
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.FSBUILD_DIR }}/packages
+        key: ${{ runner.os }}-buildir-packages-${{ hashFiles('autobuild.xml.sorted.txt') }}-FirestormVR-GHA
+
+    - name: Reset cached packages sentinels
+      # if: steps.cached-buildir-packages.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        .github/fs_reset_sentinels.sh ${FSBUILD_DIR} #dev
+        ls -lrt autobuild.xml ${FSBUILD_DIR}/packages/cmake_tracking/*_installed || true
+
+    - name: Configure autobuild (ninja)
+      shell: bash
+      run: |
+        autobuild --version
+        test -n "${VIEWER_CHANNEL}" && test -n "${PYTHON_EXECUTABLE}" #dev
+        autobuild configure -- --no-vstools --ninja --package --openal --chan "${VIEWER_CHANNEL}" -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} -DLL_TESTS:BOOL=FALSE -DVS_DISABLE_FATAL_WARNINGS=ON #dev
+    - name: Build plugins (ninja)
+      if: ${{ github.event.inputs.llpackage == 'true' }}
+      run: |
+        ninja -C ${FSBUILD_DIR} SLPlugin media_plugin_cef #dev
+    - name: Build firestorm-bin (ninja)
+      if: ${{ github.event.inputs.llpackage == 'true' }}
+      run: |
+        ninja -C ${FSBUILD_DIR} firestorm-bin #dev
+    - name: Package (ninja)
+      if: ${{ github.event.inputs.llpackage == 'true' }}
+      run: |
+        ninja -C ${FSBUILD_DIR} llpackage #dev
+    - name: Upload Artifact (ninja)
+      if: ${{ github.event.inputs.llpackage == 'true' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ format('{0}-{1}-{2}-{3}-{4}', runner.os, github.event.inputs.buildsys, env.VIEWER_CHANNEL, env.VIEWER_VERSION_STR, env.VIEWER_VERSION_GITHASH) }}
+        path: |
+          ${{ env.FSBUILD_DIR }}/newview/Phoenix*.tar.xz
+          autobuild.xml.sorted.txt
+          3p-inline.sorted.txt
