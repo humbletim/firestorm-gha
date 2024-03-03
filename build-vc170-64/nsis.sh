@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+#set -e
 
 nsi=$(pwd -W)/build-vc170-64/newview/firestorm_setup_tmp.nsi
 
