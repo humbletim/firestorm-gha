@@ -9,8 +9,7 @@ cp -av LICENSE LICENSES/openvr.txt
 cp -av headers/openvr.h include
 cp -av bin/win64/openvr_api.dll lib/win64/openvr_api.lib lib/release/
 
-tar -cjvf $GITHUB_WORKSPACE/openvr-v1.6.10.8eaf723.tar.bz2 autobuild-package.xml include/openvr.h lib/release/openvr_api.{dll,lib} LICENSES/openvr.txt
+tar -cjvf openvr-v1.6.10.8eaf723.tar.bz2 autobuild-package.xml include/openvr.h lib/release/openvr_api.{dll,lib} LICENSES/openvr.txt
 
-tar -tvf $GITHUB_WORKSPACE/openvr-v1.6.10.8eaf723.tar.bz2
+tar -tvf openvr-v1.6.10.8eaf723.tar.bz2
 
-AUTOBUILD_CONFIG_FILE=$GITHUB_WORKSPACE/autobuild.xml autobuild installables add openvr url=file:///$GITHUB_WORKSPACE/openvr-v1.6.10.8eaf723.tar.bz2 platform=windows64 hash=f413f2222e1bb9cd35900b7c169d16de 
