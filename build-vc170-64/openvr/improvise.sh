@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eu
 
+cd "$(dirname $0)"
+
 test -f openvr.tar.gz || curl -L -s https://api.github.com/repos/ValveSoftware/openvr/tarball/v1.6.10 -o openvr.tar.gz
 tar --strip-components=1 -xvf openvr.tar.gz ValveSoftware-openvr-8eaf723/lib/win64 ValveSoftware-openvr-8eaf723/bin/win64 ValveSoftware-openvr-8eaf723/headers ValveSoftware-openvr-8eaf723/LICENSE
 

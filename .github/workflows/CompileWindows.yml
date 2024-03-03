@@ -26,19 +26,22 @@ jobs:
     - name: Clone
       shell: bash
       run: |
-        pwd
+        pwd && pwd -W
         set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
         fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
-        MSYS_NO_PATHCONV=1 cmd.exe /C 'mklink /J build-vc170-64 fsvr\build-vc170-64'
         fastclone FirestormViewer/fs-build-variables master
         ls -lrtha
+
+    - name: parse viewer_version.txt
+      run: fsvr/detect_vars.sh | tee viewer_version.env >> $GITHUB_ENV
 
     - name: Path
       shell: bash
       run: |
-        echo "${GITHUB_WORKSPACE}/humbletim-bin" | tee -a $GITHUB_PATH
+        echo "${workspace}/humbletim-bin" | tee -a $GITHUB_PATH
+        MSYS_NO_PATHCONV=1 cmd.exe /C "mklink /J $(basename $build_dir) fsvr\\$(basename $build_dir)"
 
     - name: Tools
       shell: bash
@@ -50,6 +53,7 @@ jobs:
     - name: Preflight
       shell: bash
       run: |
+        set -x
         python --version
         autobuild --version
         cmake --version
