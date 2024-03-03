@@ -13036,8 +13036,8 @@ build newview\rebuild_cache: phony newview\CMakeFiles\rebuild_cache.util
 # Custom command for newview\packages-info.txt
 
 build newview\packages-info.txt | ${cmake_ninja_workdir}newview\packages-info.txt: CUSTOM_COMMAND $root_dir\autobuild.xml $root_dir\scripts\packages-formatter.py $root_dir\autobuild.xml || llcommon\llcommon.lib llcommon\stage_third_party_libs llcorehttp\llcorehttp.lib llfilesystem\llfilesystem.lib llimage\llimage.lib llimagej2coj\llimagej2coj.lib llmath\llmath.lib llmeshoptimizer\llmeshoptimizer.lib llmessage\llmessage.lib llplugin\llplugin.lib llplugin\slplugin\SLPlugin.exe llrender\llrender.lib llwindow\llwindow.lib llxml\llxml.lib media_plugins\base\media_plugin_base.lib media_plugins\cef\media_plugin_cef.dll media_plugins\libvlc\media_plugin_libvlc.dll
-  COMMAND = $cmd_exe /C "cd /D $build_dir\newview && python $source_dir/cmake/run_build_test.py -DAUTOBUILD_ADDRSIZE=64 python $source_dir/../scripts/packages-formatter.py $viewer_channel 6.6.17.70368 $packages_dir > $packages_dir-info.txt"
-  DESC = Generating $packages_dir-info.txt for the about box
+  COMMAND = $cmd_exe /C "cd /D $build_dir\newview && python $source_dir/cmake/run_build_test.py -DAUTOBUILD_ADDRSIZE=64 python $source_dir/../scripts/packages-formatter.py $viewer_channel 6.6.17.70368 $packages_dir > $build_dir/newview/packages-info.txt"
+  DESC = Generating $build_dir/newview/packages-info.txt for the about box
   restat = 1
 
 

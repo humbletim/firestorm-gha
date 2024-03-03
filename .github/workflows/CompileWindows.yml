@@ -30,8 +30,8 @@ jobs:
         set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
         fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} ${GITHUB_WORKSPACE}/relative
-        mv relative/* -iv .
+        fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
+        MSYS_NO_PATHCONV=1 cmd.exe /C 'mklink /J build-vc170-64 fsvr\build-vc170-64'
         fastclone FirestormViewer/fs-build-variables master
         ls -lrtha
 

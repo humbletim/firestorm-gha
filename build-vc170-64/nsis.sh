@@ -1,7 +1,7 @@
 #!/bin/bash
-nsi=build-vc170-64/newview/firestorm_setup_tmp.nsi
+nsi=$(pwd -W)/build-vc170-64/newview/firestorm_setup_tmp.nsi
 
-grep "openvr_api.dll" $nsi
+grep "openvr_api.dll" $nsi \
   || perl -i.bak  -pe 's@^SetCompressor .*$@SetCompressor zlib@g; s@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
      $nsi
 
@@ -15,4 +15,4 @@ grep -E ^File "$nsi" | sed -e 's@.*newview[/\\]@@' > "$nsi.txt"
 head -2 "$nsi.txt"
 tail -2 "$nsi.txt"
 
-7z -bb1 -bt -tzip a "$nsi.zip" "@$nsi.txt"
+cd build-vc170-64/newview && 7z -bb1 -bt -t7z a "$nsi.7z" "@$nsi.txt"

@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<llsd>
+<map>
+    <key>build_id</key>
+    <string>8eaf723</string>
+    <key>configuration</key>
+    <string>default</string>
+    <key>manifest</key>
+    <array>
+      <string>LICENSES/openvr.txt</string>
+      <string>lib/release/openvr_api.dll</string>
+      <string>include/openvr.h</string>
+      <string>lib/release/openvr_api.lib</string>
+    </array>
+    <key>package_description</key>
+    <map>
+      <key>copyright</key>
+      <string>Copyright (c) 2015, Valve Corporation</string>
+      <key>description</key>
+      <string>OpenVR is an API and runtime that allows access to VR hardware from multiple vendors...</string>
+      <key>license</key>
+      <string>BSD-3-Clause</string>
+      <key>license_file</key>
+      <string>LICENSES/openvr.txt</string>
+      <key>name</key>
+      <string>openvr</string>
+      <key>version</key>
+      <string>v1.6.10.8eaf723</string>
+    </map>
+    <key>platform</key>
+    <string>windows64</string>
+    <key>type</key>
+    <string>metadata</string>
+    <key>version</key>
+    <string>1</string>
+  </map>
+</llsd>
