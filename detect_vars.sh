@@ -3,7 +3,7 @@ set -e
 self="${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]}"
 here=$(dirname $(readlink -f "$self"))
 
-function _setenv() { echo "$@" && export "$@" ; }
+function _setenv() { printf "%q\n" "$@" && export "$@" ; }
 
 _setenv workspace=${GITHUB_WORKSPACE:-$(readlink -f "$here/..")}
 _setenv root_dir=$(cygpath -ma "$workspace" 2>/dev/null || echo "$workspace")
@@ -31,7 +31,7 @@ _setenv version_minor=`vercomp 2`
 _setenv version_patch=`vercomp 3`
 _setenv version_release=`vercomp 4`
 _setenv version_git_sha=`git -C $workspace describe --always --first-parent --abbrev=7`
-_setenv version_build_sha=`git -C $here describe --always --first-parent --abbrev=7`
+_setenv version_build_sha=`git -C "$build_dir" describe --always --first-parent --abbrev=7`
 _setenv version_string="${version_major}.${version_minor}.${version_patch}.${version_release}"
 _setenv version_sha="${version_git_sha}-${version_build_sha}"
 _setenv version_full="${version_string}-${version_sha}"
