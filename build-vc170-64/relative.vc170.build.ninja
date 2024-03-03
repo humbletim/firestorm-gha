@@ -39,7 +39,7 @@ include relative.vc170.rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = $root_dir\build-relative\
+cmake_ninja_workdir = $build_dir\
 
 #############################################
 # Utility command for viewer
@@ -6143,7 +6143,7 @@ build media_plugins\libvlc\rebuild_cache: phony media_plugins\libvlc\CMakeFiles\
 
 build cmake_object_order_depends_target_firestorm-bin: phony || cmake_object_order_depends_target_llappearance cmake_object_order_depends_target_llaudio cmake_object_order_depends_target_llcharacter cmake_object_order_depends_target_llcommon cmake_object_order_depends_target_llcorehttp cmake_object_order_depends_target_llfilesystem cmake_object_order_depends_target_llimage cmake_object_order_depends_target_llinventory cmake_object_order_depends_target_lllogin cmake_object_order_depends_target_llmath cmake_object_order_depends_target_llmessage cmake_object_order_depends_target_llplugin cmake_object_order_depends_target_llprimitive cmake_object_order_depends_target_llrender cmake_object_order_depends_target_llui cmake_object_order_depends_target_llxml copy_win_scripts\copy_win_scripts llcommon\stage_third_party_libs llplugin\slplugin\SLPlugin.exe newview\copy_w_viewer_manifest newview\packages-info.txt
 
-build newview\CMakeFiles\firestorm-bin.dir\cmake_pch.cxx.obj: CXX_COMPILER__firestorm-bin_unscanned_Release $root_dir\build-relative\newview\CMakeFiles\firestorm-bin.dir\cmake_pch.cxx | newview\CMakeFiles\firestorm-bin.dir\cmake_pch.hxx || cmake_object_order_depends_target_firestorm-bin
+build newview\CMakeFiles\firestorm-bin.dir\cmake_pch.cxx.obj: CXX_COMPILER__firestorm-bin_unscanned_Release $build_dir\newview\CMakeFiles\firestorm-bin.dir\cmake_pch.cxx | newview\CMakeFiles\firestorm-bin.dir\cmake_pch.hxx || cmake_object_order_depends_target_firestorm-bin
   DEFINES = -DADDRESS_SIZE=64 -DLIB_NDOF=1 -DLL_OPENAL=1 -DLL_OS_DRAGDROP_ENABLED=1 -DNOMINMAX -DOPENSIM
   FLAGS = /DWIN32 /D_WINDOWS /GR /EHsc /MD /O2 /Ob2 /std:c++17 /Zc:wchar_t- /Zi /GR /DEBUG /DLL_RELEASE=1 /DLL_RELEASE_FOR_DOWNLOAD=1 /DNDEBUG /D_SECURE_STL=0 /D_HAS_ITERATOR_DEBUGGING=0 /DWIN32 /D_WINDOWS /DLL_WINDOWS=1 /DUNICODE /D_UNICODE /DWINVER=0x0601 /D_WIN32_WINNT=0x0601 /DLL_OS_DRAGDROP_ENABLED=1 /DLIB_NDOF=1 -std:c++17 -MD /Zo /GS /TP /W3 /c /Zc:forScope /nologo /Oy- /Oi /Ot /fp:fast /MP /WX /Yc$build_dir/newview/CMakeFiles/firestorm-bin.dir/cmake_pch.hxx /Fp$build_dir/newview/CMakeFiles/firestorm-bin.dir/./cmake_pch.cxx.pch /FI$build_dir/newview/CMakeFiles/firestorm-bin.dir/cmake_pch.hxx
   INCLUDES = -I$build_dir\newview -I$source_dir\llaudio -I$source_dir\llcommon -I$source_dir\llmath -I$source_dir\llmeshoptimizer -I$source_dir\llmessage -I$source_dir\llfilesystem -I$source_dir\llcorehttp -I$source_dir\llxml -I$source_dir\llcharacter -I$source_dir\llimage -I$source_dir\llinventory -I$source_dir\llplugin -I$source_dir\llrender -I$source_dir\llwindow -I$source_dir\llprimitive -I$source_dir\llui -I$source_dir\viewer_components\login -I$source_dir\llappearance -external:I$packages_dir\include\apr-1 -external:I$packages_dir\include -external:I$packages_dir\include\zlib-ng -external:I$packages_dir\include\uriparser -external:I$packages_dir\include\meshoptimizer -external:I$packages_dir\include\nghttp2 -external:I$packages_dir\include\AL -external:I$packages_dir\include\openjpeg -external:I$packages_dir\include\libpng16 -external:I$packages_dir\include\freetype2 -external:I$packages_dir\include\collada -external:I$packages_dir\include\collada\1.4 -external:I$packages_dir\include\hunspell -external:I$packages_dir\include\glod -external:I$packages_dir\include\discord-rpc -external:I$packages_dir\include\Growl -external:W0
@@ -12962,7 +12962,7 @@ build newview\CMakeFiles\firestorm-bin.dir\llwindebug.cpp.obj: CXX_COMPILER__fir
   TARGET_COMPILE_PDB = newview\CMakeFiles\firestorm-bin.dir\
   TARGET_PDB = newview\firestorm-bin.pdb
 
-build newview\CMakeFiles\firestorm-bin.dir\viewerRes.rc.res: RC_COMPILER__firestorm-bin_unscanned_Release $root_dir\build-relative\newview\viewerRes.rc || cmake_object_order_depends_target_firestorm-bin
+build newview\CMakeFiles\firestorm-bin.dir\viewerRes.rc.res: RC_COMPILER__firestorm-bin_unscanned_Release $build_dir\newview\viewerRes.rc || cmake_object_order_depends_target_firestorm-bin
   DEFINES = -DADDRESS_SIZE=64 -DLIB_NDOF=1 -DLL_OPENAL=1 -DLL_OS_DRAGDROP_ENABLED=1 -DNOMINMAX -DOPENSIM
   DEP_FILE = newview\CMakeFiles\firestorm-bin.dir\viewerRes.rc.res.d
   FLAGS = -DWIN32 -I$source_dir/newview/res
