@@ -23,15 +23,37 @@ jobs:
   windows_build:
     runs-on: windows-2022
     steps:
-    - name: Clone Upstream
+    - name: Clone
       shell: bash
       run: |
         pwd
         set -x
-        git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/FirestormViewer/phoenix-firestorm.git --branch ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/${GITHUB_REPOSITORY}.git --branch ${GITHUB_REF_NAME} ${GITHUB_WORKSPACE}/relative
+        function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
+        fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} ${GITHUB_WORKSPACE}/relative
+        fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
+        fastclone FirestormViewer/fs-build-variables master
         mv relative/* -iv .
         ls -lrtha
+
+    - name: Path
+      shell: bash
+      run: |
+        echo "${GITHUB_WORKSPACE}/humbletim-bin" | tee -a $GITHUB_PATH
+
+    - name: Tools
+      shell: bash
+      run: |
+        python -m pip install -r requirements.txt
+        curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+        unzip -d humbletim-bin ninja-win.zip
+
+    - name: Preflight
+      shell: bash
+      run: |
+        python --version
+        autobuild --version
+        cmake --version
+        ninja --version
 
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
