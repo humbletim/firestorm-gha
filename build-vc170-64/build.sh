@@ -1,7 +1,7 @@
 #!/bin/bash
 . build-vc170-64/autobuild.env
 
-FSVRHASH=$(git -C . describe --always --first-parent --abbrev=7)-$(git -C relative describe --always --first-parent --abbrev=7)
+FSVRHASH=$(git -C . describe --always --first-parent --abbrev=7)-$(git -C fsvr describe --always --first-parent --abbrev=7)
 perl -i -pe "s@FSVRHASH@${FSVRHASH}@g" build-vc170-64/newview/fsversionvalues.h
 cat build-vc170-64/newview/fsversionvalues.h
 
