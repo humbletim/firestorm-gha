@@ -29,10 +29,10 @@ jobs:
         pwd
         set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
-        fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} ${GITHUB_WORKSPACE}/relative
         fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        fastclone FirestormViewer/fs-build-variables master
+        fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} ${GITHUB_WORKSPACE}/relative
         mv relative/* -iv .
+        fastclone FirestormViewer/fs-build-variables master
         ls -lrtha
 
     - name: Path
