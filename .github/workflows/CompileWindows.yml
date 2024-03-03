@@ -1,0 +1,39 @@
+name: CompileWindows
+
+on:
+  # pull_request:
+  workflow_dispatch:
+      inputs:
+        depth:
+          type: choice
+          description: depth
+          default: a.b.c
+          options:
+            - a
+            - a.b
+            - a.b.c
+            - a.b.c.d
+            - a.b.c.d.e
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  windows_build:
+    runs-on: windows-2022
+    steps:
+    - name: Clone Upstream
+      shell: bash
+      run: |
+        pwd
+        set -x
+        git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/FirestormViewer/phoenix-firestorm.git --branch ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
+        git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/${GITHUB_REPOSITORY}.git --branch ${GITHUB_REF_NAME} ${GITHUB_WORKSPACE}/relative
+        mv relative/* -iv .
+        ls -lrtha
+
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
