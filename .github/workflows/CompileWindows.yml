@@ -35,7 +35,7 @@ jobs:
         ls -lrtha
 
     - name: parse viewer_version.txt
-      run: fsvr/detect_vars.sh | tee viewer_version.env >> $GITHUB_ENV
+      run: fsvr/detect_vars.sh | tee build_vars.env >> $GITHUB_ENV
 
     - name: Path
       shell: bash

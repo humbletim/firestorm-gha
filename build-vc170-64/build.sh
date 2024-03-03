@@ -1,7 +1,10 @@
 #!/bin/bash
 
-FSVRHASH=$(git -C . describe --always --first-parent --abbrev=7)-$(git -C fsvr describe --always --first-parent --abbrev=7)
-perl -i -pe "s@FSVRHASH@${FSVRHASH}@g" build-vc170-64/newview/fsversionvalues.h
+#. ../build_vars.env
+
+test -d "$root_dir" && test -d "$build_dir" && test -n "$version_string" || { echo "build_vars.env?" ; exit 1; }
+
+perl -i -pe "s@FSVRHASH@${version_sha}@g" build-vc170-64/newview/fsversionvalues.h
 cat build-vc170-64/newview/fsversionvalues.h
 
 mkdir -p build-vc170-64/msvc/
@@ -17,9 +20,10 @@ cp -avu /c/PROGRA~1/MICROS~2/2022/ENTERP~1/VC/Redist/MSVC/14.38.33135/x64/Micros
 cp -avu indra/newview/exoflickrkeys.h.in build-vc170-64/newview/exoflickrkeys.h
 cp -avu indra/newview/fsdiscordkey.h.in build-vc170-64/newview/fsdiscordkey.h
 
+export version_comma="${version_string//./,}"
 perl -pe '
-  s@\$\{VIEWER_VERSION_MAJOR\},\$\{VIEWER_VERSION_MINOR\},\$\{VIEWER_VERSION_PATCH\},\$\{VIEWER_VERSION_REVISION\}@6,6,17,70368@g;
-  s@\$\{VIEWER_VERSION_MAJOR\}\.\$\{VIEWER_VERSION_MINOR\}\.\$\{VIEWER_VERSION_PATCH\}\.\$\{VIEWER_VERSION_REVISION\}@6.6.17.70368@g;
+  s@\$\{VIEWER_VERSION_MAJOR\},\$\{VIEWER_VERSION_MINOR\},\$\{VIEWER_VERSION_PATCH\},\$\{VIEWER_VERSION_REVISION\}@$ENV{version_comma}@g;
+  s@\$\{VIEWER_VERSION_MAJOR\}\.\$\{VIEWER_VERSION_MINOR\}\.\$\{VIEWER_VERSION_PATCH\}\.\$\{VIEWER_VERSION_REVISION\}@$ENV{version_string}@g;
 ' indra/newview/res/viewerRes.rc > build-vc170-64/newview/viewerRes.rc
 
 # disallow direct NSIS invocations
