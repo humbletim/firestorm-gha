@@ -10,6 +10,7 @@ mkdir -p build-vc170-64/msvc/
 mkdir -p build-vc170-64/CMakeFiles/
 mkdir -p build-vc170-64/copy_win_scripts/
 mkdir -p build-vc170-64/sharedlibs/
+mkdir -p build-vc170-64/packages/
 
 if [[ -n "$GITHUB_ACTIONS" ]] ; then
     MSYS_NO_PATHCONV=1 cmd.exe /C 'cd build-vc170-64\sharedlibs && mklink /D Release .'
@@ -38,10 +39,21 @@ perl -pe '
 #    jq -r --arg x "$x" '.[$x]|$x+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json
 # done | tee $build_dir/newview/packages-info.txt
 
-jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json | tee $build_dir/newview/packages-info.txt
 
-# jq -r '.[]|.url' ../build-vc170-64/packages-info.json |fgrep http | parallel --will-cite -j4 wget -nv -N {}
+function generate_packages_info() {
+  jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json \
+    | tee $build_dir/newview/packages-info.txt
+}
+function untar_packages() {
+    jq -r '.[]|.url' build-vc170-64/packages-info.json \
+    | parallel --will-cite -j4 'basename {} ; tar -C "$packages_dir" -xf autobuild-cache/$(basename {})' 
+}
+function verify_downloads() {
+    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+.url' build-vc170-64/packages-info.json |parallel --will-cite -j4 '{} ; echo $hash autobuild-cache/$(basename $url) | md5sum --quiet -c - '
+}
 
+function download_packages() {
+    jq -r '.[]|.url' build-vc170-64/packages-info.json |fgrep http \
+      | parallel --will-cite -j4 wget -nv -P autobuild-cache -N {}
+}
 
-
-# disallow direct NSIS invocations
