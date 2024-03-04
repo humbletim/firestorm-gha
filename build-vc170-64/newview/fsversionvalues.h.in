@@ -1,0 +1,8 @@
+#pragma once
+#define LL_VIEWER_CHANNEL "$viewer_channel"
+#define LL_VIEWER_VERSION_MAJOR $version_major
+#define LL_VIEWER_VERSION_MINOR $version_minor
+#define LL_VIEWER_VERSION_PATCH $version_patch
+#define LL_VIEWER_VERSION_BUILD $version_release
+#define LL_VIEWER_VERSION_GITHASH "$version_sha";
+#define LLBUILD_CONFIG "Release"

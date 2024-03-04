@@ -23,7 +23,7 @@ _setenv build_vcdir=build-vc${AUTOBUILD_VSVER}-${AUTOBUILD_ADDRSIZE}
 _setenv build_dir=${build_dir:-"$root_dir/$build_vcdir"}
 _setenv packages_dir=$build_dir/packages
 
-_version=$(cat $build_dir/newview/viewer_version.txt)
+_version=$(cat $_fsvr_dir/$build_vcdir/newview/viewer_version.txt)
 function vercomp() { echo $_version | cut -d "." -f $1 ; }
 
 _setenv version_major=`vercomp 1`

@@ -4,13 +4,13 @@
 
 test -d "$root_dir" && test -d "$build_dir" && test -n "$version_string" || { echo "build_vars.env?" ; exit 1; }
 
-perl -i -pe "s@FSVRHASH@${version_sha}@g" build-vc170-64/newview/fsversionvalues.h
-cat build-vc170-64/newview/fsversionvalues.h
+cat build-vc170-64/newview/fsversionvalues.h.in | envsubst | tee build-vc170-64/newview/fsversionvalues.h
 
 mkdir -p build-vc170-64/msvc/
 mkdir -p build-vc170-64/CMakeFiles/
 mkdir -p build-vc170-64/copy_win_scripts/
 mkdir -p build-vc170-64/sharedlibs/
+
 if [[ -n "$GITHUB_ACTIONS" ]] ; then
     MSYS_NO_PATHCONV=1 cmd.exe /C 'cd build-vc170-64\sharedlibs && mklink /D Release .'
     cp -avu /c/PROGRA~1/MICROS~2/2022/ENTERP~1/VC/Redist/MSVC/14.38.33135/x64/Microsoft.VC143.CRT/*{140,140_1}.dll $build_dir/msvc/
