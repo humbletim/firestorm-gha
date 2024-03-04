@@ -1,5 +1,4 @@
 #!/bin/bash
-. $GITHUB_WORKSPACE/build-vc170-64/autobuild.env
-
+test -d "$build_dir" && test -f "$AUTOBUILD_CONFIG_FILE"
 set -xe
-autobuild.orig.exe installables add openvr url=file:///$(cygpath -m "$GITHUB_WORKSPACE")/build-vc170-64/openvr/openvr-v1.6.10.8eaf723.tar.bz2 platform=windows64 hash=`md5sum build-vc170-64/openvr/openvr-v1.6.10.8eaf723.tar.bz2|awk '{ print $1 }'`
+autobuild installables add openvr url=file:///$build_dir/openvr/openvr-v1.6.10.8eaf723.tar.bz2 platform=windows64 hash=`md5sum $build_dir/openvr/openvr-v1.6.10.8eaf723.tar.bz2|awk '{ print $1 }'`
