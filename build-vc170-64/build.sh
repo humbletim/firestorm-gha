@@ -17,6 +17,9 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
     test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
     test -f /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.exe && \
       mv -v /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.orig.exe
+    pacman -S parallel --noconfirm
+    echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
+
 fi
 
 test -f $build_dir/build.ninja || sh -c 'cd build-vc170-64 && ln -s relative.vc170.env.ninja build.ninja'
@@ -36,6 +39,8 @@ perl -pe '
 # done | tee $build_dir/newview/packages-info.txt
 
 jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json | tee $build_dir/newview/packages-info.txt
+
+# jq -r '.[]|.url' ../build-vc170-64/packages-info.json |fgrep http | parallel --will-cite -j4 wget -nv -N {}
 
 
 
