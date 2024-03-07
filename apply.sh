@@ -2,7 +2,7 @@
 test -d "$build_dir" || { echo "!build_dir" >&2; exit 1; }
 test -d "$source_dir" || { echo "!source_dir" >&2; exit 1; }
 
-here="$(dirname $0)"
+here="$(readlink -f $(dirname $0))"
 cd "$here"
 echo "$(jq --sort-keys '. + $p' --argjson p "$(jq '.' meta/packages-info.json)" $build_dir/packages-info.json)" > $build_dir/packages-info.json
 cd $source_dir/newview
