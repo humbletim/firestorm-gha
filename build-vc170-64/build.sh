@@ -13,6 +13,14 @@ mkdir -p build-vc170-64/sharedlibs/
 mkdir -p build-vc170-64/packages/
 
 if [[ -n "$GITHUB_ACTIONS" ]] ; then
+    function msvcdir() {
+      . msvc.env
+      TOOLSVER=$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@')
+      echo msvc_dir=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$TOOLSVER.CRT/")
+    }
+    export -f msvcdir
+    grep msvc_dir buid_vars.env || msvcdir | tee -a build_vars.env
+
     MSYS_NO_PATHCONV=1 cmd.exe /C 'cd build-vc170-64\sharedlibs && mklink /D Release .'
     cp -avu /c/PROGRA~1/MICROS~2/2022/ENTERP~1/VC/Redist/MSVC/14.38.33135/x64/Microsoft.VC143.CRT/*{140,140_1}.dll $build_dir/msvc/
     test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old

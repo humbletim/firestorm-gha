@@ -46,7 +46,7 @@ _setenv viewer_channel=$viewer_channel
 _setenv viewer_version=$viewer_version
 _setenv_extant build_dir=`_winlike $build_dir`
 _setenv_extant workspace=`_winlike $workspace`
-_setenv_extant packages_dir=$build_dir/packages
+_setenv packages_dir=$build_dir/packages
 _setenv build_vcdir=`basename $build_dir`
 
 test \
@@ -76,4 +76,4 @@ _setenv version_full="${version_string}-${version_sha}"
 # verify specified/calculated value alignments
 test $viewer_version == $version_string || { echo "viewer_version='$viewer_version' but version_string='$version_string'" >&2 ; exit 34 ; }
 
-_setenv msvc_dir=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@').CRT/")
+#_setenv msvc_dir=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@').CRT/")
