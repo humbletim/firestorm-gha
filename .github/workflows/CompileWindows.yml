@@ -35,6 +35,11 @@ jobs:
         MSYS_NO_PATHCONV=1 cmd.exe /C "mklink /J build-vc170-64 fsvr\\build-vc170-64"
         ls -lrtha
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: fsvr/detect_vars.sh
       run: fsvr/detect_vars.sh FirestormOS-VR-GHA `cat build-vc170-64/newview/viewer_version.txt` build-vc170-64 | tee build_vars.env >> $GITHUB_ENV
 
