@@ -19,9 +19,9 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
       echo msvc_dir=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$TOOLSVER.CRT/")
     }
     export -f msvcdir
-    grep msvc_dir build_vars.env || msvcdir | tee -a build_vars.env
+    grep msvc_dir build_vars.env >/dev/null || { msvcdir | tee -a build_vars.env ; }
 
-    MSYS_NO_PATHCONV=1 cmd.exe /C 'cd build-vc170-64\sharedlibs && mklink /D Release .'
+    test -d build-vc170-64/sharedlibs/Release || MSYS_NO_PATHCONV=1 cmd.exe /C 'cd build-vc170-64\sharedlibs && mklink /D Release .'
     cp -avu /c/PROGRA~1/MICROS~2/2022/ENTERP~1/VC/Redist/MSVC/14.38.33135/x64/Microsoft.VC143.CRT/*{140,140_1}.dll $build_dir/msvc/
     test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
     test -f /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.exe && \
@@ -30,7 +30,7 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
 
 fi
 
-test -f $build_dir/build.ninja || sh -c 'cd build-vc170-64 && ln -s relative.vc170.env.ninja build.ninja'
+test -f $build_dir/build.ninja || { cd build-vc170-64 && cmd.exe //C "mklink build.ninja relative.ninja" ; }
 
 cp -avu $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 cp -avu $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h

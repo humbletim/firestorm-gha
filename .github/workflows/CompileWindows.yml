@@ -32,7 +32,8 @@ jobs:
         fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         fastclone FirestormViewer/fs-build-variables master
-        MSYS_NO_PATHCONV=1 cmd.exe /C "mklink /J build-vc170-64 fsvr\\build-vc170-64"
+        mv -v fsvr/build-vc170-64 .
+        MSYS_NO_PATHCONV=1 cmd.exe /C "cd fsvr && mklink /J build-vc170-64 ..\\build-vc170-64"
         ls -lrtha
 
     - name: Setup tmate session

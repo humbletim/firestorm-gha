@@ -24,8 +24,8 @@ function _setenv_extant() {
   test -e "$path" || { echo "_setenv_extant $@ path=$path does not exist" ; exit 1; }
  _setenv "$@"
 }
-function _cyglike() { cygpath -ma "$(readlink -f "$1")" || readlink -f "$1"; }
-function _winlike() { cygpath -ma "$(readlink -f "$1")" || readlink -f "$1"; }
+function _cyglike() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
+function _winlike() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
 function _ver_split() { echo "$1" | cut -d "." -f $2 ; }
 function _git_sha() {
   test -e $1/.git || { echo "!$1/.git" 2>&1 ; return 1; }
