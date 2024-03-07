@@ -42,7 +42,7 @@ jobs:
         limit-access-to-actor: true
 
     - name: fsvr/detect_vars.sh
-      run: fsvr/detect_vars.sh FirestormOS-VR-GHA `cat build-vc170-64/newview/viewer_version.txt` build-vc170-64 | tee build_vars.env >> $GITHUB_ENV
+      run: fsvr/detect_vars.sh Firestorm-VR-GHA `cat build-vc170-64/newview/viewer_version.txt` build-vc170-64 | tee build_vars.env >> $GITHUB_ENV
 
     - name: Path
       shell: bash

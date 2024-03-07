@@ -20,8 +20,8 @@ tail -2 "$nsi.txt"
 
 MSYS_NO_PATHCONV=1 cmd.exe /C "cd build-vc170-64 && mklink /J $viewer_channel-$version_full newview"
 
-# cd build-vc170-64 && echo 7z -bt -t7z a "../$viewer_channel-$version_full.7z" "@$nsi.txt"
-cd build-vc170-64 && echo 7z -bt -tzip a "../$viewer_channel-$version_full.zip" "@$nsi.txt"
+echo cd build-vc170-64 \&\& echo 7z -bt -t7z a "../$viewer_channel-$version_full.7z" "@$nsi.txt"
+echo cd build-vc170-64 \&\& echo 7z -bt -tzip a "../$viewer_channel-$version_full.zip" "@$nsi.txt"
 
 function files2json(){ 
   echo { \"$(< build-vc170-64/newview/firestorm_setup_tmp.nsi.txt sed 's/,/":"/g' | paste -s -d, - | sed 's/,/", "/g')\" } |tr '\\' '/' > files.json
