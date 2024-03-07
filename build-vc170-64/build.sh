@@ -52,14 +52,15 @@ function generate_packages_info() {
     | tee $build_dir/newview/packages-info.txt
 }
 function download_packages() {
-    jq -r '.[]|.url' build-vc170-64/packages-info.json |fgrep http \
-      | parallel --will-cite -j4 wget -nv -P autobuild-cache -N {}
+    jq -r '.[]|.url' build-vc170-64/packages-info.json | grep http \
+      | parallel --will-cite -j4 'echo {} >&2 && wget -nv -P autobuild-cache -N {}'
 }
 function verify_downloads() {
-    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+.url' build-vc170-64/packages-info.json |parallel --will-cite -j4 '{} ; echo $hash autobuild-cache/$(basename $url) | md5sum --quiet -c - '
+    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' build-vc170-64/packages-info.json | grep -v url=null \
+       | parallel --will-cite -j4 '{} ; echo $hash autobuild-cache/$(basename $url) | md5sum --quiet -c - '
 }
 
 function untar_packages() {
-    jq -r '.[]|.url' build-vc170-64/packages-info.json \
+    jq -r '.[]|.url' build-vc170-64/packages-info.json | grep -vE '^null$' | \
     | parallel --will-cite -j4 'basename {} ; tar -C "$packages_dir" -xf autobuild-cache/$(basename {})' 
 }
