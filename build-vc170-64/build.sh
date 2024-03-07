@@ -11,6 +11,7 @@ mkdir -p build-vc170-64/CMakeFiles/
 mkdir -p build-vc170-64/copy_win_scripts/
 mkdir -p build-vc170-64/sharedlibs/
 mkdir -p build-vc170-64/packages/
+mkdir -p build-vc170-64/newview/CMakeFiles/firestorm-bin.dir
 
 if [[ -n "$GITHUB_ACTIONS" ]] ; then
     function msvcdir() {
