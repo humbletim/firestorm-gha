@@ -19,7 +19,7 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
       echo msvc_dir=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$TOOLSVER.CRT/")
     }
     export -f msvcdir
-    grep msvc_dir buid_vars.env || msvcdir | tee -a build_vars.env
+    grep msvc_dir build_vars.env || msvcdir | tee -a build_vars.env
 
     MSYS_NO_PATHCONV=1 cmd.exe /C 'cd build-vc170-64\sharedlibs && mklink /D Release .'
     cp -avu /c/PROGRA~1/MICROS~2/2022/ENTERP~1/VC/Redist/MSVC/14.38.33135/x64/Microsoft.VC143.CRT/*{140,140_1}.dll $build_dir/msvc/
