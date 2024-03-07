@@ -16,7 +16,10 @@ link_exe = link.exe
 mt_exe = mt.exe
 ninja_exe = ninja.exe
 rc_exe = rc.exe
-msvc = $build_dir/msvc
+# msvc = $build_dir/msvc
 
-include relative.vc170.build.ninja
+cmake_pch=newview\cmake_pch
+include relative.flags.ninja
+include relative.rules.ninja
+include relative.distilled.ninja
 

@@ -216,13 +216,6 @@
     "url": "https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/87774/805833/openssl-1.1.1l.563846-windows64-563846.tar.bz2",
     "version": "1.1.1l.563846"
   },
-  "openvr": {
-    "copyright": "Copyright (c) 2015, Valve Corporation",
-    "hash": "f413f2222e1bb9cd35900b7c169d16de",
-    "name": "openvr",
-    "url": "file:////home/tim/__llm__/Firestorm_6.6.17_VR/build-vc170-64/openvr/openvr-v1.6.10.8eaf723.tar.bz2",
-    "version": "v1.6.10.8eaf723"
-  },
   "pcre": {
     "copyright": "Copyright (c) 1997-2014 University of Cambridge; Copyright(c) 2009-2014 Zoltan Herczeg; Copyright (c) 2007-2012, Google Inc.",
     "hash": "cdee8e8b48a66266550bf279c40abc22",
