@@ -32,21 +32,21 @@ jobs:
         fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         fastclone FirestormViewer/fs-build-variables master
+        MSYS_NO_PATHCONV=1 cmd.exe /C "mklink /J build-vc170-64 fsvr\\build-vc170-64"
         ls -lrtha
 
-    - name: parse viewer_version.txt
-      run: fsvr/detect_vars.sh | tee build_vars.env >> $GITHUB_ENV
+    - name: fsvr/detect_vars.sh
+      run: fsvr/detect_vars.sh FirestormOS-VR-GHA `cat build-vc170-64/newview/viewer_version.txt` build-vc170-64 | tee build_vars.env >> $GITHUB_ENV
 
     - name: Path
       shell: bash
       run: |
         echo "${workspace}/humbletim-bin" | tee -a $GITHUB_PATH
-        MSYS_NO_PATHCONV=1 cmd.exe /C "mklink /J $(basename $build_dir) fsvr\\$(basename $build_dir)"
 
     - name: Tools
       shell: bash
       run: |
-        python -m pip install -r requirements.txt
+        # python -m pip install -r requirements.txt
         curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
         unzip -d humbletim-bin ninja-win.zip
 
@@ -55,7 +55,7 @@ jobs:
       run: |
         set -x
         python --version
-        autobuild --version
+        #autobuild --version
         cmake --version
         ninja --version
 
