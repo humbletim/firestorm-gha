@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
-self="${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]}"
+self="$BASH_SOURCE"
+#self="${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]}"
 here=$(dirname $(readlink -f "$self"))
 
 function _usage() {
@@ -49,11 +50,10 @@ _setenv_extant workspace=`_winlike $workspace`
 _setenv packages_dir=$build_dir/packages
 _setenv build_vcdir=`basename $build_dir`
 
-test \
-  -n "$viewer_channel" -a \
-  $(echo "$viewer_version" | grep -Eo '[.]' | wc -l) == 3 -a \
-  -d "$build_dir" -a -d "$workspace" \
-  || _usage
+test -n "$viewer_channel" || _usage "viewer_channel"
+test $(echo "$viewer_version" | grep -Eo '[.]' | wc -l) == 3 || _usage "viewer_version"
+test -d "$build_dir" || _usage "build_dir"
+test -d "$workspace" || _usage "workspace"
 
 _setenv_extant root_dir=${root_dir:-`_cyglike $workspace`}
 _setenv_extant _fsvr_dir=${_fsvr_dir:-`_cyglike $here`}
@@ -62,18 +62,18 @@ _setenv_extant source_dir=${source_dir:-$root_dir/indra}
 test -e $root_dir/.git || { echo "!$root_dir/.git" ; exit 1; }
 test -e $_fsvr_dir/.git || { echo "!$_fsvr_dir/.git" ; exit 1; }
 
-
 _setenv version_major=`  _ver_split $viewer_version 1`
 _setenv version_minor=`  _ver_split $viewer_version 2`
 _setenv version_patch=`  _ver_split $viewer_version 3`
 _setenv version_release=`_ver_split $viewer_version 4`
-_setenv version_git_sha=`git -C "$workspace" describe --always --first-parent --abbrev=7`
-_setenv version_build_sha=`git -C "$_fsvr_dir" describe --always --first-parent --abbrev=7`
 _setenv version_string="${version_major}.${version_minor}.${version_patch}.${version_release}"
+
+_setenv version_git_sha=`_git_sha $workspace`
+_setenv version_build_sha=`_git_sha $_fsvr_dir`
 _setenv version_sha="${version_git_sha}-${version_build_sha}"
+
 _setenv version_full="${version_string}-${version_sha}"
 
 # verify specified/calculated value alignments
-test $viewer_version == $version_string || { echo "viewer_version='$viewer_version' but version_string='$version_string'" >&2 ; exit 34 ; }
-
-#_setenv msvc_dir=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@').CRT/")
+test $viewer_version == $version_string || \
+  { echo "viewer_version='$viewer_version' but version_string='$version_string'" >&2 ; exit 34 ; }
