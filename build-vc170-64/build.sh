@@ -28,7 +28,7 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
     test -f /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.exe && \
       mv -v /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.orig.exe
     which parallel || { pacman -S parallel --noconfirm && mkdir -p ~/.parallel/tmp/sshlogin/`hostname` ; echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen ; }
-
+    pip install llsd
 fi
 
 test -f $build_dir/build.ninja || { cd build-vc170-64 && cmd.exe //C "mklink build.ninja relative.ninja" ; }
