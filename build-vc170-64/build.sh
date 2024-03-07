@@ -61,6 +61,6 @@ function verify_downloads() {
 }
 
 function untar_packages() {
-    jq -r '.[]|.url' build-vc170-64/packages-info.json | grep -vE '^null$' | \
-    | parallel --will-cite -j4 'basename {} ; tar -C "$packages_dir" -xf autobuild-cache/$(basename {})' 
+    jq -r '.[]|.url' build-vc170-64/packages-info.json | grep -vE '^null$' \
+       | parallel --will-cite -j4 'basename {} ; tar -C "$packages_dir" -xf autobuild-cache/$(basename {})'
 }
