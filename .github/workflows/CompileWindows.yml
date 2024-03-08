@@ -32,7 +32,7 @@ jobs:
         fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         fastclone FirestormViewer/fs-build-variables master
-        fastclone humbletim/firestorm-gha p373r-vrmod
+        fastclone humbletim/firestorm-gha P373R_6.6.8 p373r-vrmod
         ls -lrtha
 
     # - name: Setup tmate session
@@ -40,8 +40,8 @@ jobs:
     #   with:
     #     limit-access-to-actor: true
 
-    - name: fsvr/detect_vars.sh
-      run: fsvr/detect_vars.sh Firestorm-VR-GHA `cat build-vc170-64/newview/viewer_version.txt` build-vc170-64 | tee build_vars.env >> $GITHUB_ENV
+    #- name: fsvr/detect_vars.sh
+    #  run: fsvr/detect_vars.sh Firestorm-VR-GHA `cat build-vc170-64/newview/viewer_version.txt` build-vc170-64 | tee build_vars.env >> $GITHUB_ENV
 
     - name: Path
       shell: bash
