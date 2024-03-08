@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
-self="$BASH_SOURCE"
+#self="$BASH_SOURCE"
 #self="${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]}"
-here=$(dirname $(readlink -f "$self"))
+here=$(readlink -f $(dirname "$BASH_SOURCE")/..)
 
 function _usage() {
   test -n "$@" && echo "$1" >&2

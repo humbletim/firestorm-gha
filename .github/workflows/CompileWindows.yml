@@ -32,14 +32,13 @@ jobs:
         fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         fastclone FirestormViewer/fs-build-variables master
-        mv -v fsvr/build-vc170-64 .
-        MSYS_NO_PATHCONV=1 cmd.exe /C "cd fsvr && mklink /J build-vc170-64 ..\\build-vc170-64"
+        fastclone humbletim/firestorm-gha p373r-vrmod
         ls -lrtha
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+    # - name: Setup tmate session
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true
 
     - name: fsvr/detect_vars.sh
       run: fsvr/detect_vars.sh Firestorm-VR-GHA `cat build-vc170-64/newview/viewer_version.txt` build-vc170-64 | tee build_vars.env >> $GITHUB_ENV
@@ -47,21 +46,20 @@ jobs:
     - name: Path
       shell: bash
       run: |
-        echo "${workspace}/humbletim-bin" | tee -a $GITHUB_PATH
 
     - name: Tools
       shell: bash
       run: |
-        # python -m pip install -r requirements.txt
         curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
         unzip -d humbletim-bin ninja-win.zip
+        echo "${workspace}/humbletim-bin" | tee -a $GITHUB_PATH
 
     - name: Preflight
       shell: bash
       run: |
         set -x
+        bash --version
         python --version
-        #autobuild --version
         cmake --version
         ninja --version
 
