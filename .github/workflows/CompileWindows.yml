@@ -30,9 +30,9 @@ jobs:
         set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
         fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         fastclone FirestormViewer/fs-build-variables master
-        fastclone humbletim/firestorm-gha P373R_6.6.8 p373r-vrmod
+        fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
+        fastclone ${GITHUB_REPOSITORY} P373R_6.6.8 p373r-vrmod
         ls -lrtha
 
     # - name: Setup tmate session
@@ -52,7 +52,7 @@ jobs:
       run: |
         curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
         unzip -d humbletim-bin ninja-win.zip
-        echo "${workspace}/humbletim-bin" | tee -a $GITHUB_PATH
+        echo "${GITHUB_WORKSPACE}/humbletim-bin" | tee -a $GITHUB_PATH
 
     - name: Preflight
       shell: bash
