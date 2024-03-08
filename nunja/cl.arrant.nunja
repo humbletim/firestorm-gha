@@ -1,5 +1,5 @@
 # host/ci environment
-include ../build_vars.env
+include ../fsvr/build_vars.env
 
 # toolchains and paths
 include $_fsvr_dir/nunja/cl.platform.nunja

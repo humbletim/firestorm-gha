@@ -4,16 +4,16 @@
 
 test -d "$root_dir" && test -d "$build_dir" && test -n "$version_string" || { echo "build_vars.env?" >&2 ; exit 1; }
 
-cat $_fsvr_dir/newview/fsversionvalues.h.in | envsubst | tee $build_dir/newview/fsversionvalues.h
-test -n "$version_string" || { echo "version_string?" >&2 ; exit 1; }
-echo "$version_string" | tee $build_dir/newview/version_viewer.txt
-
 for x in $(echo '
   packages CMakeFiles copy_win_scripts sharedlibs
   llcommon newview/CMakeFiles/firestorm-bin.dir
 '); do
     test -d $build_dir/$x || mkdir -pv $build_dir/$x
 done
+
+cat $_fsvr_dir/newview/fsversionvalues.h.in | envsubst | tee $build_dir/newview/fsversionvalues.h
+test -n "$version_string" || { echo "version_string?" >&2 ; exit 1; }
+echo "$version_string" | tee $build_dir/newview/viewer_version.txt
 
 function ht-ln() {
   local target=$1 linkname=$2 opts=""
@@ -47,8 +47,8 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
     python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
 fi
 
-#add convencience link so ninja -C build-dir works as shorthand
-test -f build.ninja || echo "include nunja/cl.arrant.nunja" | tee build.ninja
+# add convencience link so ninja -C build-dir works as shorthand
+ht-ln $_fsvr_dir/nunja/cl.arrant.nunja $build_dir/build.ninja
 
 ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
