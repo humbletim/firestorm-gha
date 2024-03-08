@@ -6,11 +6,11 @@ hash=($(md5sum $tarball))
 url="file:///$tarball"
 qualified="$(jq '.openvr.url = $url | .openvr.hash = $hash' --arg url "$url" --arg hash "$hash" $_fsvr_dir/openvr/meta/packages-info.json)"
 
-echo "$(jq --sort-keys '. + $p' --argjson p "$qualified" $_fsvr_dir/util/packages-info.json)" > $_fsvr_dir/util/packages-info.json
+fgrep openvr $build_dir/packages-info.json || { echo "$(jq --sort-keys '. + $p' --argjson p "$qualified" $build_dir/packages-info.json)" > $build_dir/packages-info.json ; }
 
 jq .openvr $_fsvr_dir/util/packages-info.json
 
-cp -av $tarball $root_dir/autobuild-cache
+cp -av $tarball $packages_dir
 
 # autobuild installables add openvr url=file:///$_fsvr_dir/openvr/openvr-v1.6.10.8eaf723.tar.bz2 \
 #     platform=windows64 \

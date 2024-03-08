@@ -4,7 +4,7 @@
 
 test -d "$root_dir" && test -d "$build_dir" && test -n "$version_string" || { echo "build_vars.env?" >&2 ; exit 1; }
 
-cat newview/fsversionvalues.h.in | envsubst | tee $build_dir/newview/fsversionvalues.h
+cat $_fsvr_dir/newview/fsversionvalues.h.in | envsubst | tee $build_dir/newview/fsversionvalues.h
 test -n "$version_string" || { echo "version_string?" >&2 ; exit 1; }
 echo "$version_string" | tee $build_dir/newview/version_viewer.txt
 
@@ -27,7 +27,7 @@ function ht-ln() {
 
 if [[ -n "$GITHUB_ACTIONS" ]] ; then
     function get_msvcdir() {
-      test -f msvc.env || { ./generate_msvc_env.bat | tee msvc.env ; }
+      test -s msvc.env || { $_fsvr_dir/util/generate_msvc_env.bat > msvc.env ; }
       . msvc.env
       local TOOLSVER=$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@')
       local CRT=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$TOOLSVER.CRT/")
@@ -62,21 +62,24 @@ perl -pe '
   s@\$\{VIEWER_VERSION_MAJOR\}\.\$\{VIEWER_VERSION_MINOR\}\.\$\{VIEWER_VERSION_PATCH\}\.\$\{VIEWER_VERSION_REVISION\}@$ENV{version_string}@g;
 ' $source_dir/newview/res/viewerRes.rc > $build_dir/newview/viewerRes.rc
 
+test -s $build_dir/packages-info.json || { echo '{}' > $build_dir/packages-info.json ; }
+echo "$(jq --sort-keys '. + $p' --argjson p "$(jq '.' $_fsvr_dir/util/packages-info.json)" $build_dir/packages-info.json)" > $build_dir/packages-info.json
+
 function generate_packages_info() {
-  jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $_fsvr_dir/util/packages-info.json \
+  jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json \
     | tee $build_dir/newview/packages-info.txt
 }
 function download_packages() {
-    jq -r '.[]|.url' $_fsvr_dir/util/packages-info.json | grep http \
+    jq -r '.[]|.url' $build_dir/packages-info.json | grep http \
       | parallel --will-cite -j4 'echo {} >&2 && wget -nv -P $packages_dir -N {}'
 }
 function verify_downloads() {
-    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $_fsvr_dir/util/packages-info.json | grep -v url=null \
+    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | grep -v url=null \
        | parallel --will-cite -j4 '{} ; echo $hash $packages_dir/$(basename $url) | md5sum --quiet -c - '
 }
 
 function untar_packages() {
-    jq -r '.[]|.url' $_fsvr_dir/util/packages-info.json | grep -vE '^null$' \
+    jq -r '.[]|.url' $build_dir/packages-info.json | grep -vE '^null$' \
        | parallel --will-cite -j4 'basename {} && cd $packages_dir && tar -xf $(basename {})'
 }
 
