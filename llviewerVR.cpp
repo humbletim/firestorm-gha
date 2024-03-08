@@ -42,7 +42,7 @@ llviewerVR::llviewerVR()
 	m_kMenuKey = KEY_F5;
 	m_kPlusKey = KEY_F6;
 	m_kMinusKey = KEY_F7;
-	m_fEyeDistance = 40;
+	m_fEyeDistance = 65;
 	m_fFocusDistance = 10;
 	m_fTextureShift = 0;
 	m_fTextureZoom = 0;
