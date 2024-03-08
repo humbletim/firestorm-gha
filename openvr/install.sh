@@ -6,9 +6,9 @@ hash=($(md5sum $tarball))
 url="file:///$tarball"
 qualified="$(jq '.openvr.url = $url | .openvr.hash = $hash' --arg url "$url" --arg hash "$hash" $_fsvr_dir/openvr/meta/packages-info.json)"
 
-echo "$(jq --sort-keys '. + $p' --argjson p "$qualified" $build_dir/packages-info.json)" > $build_dir/packages-info.json
+echo "$(jq --sort-keys '. + $p' --argjson p "$qualified" $_fsvr_dir/util/packages-info.json)" > $_fsvr_dir/util/packages-info.json
 
-jq .openvr $build_dir/packages-info.json
+jq .openvr $_fsvr_dir/util/packages-info.json
 
 cp -av $tarball $root_dir/autobuild-cache
 
