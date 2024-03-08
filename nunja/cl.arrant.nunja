@@ -2,13 +2,13 @@
 include ../build_vars.env
 
 # toolchains and paths
-include cl.platform.nunja
+include $_fsvr_dir/nunja/cl.platform.nunja
 
 # auto-divested constants
-include cl.petroglyph.constants.nunja
+include $_fsvr_dir/nunja/cl.petroglyph.constants.nunja
 
 # CMakeFiles/rules.ninja
-include cl.petroglyph.rules.nunja
+include $_fsvr_dir/nunja/cl.petroglyph.rules.nunja
 
 # etched build.ninja
-include cl.petroglyph.nunja
+include $_fsvr_dir/nunja/cl.petroglyph.nunja

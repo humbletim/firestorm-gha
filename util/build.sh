@@ -2,9 +2,11 @@
 
 #. ../build_vars.env
 
-test -d "$root_dir" && test -d "$build_dir" && test -n "$version_string" || { echo "build_vars.env?" ; exit 1; }
+test -d "$root_dir" && test -d "$build_dir" && test -n "$version_string" || { echo "build_vars.env?" >&2 ; exit 1; }
 
 cat newview/fsversionvalues.h.in | envsubst | tee $build_dir/newview/fsversionvalues.h
+test -n "$version_string" || { echo "version_string?" >&2 ; exit 1; }
+echo "$version_string" | tee $build_dir/newview/version_viewer.txt
 
 for x in $(echo '
   packages CMakeFiles copy_win_scripts sharedlibs
@@ -19,7 +21,7 @@ function ht-ln() {
   test -d $target && opts="/J"
   local cmd="mklink $opts $(cygpath -w $linkname) $(cygpath -w $target)"
   echo "[ht-ln] $cmd"
-  test -e $linkname && return 0
+  test -e $linkname && { echo "skipping (exists) $linkname" >&2 ; return 0; }
   MSYS_NO_PATHCONV=1 cmd.exe /C "$cmd"
 }
 
@@ -35,7 +37,7 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
     #export -f get_msvcdir
     grep msvc_dir build_vars.env >/dev/null || { echo "msvc_dir=$(get_msvcdir)" | tee -a build_vars.env ; }
 
-    ht-ln $build_dir/sharedlibs/Release $build_dir/sharedlibs
+    ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
     ht-ln $(get_msvcdir) $build_dir/msvc
     # prevent NSIS from running so we can intercept and add openvr stuff before running manually
     test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
@@ -51,6 +53,8 @@ test -f build.ninja || echo "include nunja/cl.arrant.nunja" | tee build.ninja
 ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
 ht-ln $source_dir/newview/fsdiscordkey.h.in $build_dir/newview/fsdiscordkey.h
+ht-ln $p373r_dir/llviewerVR.h $build_dir/newview/
+ht-ln $p373r_dir/llviewerVR.cpp $build_dir/newview/
 
 export version_comma="${version_string//./,}"
 perl -pe '

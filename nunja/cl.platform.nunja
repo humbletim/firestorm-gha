@@ -11,4 +11,4 @@ rc_exe        = rc.exe
 cmake_exe     = cmake.exe
 cmake_gui_exe = cmake.exe
 cmcldeps_exe  = cmcldeps.exe
-cmake_pch     = newview\cmake_pch
+cmake_pch     = ..\fsvr\newview\cmake_pch
