@@ -20,8 +20,9 @@ jobs:
   windows_build:
     runs-on: windows-2022
     steps:
-   - name: Output Inputs
-     run: echo "${{ toJSON(github.event.inputs) }}"
+    - name: Output Inputs
+      run: echo "${{ toJSON(github.event.inputs) }}"
+
     - name: Clone
       shell: bash
       run: |
