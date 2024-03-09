@@ -20,8 +20,15 @@ tail -2 $build_dir/installer.txt
 
 ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
 
-echo cd $build_dir \&\& echo 7z -bt -t7z a "$workspace/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"
-echo cd build-vc170-64 \&\& echo 7z -bt -tzip a "$workspace/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"
+function make_installer() {
+  PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $build_dir/newview/firestorm_setup_tmp.nsi
+}
+function make_7z() {
+  sh -c 'cd $build_dir && 7z -bt -t7z a $workspace/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
+}
+
+#echo cd $build_dir \&\& echo 7z -bt -t7z a "$workspace/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"
+#echo cd build-vc170-64 \&\& echo 7z -bt -tzip a "$workspace/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"
 
 function files2json(){ 
   echo { \"$(< $build_dir/installer.txt sed 's/,/":"/g' | paste -s -d, - | sed 's/,/", "/g')\" } |tr '\\' '/' > files.json
