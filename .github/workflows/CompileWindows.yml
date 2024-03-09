@@ -4,16 +4,13 @@ on:
   # pull_request:
   workflow_dispatch:
       inputs:
-        depth:
+        fsbranch:
           type: choice
           description: depth
-          default: a.b.c
+          default: 6.6.17
           options:
-            - a
-            - a.b
-            - a.b.c
-            - a.b.c.d
-            - a.b.c.d.e
+            - 6.6.17
+            - 7.1.2
 
 defaults:
   run:
@@ -29,7 +26,8 @@ jobs:
         pwd && pwd -W
         set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
-        fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
+        #fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
+        fastclone FirestormViewer/phoenix-firestorm Firestorm_${{ inputs.fsbranch }} ${GITHUB_WORKSPACE}
         fastclone FirestormViewer/fs-build-variables master
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         fastclone ${GITHUB_REPOSITORY} P373R_6.6.8 p373r-vrmod
@@ -43,9 +41,11 @@ jobs:
     #- name: fsvr/detect_vars.sh
     #  run: fsvr/detect_vars.sh Firestorm-VR-GHA `cat build-vc170-64/newview/viewer_version.txt` build-vc170-64 | tee build_vars.env >> $GITHUB_ENV
 
-    - name: Path
+    - name: Nunja Mapping
       shell: bash
       run: |
+        mkdir -pv build-vc170-64
+        ./fsvr/util/generate_buid_vars.sh FirestormOS-VR-GHA `cat fsvr/${{ inputs.fsbranch }}/viewer_version.txt` build-vc170-64/ | tee build_vars.env
 
     - name: Tools
       shell: bash
