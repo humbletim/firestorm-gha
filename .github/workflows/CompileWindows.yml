@@ -7,10 +7,10 @@ on:
         fsbranch:
           type: choice
           description: fstuple
-          default: '{ "base": "6.6.17", "repo": "FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }'
+          default: base=6.6.17 repo=FirestormViewer/phoenix-firestorm branch=Firestorm_6.6.17
           options:
-            - '{ "base": "6.6.17", "repo": "FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }'
-            - '{ "base": "7.1.2", "repo": "FiretormViewer/phoenix-firestorm-alpha", "branch": "master" }'
+            - base=6.6.17 repo=FirestormViewer/phoenix-firestorm branch=Firestorm_6.6.17
+            - base=7.1.2 repo=FirestormViewer/phoenix-firestorm-alpha branch=master
 
 defaults:
   run:
@@ -27,9 +27,7 @@ jobs:
         set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
         #fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        eval `echo _fsrepo=${{ fromJSON(inputs.fstuple).repo }} | tee -a $GETHUB_ENV`
-        eval `echo _fsbranch=${{ fromJSON(inputs.fstuple).branch }} | tee -a $GETHUB_ENV`
-        eval `echo _fsbase=${{ fromJSON(inputs.fstuple).base }} | tee -a $GETHUB_ENV`
+        eval `${{inputs.fstuple}} ; echo _fsbase=$base _fsrepo=$repo _fsbranch=$branch | tee -a $GITHUB_ENV`
         fastclone ${_fsrepo} ${_fsbranch} ${GITHUB_WORKSPACE}
         fastclone FirestormViewer/fs-build-variables master
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
