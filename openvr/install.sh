@@ -1,6 +1,7 @@
 #!/bin/bash
 test -d "$build_dir" || { echo "!build_dir" >&2 ; exit 1; }
 test -d "$_fsvr_dir" || { echo "!_fsvr_dir" >&2 ; exit 1; }
+test -d "$packages_dir" || { echo "!packages_dir" >&2 ; exit 1; }
 set -xe
 tarball=$_fsvr_dir/openvr/openvr-v1.6.10.8eaf723.tar.bz2
 hash=($(md5sum $tarball))
@@ -13,7 +14,8 @@ fgrep openvr $build_dir/packages-info.json || { echo "$(jq --sort-keys '. + $p' 
 
 jq .openvr $build_dir/packages-info.json
 
-cp -av $tarball $packages_dir
+
+cp -av $tarball $packages_dir/
 
 # autobuild installables add openvr url=file:///$_fsvr_dir/openvr/openvr-v1.6.10.8eaf723.tar.bz2 \
 #     platform=windows64 \

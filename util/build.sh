@@ -71,11 +71,12 @@ function generate_packages_info() {
 }
 function download_packages() {
     jq -r '.[]|.url' $build_dir/packages-info.json | grep http \
-      | parallel --will-cite -j4 'echo {} >&2 && wget -nv -P $packages_dir -N {}'
+      | parallel --will-cite -j4 'echo {} >&2 && wget -q -P $packages_dir -N {}'
 }
 function verify_downloads() {
+echo packages_dir=$packages_dir
     jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | grep -v url=null \
-       | parallel --will-cite -j4 '{} ; echo $hash $packages_dir/$(basename $url) | md5sum --quiet -c - '
+     | parallel --will-cite -j4 '{} ; tool=md5sum; test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum; echo $tool: $(basename $url) ; echo $hash $packages_dir/$(basename $url) | $tool --quiet -c -'
 }
 
 function untar_packages() {

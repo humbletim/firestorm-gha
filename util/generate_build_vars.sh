@@ -74,6 +74,12 @@ _setenv version_sha="${version_git_sha}-${version_build_sha}"
 
 _setenv version_full="${version_string}-${version_sha}"
 
+for x in ${version_string} ${version_major}.${version_minor}.${version_patch}; do
+  test ! -d "$nunja_dir" && test -d $_fsvr_dir/$x && _setenv_extant nunja_dir=$_fsvr_dir/$x
+done
+
+test -d "$nunja_dir" || { echo "could not find nunja dir based on version... ${version_string}" >&2 ; exit 1; }
+
 # verify specified/calculated value alignments
 test $viewer_version == $version_string || \
   { echo "viewer_version='$viewer_version' but version_string='$version_string'" >&2 ; exit 34 ; }
