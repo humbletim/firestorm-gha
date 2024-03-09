@@ -20,6 +20,8 @@ jobs:
   windows_build:
     runs-on: windows-2022
     steps:
+   - name: Output Inputs
+     run: echo "${{ toJSON(github.event.inputs) }}"
     - name: Clone
       shell: bash
       run: |
@@ -27,7 +29,11 @@ jobs:
         set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
         #fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        eval `${{inputs.fstuple}} ; echo _fsbase=$base _fsrepo=$repo _fsbranch=$branch | tee -a $GITHUB_ENV`
+        eval `${{inputs.fstuple}} ; {
+          echo _fsbase=$base
+          echo _fsrepo=$repo
+          echo _fsbranch=$branch
+        } | tee -a $GITHUB_ENV`
         fastclone ${_fsrepo} ${_fsbranch} ${GITHUB_WORKSPACE}
         fastclone FirestormViewer/fs-build-variables master
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
