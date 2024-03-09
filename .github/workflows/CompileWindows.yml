@@ -4,7 +4,7 @@ on:
   # pull_request:
   workflow_dispatch:
       inputs:
-        fsbranch:
+        fstuple:
           type: choice
           description: fstuple
           default: base=6.6.17 repo=FirestormViewer/phoenix-firestorm branch=Firestorm_6.6.17
