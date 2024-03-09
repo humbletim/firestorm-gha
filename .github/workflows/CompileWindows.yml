@@ -33,6 +33,7 @@ jobs:
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         fastclone ${GITHUB_REPOSITORY} P373R_6.6.8 p373r-vrmod
         ls -lrtha
+        ls -lrtha fsvr/
 
     # - name: Setup tmate session
     #   uses: mxschmitt/action-tmate@v3
@@ -46,7 +47,8 @@ jobs:
       shell: bash
       run: |
         mkdir -pv build-vc170-64
-        ./fsvr/util/generate_buid_vars.sh FirestormOS-VR-GHA `cat fsvr/$_fsbase/viewer_version.txt` build-vc170-64/ | tee build_vars.env
+        set +x
+        ./fsvr/util/generate_build_vars.sh FirestormOS-VR-GHA `cat ./fsvr/$_fsbase/viewer_version.txt` build-vc170-64/ | tee build_vars.env
 
     - name: Tools
       shell: bash
