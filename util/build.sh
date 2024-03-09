@@ -2,7 +2,7 @@
 
 #. ../build_vars.env
 
-test -d "$root_dir" && test -d "$build_dir" && test -n "$version_string" || { echo "build_vars.env?" >&2 ; exit 1; }
+test -d "$nunja_dir" && test -d "$root_dir" && test -d "$build_dir" && test -n "$version_string" || { echo "build_vars.env?" >&2 ; exit 1; }
 
 for x in $(echo '
   packages CMakeFiles copy_win_scripts sharedlibs
@@ -35,7 +35,7 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
       echo "$CRT"
     }
     #export -f get_msvcdir
-    grep msvc_dir build_vars.env >/dev/null || { echo "msvc_dir=$(get_msvcdir)" | tee -a build_vars.env ; }
+    grep msvc_dir $root_dir/build_vars.env >/dev/null || { echo "msvc_dir=$(get_msvcdir)" | tee -a $root_dir/build_vars.env ; }
 
     ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
     ht-ln $(get_msvcdir) $build_dir/msvc
@@ -43,12 +43,12 @@ if [[ -n "$GITHUB_ACTIONS" ]] ; then
     test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
     # test -f /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.exe && \
     #   mv -v /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts/autobuild.orig.exe
-    which parallel || { pacman -S parallel --noconfirm && mkdir -p ~/.parallel/tmp/sshlogin/`hostname` ; echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen ; }
+    which parallel 2>/devnull || { pacman -S parallel --noconfirm && mkdir -p ~/.parallel/tmp/sshlogin/`hostname` ; echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen ; }
     python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
 fi
 
 # add convencience link so ninja -C build-dir works as shorthand
-ht-ln $_fsvr_dir/nunja/cl.arrant.nunja $build_dir/build.ninja
+ht-ln $nunja_dir/cl.arrant.nunja $build_dir/build.ninja
 
 ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
@@ -63,7 +63,7 @@ perl -pe '
 ' $source_dir/newview/res/viewerRes.rc > $build_dir/newview/viewerRes.rc
 
 test -s $build_dir/packages-info.json || { echo '{}' > $build_dir/packages-info.json ; }
-echo "$(jq --sort-keys '. + $p' --argjson p "$(jq '.' $_fsvr_dir/util/packages-info.json)" $build_dir/packages-info.json)" > $build_dir/packages-info.json
+echo "$(jq --sort-keys '. + $p' --argjson p "$(jq '.' $nunja_dir/packages-info.json)" $build_dir/packages-info.json)" > $build_dir/packages-info.json
 
 function generate_packages_info() {
   jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json \
