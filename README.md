@@ -12,9 +12,8 @@ Download here: [Releases](../../releases/latest)
 - See [Original Firestorm Source Code](https://vcs.firestormviewer.org/phoenix-firestorm)
 
 Notes:
-* App name has been changed to "FirestormVR" so installation can exist side-by-side with stock Firestorm.
-    - app settings stored in user folder `AppData/Roaming/FirestormVR_x64`
-    - cache stored in user folder `AppData/Local/FirestormVROS_x64`
+* On Windows:
+  - App name and install location have been changed to "FirestormOS-VR-GHA" so installation can exist side-by-side with stock Firestorm.
+  - App settings and cache are shared with stock Firestorm in `AppData/Roaming/Firestorm_x64` and `AppData/Local/FirestormOS_x64`
 * Linux build now compiles, but entering into VR mode on Linux via SteamVR has not yet been tested.
 * Special Thanks to @thoys for sharing his Github Action wisdoms!
-
