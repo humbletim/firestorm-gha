@@ -7,13 +7,10 @@ on:
         fsbranch:
           type: choice
           description: fstuple
-          default: |
-            { "base": "6.6.17", "repo": "FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }
-          options: |
-            [
-              { "base": "6.6.17", "repo": "FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }
-              { "base": "7.1.2", "repo": "FiretormViewer/phoenix-firestorm-alpha", "branch": "master" },
-            ]
+          default: '{ "base": "6.6.17", "repo": "FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }'
+          options:
+            - '{ "base": "6.6.17", "repo": "FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }'
+            - '{ "base": "7.1.2", "repo": "FiretormViewer/phoenix-firestorm-alpha", "branch": "master" }'
 
 defaults:
   run:
