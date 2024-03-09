@@ -6,11 +6,11 @@ on:
       inputs:
         fsbranch:
           type: choice
-          description: depth
-          default: 6.6.17
+          description: fstuple
+          default: { "base": "6.6.17", "repo": "FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }
           options:
-            - 6.6.17
-            - 7.1.2
+            - { "base": "6.6.17", "repo": "FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }
+            - { "base": "7.1.2", "repo": "FiretormViewer/phoenix-firestorm-alpha", "branch": "master" }
 
 defaults:
   run:
@@ -27,7 +27,10 @@ jobs:
         set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
         #fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        fastclone FirestormViewer/phoenix-firestorm Firestorm_${{ inputs.fsbranch }} ${GITHUB_WORKSPACE}
+        eval `echo _fsrepo=${{ fromJSON(inputs.fstuple).repo }} | tee -a $GETHUB_ENV`
+        eval `echo _fsbranch=${{ fromJSON(inputs.fstuple).branch }} | tee -a $GETHUB_ENV`
+        eval `echo _fsbase=${{ fromJSON(inputs.fstuple).base }} | tee -a $GETHUB_ENV`
+        fastclone ${_fsrepo} ${_fsbranch} ${GITHUB_WORKSPACE}
         fastclone FirestormViewer/fs-build-variables master
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         fastclone ${GITHUB_REPOSITORY} P373R_6.6.8 p373r-vrmod
@@ -45,7 +48,7 @@ jobs:
       shell: bash
       run: |
         mkdir -pv build-vc170-64
-        ./fsvr/util/generate_buid_vars.sh FirestormOS-VR-GHA `cat fsvr/${{ inputs.fsbranch }}/viewer_version.txt` build-vc170-64/ | tee build_vars.env
+        ./fsvr/util/generate_buid_vars.sh FirestormOS-VR-GHA `cat fsvr/$_fsbase/viewer_version.txt` build-vc170-64/ | tee build_vars.env
 
     - name: Tools
       shell: bash
