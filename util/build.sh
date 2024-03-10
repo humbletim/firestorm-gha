@@ -92,7 +92,7 @@ function 003_prepare_msys_msvc() {(
 function merge_packages_info() {(
     set -E
     local packages_info=$1
-    test -z "$packages_info" && packages_info=/dev/stdin \
+    test -z "$packages_info" && packages_info=- \
     || test -s "$packages_info" || _die "merge_packages_info -- packages-info.json or stdin missing"
     test -s $build_dir/packages-info.json || { echo '{}' > $build_dir/packages-info.json ; }
     local json="$(jq --sort-keys '. + $p' --argjson p "$(jq '.' $packages_info)" $build_dir/packages-info.json)"
