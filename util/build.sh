@@ -68,7 +68,7 @@ function 003_prepare_msys_msvc() {(
     [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
 
     # make msvcp140.dll redists easy to reference as build/msvc/
-    msvc_dir=$(get_msvcdir)
+    msvc_dir=$(get_msvcdir) || _die "could not get msvc_dir $(ls -l msvc.env)"
     # ht-ln $msvc_dir $build_dir/msvc
     grep msvc_dir $build_dir/build_vars.env >/dev/null \
       || { echo "msvc_dir=$msvc_dir" | tee -a $build_dir/build_vars.env ; }
