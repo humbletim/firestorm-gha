@@ -5,8 +5,6 @@ _usage="./util/generate_build_vars.sh <viewer channel> <viewer version x.y.z.w> 
 
 viewer_channel=$1 viewer_version=$2 build_dir=$3
 
-set -ex
-
 require_here=`readlink -f $(dirname $0)`
 function require() { source $require_here/$@ ; }
 require _utils.sh
@@ -24,8 +22,9 @@ require generate_git_vars.sh \
   version_fsvr_sha=$_fsvr_dir
 
 # version_fsvr_tag=`git tag --contains "$version_fsvr_sha" -n 1`
-# test -n "$version_fsvr_tag" || 
-version_fsvr_tag=`git branch --contains "$version_fsvr_sha" --format "%(refname:lstrip=-1)"`
+# test -n "$version_fsvr_tag" ||
+version_fsvr_tag=`git describe --all --always|sed -e 's@.*/@@'`
+# version_fsvr_tag=`git branch --contains "$version_fsvr_sha" --format "%(refname:lstrip=-1)"`
 
 _setenv version_fsvr_tag=$version_fsvr_tag
 _setenv version_shas="$version_git_sha-$version_fsvr_sha"
