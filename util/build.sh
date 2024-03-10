@@ -150,7 +150,11 @@ function 008_untar_packages() {(
 function 009_ninja_preflight() {(
     set -E
     _assert nunja_dir 'test -d "$nunja_dir"'
-    ( echo "nunja_dir=$nunja_dir" ; cat $build_dir/build_vars.env ; cat $nunja_dir/cl.arrant.nunja ) > $build_dir/build.ninja
+    ( 
+      echo "nunja_dir=$nunja_dir" ;
+      cat $build_dir/build_vars.env ;
+      cat $nunja_dir/cl.arrant.nunja
+    ) > $build_dir/build.ninja
     test -f msvc.env && . msvc.env
     ninja -C $build_dir -n
 )}
