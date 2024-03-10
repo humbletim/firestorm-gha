@@ -9,7 +9,7 @@ _assert "build_dir" 'test -d "$build_dir"'
 _assert "version_xyzw" test -n "$version_xyzw"
 
 function 001_ensure_build_directories() {(
-    set -e
+    set -E
     local directories=(
       packages
       CMakeFiles
@@ -35,7 +35,7 @@ fsversionvalues=(
 )
 
 function 002_perform_replacements() {(
-    set -e
+    set -E
     echo $version_xyzw | tee $build_dir/newview/viewer_version.txt >&2
     ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 
@@ -51,7 +51,7 @@ function 002_perform_replacements() {(
 )}
 
 function get_msvcdir() {(
-  set -e
+  set -E
   _assert "_fsvr_utils_dir" test -f "$_fsvr_utils_dir/generate_msvc_env.bat"
   test -s msvc.env || { $_fsvr_utils_dir/generate_msvc_env.bat > msvc.env ; }
   . msvc.env
@@ -64,7 +64,7 @@ function get_msvcdir() {(
 )}
 
 function 003_prepare_msys_msvc() {(
-    set -e
+    set -E
     [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
 
     # make msvcp140.dll redists easy to reference as build/msvc/
@@ -90,7 +90,7 @@ function 003_prepare_msys_msvc() {(
 )}
 
 function merge_packages_info() {(
-    set -e
+    set -E
     local packages_info=$1
     test -z "$packages_info" && packages_info=/dev/stdin \
     || test -s "$packages_info" || _die "merge_packages_info -- packages-info.json or stdin missing"
@@ -102,7 +102,7 @@ function merge_packages_info() {(
 )}
 
 function 004_generate_package_infos() {(
-    set -e
+    set -E
     cat $_fsvr_utils_dir/../meta/packages-info.json | envsubst | merge_packages_info
 
     _assert nunja_dir 'test -d "$nunja_dir"'
@@ -123,32 +123,32 @@ function 004_generate_package_infos() {(
 )}
 
 function 005_generate_packages_info_text() {(
-  set -e
+  set -E
   jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json \
     | tee $build_dir/newview/packages-info.txt
 )}
 
 function 006_download_packages() {(
-    set -e
+    set -E
     jq -r '.[]|.url' $build_dir/packages-info.json | grep http \
       | parallel --will-cite -j4 'echo {} >&2 && wget -q -P $packages_dir -N {}'
 )}
 
 function 007_verify_downloads() {(
-    set -e
+    set -E
     echo packages_dir=$packages_dir >&2
     jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | grep -v url=null \
      | parallel --will-cite -j4 '{} ; tool=md5sum; test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum; echo $tool: $(basename $url) ; echo $hash $packages_dir/$(basename $url) | $tool --quiet -c -'
 )}
 
 function 008_untar_packages() {(
-    set -e
+    set -E
     jq -r '.[]|.url' $build_dir/packages-info.json | grep -vE '^null$' \
        | parallel --will-cite -j4 'basename {} && cd $packages_dir && tar -xf $(basename {})'
 )}
 
 function 009_ninja_preflight() {(
-    set -e
+    set -E
     _assert nunja_dir 'test -d "$nunja_dir"'
     ( echo "nunja_dir=$nunja_dir" ; cat $build_dir/build_vars.env ; cat $nunja_dir/cl.arrant.nunja ) > $build_dir/build.ninja
     test -f msvc.env && . msvc.env
@@ -156,13 +156,13 @@ function 009_ninja_preflight() {(
 )}
 
 function 00a_ninja_build() {(
-  set -e
+  set -E
   test -f msvc.env && . msvc.env
   ninja -C $build_dir -j4 llpackage
 )}
 
 function 00b_bundle() {(
-  set -e
+  set -E
   . $_fsvr_utils_dir/nsis.sh
   make_installer
   make_7zip
