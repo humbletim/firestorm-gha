@@ -8,7 +8,7 @@ _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
 _assert "version_xyzw" test -n "$version_xyzw"
 
-function 001_ensure_build_directories() {
+function 001_ensure_build_directories() {(
     set -e
     local directories=(
       packages
@@ -22,7 +22,7 @@ function 001_ensure_build_directories() {
     for x in "${directories[@]}"; do
       test -d $build_dir/$x && echo "[exists] $x" >&2 || mkdir -pv $build_dir/$x
     done
-}
+)}
 
 fsversionvalues=(
  CMAKE_BUILD_TYPE=Release
@@ -34,9 +34,9 @@ fsversionvalues=(
  VIEWER_VERSION_REVISION=$version_release
 )
 
-function 002_perform_replacements() {
+function 002_perform_replacements() {(
     set -e
-    echo $version_xyzw | tee $build_dir/newview/viewer_version.txt
+    echo $version_xyzw | tee $build_dir/newview/viewer_version.txt >&2
     ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 
     cat $source_dir/newview/fsversionvalues.h.in | sed -E 's~@([A-Z_]+)@~$\1~g' \
@@ -48,9 +48,9 @@ function 002_perform_replacements() {
     # TODO: see if there is a way to opt-out via configuration from flickr/discord integration
     ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
     ht-ln $source_dir/newview/fsdiscordkey.h.in $build_dir/newview/fsdiscordkey.h
-}
+)}
 
-function get_msvcdir() {
+function get_msvcdir() {(
   set -e
   _assert "_fsvr_utils_dir" test -f "$_fsvr_utils_dir/generate_msvc_env.bat"
   test -s msvc.env || { $_fsvr_utils_dir/generate_msvc_env.bat > msvc.env ; }
@@ -61,9 +61,9 @@ function get_msvcdir() {
   local CRT=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$TOOLSVER.CRT/")
   test -d $CRT || { echo "msvc CRT '$CRT' does not exist" &>2 ; return 1 ; }
   echo "$CRT"
-}
+)}
 
-function 003_prepare_msys_msvc() {
+function 003_prepare_msys_msvc() {(
     set -e
     [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
 
@@ -87,9 +87,9 @@ function 003_prepare_msys_msvc() {
         # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
         python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
     fi
-}
+)}
 
-function merge_packages_info() {
+function merge_packages_info() {(
     set -e
     local packages_info=$1
     test -z "$packages_info" && packages_info=/dev/stdin \
@@ -99,9 +99,9 @@ function merge_packages_info() {
     test -n "$json" || _die "problem merging packages infos $packages_info $build_dir/packages-info.json"
     echo "$json" > $build_dir/packages-info.json
     _relativize "merged $packages_info" >&2
-}
+)}
 
-function 004_generate_package_infos() {
+function 004_generate_package_infos() {(
     set -e
     cat $_fsvr_utils_dir/../meta/packages-info.json | envsubst | merge_packages_info
 
@@ -120,52 +120,53 @@ function 004_generate_package_infos() {
     ht-ln $p373r_dir/llviewerVR.h $build_dir/newview/
     ht-ln $p373r_dir/llviewerVR.cpp $build_dir/newview/
     merge_packages_info $p373r_dir/meta/packages-info.json
-}
+)}
 
-function 005_generate_packages_info_text() {
+function 005_generate_packages_info_text() {(
   set -e
   jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json \
     | tee $build_dir/newview/packages-info.txt
-}
+)}
 
-function 006_download_packages() {
+function 006_download_packages() {(
     set -e
     jq -r '.[]|.url' $build_dir/packages-info.json | grep http \
       | parallel --will-cite -j4 'echo {} >&2 && wget -q -P $packages_dir -N {}'
-}
-function 007_verify_downloads() {
+)}
+
+function 007_verify_downloads() {(
     set -e
     echo packages_dir=$packages_dir >&2
     jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | grep -v url=null \
      | parallel --will-cite -j4 '{} ; tool=md5sum; test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum; echo $tool: $(basename $url) ; echo $hash $packages_dir/$(basename $url) | $tool --quiet -c -'
-}
+)}
 
-function 008_untar_packages() {
+function 008_untar_packages() {(
     set -e
     jq -r '.[]|.url' $build_dir/packages-info.json | grep -vE '^null$' \
        | parallel --will-cite -j4 'basename {} && cd $packages_dir && tar -xf $(basename {})'
-}
+)}
 
-function 009_ninja_preflight() {
+function 009_ninja_preflight() {(
     set -e
     _assert nunja_dir 'test -d "$nunja_dir"'
     ( echo "nunja_dir=$nunja_dir" ; cat $build_dir/build_vars.env ; cat $nunja_dir/cl.arrant.nunja ) > $build_dir/build.ninja
     test -f msvc.env && . msvc.env
     ninja -C $build_dir -n
-}
+)}
 
-function 00a_ninja_build() {
+function 00a_ninja_build() {(
   set -e
   test -f msvc.env && . msvc.env
   ninja -C $build_dir -j4 llpackage
-}
+)}
 
-function 00b_bundle() {
+function 00b_bundle() {(
   set -e
   . $_fsvr_utils_dir/nsis.sh
   make_installer
   make_7zip
-}
+)}
 
 # Check if the script is being sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
