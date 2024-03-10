@@ -52,6 +52,8 @@ function get_msvcdir() {
   _assert "_fsvr_utils_dir" test -f "$_fsvr_utils_dir/generate_msvc_env.bat"
   test -s msvc.env || { $_fsvr_utils_dir/generate_msvc_env.bat > msvc.env ; }
   . msvc.env
+  test -n "$VCToolsVersion" || _die "!VCToolsVersion"
+  test -d "$VCToolsRedistDir" || _die "!VCToolsRedistDir"
   local TOOLSVER=$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@')
   local CRT=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$TOOLSVER.CRT/")
   test -d $CRT || { echo "msvc CRT '$CRT' does not exist" &>2 ; return 1 ; }
@@ -68,7 +70,8 @@ function 003_prepare_msys_msvc() {
     ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
 
     # make msvcp140.dll redists easy to reference as build/msvc/
-    ht-ln $(get_msvcdir) $build_dir/msvc
+    msvc_dir=$(get_msvcdir)
+    ht-ln $msvc_dir $build_dir/msvc
 
     if [[ -n "$GITHUB_ACTIONS" ]] ; then
         # TODO: masking the NSIS folder usefully disrupts viewer_manifest.py
