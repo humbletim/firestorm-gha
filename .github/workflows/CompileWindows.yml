@@ -69,30 +69,35 @@ jobs:
         cmake --version
         ninja --version
 
-    - name: 001_ensure_build_directories
-      run: ./fsvr/util/build.sh 001_ensure_build_directories 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
-    - name: 002_perform_replacements
-      run: ./fsvr/util/build.sh 002_perform_replacements
-
-    - name: 003_prepare_msys_msvc
-      run: ./fsvr/util/build.sh 003_prepare_msys_msvc
-
-    - name: 004_generate_package_infos
-      run: ./fsvr/util/build.sh 004_generate_package_infos
-
-    - name: 005_generate_packages_info_text
-      run: ./fsvr/util/build.sh 005_generate_packages_info_text
-
-    - name: 006_download_packages
-      run: ./fsvr/util/build.sh 006_download_packages
-
-    - name: 007_verify_downloads
-      run: ./fsvr/util/build.sh 007_verify_downloads
-
-    - name: 008_untar_packages
-      run: ./fsvr/util/build.sh 008_untar_packages
-
+#     - name: 001_ensure_build_directories
+#       run: ./fsvr/util/build.sh 001_ensure_build_directories 
+# 
+#     - name: 002_perform_replacements
+#       run: ./fsvr/util/build.sh 002_perform_replacements
+# 
+#     - name: 003_prepare_msys_msvc
+#       run: ./fsvr/util/build.sh 003_prepare_msys_msvc
+# 
+#     - name: 004_generate_package_infos
+#       run: ./fsvr/util/build.sh 004_generate_package_infos
+# 
+#     - name: 005_generate_packages_info_text
+#       run: ./fsvr/util/build.sh 005_generate_packages_info_text
+# 
+#     - name: 006_download_packages
+#       run: ./fsvr/util/build.sh 006_download_packages
+# 
+#     - name: 007_verify_downloads
+#       run: ./fsvr/util/build.sh 007_verify_downloads
+# 
+#     - name: 008_untar_packages
+#       run: ./fsvr/util/build.sh 008_untar_packages
+# 
 #     - name: 009_ninja_preflight
 #       run: ./fsvr/util/build.sh 009_ninja_preflight
 # 
