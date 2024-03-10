@@ -77,7 +77,8 @@ function ht-ln() {
   # but on Windows / msys use mklink instead
   if [[ "$OSTYPE" == "msys" ]]; then
     # note: /J junctions are used; /D directory symbolic links is another option to consider
-    test -d $source && opts="/J" || test -f $source && opts="/H" 
+    test -d $source && opts="/J"
+    test -f $source && opts="/H"
     cmd="env MSYS_NO_PATHCONV=1 cmd.exe /C \"mklink $opts $(cygpath -w $linkname) $(cygpath -w $source)\""
   fi
 
