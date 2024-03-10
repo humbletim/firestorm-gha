@@ -1,6 +1,3 @@
-# host/ci environment
-include ../build_vars.env
-
 # toolchains and paths
 include $nunja_dir/cl.platform.nunja
 

@@ -1,0 +1,7 @@
+{
+  "firestorm_gha": {
+    "copyright": "https://github.com/humbletim/firestorm-gha",
+    "name": "firestorm_gha",
+    "version": "$version_fsvr_tag"
+  }
+}

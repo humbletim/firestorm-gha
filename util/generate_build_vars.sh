@@ -1,86 +1,33 @@
 #!/bin/bash
+# generate ninja and bash compatible variable definitions -- humbletim 2024.03.08
+
+_usage="./util/generate_build_vars.sh <viewer channel> <viewer version x.y.z.w> <build dir/>"
+
+viewer_channel=$1 viewer_version=$2 build_dir=$3
+
 set -e
-#self="$BASH_SOURCE"
-#self="${BASH_SOURCE[${#BASH_SOURCE[@]} - 1]}"
-here=$(readlink -f $(dirname "$BASH_SOURCE")/..)
 
-function _usage() {
-  test -n "$@" && echo "$1" >&2
-  echo "usage: \$ [env workspace=...] detect_vars.sh [viewer_channel] [viewer_version as x.y.z.w] [build_dir]" >&2
-  exit 128
-}
+require_here=`readlink -f $(dirname $0)`
+function require() { source $require_here/$@ ; }
+require _utils.sh
 
-function _setenv() {
-  local name=$(echo "$@" | cut -d "=" -f 1)
-  local value="${@/$name=/}"
-  #echo "name=$name value=$value" >&2
-  export "$name=$value"
-  # deal with spaces, backslashes or semicolons unless already single-quoted
-  echo "$value" | grep -E "^[^\"]+[ \\;]" >/dev/null && value="$(printf '%q\n' "$value")" #value="\"$value\""
-  echo "$name=$value"  
-  #declare -p $name
-}
-function _setenv_extant() {
-  local path=$(echo "$@" | cut -d "=" -f 2)
-  test -e "$path" || { echo "_setenv_extant $@ path=$path does not exist" ; exit 1; }
- _setenv "$@"
-}
-function _cyglike() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
-function _winlike() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
-function _ver_split() { echo "$1" | cut -d "." -f $2 ; }
-function _git_sha() {
-  test -e $1/.git || { echo "!$1/.git" 2>&1 ; return 1; }
-  git -C "$1" describe --always --first-parent --abbrev=7
-}
-
-
-workspace=${workspace:-${GITHUB_WORKSPACE}}
-viewer_channel=$1
-viewer_version=$2
-build_dir=$3
-
-test -d "$workspace" || _usage "env workspace or GITHUB_WORKSPACE expected as base"
-test $(echo "$viewer_version" | grep -Eo '[.]' | wc -l) == 3  || _usage "expected x.y.z.w got '$viewer_version'"
-test -d "$build_dir" || _usage "build_dir=$build_dir does not exist"
+_assert "usage: $_usage"        [[ $# -eq 3 ]]
+_assert "invalid channel name" '[[ $viewer_channel =~ ^[-_a-zA-Z0-9.]+$ ]]'
+_assert "invalid version"      '[[ $viewer_version =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]'
+_assert "invalid build_dir"    'test -d $build_dir'
 
 _setenv viewer_channel=$viewer_channel
-_setenv viewer_version=$viewer_version
-_setenv_extant build_dir=`_winlike $build_dir`
-_setenv_extant workspace=`_winlike $workspace`
-_setenv packages_dir=$build_dir/packages
-_setenv build_vcdir=`basename $build_dir`
+require generate_version_vars.sh $viewer_version
+require generate_path_vars.sh $build_dir
+require generate_git_vars.sh \
+  version_git_sha=$root_dir \
+  version_fsvr_sha=$_fsvr_dir
 
-test -n "$viewer_channel" || _usage "viewer_channel"
-test $(echo "$viewer_version" | grep -Eo '[.]' | wc -l) == 3 || _usage "viewer_version"
-test -d "$build_dir" || _usage "build_dir"
-test -d "$workspace" || _usage "workspace"
+version_fsvr_tag=`git tag --contains "$version_fsvr_sha" -n 1`
+test -n "$version_fsvr_tag" || version_fsvr_tag=`git branch --contains $version_fsvr_sha --format "%(refname:lstrip=-1)"`
 
-_setenv_extant root_dir=${root_dir:-`_cyglike $workspace`}
-_setenv_extant _fsvr_dir=${_fsvr_dir:-`_cyglike $here`}
-_setenv_extant source_dir=${source_dir:-$root_dir/indra}
+_setenv version_fsvr_tag=$version_fsvr_tag
+_setenv version_shas="$version_git_sha-$version_fsvr_sha"
+_setenv version_full="$version_xyzw-$version_shas"
 
-test -e $root_dir/.git || { echo "!$root_dir/.git" ; exit 1; }
-test -e $_fsvr_dir/.git || { echo "!$_fsvr_dir/.git" ; exit 1; }
-
-_setenv version_major=`  _ver_split $viewer_version 1`
-_setenv version_minor=`  _ver_split $viewer_version 2`
-_setenv version_patch=`  _ver_split $viewer_version 3`
-_setenv version_release=`_ver_split $viewer_version 4`
-_setenv version_string="${version_major}.${version_minor}.${version_patch}.${version_release}"
-
-_setenv version_git_sha=`_git_sha $workspace`
-_setenv version_build_sha=`_git_sha $_fsvr_dir`
-_setenv version_sha="${version_git_sha}-${version_build_sha}"
-
-_setenv version_full="${version_string}-${version_sha}"
-
-for x in ${version_string} ${version_major}.${version_minor}.${version_patch}; do
-  test ! -d "$nunja_dir" && test -d $_fsvr_dir/$x && nunja_dir=$_fsvr_dir/$x
-done
-
-test -d "$nunja_dir" || { echo "could not find nunja dir based on version... ${version_string}" >&2 ; exit 1; }
-_setenv_extant nunja_dir=`_cyglike $nunja_dir`
-
-# verify specified/calculated value alignments
-test $viewer_version == $version_string || \
-  { echo "viewer_version='$viewer_version' but version_string='$version_string'" >&2 ; exit 34 ; }
+_assert "root_dir" 'test -d $root_dir'
