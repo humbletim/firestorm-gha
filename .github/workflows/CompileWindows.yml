@@ -53,6 +53,7 @@ jobs:
         ( cd $_home_bin && tar -xvf "$_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst" --strip-components=2 usr/bin/parallel )                
         mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
         echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
+        echo 65535 > ~/.parallel/will-cite
         ls -l .
         ls -l $_fsvr_cache
         ls -l $_home_bin
