@@ -24,14 +24,14 @@ jobs:
       working-directory: ..
       run: |
         echo "${{ toJSON(github.event.inputs) }}"
-        eval `${{inputs.fstuple}} ; {
+        eval `${{inputs.fstuple}} ; (
           echo _fsbase=$base
           echo _fsrepo=$repo
           echo _fsbranch=$branch
           echo nunja_dir=$(pwd -W)/fsvr/$base
           echo p373r_dir=$(pwd -W)/p373r-vrmod
           echo _fsvr_cache=`cygpath -ma c:/_fsvr_cache`
-        } | tee -a $GITHUB_ENV`
+        ) | tee -a $GITHUB_ENV`
         mkdir -pv $_fsvr_cache
 
     - name: Tools
