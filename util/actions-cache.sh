@@ -38,7 +38,7 @@ shift
 err=0
 echo "node -e {{$cmd}} $@" >&2
 result="$(node -e "${script}" "$@" 2>&1)"
-
+# echo "$result" >&2
 echo "$result" | grep -Eo '^\w+_result=(.*)$' | sed -E 's@^\w+_result=@@' || { echo "$result" >&2 && exit 1; } 
 exit 0
 

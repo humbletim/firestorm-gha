@@ -61,6 +61,7 @@ function test_bin() {
 }
 
 restored_bin_id=$(./util/actions-cache.sh restore $base-bin-a bin)
+echo restored_bin_id=$restored_bin_id
 
 if [[ $restored_bin_id == -1 ]]; then
     test -f bin/ninja.exe || unzip -d $_home_bin "$(eval $(cat << EOF
