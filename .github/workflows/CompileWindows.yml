@@ -127,6 +127,11 @@ jobs:
     - name: 085_prepare_msys_msvc
       run: ./fsvr/util/build.sh 085
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: 090_ninja_preflight
       run: ./fsvr/util/build.sh 090
 
