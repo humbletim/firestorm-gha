@@ -57,8 +57,8 @@ function 020_perform_replacements() {(
 function get_msvcdir() {(
   _dbgopts
   _assert "_fsvr_utils_dir" test -f "$_fsvr_utils_dir/generate_msvc_env.bat"
-  _assert "$build_dir/msvc.env" test -s msvc.env
-  . msvc.env
+  _assert "$build_dir/msvc.env" test -s $build_dir/msvc.env
+  . $build_dir/msvc.env
   test -n "$VCToolsVersion" || _die "!VCToolsVersion"
   test -d "$VCToolsRedistDir" || _die "!VCToolsRedistDir"
   local TOOLSVER=$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@')
@@ -84,7 +84,7 @@ function 085_prepare_msys_msvc() {(
     ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
 
     # make msvcp140.dll redists easy to reference as build/msvc/
-    msvc_dir=$(get_msvcdir) || _die "could not get msvc_dir $(ls -l msvc.env)"
+    msvc_dir=$(get_msvcdir) || _die "could not get msvc_dir $(ls -l $build_dir/)"
     # ht-ln $msvc_dir $build_dir/msvc
     grep msvc_dir $build_dir/build_vars.env >/dev/null \
       || { echo "msvc_dir=$msvc_dir" | tee -a $build_dir/build_vars.env ; }  
@@ -205,7 +205,8 @@ function 090_ninja_preflight() {(
       echo "nunja_dir=$nunja_dir" ;
       cat $nunja_dir/cl.arrant.nunja
     ) > $build_dir/build.ninja
-    test -f msvc.env && . msvc.env
+    _assert msvc.env 'test -f $build_dir/msvc.env'
+    . $build_dir/msvc.env
 
     local out=
     out="$(ninja -C $build_dir -n 2>&1)" || _die_exit_code=$? _die "ninja -n failed\n$out"
@@ -215,9 +216,10 @@ function 090_ninja_preflight() {(
 )}
 
 function 0a0_ninja_build() {(
-  _dbgopts
-  test -f msvc.env && . msvc.env
-  ninja -C $build_dir -j4 llpackage
+    _dbgopts
+    _assert msvc.env 'test -f $build_dir/msvc.env'
+    . $build_dir/msvc.env
+    ninja -C $build_dir -j4 llpackage
 )}
 
 function 0b0_bundle() {(
