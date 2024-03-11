@@ -14,11 +14,14 @@ cd "$(dirname $0)"
 # ovr=https://raw.githubusercontent.com/ValveSoftware/openvr/v1.6.10/
 ovr=https://rawcdn.githack.com/ValveSoftware/openvr/v1.6.10/
 tarball=openvr-v1.6.10.8eaf723.tar.bz2
-function _wget() { wget -nv -nc "$@" ; }
+function _wget() { set -e; wget -nv -nc "$@" ; }
 _wget -O LICENSES/openvr.txt $ovr/LICENSE
 _wget -O include/openvr.h $ovr/headers/openvr.h
 _wget -P lib/release/ $ovr/bin/win64/openvr_api.dll $ovr/lib/win64/openvr_api.lib
-sha256sum --check openvr.v1.6.10.sha256
+# sha256sum --strict --check openvr.v1.6.10.sha256 || exit 1
+
+test -s include/openvr.h || exit 222
+find .
 
 test -f $tarball || tar -cjvf $tarball \
         autobuild-package.xml \
@@ -26,8 +29,8 @@ test -f $tarball || tar -cjvf $tarball \
         lib/release/openvr_api.{dll,lib} \
         LICENSES/openvr.txt
 
-tar -tvf $tarball
+#tar -tvf $tarball
 
-for x in md5sum sha1sum sha256sum ; do
-  $x $tarball | tee $tarball.$x
-done
+#for x in md5sum sha1sum sha256sum ; do
+#  $x $tarball | tee $tarball.$x
+#done

@@ -113,8 +113,8 @@ function 040_generate_package_infos() {(
     local openvr_dir=$_fsvr_dir/openvr
     _assert openvr 'test -d "$openvr_dir"'
     # set -x
-    bash $openvr_dir/improvise.sh
-    bash $openvr_dir/install.sh
+    bash $openvr_dir/improvise.sh || _die "openvr/improvise failed"
+    bash $openvr_dir/install.sh || _die "openvr/install failed"
     #cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
     #merge_packages_info $openvr_dir/meta/packages-info.json
 
@@ -122,7 +122,7 @@ function 040_generate_package_infos() {(
     # (note: -I$build_dir/newview is already part of stock build opts)
     _assert p373r_dir test -d "$p373r_dir"
     _assert p373r_dir 'test -d "$p373r_dir"'
-    bash $p373r_dir/apply.sh
+    bash $p373r_dir/apply.sh || _die "p373r/apply failed"
     ht-ln $p373r_dir/llviewerVR.h $build_dir/newview/
     ht-ln $p373r_dir/llviewerVR.cpp $build_dir/newview/
     merge_packages_info $p373r_dir/meta/packages-info.json
@@ -181,7 +181,7 @@ function 070_verify_downloads() {(
     jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | tr -d '\r' | grep -v url=null \
      | sed -e 's@ url=[^ ]\+/@ url=@' | \
      self=$_fsvr_utils_dir/build.sh _parallel "$FUNCNAME" -j4 '{} ; $self _verify_one $name $hash $(basename $url)' \
-    || die "verification failed $?"
+    || _die "verification failed $?"
        # tool=md5sum;
        # test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum;
        # echo $tool: $(basename $url) ; 
