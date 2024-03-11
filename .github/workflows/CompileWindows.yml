@@ -26,14 +26,18 @@ jobs:
     - name: Tools
       working-directory: ..
       run: |
-        mkdir ~/bin && cygpath -ma ~/bin | tee -a $GITHUB_PATH
-        curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-        unzip -d ~/bin ninja-win.zip
+        set -e
+        test -d ~/bin || mkdir ~/bin
+        cygpath -ma ~/bin | tee -a $GITHUB_PATH
+        PATH=~/bin:$PATH
         cp -avu C:/msys64/usr/bin/wget.exe ~/bin/
+        wget -q https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+        echo 'bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f  ninja-win.zip' | sha256sum -c
+        unzip -d ~/bin ninja-win.zip
         #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
         #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
-        ~/bin/wget -q https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
-        echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
+        wget -q https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
+        echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum -c
         tar -C ~/bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
         mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
         echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
