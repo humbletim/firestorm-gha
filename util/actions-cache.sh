@@ -37,10 +37,9 @@ script="${!cmd}"
 shift
 err=0
 echo "node -e {{$cmd}} $@" >&2
-result=$(node -e "${script}" "$@" 2>&1) || err=$?
+result="$(node -e "${script}" "$@" 2>&1)"
 
-test $err != 0 && { echo "failed: $result" >&2 ; exit $err ; }
-echo "$result" | grep -Eo '^\w+_result=(.*)$' | sed -E 's@^\w+_result=@@' 
+echo "$result" | grep -Eo '^\w+_result=(.*)$' | sed -E 's@^\w+_result=@@' || { echo "$result" >&2 && exit 1; } 
 exit 0
 
 ############################################
