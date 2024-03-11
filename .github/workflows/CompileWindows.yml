@@ -110,7 +110,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ env._fsvr_cache }}
-        key: ${{ runner.os }}-${{ env.viewer_version }}-${{ hashFiles(env.build_dir+'/packages-info.json') }}
+        key: ${{ runner.os }}-${{ env.viewer_version }}-${{ hashFiles(format('{0}/packages-info.json', env.build_dir)) }}
       # if: steps._fsvr_cache.outputs.cache-hit != 'true'
 
     # - name: Setup tmate session
