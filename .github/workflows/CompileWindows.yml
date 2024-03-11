@@ -38,7 +38,7 @@ jobs:
     - name: Tools
       working-directory: ..
       run: |
-        set -ex
+        set -e
         BIN=$(cygpath -ma ~/bin)
         test -d $BIN || mkdir $BIN
         cygpath -ma $BIN | tee -a $GITHUB_PATH
@@ -82,10 +82,10 @@ jobs:
         ls -lrtha
         ls -lrtha fsvr/
 
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
     - name: Nunja Mapping
       run: |
