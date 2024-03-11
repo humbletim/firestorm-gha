@@ -4,7 +4,10 @@
 
 _fsvr_utils_dir=$(readlink -f $(dirname "$BASH_SOURCE"))
 
-function _die() { echo -e "[_die] error: $@" >&2 ; exit 128 ; }
+function _dbgopts() { set -Euo pipefail ; }
+
+_die_exit_code=128
+function _die() { echo -e "[_die] error: $@" >&2 ; exit ${_die_exit_code:-1} ; }
 
 # assert "message" [test expression...]
 function _assert() {
@@ -21,6 +24,7 @@ function _relativize() {
     rel=${rel//$source_dir/\$source_dir}
     rel=${rel//$root_dir/\$root_dir}
     rel=${rel//$_fsvr_dir/\$_fsvr_dir}
+    test -d "$_fsvr_cache" && rel=${rel//$_fsvr_cache/\$_fsvr_cache}
     test -d "$nunja_dir" && rel=${rel//$nunja_dir/\$nunja_dir}
     test -d "$p373r_dir" && rel=${rel//$p373r_dir/\$p373r_dir}
     echo $rel

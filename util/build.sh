@@ -8,8 +8,8 @@ _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
 _assert "version_xyzw" test -n "$version_xyzw"
 
-function 001_ensure_build_directories() {(
-    set -E
+function 010_ensure_build_directories() {(
+    _dbgopts
     local directories=(
       packages
       CMakeFiles
@@ -34,10 +34,14 @@ fsversionvalues=(
  VIEWER_VERSION_REVISION=$version_release
 )
 
-function 002_perform_replacements() {(
-    set -E
+function 020_perform_replacements() {(
+    _dbgopts
+
     echo $version_xyzw | tee $build_dir/newview/viewer_version.txt >&2
     ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
+
+    ht-ln $_fsvr_dir/newview/cmake_pch.hxx $build_dir/newview/
+    ht-ln $_fsvr_dir/newview/cmake_pch.cxx $build_dir/newview/
 
     cat $source_dir/newview/fsversionvalues.h.in | sed -E 's~@([A-Z_]+)@~$\1~g' \
       | env ${fsversionvalues[@]} envsubst > $build_dir/newview/fsversionvalues.h
@@ -51,9 +55,9 @@ function 002_perform_replacements() {(
 )}
 
 function get_msvcdir() {(
-  set -E
+  _dbgopts
   _assert "_fsvr_utils_dir" test -f "$_fsvr_utils_dir/generate_msvc_env.bat"
-  test -s msvc.env || { $_fsvr_utils_dir/generate_msvc_env.bat > msvc.env ; }
+  _assert "$build_dir/msvc.env" test -s msvc.env
   . msvc.env
   test -n "$VCToolsVersion" || _die "!VCToolsVersion"
   test -d "$VCToolsRedistDir" || _die "!VCToolsRedistDir"
@@ -63,19 +67,8 @@ function get_msvcdir() {(
   echo "$CRT"
 )}
 
-# function download_gnu_parallel() {(
-#     set -E
-#     #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
-#     #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
-#     wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
-#     echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
-#     tar -C humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
-#     mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
-#     echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
-# )}
-
-function 003_prepare_msys_msvc() {(
-    set -E
+function 085_prepare_msys_msvc() {(
+    _dbgopts
     [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
 
     if [[ -n "$GITHUB_ACTIONS" ]] ; then
@@ -83,9 +76,6 @@ function 003_prepare_msys_msvc() {(
         #   past manifest processing and workable firestorm_setup_tmp.nsi emerging
         # see: indra/newview/viewer_manifest.py:    def nsi_file_commands
         test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
-        # gnu parallel is used to manually download, verify, untar 3p prebuilt dependencies
-        which parallel 2>&1 2>/devnull || download_gnu_parallel
-        parallel --version 2>&1 | head -1 >&2 || _die "error configuring parallel"
         # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
         python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
     fi
@@ -101,8 +91,8 @@ function 003_prepare_msys_msvc() {(
 )}
 
 function merge_packages_info() {(
-    set -E
-    local packages_info=$1
+    _dbgopts
+    local packages_info=${1:-}
     test -z "$packages_info" && packages_info=- \
     || test -s "$packages_info" || _die "merge_packages_info -- packages-info.json or stdin missing"
     test -s $build_dir/packages-info.json || { echo '{}' > $build_dir/packages-info.json ; }
@@ -112,15 +102,17 @@ function merge_packages_info() {(
     _relativize "merged $packages_info" >&2
 )}
 
-function 004_generate_package_infos() {(
-    set -E
+function 040_generate_package_infos() {(
+    _dbgopts
+    _assert $_fsvr_utils_dir/../meta/packages-info.json 'test -s "$_fsvr_utils_dir/../meta/packages-info.json"'
     cat $_fsvr_utils_dir/../meta/packages-info.json | envsubst | merge_packages_info
-
+   
     _assert nunja_dir 'test -d "$nunja_dir"'
     merge_packages_info $nunja_dir/packages-info.json
 
     local openvr_dir=$_fsvr_dir/openvr
     _assert openvr 'test -d "$openvr_dir"'
+    # set -x
     bash $openvr_dir/improvise.sh
     bash $openvr_dir/install.sh
     #cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
@@ -136,63 +128,128 @@ function 004_generate_package_infos() {(
     merge_packages_info $p373r_dir/meta/packages-info.json
 )}
 
-function 005_generate_packages_info_text() {(
-  set -E
+function 050_generate_packages_info_text() {(
+  _dbgopts
   jq -r '.[]|.name+": "+.version+"\n"+.copyright+"\n"' $build_dir/packages-info.json \
     | tee $build_dir/newview/packages-info.txt
 )}
 
-function 006_download_packages() {(
-    set -E
-    jq -r '.[]|.url' $build_dir/packages-info.json | grep http \
-      | parallel --will-cite -j4 'echo {} >&2 && wget -q -P $packages_dir -N {}'
+
+function _parallel() {(
+    _dbgopts
+    local funcname=$1
+    shift
+    test -f $build_dir/$funcname.txt && rm -v $build_dir/$funcname.txt
+    parallel --joblog $build_dir/$funcname.txt --halt-on-error 2 "$@" \
+      || { rc=$? ; _relativize "see $build_dir/$funcname.txt" >&2 ; return $rc ; }
 )}
 
-function 007_verify_downloads() {(
-    set -E
+function 060_download_packages() {(
+    _dbgopts
+    _assert _fsvr_cache 'test -d "$_fsvr_cache"'
+    jq -r '.[]|.url' $build_dir/packages-info.json | td -d '\r' | grep http \
+      | _parallel "$FUNCNAME" -j4 'set -e ; echo {} >&2 ; wget -nv -N -P "$_fsvr_cache" -N {} ; test -s $_fsvr_cache/$(basename {}); exit 0'
+)}
+
+function _verify_one() {(
+    _dbgopts
+    # echo "_verify_one $@"
+    local name=$1 hash=$2 filename=$(basename "$3")
+    local tool=md5sum
+    test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum
+    echo "$hash $filename" > $_fsvr_cache/$filename.$tool 
+    # echo "$tool: $filename ($_fsvr_cache)" >&2 
+    
+    got=($(cd $_fsvr_cache && $tool $filename))
+    out="$(cd $_fsvr_cache && $tool --strict --check $filename.$tool)" || {
+        rc=$?
+        echo "$out"
+        echo "checksum failed: $filename expected: $hash got: $got" >&2 ;
+        return $rc
+    }
+    _relativize "$out"
+     #     return 0
+)}
+
+function 070_verify_downloads() {(
+    _dbgopts
     echo packages_dir=$packages_dir >&2
-    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | grep -v url=null \
-     | parallel --will-cite -j4 '{} ; tool=md5sum; test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum; echo $tool: $(basename $url) ; echo $hash $packages_dir/$(basename $url) | $tool --quiet -c -'
+    echo _fsvr_cache=$_fsvr_cache >&2
+    cd $_fsvr_cache/
+    test -f $build_dir/$FUNCNAME.txt && rm -v $build_dir/$FUNCNAME.txt
+    # echo "`jq -r '.[]|"_verify_one "+.name+" "+.hash+" "+(.url//"null")+""' $build_dir/packages-info.json | grep -v null`"
+    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | tr -d '\r' | grep -v url=null \
+     | sed -e 's@ url=[^ ]\+/@ url=@' | \
+     self=$_fsvr_utils_dir/build.sh _parallel "$FUNCNAME" -j4 '{} ; $self _verify_one $name $hash $(basename $url)' \
+    || die "verification failed $?"
+       # tool=md5sum;
+       # test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum;
+       # echo $tool: $(basename $url) ; 
+       # check="$hash $_fsvr_cache/$(basename $url)" ;
+       # echo "$check" | $tool --quiet -c -;
+    return 0
 )}
 
-function 008_untar_packages() {(
-    set -E
-    jq -r '.[]|.url' $build_dir/packages-info.json | grep -vE '^null$' \
-       | parallel --will-cite -j8 'basename {} && cd $packages_dir && tar -xf $(basename {})'
+function 080_untar_packages() {(
+    _dbgopts
+    jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep -vE '^null$' \
+     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && tar -xf $_fsvr_cache/$(basename {})' \
+       || _die "untar failed $?"
 )}
 
-function 009_ninja_preflight() {(
-    set -E
+function 090_ninja_preflight() {(
+    _dbgopts
     _assert nunja_dir 'test -d "$nunja_dir"'
     ( 
+      echo "include build_vars.env"
       echo "nunja_dir=$nunja_dir" ;
-      cat $build_dir/build_vars.env ;
       cat $nunja_dir/cl.arrant.nunja
     ) > $build_dir/build.ninja
     test -f msvc.env && . msvc.env
-    local out="$(ninja -C $build_dir -n 2>&1)"
+
+    local out=
+    out="$(ninja -C $build_dir -n 2>&1)" || _die_exit_code=$? _die "ninja -n failed\n$out"
     echo "$out" | head -3
     echo "..."
     echo "$out" | tail -3
 )}
 
-function 00a_ninja_build() {(
-  set -E
+function 0a0_ninja_build() {(
+  _dbgopts
   test -f msvc.env && . msvc.env
   ninja -C $build_dir -j4 llpackage
 )}
 
-function 00b_bundle() {(
-  set -E
+function 0b0_bundle() {(
+  _dbgopts
   . $_fsvr_utils_dir/nsis.sh
   make_installer
   make_7zip
 )}
 
+function _steps() {
+    declare -f | grep '^0.*()' | sed 's@^@    @g;s@()@@' | sort 
+}
+
 # Check if the script is being sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  echo "running command: $@" >&2
-  eval "$@"
+  _dbgopts
+  cmd=$1
+  shift
+  if [[ $cmd =~ ^[0-9a-fA-F]{3}$ ]] ; then
+    cmd=$(_steps | grep $cmd | xargs echo)
+    echo "cmd=$cmd" >&2
+  fi
+  test -n "$cmd" || _die "!cmd $cmd $@"
+  #echo "running command: $cmd" >&2
+  
+  eval "$cmd $@" || _die "command $cmd $@ failed $?"
+  if [[ ! $cmd =~ ^_ ]]; then
+    for x in `_steps 2> /dev/null` ; do
+     [[ $x != $cmd && $x > $cmd ]] && echo "    $x"
+    done
+  fi
+  exit 0  
 else
-  { echo "sourced functions available:" ; declare -f | grep '^0.*()' | sed 's@^@    @g;s@()@@' | sort ; } >&2
+  { echo "sourced functions available:" ; _steps ; } >&2
 fi

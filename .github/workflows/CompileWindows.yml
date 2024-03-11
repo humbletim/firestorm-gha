@@ -31,18 +31,19 @@ jobs:
         cygpath -ma ~/bin | tee -a $GITHUB_PATH
         PATH=~/bin:$PATH
         cp -avu C:/msys64/usr/bin/wget.exe ~/bin/
-        wget -q https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+        wget -q -N -P $_fsvr_cache https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
         echo 'bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f  ninja-win.zip' | sha256sum -c
-        unzip -d ~/bin ninja-win.zip
+        unzip -d ~/bin $_fsvr_cache/ninja-win.zip
         #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
         #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
-        wget -q https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
+        wget -q -N -P $_fsvr_cache https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
         echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum -c
-        tar -C ~/bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
+        tar -C ~/bin -xvf $_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
         mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
         echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
         ls -l .
         ls -l $GITHUB_WORKSPACE
+        ls -l $_fsvr_cache
 
     - name: Preflight
       shell: bash
@@ -56,7 +57,7 @@ jobs:
     - name: Clone
       run: |
         pwd && pwd -W
-        set -x
+        # set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
         #fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
         eval `${{inputs.fstuple}} ; {
@@ -65,7 +66,9 @@ jobs:
           echo _fsbranch=$branch
           echo nunja_dir=$(pwd -W)/fsvr/$base
           echo p373r_dir=$(pwd -W)/p373r-vrmod
+          echo _fsvr_cache=`cygpath -ma c:/_fsvr_cache`
         } | tee -a $GITHUB_ENV`
+        mkdir -pv $_fsvr_cache
         fastclone ${_fsrepo} ${_fsbranch} ${GITHUB_WORKSPACE}
         fastclone FirestormViewer/fs-build-variables master
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
@@ -83,43 +86,57 @@ jobs:
         mkdir -pv build
         eval `echo nunja_dir=fsvr/$_fsbase | tee -a $GITHUB_ENV`
         ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat $nunja_dir/viewer_version.txt` build/ | tee build/build_vars.env | tee $GITHUB_ENV
+        ./fsvr/util/generate_msvc_env.bat > build/msvc.env
 
     # - name: Setup tmate session
     #   uses: mxschmitt/action-tmate@v3
     #   with:
     #     limit-access-to-actor: true
 
-    - name: 001_ensure_build_directories
+    - name: 010_ensure_build_directories
       run: ./fsvr/util/build.sh 001_ensure_build_directories 
 
-    - name: 002_perform_replacements
+    - name: 020_perform_replacements
       run: ./fsvr/util/build.sh 002_perform_replacements
 
-    - name: 003_prepare_msys_msvc
-      run: ./fsvr/util/build.sh 003_prepare_msys_msvc
-
-    - name: 004_generate_package_infos
+    - name: 040_generate_package_infos
       run: ./fsvr/util/build.sh 004_generate_package_infos
 
-    - name: 005_generate_packages_info_text
+    - name: 050_generate_packages_info_text
       run: ./fsvr/util/build.sh 005_generate_packages_info_text
 
-    - name: 006_download_packages
+    - name: _fsvr_cache
+      id: _fsvr_cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ env._fsvr_cache }}
+        key: ${{ runner.os }}-${{ env.viewer_version }}-${{ hashFiles(env.build_dir+'/packages-info.json') }}
+      # if: steps._fsvr_cache.outputs.cache-hit != 'true'
+
+    # - name: Setup tmate session
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true
+
+    - name: 060_download_packages
       run: ./fsvr/util/build.sh 006_download_packages
 
-    - name: 007_verify_downloads
+    - name: 070_verify_downloads
       run: ./fsvr/util/build.sh 007_verify_downloads
 
-    - name: 008_untar_packages
+    - name: 080_untar_packages
       run: ./fsvr/util/build.sh 008_untar_packages
 
-    - name: 009_ninja_preflight
+    - name: 085_prepare_msys_msvc
+      run: ./fsvr/util/build.sh 003_prepare_msys_msvc
+
+    - name: 090_ninja_preflight
       run: ./fsvr/util/build.sh 009_ninja_preflight
 
-    - name: 00a_ninja_build
-      run: ./fsvr/util/build.sh 00a_ninja_build
+    # - name: 0a0_ninja_build
+    #   run: ./fsvr/util/build.sh 00a_ninja_build
 
-#     - name: 00b_bundle
+#     - name: 0b0_bundle
 #       run: ./fsvr/util/build.sh 00b_bundle
 
     - name: Setup tmate session
