@@ -21,12 +21,23 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: Output Inputs
-      run: echo "${{ toJSON(github.event.inputs) }}"
+      working-directory: ..
+      run: |
+        echo "${{ toJSON(github.event.inputs) }}"
+        eval `${{inputs.fstuple}} ; {
+          echo _fsbase=$base
+          echo _fsrepo=$repo
+          echo _fsbranch=$branch
+          echo nunja_dir=$(pwd -W)/fsvr/$base
+          echo p373r_dir=$(pwd -W)/p373r-vrmod
+          echo _fsvr_cache=`cygpath -ma c:/_fsvr_cache`
+        } | tee -a $GITHUB_ENV`
+        mkdir -pv $_fsvr_cache
 
     - name: Tools
       working-directory: ..
       run: |
-        set -e
+        set -ex
         test -d ~/bin || mkdir ~/bin
         cygpath -ma ~/bin | tee -a $GITHUB_PATH
         PATH=~/bin:$PATH
@@ -60,15 +71,6 @@ jobs:
         # set -x
         function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
         #fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        eval `${{inputs.fstuple}} ; {
-          echo _fsbase=$base
-          echo _fsrepo=$repo
-          echo _fsbranch=$branch
-          echo nunja_dir=$(pwd -W)/fsvr/$base
-          echo p373r_dir=$(pwd -W)/p373r-vrmod
-          echo _fsvr_cache=`cygpath -ma c:/_fsvr_cache`
-        } | tee -a $GITHUB_ENV`
-        mkdir -pv $_fsvr_cache
         fastclone ${_fsrepo} ${_fsbranch} ${GITHUB_WORKSPACE}
         fastclone FirestormViewer/fs-build-variables master
         fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
