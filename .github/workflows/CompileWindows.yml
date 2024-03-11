@@ -23,6 +23,29 @@ jobs:
     - name: Output Inputs
       run: echo "${{ toJSON(github.event.inputs) }}"
 
+    - name: Tools
+      run: |
+        curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+        unzip -d humbletim-bin ninja-win.zip
+        echo "${GITHUB_WORKSPACE}/humbletim-bin" | tee -a $GITHUB_PATH
+        cp -avu C:/msys64/usr/bin/wget.exe humbletim-bin/
+        #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
+        #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
+        wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
+        echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
+        tar -C humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
+        mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
+        echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
+
+    - name: Preflight
+      shell: bash
+      run: |
+        bash --version | head -1
+        python --version | head -1
+        ninja --version | head -1
+        wget --version | head -1
+        parallel --version | head -1
+
     - name: Clone
       run: |
         pwd && pwd -W
@@ -48,35 +71,11 @@ jobs:
     #   with:
     #     limit-access-to-actor: true
 
-    - name: Tools
-      run: |
-        curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-        unzip -d humbletim-bin ninja-win.zip
-        echo "${GITHUB_WORKSPACE}/humbletim-bin" | tee -a $GITHUB_PATH
-        cp -avu C:/msys64/usr/bin/wget.exe humbletim-bin/
-        #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
-        #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
-        wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
-        echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
-        tar -C humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
-        mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
-        echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
-
-
     - name: Nunja Mapping
       run: |
         mkdir -pv build
         eval `echo nunja_dir=fsvr/$_fsbase | tee -a $GITHUB_ENV`
         ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat $nunja_dir/viewer_version.txt` build/ | tee build/build_vars.env | tee $GITHUB_ENV
-
-    - name: Preflight
-      shell: bash
-      run: |
-        bash --version | head -1
-        python --version | head -1
-        ninja --version | head -1
-        wget --version | head -1
-        parallel --version | head -1
 
     # - name: Setup tmate session
     #   uses: mxschmitt/action-tmate@v3
