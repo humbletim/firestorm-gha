@@ -193,7 +193,7 @@ function 070_verify_downloads() {(
 function 080_untar_packages() {(
     _dbgopts
     jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep -vE '^null$' \
-     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && 7z -bb0 x $_fsvr_cache/$(basename {})' \
+     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && { bzcat $_fsvr_cache/$(basename {}) | 7z -si -bb0 x ; }' \
        || _die "untar failed $?"
 )}
 
