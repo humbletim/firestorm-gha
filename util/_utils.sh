@@ -68,11 +68,11 @@ function _git_sha() {
 #  returns the resulting outputdir/filename to stdout
 function wget_sha256() {(
   set -Euo pipefail
-  local hash=$1 url=$2 dir=$3
+  local hash=$1 url=$2 dir=${3:-.}
   local filename=`basename $url`
   test ! -d "$dir" || cd $dir
   wget -q -N $url >&2
-  echo "$hash $filename" | sha256sum --string --check >&2
+  echo "$hash $filename" | sha256sum --strict --check >&2
   echo $dir/$filename
 )}
 
