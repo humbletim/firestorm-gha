@@ -67,7 +67,7 @@ function _git_sha() {
 # usage: wget_sha256 <sha256sumhex> <url> <outputdir>
 #  returns the resulting outputdir/filename to stdout
 function wget_sha256() {(
-  set -Eui pipefail
+  set -Euo pipefail
   local hash=$1 url=$2 dir=$3
   local filename=`basename $url`
   test ! -d "$dir" || cd $dir
