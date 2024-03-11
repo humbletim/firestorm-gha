@@ -29,7 +29,7 @@ jobs:
       run: declare -x > ../_stock_bash.env
 
     - name: Probe MSYS2 Bash
-      shell: msys2
+      shell: C:\msys64\usr\bin\bash.exe {0}
       run: declare -x > ../_msys2_bash.env
 
 
