@@ -170,7 +170,7 @@ function 009_ninja_preflight() {(
       cat $nunja_dir/cl.arrant.nunja
     ) > $build_dir/build.ninja
     test -f msvc.env && . msvc.env
-    local out="$(ninja -C $build_dir -n 2>&1"
+    local out="$(ninja -C $build_dir -n 2>&1)"
     echo "$out" | head -3
     echo "..."
     echo "$out" | tail -3
