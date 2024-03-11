@@ -36,7 +36,7 @@ cmd=$1
 script="${!cmd}"
 shift
 err=0
-echo "node -e {{$1}} $@" >&2
+echo "node -e {{$cmd}} $@" >&2
 result=$(node -e "${script}" "$@" 2>&1) || err=$?
 
 test $err != 0 && { echo "failed: $result" >&2 ; exit $err ; }
