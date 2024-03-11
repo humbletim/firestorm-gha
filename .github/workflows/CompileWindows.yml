@@ -80,6 +80,11 @@ jobs:
     - name: 002_perform_replacements
       run: ./fsvr/util/build.sh 002_perform_replacements
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: 003_prepare_msys_msvc
       run: ./fsvr/util/build.sh 003_prepare_msys_msvc
 
