@@ -63,16 +63,16 @@ function get_msvcdir() {(
   echo "$CRT"
 )}
 
-function download_gnu_parallel() {(
-    set -E
-    #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
-    #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
-    wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
-    echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
-    tar -C humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
-    mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
-    echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
-)}
+# function download_gnu_parallel() {(
+#     set -E
+#     #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
+#     #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
+#     wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
+#     echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
+#     tar -C humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
+#     mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
+#     echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
+# )}
 
 function 003_prepare_msys_msvc() {(
     set -E
