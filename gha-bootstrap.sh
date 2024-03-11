@@ -64,19 +64,19 @@ restored_bin_id=$(./util/actions-cache.sh restore $base-bin-a bin)
 
 if [[ $restored_bin_id == -1 ]]; then
     test -f bin/ninja.exe || unzip -d $_home_bin "$(eval $(cat << EOF
-    wget_sha256
-        bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f
-        https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-        .
-    EOF
+wget_sha256
+    bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f
+    https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+    .
+EOF
     ) )"
 
     test -x bin/parallel || echo xMSYS_NO_PATHCONV=1 tar -C $_home_bin --strip-components=2 -vxf "$(eval $(cat << EOF
-    wget_sha256
-        3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782
-        https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
-        .
-    EOF
+wget_sha256
+    3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782
+    https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
+    .
+EOF
     ) )" usr/bin/parallel
 
     test -f bin/hostname || echo -e '#/bin/bash\necho windows2022' > bin/hostname
@@ -86,10 +86,10 @@ if [[ $restored_bin_id == -1 ]]; then
     # In the spirit of open source collaboration, this build automation
     # recognizes the contributions of GNU Parallel, developed by O. Tange.
     mkdir -pv $PARALLEL_HOME
-    cat <<_EOF_ > $PARALLEL_HOME/will-cite
-      Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
-      Zenodo. https://doi.org/10.5281/zenodo.7347980
-    _EOF_
+cat <<_EOF_ > $PARALLEL_HOME/will-cite
+  Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
+  Zenodo. https://doi.org/10.5281/zenodo.7347980
+_EOF_
 
     mkdir -p $PARALLEL_HOME/tmp/sshlogin/`hostname`
     echo 65535 > $PARALLEL_HOME/tmp/sshlogin/`hostname`/linelen
