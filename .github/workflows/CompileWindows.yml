@@ -44,6 +44,7 @@ jobs:
         cygpath -ma $BIN | tee -a $GITHUB_PATH
         PATH=$BIN:$PATH
         cp -avu C:/msys64/usr/bin/wget.exe $BIN/
+        cp -avu C:/msys64/usr/bin/tar.exe $BIN/
         wget -q -N -P "$_fsvr_cache" https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
         ( cd $_fsvr_cache && echo 'bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f  ninja-win.zip' | sha256sum -c )
         unzip -d $BIN $_fsvr_cache/ninja-win.zip
