@@ -21,7 +21,6 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: Output Inputs
-      working-directory: ..
       run: |
         set -e
         echo "${{ toJSON(github.event.inputs) }}"
@@ -32,33 +31,31 @@ jobs:
           echo nunja_dir=$(pwd -W)/fsvr/$base
           echo p373r_dir=$(pwd -W)/p373r-vrmod
           echo _fsvr_cache=$(cygpath -ma c:/_fsvr_cache)
+          echo _home_bin=$(cygpath -ma ~/bin)
         ) | tee -a $GITHUB_ENV`
-        mkdir -pv $_fsvr_cache
+        mkdir -pv $_fsvr_cache $_home_bin
+        echo $_home_bin | tee -a $GITHUB_PATH
 
     - name: Tools
       working-directory: ..
       run: |
         set -e
-        BIN=$(cygpath -ma ~/bin)
-        test -d $BIN || mkdir $BIN
-        cygpath -ma $BIN | tee -a $GITHUB_PATH
-        PATH=$BIN:$PATH
-        cp -avu C:/msys64/usr/bin/wget.exe $BIN/
-        cp -avu C:/msys64/usr/bin/tar.exe $BIN/
+        cp -avu C:/msys64/usr/bin/wget.exe $_home_bin/
+        # cp -avu C:/msys64/usr/bin/tar.exe $_home_bin/
         wget -q -N -P "$_fsvr_cache" https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
         ( cd $_fsvr_cache && echo 'bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f  ninja-win.zip' | sha256sum -c )
-        unzip -d $BIN $_fsvr_cache/ninja-win.zip
+        unzip -d $_home_bin $_fsvr_cache/ninja-win.zip
         #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
         #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
         wget -q -N -P "$_fsvr_cache" https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
         ( cd $_fsvr_cache && echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum -c )
-        # ( cd $BIN && tar -xvf "$_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst" --strip-components=2 usr/bin/parallel ) ||
-        ( cd $BIN && tar -xvf "$(cygpath -ua $_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst)" --strip-components=2 usr/bin/parallel )                
+        # ( cd $_home_bin && tar -xvf "$_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst" --strip-components=2 usr/bin/parallel ) ||
+        ( cd $_home_bin && tar -xvf "$(cygpath -ua $_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst)" --strip-components=2 usr/bin/parallel )                
         mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
         echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
         ls -l .
-        ls -l $GITHUB_WORKSPACE
         ls -l $_fsvr_cache
+        ls -l $_home_bin
 
     - name: Preflight
       shell: bash
@@ -82,10 +79,10 @@ jobs:
         ls -lrtha
         ls -lrtha fsvr/
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+    # - name: Setup tmate session
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true
 
     - name: Nunja Mapping
       run: |
