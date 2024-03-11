@@ -73,7 +73,11 @@ function 003_prepare_msys_msvc() {(
         # see: indra/newview/viewer_manifest.py:    def nsi_file_commands
         test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
         # gnu parallel is used to manually download, verify, untar 3p prebuilt dependencies
-        which parallel 2>/devnull || { pacman -S parallel --noconfirm --quiet && mkdir -p ~/.parallel/tmp/sshlogin/`hostname` ; echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen ; }
+        which parallel 2>/devnull || {
+            pacman -S parallel --noconfirm --quiet || _die "could not install pacman"
+            mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
+            echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
+        }
         # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
         python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
     fi

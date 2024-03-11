@@ -34,7 +34,7 @@ jobs:
           echo _fsrepo=$repo
           echo _fsbranch=$branch
           echo nunja_dir=$(pwd -W)/fsvr/$base
-          echo p373r_dir=$(pwd -W)p373r-vrmod
+          echo p373r_dir=$(pwd -W)/p373r-vrmod
         } | tee -a $GITHUB_ENV`
         fastclone ${_fsrepo} ${_fsbranch} ${GITHUB_WORKSPACE}
         fastclone FirestormViewer/fs-build-variables master
