@@ -24,12 +24,13 @@ jobs:
       shell: bash
       run: echo "${{ toJSON(github.event.inputs) }}"
 
+    # shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
     - name: Probe Git+Bash
       shell: bash
       run: declare -x > ../_stock_bash.env
 
     - name: Probe MSYS2 Bash
-      shell: C:\msys64\usr\bin\bash.exe {0}
+      shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
       run: declare -x > ../_msys2_bash.env
 
     - name: Initial Bootstrapping
