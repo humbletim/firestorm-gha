@@ -190,10 +190,18 @@ function 070_verify_downloads() {(
     return 0
 )}
 
+# function 080_untar_packages() {(
+#     _dbgopts
+#     jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep -vE '^null$' \
+#      | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && { bzcat $_fsvr_cache/$(basename {}) | 7z -y -ttar -si -bb0 x 2>&1 | { grep -iE "error|warn|fatal|fail" || true ; } ; }' \
+#        || _die "untar failed $?"
+# )}
+# 
+
 function 080_untar_packages() {(
     _dbgopts
     jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep -vE '^null$' \
-     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && { bzcat $_fsvr_cache/$(basename {}) | 7z -y -ttar -si -bb0 x 2>&1 | { grep -iE "error|warn|fatal|fail" || true ; } ; }' \
+     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && tar -xf $_fsvr_cache/$(basename {})' \
        || _die "untar failed $?"
 )}
 
