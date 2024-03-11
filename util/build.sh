@@ -81,7 +81,7 @@ function 003_prepare_msys_msvc() {(
             tar -C humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
             mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
             echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
-            parallel --version 2>&1 | head >&2
+            parallel --version 2>&1 | head -1 >&2
         } || _die "error configuring parallel"
         # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
         python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
