@@ -23,7 +23,7 @@ jobs:
     - name: Output Inputs
       working-directory: ..
       run: |
-        set -x
+        set -x 
         echo "${{ toJSON(github.event.inputs) }}"
         eval `${{inputs.fstuple}} ; (
           echo _fsbase=$base
