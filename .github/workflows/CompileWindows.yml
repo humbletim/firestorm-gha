@@ -115,10 +115,10 @@ jobs:
 
     - name: 009_ninja_preflight
       run: ./fsvr/util/build.sh 009_ninja_preflight
-# 
-#     - name: 00a_ninja_build
-#       run: ./fsvr/util/build.sh 00a_ninja_build
-# 
+
+    - name: 00a_ninja_build
+      run: ./fsvr/util/build.sh 00a_ninja_build
+
 #     - name: 00b_bundle
 #       run: ./fsvr/util/build.sh 00b_bundle
 

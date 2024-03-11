@@ -158,7 +158,7 @@ function 007_verify_downloads() {(
 function 008_untar_packages() {(
     set -E
     jq -r '.[]|.url' $build_dir/packages-info.json | grep -vE '^null$' \
-       | parallel --will-cite -j4 'basename {} && cd $packages_dir && tar -xf $(basename {})'
+       | parallel --will-cite -j8 'basename {} && cd $packages_dir && tar -xf $(basename {})'
 )}
 
 function 009_ninja_preflight() {(
@@ -170,7 +170,10 @@ function 009_ninja_preflight() {(
       cat $nunja_dir/cl.arrant.nunja
     ) > $build_dir/build.ninja
     test -f msvc.env && . msvc.env
-    ninja -C $build_dir -n
+    local out="$(ninja -C $build_dir -n 2>&1"
+    echo "$out" | head -3
+    echo "..."
+    echo "$out" | tail -3
 )}
 
 function 00a_ninja_build() {(
