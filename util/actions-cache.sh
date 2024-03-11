@@ -17,7 +17,7 @@ restore=$(cat <<'EOF'
     [ key, ...restoreKeys ] = key.split(/\s+/);
     console.log({ key, restoreKeys, paths });
     require('@actions/cache').restoreCache(paths, key, restoreKeys)
-    .then((x)=>console.log(`restore_result={x}`))
+    .then((x)=>console.log(`restore_result=${x}`))
     .catch((e)=>{console.error(e);process.exit(2);})
 EOF
 )
@@ -26,7 +26,7 @@ save=$(cat <<'EOF'
     const [ _, key, ...paths ] = process.argv;
     console.log({ key, paths });
     require('@actions/cache').saveCache(paths, key)
-    .then((x)=>console.log(`save_result={x}`))
+    .then((x)=>console.log(`save_result=${x}`))
     .catch((e)=>{console.error(e);process.exit(2);})
 EOF
 )
