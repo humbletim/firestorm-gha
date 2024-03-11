@@ -53,7 +53,7 @@ jobs:
         curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
         unzip -d humbletim-bin ninja-win.zip
         echo "${GITHUB_WORKSPACE}/humbletim-bin" | tee -a $GITHUB_PATH
-        . fsvr/util/_util.sh
+        . fsvr/util/_utils.sh
         ht-ln C:/msys64/usr/bin/wget.exe humbletim-bin/
         #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
         #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
