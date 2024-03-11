@@ -67,16 +67,6 @@ function 003_prepare_msys_msvc() {(
     set -E
     [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
 
-    # make msvcp140.dll redists easy to reference as build/msvc/
-    msvc_dir=$(get_msvcdir) || _die "could not get msvc_dir $(ls -l msvc.env)"
-    # ht-ln $msvc_dir $build_dir/msvc
-    grep msvc_dir $build_dir/build_vars.env >/dev/null \
-      || { echo "msvc_dir=$msvc_dir" | tee -a $build_dir/build_vars.env ; }
-
-    # workaround a windows64 ninja viewer_manifest.py path quirkinesses
-    ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
-
-  
     if [[ -n "$GITHUB_ACTIONS" ]] ; then
         # TODO: masking the NSIS folder usefully disrupts viewer_manifest.py
         #   past manifest processing and workable firestorm_setup_tmp.nsi emerging
@@ -87,6 +77,15 @@ function 003_prepare_msys_msvc() {(
         # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
         python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
     fi
+
+    # workaround a windows64 ninja viewer_manifest.py path quirkinesses
+    ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
+
+    # make msvcp140.dll redists easy to reference as build/msvc/
+    msvc_dir=$(get_msvcdir) || _die "could not get msvc_dir $(ls -l msvc.env)"
+    # ht-ln $msvc_dir $build_dir/msvc
+    grep msvc_dir $build_dir/build_vars.env >/dev/null \
+      || { echo "msvc_dir=$msvc_dir" | tee -a $build_dir/build_vars.env ; }  
 )}
 
 function merge_packages_info() {(
