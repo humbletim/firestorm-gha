@@ -52,7 +52,7 @@ jobs:
         #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
         wget -q -N -P "$_fsvr_cache" https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
         ( cd $_fsvr_cache && echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum -c )
-        ( cd $BIN && tar -xvf "$_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst" --strip-components=2 usr/bin/parallel ) || \
+        # ( cd $BIN && tar -xvf "$_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst" --strip-components=2 usr/bin/parallel ) ||
         ( cd $BIN && tar -xvf "$(cygpath -ua $_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst)" --strip-components=2 usr/bin/parallel )                
         mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
         echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
@@ -100,16 +100,16 @@ jobs:
     #     limit-access-to-actor: true
 
     - name: 010_ensure_build_directories
-      run: ./fsvr/util/build.sh 001_ensure_build_directories 
+      run: ./fsvr/util/build.sh 010
 
     - name: 020_perform_replacements
-      run: ./fsvr/util/build.sh 002_perform_replacements
+      run: ./fsvr/util/build.sh 020
 
     - name: 040_generate_package_infos
-      run: ./fsvr/util/build.sh 004_generate_package_infos
+      run: ./fsvr/util/build.sh 040
 
     - name: 050_generate_packages_info_text
-      run: ./fsvr/util/build.sh 005_generate_packages_info_text
+      run: ./fsvr/util/build.sh 050
 
     - name: _fsvr_cache
       id: _fsvr_cache
@@ -119,33 +119,28 @@ jobs:
         key: ${{ runner.os }}-${{ env.viewer_version }}-${{ hashFiles(format('{0}/packages-info.json', env.build_dir)) }}
       # if: steps._fsvr_cache.outputs.cache-hit != 'true'
 
+    - name: 060_download_packages
+      run: ./fsvr/util/build.sh 060
+
+    - name: 070_verify_downloads
+      run: ./fsvr/util/build.sh 070
+
+    - name: 080_untar_packages
+      run: ./fsvr/util/build.sh 080
+
+    - name: 085_prepare_msys_msvc
+      run: ./fsvr/util/build.sh 085
+
+    - name: 090_ninja_preflight
+      run: ./fsvr/util/build.sh 090
+
+#     - name: 0a0_ninja_build
+#       run: ./fsvr/util/build.sh 0a0
+# 
+#     - name: 0b0_bundle
+#       run: ./fsvr/util/build.sh 0b0
+
     # - name: Setup tmate session
     #   uses: mxschmitt/action-tmate@v3
     #   with:
     #     limit-access-to-actor: true
-
-    - name: 060_download_packages
-      run: ./fsvr/util/build.sh 006_download_packages
-
-    - name: 070_verify_downloads
-      run: ./fsvr/util/build.sh 007_verify_downloads
-
-    - name: 080_untar_packages
-      run: ./fsvr/util/build.sh 008_untar_packages
-
-    - name: 085_prepare_msys_msvc
-      run: ./fsvr/util/build.sh 003_prepare_msys_msvc
-
-    - name: 090_ninja_preflight
-      run: ./fsvr/util/build.sh 009_ninja_preflight
-
-    # - name: 0a0_ninja_build
-    #   run: ./fsvr/util/build.sh 00a_ninja_build
-
-#     - name: 0b0_bundle
-#       run: ./fsvr/util/build.sh 00b_bundle
-
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
