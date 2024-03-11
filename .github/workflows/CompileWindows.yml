@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
       inputs:
         fstuple:
-          type: choice
+          type: string
           description: fstuple
           default: base=6.6.17 repo=FirestormViewer/phoenix-firestorm branch=Firestorm_6.6.17
           options:
@@ -21,133 +21,165 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: Output Inputs
-      run: |
-        set -e
-        echo "${{ toJSON(github.event.inputs) }}"
-        eval `${{inputs.fstuple}} ; (
-          echo _fsbase=$base
-          echo _fsrepo=$repo
-          echo _fsbranch=$branch
-          echo nunja_dir=$(pwd -W)/fsvr/$base
-          echo p373r_dir=$(pwd -W)/p373r-vrmod
-          echo _fsvr_cache=$(cygpath -ua c:/_fsvr_cache)
-          echo _home_bin=$(cygpath -ma ~/bin)
-        ) | tee -a $GITHUB_ENV`
-        mkdir -pv $_fsvr_cache $_home_bin
-        echo $_home_bin | tee -a $GITHUB_PATH
+      shell: bash
+      run: echo "${{ toJSON(github.event.inputs) }}"
 
-    - name: Tools
-      working-directory: ..
-      run: |
-        set -e
-        cp -avu C:/msys64/usr/bin/wget.exe $_home_bin/
-        # cp -avu C:/msys64/usr/bin/tar.exe $_home_bin/
-        wget -q -N -P "$_fsvr_cache" https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-        ( cd $_fsvr_cache && echo 'bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f  ninja-win.zip' | sha256sum -c )
-        unzip -d $_home_bin $_fsvr_cache/ninja-win.zip
-        #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
-        #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
-        wget -q -N -P "$_fsvr_cache" https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
-        ( cd $_fsvr_cache && echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum -c )
-        # ( cd $_home_bin && tar -xvf "$_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst" --strip-components=2 usr/bin/parallel ) ||
-        ( cd $_home_bin && tar -xvf "$_fsvr_cache/parallel-20231122-1-any.pkg.tar.zst" --strip-components=2 usr/bin/parallel )                
-        mkdir -p ~/.parallel
-        cmd /C "mklink /J $(cygpath -wa C:/msys64/home/runneradmin/.parallel) $(cygpath -wa ~/.parallel)"
-        mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
-        echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
-        echo 65535 > ~/.parallel/linelen
-        echo 65535 > ~/.parallel/will-cite
-        find ~/.parallel
-        cygpath -ma ~
-        ls -l .
-        ls -l $_fsvr_cache
-        ls -l $_home_bin
+    - name: Probe Git+Bash
+      shell: bash
+      run: declare -x > ../_stock_bash.env
 
-    - name: Preflight
+    - name: Probe MSYS2 Bash
+      shell: msys2
+      run: declare -x > ../_msys2_bash.env
+
+
+    - name: Initial Bootstrapping
       shell: bash
       run: |
-        bash --version | head -1
-        python --version | head -1
-        ninja --version | head -1
-        wget --version | head -1
-        parallel --version | head -1
+        wget -q https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF}/gha-bootstrap.sh
+        chmod a+x gha-bootstrap.sh
+        env ${{inputs.fstuple}} ./gha-bootstrap.sh
 
-    - name: Clone
-      run: |
-        pwd && pwd -W
-        # set -x
-        function fastclone() { git clone --quiet --recurse-submodules --filter=tree:0 https://github.com/$1.git --branch $2 $3 ; }
-        #fastclone FirestormViewer/phoenix-firestorm ${GITHUB_REF_NAME/_VR/} ${GITHUB_WORKSPACE}
-        fastclone ${_fsrepo} ${_fsbranch} ${GITHUB_WORKSPACE}
-        fastclone FirestormViewer/fs-build-variables master
-        fastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
-        fastclone ${GITHUB_REPOSITORY} P373R_6.6.8 $p373r_dir
-        ls -lrtha
-        ls -lrtha fsvr/
-
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
-
-    - name: Nunja Mapping
-      run: |
-        mkdir -pv build
-        ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat $nunja_dir/viewer_version.txt` build/ | tee build/build_vars.env | tee $GITHUB_ENV
-        ./fsvr/util/generate_msvc_env.bat > build/msvc.env
-
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
-
-    - name: 010_ensure_build_directories
-      run: ./fsvr/util/build.sh 010
-
-    - name: 020_perform_replacements
-      run: ./fsvr/util/build.sh 020
-
-    - name: 040_generate_package_infos
-      run: ./fsvr/util/build.sh 040
-
-    - name: 050_generate_packages_info_text
-      run: ./fsvr/util/build.sh 050
-
-    - name: _fsvr_cache
-      id: _fsvr_cache
-      uses: actions/cache@v4
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
       with:
-        path: c:/_fsvr_cache
-        key: ${{ runner.os }}-${{ env.viewer_version }}-${{ env.version_git_sha }}
-      # if: steps._fsvr_cache.outputs.cache-hit != 'true'
+        limit-access-to-actor: true
 
-    - name: 060_download_packages
-      run: ./fsvr/util/build.sh 060
-
-    - name: 070_verify_downloads
-      run: ./fsvr/util/build.sh 070
-
-    - name: 080_untar_packages
-      run: ./fsvr/util/build.sh 080
-
-    - name: 085_prepare_msys_msvc
-      run: ./fsvr/util/build.sh 085
-
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
-
-    - name: 090_ninja_preflight
-      run: ./fsvr/util/build.sh 090
-
-#     - name: 0a0_ninja_build
-#       run: ./fsvr/util/build.sh 0a0
+#     - name: GHA-specific Tool Installation
+#       run: |
+#         set -Euo pipefail
 # 
-#     - name: 0b0_bundle
-#       run: ./fsvr/util/build.sh 0b0
-
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
+#         mkdir -pv cache/tools
+#         unzip -d $_home_bin $(wget_sha256
+#             bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f
+#             https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+#             cache/tools
+#         )
+# 
+#         tar -xf -C $_home_bin $(wget_sha256
+#             3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782
+#             https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
+#             cache/tools
+#         )
+# 
+#         # In the spirit of open source collaboration, this build automation
+#         # recognizes the contributions of GNU Parallel, developed by O. Tange.
+#         mkdir -pv ~/.parallel
+#         cat <<_EOF_ > ~/.parallel/will-cite
+#           Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
+#           Zenodo. https://doi.org/10.5281/zenodo.7347980
+#         _EOF_
+#         # preset linelen (avoids "first run" painfully slow autocalculation)
+#         echo 65535 > ~/.parallel/linelen
+# 
+#         # git helper for maybe faster initial clones
+#         cat <<_EOF_ > $_home_bin/git-ghafastclone
+#         #/bin/bash
+#         [[ "$@" =~ --(help|version) ]] && { echo "inline" ; exit 0 ; }
+#         set -Exuo pipefail
+#         git clone --quiet --recurse-submodules --filter=tree:0 \
+#             https://github.com/$1.git --branch $2 $3
+#         _EOF_
+# 
+#     - name: Preflight
+#       run: |
+#         echo SHELL=$SHELL BASH=$BASH BASH_SOURCE=$BASH_SOURCE
+#         bash --version | head -1
+#         python --version | head -1
+#         ninja --version | head -1
+#         wget --version | head -1
+#         parallel --version | head -1
+#         git --version | head -1
+#         git ghafastclone --version | head -1
+#     
+#     # - name: cache upstream checkout
+#     #   id: upstream_cache
+#     #   uses: actions/cache@v4
+#     #   with:
+#     #     path: upstream/
+#     #     key: ${{ runner.os }}-${{ env._fsrepo }}-${{ env._fsbranch }}
+# 
+#     - name: Clone Upstreams
+#       # if: steps.upstream_cache.outputs.cache-hit != 'true'
+#       run: |
+#         pwd && pwd -W
+#         set -E
+#         eval `echo checkout=$_fsvr_cache/checkout | tee -a $GITHUB_ENV`
+#         mkdir -pv $checkout
+#         git ghafastclone FirestormViewer/fs-build-variables master ${checkout}/fs-build-variables
+#         git ghafastclone ${_fsrepo} ${_fsbranch} ${checkout}/${_fsbase}
+#  
+#     - name: Clone Sidestreams
+#       run: |
+#         ht-ln ${checkout}/${_fsbase} ${GITHUB_WORKSPACE}
+#         git ghafastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} ${checkout}/fsvr
+#         cd ${checkout}/fsvr
+#         git worktree add ../p373r P373R_6.6.8
+#         # git ghafastclone ${GITHUB_REPOSITORY} P373R_6.6.8 ${checkout}/p373r
+# 
+#     - name: Setup tmate session
+#       uses: mxschmitt/action-tmate@v3
+#       with:
+#         limit-access-to-actor: true
+# 
+#     - name: Nunja Mapping
+#       run: |
+#         mkdir -pv build
+#         ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat $nunja_dir/viewer_version.txt` build/ | tee build/build_vars.env | tee $GITHUB_ENV
+#         ./fsvr/util/generate_msvc_env.bat > build/msvc.env
+# 
+#     # - name: Setup tmate session
+#     #   uses: mxschmitt/action-tmate@v3
+#     #   with:
+#     #     limit-access-to-actor: true
+# 
+#     - name: 010_ensure_build_directories
+#       run: ./fsvr/util/build.sh 010
+# 
+#     - name: 020_perform_replacements
+#       run: ./fsvr/util/build.sh 020
+# 
+#     - name: 040_generate_package_infos
+#       run: ./fsvr/util/build.sh 040
+# 
+#     - name: 050_generate_packages_info_text
+#       run: ./fsvr/util/build.sh 050
+# 
+#     - name: _fsvr_cache
+#       id: _fsvr_cache
+#       uses: actions/cache@v4
+#       with:
+#         path: c:/_fsvr_cache
+#         key: ${{ runner.os }}-${{ env.viewer_version }}-${{ env.version_git_sha }}
+#       # if: steps._fsvr_cache.outputs.cache-hit != 'true'
+# 
+#     - name: 060_download_packages
+#       run: ./fsvr/util/build.sh 060
+# 
+#     - name: 070_verify_downloads
+#       run: ./fsvr/util/build.sh 070
+# 
+#     - name: 080_untar_packages
+#       run: ./fsvr/util/build.sh 080
+# 
+#     - name: 085_prepare_msys_msvc
+#       run: ./fsvr/util/build.sh 085
+# 
+#     # - name: Setup tmate session
+#     #   uses: mxschmitt/action-tmate@v3
+#     #   with:
+#     #     limit-access-to-actor: true
+# 
+#     - name: 090_ninja_preflight
+#       run: ./fsvr/util/build.sh 090
+# 
+# #     - name: 0a0_ninja_build
+# #       run: ./fsvr/util/build.sh 0a0
+# # 
+# #     - name: 0b0_bundle
+# #       run: ./fsvr/util/build.sh 0b0
+# 
+#     # - name: Setup tmate session
+#     #   uses: mxschmitt/action-tmate@v3
+#     #   with:
+#     #     limit-access-to-actor: true
