@@ -63,6 +63,19 @@ function _git_sha() {
   git -C "$1" describe --always --first-parent --abbrev=7
 }
 
+# helper to download + checksum verify using wget
+# usage: wget_sha256 <sha256sumhex> <url> <outputdir>
+#  returns the resulting outputdir/filename to stdout
+function wget_sha256() {(
+  set -Eui pipefail
+  local hash=$1 url=$2 dir=$3
+  local filename=`basename $url`
+  test ! -d "$dir" || cd $dir
+  wget -q -N $url >&2
+  echo "$hash $filename" | sha256sum --string --check >&2
+  echo $dir/$filename
+)}
+
 # helper to create symbolic links
 # usage: ht-ln <SOURCE> <destination folder/ or desired link filepath>
 function ht-ln() {
