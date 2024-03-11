@@ -34,7 +34,7 @@ EOF
 set -Euo pipefail
 script="${!1}"
 shift
-exec node -e "${script}" "$@"
+node -e "${script}" "$@" 2>&1 | grep -v ::debug::
 exit 0
 
 ############################################
