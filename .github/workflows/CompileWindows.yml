@@ -109,7 +109,7 @@ jobs:
 
     - name: _fsvr_cache
       id: _fsvr_cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ env._fsvr_cache }}
         key: ${{ runner.os }}-${{ env.viewer_version }}-${{ hashFiles(format('{0}/packages-info.json', env.build_dir)) }}
