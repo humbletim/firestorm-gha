@@ -116,7 +116,7 @@ function 040_generate_package_infos() {(
     bash $openvr_dir/improvise.sh || _die "openvr/improvise failed"
     bash $openvr_dir/install.sh || _die "openvr/install failed"
     #cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
-    #merge_packages_info $openvr_dir/meta/packages-info.json
+    merge_packages_info $openvr_dir/meta/packages-info.json
 
     # apply p373r patch and make llviewerVR.* available to llviewerdisplay.cpp
     # (note: -I$build_dir/newview is already part of stock build opts)
