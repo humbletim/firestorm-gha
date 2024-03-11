@@ -63,6 +63,17 @@ function get_msvcdir() {(
   echo "$CRT"
 )}
 
+function download_gnu_parallel() {(
+    set -E
+    #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
+    #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
+    wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
+    echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
+    tar -C humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
+    mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
+    echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
+)}
+
 function 003_prepare_msys_msvc() {(
     set -E
     [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
@@ -73,16 +84,8 @@ function 003_prepare_msys_msvc() {(
         # see: indra/newview/viewer_manifest.py:    def nsi_file_commands
         test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
         # gnu parallel is used to manually download, verify, untar 3p prebuilt dependencies
-        which parallel 2>/devnull || {
-            #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
-            #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
-            wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
-            echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
-            tar -C humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
-            mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
-            echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
-            parallel --version 2>&1 | head -1 >&2
-        } || _die "error configuring parallel"
+        which parallel 2>&1 2>/devnull || download_gnu_parallel
+        parallel --version 2>&1 | head -1 >&2 || _die "error configuring parallel"
         # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
         python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
     fi
