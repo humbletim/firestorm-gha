@@ -110,13 +110,16 @@ function 004_generate_package_infos() {(
 
     local openvr_dir=$_fsvr_dir/openvr
     _assert openvr 'test -d "$openvr_dir"'
+    bash $openvr_dir/improvise.sh
+    bash $openvr_dir/install.sh
     #cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
-    merge_packages_info $openvr_dir/meta/packages-info.json
+    #merge_packages_info $openvr_dir/meta/packages-info.json
 
-    # make p373r available to existing llviewerdisplay.cpp
+    # apply p373r patch and make llviewerVR.* available to llviewerdisplay.cpp
     # (note: -I$build_dir/newview is already part of stock build opts)
     _assert p373r_dir test -d "$p373r_dir"
     _assert p373r_dir 'test -d "$p373r_dir"'
+    bash $p373r_dir/apply.sh
     ht-ln $p373r_dir/llviewerVR.h $build_dir/newview/
     ht-ln $p373r_dir/llviewerVR.cpp $build_dir/newview/
     merge_packages_info $p373r_dir/meta/packages-info.json
