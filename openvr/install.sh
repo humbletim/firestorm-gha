@@ -2,7 +2,7 @@
 test -d "$build_dir" || { echo "!build_dir" >&2 ; exit 1; }
 test -d "$_fsvr_dir" || { echo "!_fsvr_dir" >&2 ; exit 1; }
 test -d "$packages_dir" || { echo "!packages_dir" >&2 ; exit 1; }
-set -xe
+set -e
 tarball=$_fsvr_dir/openvr/openvr-v1.6.10.8eaf723.tar.bz2
 hash=($(md5sum $tarball))
 url="file:///$tarball"
