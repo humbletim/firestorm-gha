@@ -147,7 +147,7 @@ function _parallel() {(
 function 060_download_packages() {(
     _dbgopts
     _assert _fsvr_cache 'test -d "$_fsvr_cache"'
-    jq -r '.[]|.url' $build_dir/packages-info.json | td -d '\r' | grep http \
+    jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep http \
       | _parallel "$FUNCNAME" -j4 'set -e ; echo {} >&2 ; wget -nv -N -P "$_fsvr_cache" -N {} ; test -s $_fsvr_cache/$(basename {}); exit 0'
 )}
 
