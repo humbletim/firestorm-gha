@@ -27,15 +27,16 @@ jobs:
       run: mkdir ../humbletim-bin && cygpath -ma ../humbletim-bin | tee -a $GITHUB_PATH
 
     - name: Tools
+      working-directory: /tmp
       run: |
         curl -L -o ninja-win.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-        unzip -d ../humbletim-bin ninja-win.zip
-        cp -avu C:/msys64/usr/bin/wget.exe ../humbletim-bin/
+        unzip -d ${GITHUB_WORKSPACE}/humbletim-bin ninja-win.zip
+        cp -avu C:/msys64/usr/bin/wget.exe ${GITHUB_WORKSPACE}/humbletim-bin/
         #pacman -S parallel --noconfirm --quiet || _die "could not install parallel with pacman"
         #wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst.sig
         wget https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
         echo '3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 *parallel-20231122-1-any.pkg.tar.zst' | sha256sum.exe -c
-        tar -C ../humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
+        tar -C ${GITHUB_WORKSPACE}/humbletim-bin -xvf parallel-20231122-1-any.pkg.tar.zst --strip-components=2 usr/bin/parallel
         mkdir -p ~/.parallel/tmp/sshlogin/`hostname`
         echo 65535 > ~/.parallel/tmp/sshlogin/`hostname`/linelen
 
