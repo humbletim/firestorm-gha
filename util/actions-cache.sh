@@ -34,7 +34,12 @@ EOF
 set -Euo pipefail
 script="${!1}"
 shift
-node -e "${script}" "$@" 2>&1 | grep -v ::debug::
+err=0
+echo "node -e {{$1}} $@" >&2
+result=$(node -e "${script}" "$@" 2>&1) || err=$?
+
+test $err != 0 && { echo "failed: $result" >&2 ; exit $err ; }
+echo "$result" | grep -Eo '^\w+_result=(.*)$' | sed -E 's@^\w+_result=@@' 
 exit 0
 
 ############################################

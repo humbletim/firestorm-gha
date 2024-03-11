@@ -52,8 +52,18 @@ function _setenv_extant() {
   local name="${@/=*/}"
   local value="${@/#$name=/}"
   test -e "$value" || [[ "$value" == \$* ]] || { echo "ERROR: _setenv_extant $@ value=$value does not exist" >&2 ; exit 1; }
- _setenv "$@"
+  _setenv "$@"
 }
+
+# like above but _setenv_ma also encodes using cygpath -ma conventions
+function _setenv_ma() {
+  local name="${@/=*/}"
+  local value="${@/#$name=/}"
+  value=`_realpath $value`
+  test -e "$value" || [[ "$value" == \$* ]] || { echo "ERROR: _setenv_extant $@ value=$value does not exist" >&2 ; exit 1; }
+  _setenv "$name=$value"
+}
+
 
 function _realpath() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
 function _relative_path() { realpath --relative-to "$2" "$1" ; }
