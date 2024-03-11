@@ -23,6 +23,7 @@ jobs:
     - name: Output Inputs
       working-directory: ..
       run: |
+        set -x
         echo "${{ toJSON(github.event.inputs) }}"
         eval `${{inputs.fstuple}} ; (
           echo _fsbase=$base
@@ -30,7 +31,7 @@ jobs:
           echo _fsbranch=$branch
           echo nunja_dir=$(pwd -W)/fsvr/$base
           echo p373r_dir=$(pwd -W)/p373r-vrmod
-          echo _fsvr_cache=`cygpath -ma c:/_fsvr_cache`
+          echo _fsvr_cache=$(cygpath -ma c:/_fsvr_cache)
         ) | tee -a $GITHUB_ENV`
         mkdir -pv $_fsvr_cache
 
