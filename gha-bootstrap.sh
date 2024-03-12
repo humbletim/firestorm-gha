@@ -72,6 +72,9 @@ function _restore_gha_cache() {
     echo $cache_id
 }
 
+restored_bin_id=undefined
+restored_node_modules_id=undefined
+
 function restore_gha_caches() {
     restored_bin_id=$(_restore_gha_cache $base-bin-a bin) \
         || _die "[gha-bootstrap] actions-cache restore bin failed $?"

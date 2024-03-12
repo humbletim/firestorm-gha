@@ -41,7 +41,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ github.token }}
       run: |
-        "/c/Program Files/nodejs/npm" i @actions/cache @actions/artifact @actions/github
+        "/c/Program Files/nodejs/npm" i @actions/cache # @actions/artifact @actions/github
         echo "${{ github.token }}" > ~/.github_token
         C:/msys64/usr/bin/wget.exe -q https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF}/gha-bootstrap.sh
         chmod a+x gha-bootstrap.sh
