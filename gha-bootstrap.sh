@@ -40,6 +40,7 @@ _bash=$BASH
     _fsbranch=$branch
     nunja_dir=$pwd/fsvr/$base
     p373r_dir=$pwd/p373r-vrmod
+    _home=`_realpath ~`
     _home_bin=$pwd/bin
     _fsvr_cache=$pwd/cache
     PARALLEL_HOME=`_realpath bin/parallel-home`
@@ -47,11 +48,13 @@ EOF
 )
 eval `echo "$vars" | tee gha-bootstrap.env`
 
+echo "$GITHUB_TOKEN" > $_home/.github_token
+
 mkdir -pv $_fsvr_cache
 mkdir -pv $_home_bin
 test ! -n "$GITHUB_PATH" || { echo $_home_bin | tee -a $GITHUB_PATH ; }
 
-test -d node_modules/@actions/cache || npm install --no-save @actions/cache
+test -d node_modules/@actions/cache || npm install --no-save @actions/cache 2>/dev/null
 
 function test_bin() {
     set -e
@@ -60,7 +63,7 @@ function test_bin() {
     _assert hostname [[ `hostname` == windows2022 ]]
 }
 
-restored_bin_id=$(./util/actions-cache.sh restore $base-bin-a bin)
+restored_bin_id=$(./fsvr/util/actions-cache.sh restore $base-bin-a bin) || _die "actions-cache restore failed $?"
 echo restored_bin_id=$restored_bin_id
 
 if [[ $restored_bin_id == undefined ]]; then
@@ -98,6 +101,7 @@ _EOF_
     testbin && ./util/actions-cache.sh save $base-bin-a bin
 fi
 
+test -d node_modules/@actions/artifact || npm install --no-save @actions/artifact 2>/dev/null
 #npm install --no-save @actions/artifact
 
 exit 0
