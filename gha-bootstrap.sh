@@ -127,7 +127,7 @@ function ensure_gha_bin() {
             echo "
               Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
               Zenodo. https://doi.org/10.5281/zenodo.7347980
-            " | bin/parallel-home/will-cite
+            " > bin/parallel-home/will-cite
         } || _die "[gha-bootstrap] failed to provision parallel $?"
 
     fi
