@@ -60,10 +60,10 @@ function _restore_gha_cache() {
     local id=$1
     local cache_id=undefined
     if [[ -s restored_$id && `cat restored_$id` != undefined ]]; then
-        echo "restored_$id exists; skipping" >&2
+        echo "[gha-bootstrap] restored_$id exists; skipping" >&2
         cache_id=`cat restored_$id`
     else
-        cache_id=$($_fsvr_dir/util/actions-cache.sh restore "$@") \
+        cache_id=$(NODE_DEBUG=1 $_fsvr_dir/util/actions-cache.sh restore "$@") \
             || _die "[gha-bootstrap] actions-cache restore $id  failed $?"
         if [[ $cache_id != undefined ]]; then
             echo $cache_id > restored_$id
@@ -79,11 +79,11 @@ function restore_gha_caches() {
     set -x
     restored_bin_id=$(_restore_gha_cache $base-bin-a bin) \
         || _die "[gha-bootstrap] actions-cache restore bin failed $?"
-    echo restored_bin_id=$restored_bin_id >&2
+    echo "[gha-bootstrap] restored_bin_id=$restored_bin_id" >&2
 
     restored_node_modules_id=$(_restore_gha_cache $base-node_modules-a node_modules) \
         || _die "[gha-bootstrap] actions-cache restore node_modules failed $?"
-    echo restored_node_modules_id=$restored_node_modules_id >&2
+    echo "[gha-bootstrap] restored_node_modules_id=$restored_node_modules_id" >&2
 }
 
 function ensure_gha_bin() {
@@ -126,7 +126,7 @@ function ensure_gha_bin() {
             echo "
               Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
               Zenodo. https://doi.org/10.5281/zenodo.7347980
-            " | PARALLEL_HOME/will-cite
+            " | bin/parallel-home/will-cite
         } || _die "[gha-bootstrap] failed to provision parallel $?"
 
     fi
