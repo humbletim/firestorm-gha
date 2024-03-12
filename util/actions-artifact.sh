@@ -35,7 +35,7 @@ local list=$(cat <<'EOF'
         repositoryName: name,
       }  
     }
-    ).then((x,y) =>console.log('list_result='+x)
+    ).then((x,y) =>console.log('list_result='+JSON.stringify(x))
     ).catch((e)=>console.error('list_error='+e));
 EOF
 )
@@ -74,7 +74,7 @@ local upload=$(cat <<'EOF'
         args.files,
         args.workingDirectory,
         { retentionDays: args.retentionDays, compressionLevel: args.compressionLevel}
-    ).then((x,y) =>console.log('upload_result='+x)
+    ).then((x) =>console.log('upload_result='+JSON.strigify(x))
     ).catch((e)=>console.error('upload_error='+e));
 EOF
 )
