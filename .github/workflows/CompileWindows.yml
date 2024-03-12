@@ -46,10 +46,10 @@ jobs:
         C:/msys64/usr/bin/wget.exe -q https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF}/gha-bootstrap.sh
         chmod a+x gha-bootstrap.sh
         env ${{inputs.fstuple}} ./gha-bootstrap.sh
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+    # - name: Setup tmate session
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true
 
 #     - name: GHA-specific Tool Installation
 #       run: |

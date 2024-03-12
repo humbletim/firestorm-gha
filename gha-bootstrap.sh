@@ -191,10 +191,11 @@ function require() { source $require_here/$@ ; }
 
 require util/_utils.sh
 
-is_gha && ( restore_gha_caches || _die "!restore_gha_caches" )
-
-is_gha && ( ensure_gha_bin || _die "!ensure_gha_bin")
-is_gha && ( save_gha_caches || _die "!save_gha_caches")
+if is_gha; then
+    restore_gha_caches || _die "!restore_gha_caches"
+    ensure_gha_bin || _die "!ensure_gha_bin"
+    save_gha_caches || _die "!save_gha_caches"
+fi
 
 _assert base test -n "$base"
 _assert repo test -n "$repo"
