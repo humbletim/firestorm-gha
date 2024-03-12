@@ -108,7 +108,7 @@ function ensure_gha_bin() {
 
         test -x bin/hostname.exe || {
             # avoid entropy by hard-coding hostname used by parallel and other tools
-            local gcc="/c/Program\ Files/LLVM/bin/clang"
+            local gcc=$(cygpath -ms '/c/Program Files/LLVM/bin/clang')
             echo '
               #include <stdio.h>
               int main(int argc, char *argv[]) { printf(MESSAGE); return 0; }
