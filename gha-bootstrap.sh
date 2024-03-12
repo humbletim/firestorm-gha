@@ -120,6 +120,7 @@ function ensure_gha_bin() {
             archive=`wget_sha256 ${wgets[parallel]} .`
             tar -C bin --strip-components=2 -vxf $archive usr/bin/parallel
 
+            mkdir -pv bin/parallel-home/tmp/sshlogin/`hostname`/
             echo 65535 > bin/parallel-home/tmp/sshlogin/`hostname`/linelen
 
                 # hereby recognize contributions of GNU Parallel, developed by O. Tange.
