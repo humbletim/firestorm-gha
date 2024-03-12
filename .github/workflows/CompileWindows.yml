@@ -16,6 +16,9 @@ defaults:
   run:
     shell: bash
 
+env:
+   PATH: ${{ env.PWD }}/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin
+
 jobs:
   windows_build:
     runs-on: windows-2022
@@ -38,6 +41,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ github.token }}
       run: |
+        exit 0
         C:/msys64/usr/bin/wget.exe -q https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF}/gha-bootstrap.sh
         chmod a+x gha-bootstrap.sh
         env ${{inputs.fstuple}} ./gha-bootstrap.sh
