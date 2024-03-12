@@ -11,7 +11,19 @@
 #   # or space-separated ids for fallback restoreKeys 
 #   ./actions-cache-save.sh restore "id-1 id-" ...paths 
 
-restore=$(cat <<'EOF'
+function actions-cache-nodeeval() {
+    local cmd=$1 script=$2
+    shift 2
+    echo "node -e {{$cmd}} $@" >&2
+    result="$(node -e "${script}" "$@" 2>&1 || echo "${cmd}_error=$?")"
+    test -n "$NODE_DEBUG" && echo "$result" >&2 ;
+    outvalue=$(echo "$result" | grep -Eo "^${cmd}_(result|error)=(.*)\$" | sed -E 's@^\w+_result=@@')
+    echo "$outvalue"
+}
+
+
+function actions-cache-restore() {
+local restore=$(cat <<'EOF'
     let [ _, key, ...paths ] = process.argv;
     let restoreKeys=[];
     [ key, ...restoreKeys ] = key.split(/\s+/);
@@ -21,8 +33,11 @@ restore=$(cat <<'EOF'
     .catch((e)=>{console.error(e);process.exit(2);})
 EOF
 )
+  actions-cache-nodeeval restore "${restore}" "$@"
+}
 
-save=$(cat <<'EOF'
+function actions-cache-save() {
+local save=$(cat <<'EOF'
     const [ _, key, ...paths ] = process.argv;
     console.log({ key, paths });
     require('@actions/cache').saveCache(paths, key)
@@ -30,17 +45,25 @@ save=$(cat <<'EOF'
     .catch((e)=>{console.error(e);process.exit(2);})
 EOF
 )
+  actions-cache-nodeeval save "${save}" "$@"
+}
 
-set -Euo pipefail
-cmd=$1
-script="${!cmd}"
-shift
-err=0
-echo "node -e {{$cmd}} $@" >&2
-result="$(node -e "${script}" "$@" 2>&1 || echo "${cmd}_error=$?")"
-outvalue=$(echo "$result" | grep -Eo '^\w+_result=(.*)$' | sed -E 's@^\w+_result=@@')
-echo "$outvalue"
-exit 0
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  func=$1 && shift
+  declare -f actions-cache-$func &>/dev/null && func=actions-cache-$func
+  $func "$@"
+fi
+# __main__ "$@"
+# set -Euo pipefail
+# cmd=$1
+# script="${!cmd}"
+# shift
+# err=0
+# echo "node -e {{$cmd}} $@" >&2
+# result="$(node -e "${script}" "$@" 2>&1 || echo "${cmd}_error=$?")"
+# outvalue=$(echo "$result" | grep -Eo '^\w+_result=(.*)$' | sed -E 's@^\w+_result=@@')
+# echo "$outvalue"
+# exit 0
 
 ############################################
 # cat <<'EOF'

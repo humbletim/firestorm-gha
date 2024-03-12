@@ -113,3 +113,19 @@ function ht-ln() {
   test -e "$linkname" && { false && _relativize "skipping (exists) $linkname" >&2 ; return 0; }
   eval "$cmd"
 }
+
+# usage: __main__ ${BASH_SOURCE[0]} ${0}
+#   => if first argument is a declared function, invoke with args
+#      (otherwise no-op)
+function __main__() {
+  if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    if declare -f "$1" &>/dev/null; then
+        # echo "__main__ ${BASH_SOURCE[0]} ${0}" >&2
+        function_name=$1
+        shift
+        eval "$function_name $@" || _die "invocation $function_name $@ failed $?"
+    fi
+  fi
+}
+
+__main__ "$@"

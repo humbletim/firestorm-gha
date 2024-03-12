@@ -3,9 +3,6 @@ set -Euo pipefail
 echo test to stdout
 echo test to stderr >&2
 
-require_here=`readlink -f $(dirname $BASH_SOURCE)`
-function require() { source $require_here/$@ ; }
-
 if [[ -n "$GITHUB_ACTIONS" ]]; then
     git clone --quiet --recurse-submodules --filter=tree:0 \
       https://github.com/${GITHUB_REPOSITORY} --branch ${GITHUB_REF_NAME} fsvr
@@ -24,6 +21,9 @@ if [[ -n "$GITHUB_ACTIONS" ]]; then
     # _localfetch util util/_utils.sh util/actions-cache.sh util/actions-artifact.sh
     # chmod a+x util/*.sh
 fi
+
+require_here=`readlink -f fsvr`
+function require() { source $require_here/$@ ; }
 
 require util/_utils.sh
 

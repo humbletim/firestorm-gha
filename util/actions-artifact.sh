@@ -9,8 +9,54 @@
 #   ./actions-artifact.sh upload id-1 ...paths 
 #
 
+function actions-artifact-nodeeval() {
+    local cmd=$1 script=$2
+    shift 2
+    echo "node -e {{$cmd}} $@" >&2
+    result="$(node -e "${script}" "$@" 2>&1 || echo "${cmd}_error=$?")"
+    test -n "$NODE_DEBUG" && echo "$result" >&2 ;
+    outvalue=$(echo "$result" | grep -Eo "^${cmd}_(result|error)=(.*)\$" | sed -E 's@^\w+_result=@@')
+    echo "$outvalue"
+}
 
-upload=$(cat <<'EOF'
+function actions-artifact-list() {
+local list=$(cat <<'EOF'
+    const [_, ownername, id] = process.argv;
+    const [ owner, name ] = ownername.split('/');
+    console.warn("argv", { owner, name, id });
+    const {DefaultArtifactClient} = require('@actions/artifact')
+    const artifact = new DefaultArtifactClient()
+    artifact.listArtifacts({
+      findBy: {
+        // must have actions:read permission on target repository
+        token: process.env['GITHUB_TOKEN'],
+        workflowRunId: id,
+        repositoryOwner: owner,
+        repositoryName: name,
+      }  
+    }
+    ).then((x,y) =>console.log('list_result='+x)
+    ).catch((e)=>console.error('list_error='+e));
+EOF
+)
+  actions-artifact-nodeeval list "${list}" "$@"
+}
+
+
+# ```ts
+# await artifact.downloadArtifact(1337, {
+#   findBy
+# })
+# 
+# // can also be used in other methods
+# 
+# await artifact.getArtifact('my-artifact', {
+#   findBy
+# })
+# 
+
+function actions-artifact-upload() {
+local upload=$(cat <<'EOF'
     const [_, name, ...files] = process.argv;
     console.warn("argv", name, files);
 
@@ -28,12 +74,15 @@ upload=$(cat <<'EOF'
         args.files,
         args.workingDirectory,
         { retentionDays: args.retentionDays, compressionLevel: args.compressionLevel}
-    ).then((x,y) =>console.warn('then', x,y)
-    ).catch((e)=>console.error('error', e));
+    ).then((x,y) =>console.log('upload_result='+x)
+    ).catch((e)=>console.error('upload_error='+e));
 EOF
 )
+  actions-artifact-nodeeval upload "${upload}" "$@"
+}
 
-test=$(cat <<'EOF'
+function actions-artifact-test() {
+local test=$(cat <<'EOF'
     const [_, name, ...files] = process.argv;
     console.warn("argv", name, files);
 
@@ -43,13 +92,15 @@ test=$(cat <<'EOF'
         compressionLevel: +process.env.compressionLevel || 0,
         workingDirectory: process.env.workingDirectory || '.',
     };
-    console.warn(args);
-    process.exit(-1);
+    console.log('test_result='+JSON.stringify(args));
+    //process.exit(-1);
 EOF
 )
+  actions-artifact-nodeeval test "${test}" "$@"
+}
 
-set -Euo pipefail
-script="${!1}"
-shift
-exec node -e "${script}" "$@"
-exit 0
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  func=$1 && shift
+  declare -f actions-artifact-$func &>/dev/null && func=actions-artifact-$func
+  $func "$@"
+fi
