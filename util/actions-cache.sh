@@ -16,7 +16,7 @@ function actions-cache-nodeeval() {
     shift 2
     echo "node -e {{$cmd}} $@" >&2
     result="$(node -e "${script}" "$@" 2>&1 || echo "${cmd}_error=$?")"
-    test -n "$NODE_DEBUG" && echo "$result" >&2 ;
+    test -n "$NODE_DEBUG" && echo "//actions-cache-nodeeval $result" >&2 ;
     outvalue=$(echo "$result" | grep -Eo "^${cmd}_(result|error)=(.*)\$" | sed -E 's@^\w+_result=@@')
     echo "$outvalue"
 }
