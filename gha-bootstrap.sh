@@ -76,6 +76,7 @@ restored_bin_id=undefined
 restored_node_modules_id=undefined
 
 function restore_gha_caches() {
+    set -x
     restored_bin_id=$(_restore_gha_cache $base-bin-a bin) \
         || _die "[gha-bootstrap] actions-cache restore bin failed $?"
     echo restored_bin_id=$restored_bin_id >&2
@@ -86,7 +87,7 @@ function restore_gha_caches() {
 }
 
 function ensure_gha_bin() {
-    set -Euo pipefail
+    set -xEuo pipefail
     declare -A wgets=(
         [ninja]="
             bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f
