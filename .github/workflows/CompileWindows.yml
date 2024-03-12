@@ -47,10 +47,10 @@ jobs:
         # chmod a+x gha-bootstrap.sh
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
         env ${{inputs.fstuple}} ./fsvr/gha-bootstrap.sh
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
 #     - name: GHA-specific Tool Installation
 #       run: |
