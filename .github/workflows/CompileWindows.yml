@@ -17,7 +17,7 @@ defaults:
     shell: bash
 
 env:
-   PATH: /c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin
+   PATH: /c/Program Files/Git/bin:/c/Program Files/Git/usr/bin
 
 jobs:
   windows_build:
@@ -41,6 +41,8 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ github.token }}
       run: |
+        echo "${{ github.token }}" > ~/.github_token
+        npm i @actions/cache @actions/artifact @actions/github
         exit 0
         C:/msys64/usr/bin/wget.exe -q https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF}/gha-bootstrap.sh
         chmod a+x gha-bootstrap.sh
