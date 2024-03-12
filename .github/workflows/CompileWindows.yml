@@ -23,6 +23,8 @@ jobs:
   windows_build:
     runs-on: windows-2022
     steps:
+    - uses: actions/cache@v4
+
     - name: Output Inputs
       shell: bash
       run: echo "${{ toJSON(github.event.inputs) }}"

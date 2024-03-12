@@ -8,16 +8,17 @@ echo test to stderr >&2
 
 echo base=$base repo=$repo branch=$branch >&2
 
+
 _gha_PATH=`echo "$(cat <<EOF
 /c/tools/zstd
-/c/Program Files/Git/bin
-/c/Program Files/Git/usr/bin
+/c/PROGRA~1/Git/bin
+/c/PROGRA~1/Git/usr/bin
 /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts
 /c/hostedtoolcache/windows/Python/3.9.13/x64
-/c/Program Files/OpenSSL/bin
+/c/PROGRA~1/OpenSSL/bin
 /c/Windows/System32/OpenSSH
-/c/Program Files/nodejs
-/c/Program Files/LLVM/bin
+/c/PROGRA~1/nodejs
+/c/PROGRA~1/LLVM/bin
 /c/ProgramData/Chocolatey/bin
 EOF
 )" | tr '\n' ':'`
@@ -216,7 +217,7 @@ vars="$(cat <<EOF
     fsvr_path=$fsvr_path
     nunja_dir=$pwd/fsvr/$base
     p373r_dir=$pwd/p373r-vrmod
-    _home=`_realpath ~`
+    _home=`_realpath $USERPROFILE`
     _home_bin=$pwd/bin
     _fsvr_cache=$pwd/cache
     _path=$fsvr_path
