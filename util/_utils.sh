@@ -1,5 +1,5 @@
 #!/bin/bash
- 
+
 # fsvr script utilities -- humbletim 2024.03.08
 
 _fsvr_utils_dir=$(readlink -f $(dirname "$BASH_SOURCE"))
@@ -39,8 +39,10 @@ function _relativize() {
 # _setenv "key=value;with;semicolons" => key=value\;with\;semicolons
 
 function _setenv() {
-  local name="${@/=*/}"
-  local value="${@/#$name=/}"
+  local vargs="$@" # sqaush args
+  local name="${vargs/=*/}"
+  local value="${vargs/#$name=/}"
+  if [[ $value == *=* ]] ; then echo "[_setenv warning] assignment '$@' contains multipe ='s; treating as '$name={$value}'" ; fi
   export "$name=$value"
   # unless quoted then escape spaces, backslashes and semicolons
   echo "$value" | grep -E "^[^\"]+[ \\;]" >/dev/null && value="$(printf '%q\n' "$value")"
