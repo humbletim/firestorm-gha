@@ -87,7 +87,7 @@ function restore_gha_caches() {
 }
 
 function ensure_gha_bin() {
-    set -xEuo pipefail
+    set -Euo pipefail
     declare -A wgets=(
         [ninja]="
             bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f
@@ -108,11 +108,11 @@ function ensure_gha_bin() {
 
         test -x bin/hostname.exe || {
             # avoid entropy by hard-coding hostname used by parallel and other tools
-            alias gcc="/c/Program\ Files/LLVM/bin/clang"
+            local gcc="/c/Program\ Files/LLVM/bin/clang"
             echo '
               #include <stdio.h>
               int main(int argc, char *argv[]) { printf(MESSAGE); return 0; }
-            ' | gcc "-DMESSAGE=\"windows2022\"" -x c - -o bin/hostname.exe
+            ' | $gcc "-DMESSAGE=\"windows2022\"" -x c - -o bin/hostname.exe
         } || _die "[gha-bootstrap] failed to provision hostname.exe $?"
 
         test -x bin/parallel || {
