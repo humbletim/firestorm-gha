@@ -20,13 +20,13 @@ function _assert() {
 # reverse-susbstitute well known paths for use as tidier debug logging
 function _relativize() {
     local rel="$@"
-    rel=${rel//$build_dir/\$build_dir}
-    rel=${rel//$source_dir/\$source_dir}
-    rel=${rel//$root_dir/\$root_dir}
-    rel=${rel//$_fsvr_dir/\$_fsvr_dir}
-    test -d "$_fsvr_cache" && rel=${rel//$_fsvr_cache/\$_fsvr_cache}
-    test -d "$nunja_dir" && rel=${rel//$nunja_dir/\$nunja_dir}
-    test -d "$p373r_dir" && rel=${rel//$p373r_dir/\$p373r_dir}
+    test ! -v build_dir   || rel=${rel//$build_dir/\$build_dir}
+    test ! -v source_dir  || rel=${rel//$source_dir/\$source_dir}
+    test ! -v root_dor    || rel=${rel//$root_dir/\$root_dir}
+    test ! -v _fsvr_dir   || rel=${rel//$_fsvr_dir/\$_fsvr_dir}
+    test ! -v _fsvr_cache || rel=${rel//$_fsvr_cache/\$_fsvr_cache}
+    test ! -v nunja_dir   || rel=${rel//$nunja_dir/\$nunja_dir}
+    test ! -v p373r_dir   || rel=${rel//$p373r_dir/\$p373r_dir}
     echo $rel
 }
 
