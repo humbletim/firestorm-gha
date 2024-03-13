@@ -156,7 +156,7 @@ function save_gha_caches() {
       set -e
       parallel --version | head -1
       echo -n 'ninja: ' ; ninja --version
-      _assert hostname [[ `hostname` == windows-2022 || `hostname` == windows2022 ]]
+      _assert hostname [[ `hostname` =~ windows[-]?2022 ]]
     ) || _die "[gha-bootstrap] testbin failed"
 
     ls -1d node_modules/@actions/{core,github,cache,artifact} \
