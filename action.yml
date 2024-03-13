@@ -11,7 +11,6 @@ runs:
     - name: test
       shell: bash
       run: |
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
         env ${{inputs.fstuple}} ./fsvr/gha-bootstrap.sh
     # - name: Report migration status
     #   id: database-migration-report
