@@ -50,7 +50,7 @@ function initialize_gha_shell() {
 
     test -d node_modules/@actions/cache || {
         echo "[gha-bootstrap] installing @actions/cache" >&2
-        npm install --no-save @actions/cache 2>/dev/null
+        "/c/Program Files/nodejs/npm" install --no-save @actions/cache 2>/dev/null
     } || return `_err $? "[gha-bootstrap] npm i @actions/cache failed"`
 }
 
