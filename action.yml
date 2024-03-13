@@ -4,3 +4,6 @@ runs:
   main: 'action.js'
   post: 'action.js'
   post-if: success()
+outputs:
+  ACTION_CACHE_URL:
+    description: 'A boolean value to indicate if a cache was hit.'
