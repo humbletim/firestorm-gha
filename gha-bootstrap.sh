@@ -35,9 +35,9 @@ function initialize_gha_shell() {
     local userhome=`cygpath -ua $USERPROFILE`
     mkdir -pv $userhome/bin
     fsvr_path="$userhome/bin:$fsvr_path"
-    if [[ ! -s $userhome/.github_token && -n "$GITHUB_TOKEN" ]]; then
-      echo "$GITHUB_TOKEN" > $userhome/.github_token
-    fi
+    # if [[ ! -s $userhome/.github_token && -v GITHUB_TOKEN ]]; then
+    #   echo "$GITHUB_TOKEN" > $userhome/.github_token
+    # fi
     # cherry-pick msys64 (to avoid bringing in msys64/usr/bin/*.* to PATH)
     cp -uav 'c:/msys64/usr/bin/wget.exe' $userhome/bin/
     # cp -uav 'c:/msys64/usr/bin/more.exe' $userhome/bin/
