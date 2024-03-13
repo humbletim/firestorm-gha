@@ -31,13 +31,13 @@ jobs:
         name: my-artifact
         path: /invalid/path
         if-no-files-found: ignore
-    - uses: actions/cache@v4
+    - uses: actions/cache/restore@v4
+    # - uses: actions/cache@v4
       with:
         lookup-only: true
         key: /dev/null
         path: /dev/null
-        if-no-files-found: ignore
-
+  
     - name: Output Inputs
       shell: bash
       run: echo "${{ toJSON(github.event.inputs) }}"
@@ -52,7 +52,7 @@ jobs:
     - name: Run as Action
       uses: ./fsvr/actions-node-script
       with:
-        environment: ${{ github.event.inputs.fstuple }}
+        # environment: ${{ github.event.inputs.fstuple }}
         shell: bash
         run: |
             echo testing 1 2 3
