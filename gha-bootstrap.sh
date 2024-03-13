@@ -199,7 +199,7 @@ function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
 if is_gha; then
     cd "${GITHUB_WORKSPACE}"
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
-    fsvr_path="$(cygpath -ua bin):$_gha_PATH"
+    fsvr_path="$(cygpath -ua bin):$_gha_PATH::/c/Windows/system32"
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
