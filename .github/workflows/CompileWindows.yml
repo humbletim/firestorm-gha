@@ -49,13 +49,13 @@ jobs:
         echo "${{ github.token }}" > ~/.github_token
 
 
-    - name: Populate ACTIONS_CACHE_URL
+    - name: Run as Action
       uses: ./fsvr/actions_cache_url
 
-    - name: gha-bootstrap
-      run: |
-        echo ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL
-        env ${{github.event.inputs.fstuple}} ./fsvr/gha-bootstrap.sh
+    # - name: gha-bootstrap
+    #   run: |
+    #     echo ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL
+    #     env ${{github.event.inputs.fstuple}} ./fsvr/gha-bootstrap.sh
 
 
     # - name: Initial Bootstrapping
