@@ -47,11 +47,25 @@ jobs:
       run: |
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
         echo "${{ github.token }}" > ~/.github_token
-
+        for x in ${{github.event.inputs.fstuple}}; do
+          echo $x | tee -a $GITHUB_ENV
+        done
 
     - name: Run as Action
       uses: ./fsvr/actions_cache_url
+      env:
+        foo: var
+        inputs: ${{ github.event.inputs }}
+        inputs_json: ${{ toJSON(github.event.inputs) }}
+      with:
+        fstuple: ${{ github.event.inputs.fstuple }}
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      env:
+        foo: bar
+      with:
+        limit-access-to-actor: true
     # - name: gha-bootstrap
     #   run: |
     #     echo ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL
@@ -69,10 +83,6 @@ jobs:
     #     # chmod a+x gha-bootstrap.sh
     #     git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
     #     env ${{inputs.fstuple}} ./fsvr/gha-bootstrap.sh
-    # - name: Setup tmate session
-      # uses: mxschmitt/action-tmate@v3
-      # with:
-      #   limit-access-to-actor: true
 
 #     - name: GHA-specific Tool Installation
 #       run: |
