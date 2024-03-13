@@ -6,7 +6,12 @@
 
 const child_process = require('child_process');
 process.chdir(process.env.GITHUB_WORKSPACE);
-const bash = child_process.spawn('bash', ['fsvr/gha-bootstrap.sh']);
+try {
+let bash = child_process.spawn('/bin/bash', ['fsvr/gha-bootstrap.sh']);
+} catch(e) {
+console.error('/bin/bash no work; trying PROGRAMFILES', e);
+ bash = child_process.spawn(`${process.env.PROGRAMFILES}\\Git\\usr\\bin\\bash.exe`, ['fsvr/gha-bootstrap.sh']);
+}
 process.stdin.pipe(bash.stdin);
 bash.stdout.pipe(process.stdout);
 bash.stderr.pipe(process.stderr);
