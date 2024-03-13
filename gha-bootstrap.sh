@@ -27,6 +27,8 @@ EOF
 # function dup_to_stderr() { $USERPROFILE/bin/bash -c 'tee >(cat >&2)' ;  }
 fsvr_path="$PATH"
 
+function _err() { local rc=$1 ; shift; echo "$@" >&2; return $rc; }
+
 function initialize_gha_shell() {
     set -Euo pipefail
     local userhome=`cygpath -ua $USERPROFILE`
@@ -49,7 +51,7 @@ function initialize_gha_shell() {
     test -d node_modules/@actions/cache || {
         echo "[gha-bootstrap] installing @actions/cache" >&2
         npm install --no-save @actions/cache 2>/dev/null
-    } || _die "[gha-bootstrap] npm i @actions/cache failed $?"
+    } || return `_err $? "[gha-bootstrap] npm i @actions/cache failed"`
 }
 
 function initialize_fsvr_gha_checkout() {
