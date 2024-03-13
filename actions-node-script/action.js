@@ -18,16 +18,18 @@ console.debug('INPUT_', { inputs, run, shell, environment, workspace, working_di
 
 if (!shell || shell == 'bash') {
     var bash_exe = process.env.PROGRAMFILES ? `${process.env.PROGRAMFILES}\\Git\\usr\\bin\\bash.exe` : 'bash';
-    shell = `${bash_exe} --noprofile --norc -e -o pipefail {0}`
+    shell = `"${bash_exe}" --noprofile --norc -e -o pipefail {0}`
 }
 
+var exe;
+var args = shell
+    .replace(/^"([^\"]+)" |^([^ ]+) /, (_, a, b) => { exe=a || b; return ''; })
+    .split(/ +/).filter(x=>x!=='');
 
-var args = shell.split(/ +/).filter((x)=> x !== '');
 var idx = args.indexOf('{0}');
 if (!~idx) throw new Error('{0} not found in '+shell);
 args.splice(idx, 1, '-c', run);
 
-var exe = args.shift();
 var options = { stdio: 'inherit', env: {}, shell: false };
 if (working_directory) options.cwd = working_directory;
 else if (workspace) options.cwd = workspace;
@@ -35,7 +37,7 @@ else if (workspace) options.cwd = workspace;
 var estr= environment || '';
 (' '+estr).replace(/ ([-_0-9A-Za-z]+)=([^ ]+)/g, (_, k, v) => options.env[k]=v);
 
-console.debug('... calling spawn', exe, args, options)
+console.debug('PARSED_', { exe, args, options })
 
 const bash = child_process.spawn(exe, args, options );
 bash.on('exit', (c)=>{ console.log('exit code', c); process.exit(c); });
