@@ -55,6 +55,7 @@ jobs:
     - name: gha-bootstrap
       run: |
         echo ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL
+        env ${{github.event.inputs.fstuple}} ./fsvr/gha-bootstrap.sh
 
 
     # - name: Initial Bootstrapping
