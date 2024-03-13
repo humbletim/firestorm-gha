@@ -120,7 +120,7 @@ function ensure_gha_bin() {
             echo '
               #include <stdio.h>
               int main(int argc, char *argv[]) { printf(MESSAGE); return 0; }
-            ' | $gcc "-DMESSAGE=\"windows2022\"" -x c - -o bin/hostname.exe
+            ' | $gcc "-DMESSAGE=\"windows-2022\"" -x c - -o bin/hostname.exe
         } || _die "[gha-bootstrap] failed to provision hostname.exe $?"
 
         test -x bin/parallel || {
@@ -156,7 +156,7 @@ function save_gha_caches() {
       set -e
       parallel --version | head -1
       echo -n 'ninja: ' ; ninja --version
-      _assert hostname [[ `hostname` == windows2022 ]]
+      _assert hostname [[ `hostname` == windows-2022 ]]
     ) || _die "[gha-bootstrap] testbin failed"
 
     ls -1d node_modules/@actions/{core,github,cache,artifact} \

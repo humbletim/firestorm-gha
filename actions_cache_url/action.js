@@ -11,4 +11,3 @@ process.stdin.pipe(bash.stdin);
 bash.stdout.pipe(process.stdout);
 bash.stderr.pipe(process.stderr);
 bash.on('exit', (c)=> process.exit(c));
-bash.wait()
