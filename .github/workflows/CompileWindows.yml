@@ -23,36 +23,44 @@ jobs:
   windows_build:
     runs-on: windows-2022
     steps:
-    - uses: actions/cache@v4
-      with:
-        lookup-only: true
-        key: /dev/null
-        path: /dev/null
+    # - uses: actions/cache@v4
+    #   with:
+    #     lookup-only: true
+    #     key: /dev/null
+    #     path: /dev/null
     - name: Output Inputs
       shell: bash
       run: echo "${{ toJSON(github.event.inputs) }}"
 
     # shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
-    - name: Probe Git+Bash
-      shell: bash
-      run: declare -x > ../_stock_bash.env
-
-    - name: Probe MSYS2 Bash
-      shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
-      run: declare -x > ../_msys2_bash.env
+#     - name: Probe Git+Bash
+#       shell: bash
+#       run: declare -x > ../_stock_bash.env
+# 
+#     - name: Probe MSYS2 Bash
+#       shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
+#       run: declare -x > ../_msys2_bash.env
 
     - name: Initial Bootstrapping
-      shell: bash
       env:
           GITHUB_TOKEN: ${{ github.token }}
       run: |
-        "/c/Program Files/nodejs/npm" i @actions/cache # @actions/artifact @actions/github
         echo "${{ github.token }}" > ~/.github_token
-        # C:/msys64/usr/bin/wget.exe -q https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF}/gha-bootstrap.sh
-        # chmod a+x gha-bootstrap.sh
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
-        env ${{inputs.fstuple}} ./fsvr/gha-bootstrap.sh
-    - name: Setup tmate session
+
+      uses: ./
+
+    # - name: Initial Bootstrapping
+    #   shell: bash
+    #   env:
+    #       GITHUB_TOKEN: ${{ github.token }}
+    #   run: |
+    #     "/c/Program Files/nodejs/npm" i @actions/cache # @actions/artifact @actions/github
+    #     echo "${{ github.token }}" > ~/.github_token
+    #     # C:/msys64/usr/bin/wget.exe -q https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF}/gha-bootstrap.sh
+    #     # chmod a+x gha-bootstrap.sh
+    #     git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
+    #     env ${{inputs.fstuple}} ./fsvr/gha-bootstrap.sh
+    # - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
