@@ -36,6 +36,7 @@ jobs:
         lookup-only: true
         key: /dev/null
         path: /dev/null
+        if-no-files-found: ignore
 
     - name: Output Inputs
       shell: bash
