@@ -1,5 +1,10 @@
 name: "Test"
 runs:
+  using: 'node20'
+  main: 'action.js'
+  post: 'action.js'
+  post-if: success()
+
   using: "composite"
   steps:
     - name: Output Inputs
