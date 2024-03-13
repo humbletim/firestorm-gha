@@ -30,7 +30,7 @@ var idx = args.indexOf('{0}');
 if (!~idx) throw new Error('{0} not found in '+shell);
 args.splice(idx, 1, '-c', run);
 
-var options = { stdio: 'inherit', env: {}, shell: false };
+var options = { stdio: 'inherit', env: process.env, shell: false };
 if (working_directory) options.cwd = working_directory;
 else if (workspace) options.cwd = workspace;
 
