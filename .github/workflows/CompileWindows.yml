@@ -25,7 +25,12 @@ jobs:
     runs-on: windows-2022
     steps:
 
-    # no-op that pre-populates system-level restore-only and save-only in /d/a/_actions/actions
+    # no-ops that pre-populate upload-artifact, restore-only and save-only in /d/a/_actions/actions
+    - uses: actions/upload-artifact@v4
+      with:
+        name: my-artifact
+        path: /invalid/path
+        if-no-files-found: ignore
     - uses: actions/cache@v4
       with:
         lookup-only: true

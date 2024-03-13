@@ -21,7 +21,7 @@ ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
 
 function make_installer() {
   PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $build_dir/newview/firestorm_setup_tmp.nsi
-  mv -v $build_dir/newview/Phoenix*$viewer_viewer*.exe $root_dir/
+  mv -v $build_dir/newview/Phoenix*${viewer_version//./-}*.exe $root_dir/
 }
 function make_7z() {
   sh -c 'cd $build_dir && 7z -bt -t7z a "$root_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
