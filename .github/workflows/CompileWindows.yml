@@ -49,21 +49,29 @@ jobs:
         done
 
     - name: Run as Action
-      uses: ./fsvr/actions_cache_url
-      env:
-        _fstuple: ${{github.event.inputs.fstuple}}
-        inputs_json: ${{ toJSON(github.event.inputs) }}
+      uses: ./fsvr/actions-node-script
       with:
-        fstuple: ${{ github.event.inputs.fstuple }}
-        script: ./gha-bootstrap.sh
-        env: ${{ github.event.inputs.fstuple }}
+        environment: ${{ github.event.inputs.fstuple }}
+        shell: bash
+        run: |
+            echo testing 1 2 3
+            echo ${{ github.event.inputs.fstuple }} 
+            test -v ACTIONS_CACHE_URL && echo "cache url available"
+            env
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      env:
-        foo: bar
-      with:
-        limit-access-to-actor: true
+#     - name: Run as Action
+#       uses: ./fsvr/actions-node-script
+#       with:
+#         fstuple: ${{ github.event.inputs.fstuple }}
+#         script: ./gha-bootstrap.sh
+#         env: ${{ github.event.inputs.fstuple }}
+# 
+#     - name: Setup tmate session
+#       uses: mxschmitt/action-tmate@v3
+#       env:
+#         foo: bar
+#       with:
+#         limit-access-to-actor: true
 
 #      - name: Nunja Mapping
 #       run: |

@@ -1,0 +1,15 @@
+name: "run script within node20 actions environment"
+runs:
+    using: node20
+    main: action.js
+inputs:
+    run:
+        required: true
+        description: like jobs..steps..run
+    shell:
+        description: like jobs..steps..shell
+        default: bash
+    working-directory:
+        description: like jobs..steps..working-directory
+    environment:
+        description: format: key=value key2=value2 key3="value with spaces"
