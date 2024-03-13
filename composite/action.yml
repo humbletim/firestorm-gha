@@ -1,0 +1,20 @@
+name: "Test"
+  using: "composite"
+  steps:
+    - name: Output Inputs
+      shell: bash
+      run: echo "${{ toJSON(github.event.inputs) }}"
+    - name: Output unqualified Inputs
+      shell: bash
+      run: echo "${{ toJSON(inputs) }}"
+    - name: Output ACTION_ vars
+      shell: bash
+      run: env | grep ^ACTION
+    - name: test
+      shell: bash
+      run: |
+        echo ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL
+        env ${{ github.event.inputs.fstuple }} ./fsvr/gha-bootstrap.sh
+    # - name: Report migration status
+    #   id: database-migration-report
+    #   run: if [ $? -eq 0 ]; then echo "report=Migrated database successfully" >> $GITHUB_OUTPUT; else echo "report=Failed to migrate database" >> $GITHUB_OUTPUT; fi
