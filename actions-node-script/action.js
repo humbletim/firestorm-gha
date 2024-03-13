@@ -6,11 +6,11 @@ const child_process = require('child_process');
 
 
 var {
-    INPUTS_environment: environment,
+    INPUT_environment: environment,
     INPUT_inputs: inputs,
-    INPUTS_run: run,
-    INPUTS_shell: shell,
-    "INPUTS_working-directory": working_directory,
+    INPUT_run: run,
+    INPUT_shell: shell,
+    "INPUT_working-directory": working_directory,
     GITHUB_WORKSPACE: workspace,
 } = process.env;
 
@@ -21,9 +21,6 @@ if (!shell || shell == 'bash') {
     shell = `${bash_exe} --noprofile --norc -e -o pipefail {0}`
 }
 
-var environment = {};
-var estr= process.env.INPUTS_environment || '';
-(' '+estr).replace(/ ([-_0-9A-Za-z]+)=([^ ]+)/g, (_, k, v) => environment[k]=v);
 
 var args = shell.split(/ +/).filter((x)=> x !== '');
 var idx = args.indexOf('{0}');
@@ -31,11 +28,14 @@ if (!~idx) throw new Error('{0} not found in '+shell);
 args.splice(idx, 1, '-c', run);
 
 var exe = args.shift();
-var options = { stdio: 'inherit', env: environment, shell: false };
+var options = { stdio: 'inherit', env: {}, shell: false };
 if (working_directory) options.cwd = working_directory;
 else if (workspace) options.cwd = workspace;
 
-console.debug('spawn', exe, args, options)
+var estr= environment || '';
+(' '+estr).replace(/ ([-_0-9A-Za-z]+)=([^ ]+)/g, (_, k, v) => options.env[k]=v);
+
+console.debug('... calling spawn', exe, args, options)
 
 const bash = child_process.spawn(exe, args, options );
 bash.on('exit', (c)=>{ console.log('exit code', c); process.exit(c); });
