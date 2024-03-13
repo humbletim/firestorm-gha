@@ -37,7 +37,7 @@ parsedEnv = Object.assign({}, ...parsedEnv);
 var forwardEnv = {};
 (parsedEnv['*']||'').split(/[\s:,;]+/)
   .forEach((name) => {
-    if (name === '*') Object.assign(forwardEnv, process.env);
+    if (name === 'process.env') Object.assign(forwardEnv, process.env);
     else if (name in process.env) forwardEnv[name] = process.env[name];
   });
 
@@ -48,7 +48,9 @@ var options = {
     env: { ...forwardEnv, ...parsedEnv },
 };
 
-console.debug('PARSED_', { exe, args, options, forwardEnv, parsedEnv })
+var tmp = JSON.parse(JSON.stringify(options));
+if (parsedEnv['*'] === 'process.env') tmp.env = '{ /* inherit process.env + parsed */ }'; 
+console.debug('PARSED_', { exe, args, options: tmp, forwardEnv: Object.keys(forwardEnv), parsedEnv: parsedEnv })
 
 const bash = child_process.spawn(exe, args, options );
 

@@ -20,7 +20,7 @@ inputs:
               key3="value with spaces"
 
             to inherit from current process:
-            environment: *=proces.env
+            environment: '*=proces.env'
 
             to inherit only specific environment vars:
-            environment: *=ACTION_CACHE_URL:HOME
+            environment: '*=ACTION_CACHE_URL:HOME'
