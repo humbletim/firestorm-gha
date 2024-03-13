@@ -1,10 +1,11 @@
 #!/bin/bash
+echo test to stdout $ACTIONS_CACHE_URL
+echo test to stderr >&2
+
 set -Euo pipefail
 
 fdbgopts="set -Eou pipefail ; trap 'echo err \$? ; exit 1' ERR"
 
-echo test to stdout
-echo test to stderr >&2
 
 echo base=$base repo=$repo branch=$branch >&2
 

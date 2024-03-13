@@ -45,6 +45,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ github.token }}
       run: |
+        echo ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
         echo "${{ github.token }}" > ~/.github_token
 

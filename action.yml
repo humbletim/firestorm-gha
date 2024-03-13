@@ -11,6 +11,7 @@ runs:
     - name: test
       shell: bash
       run: |
+        echo ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL
         env ${{ github.event.inputs.fstuple }} ./fsvr/gha-bootstrap.sh
     # - name: Report migration status
     #   id: database-migration-report
