@@ -1,0 +1,9 @@
+name: "Test"
+runs:
+  using: 'node20'
+  main: 'action.js'
+  # post: 'action.js'
+  # post-if: success()
+outputs:
+  ACTION_CACHE_URL:
+    description: 'ACTION_CACHE_URL'

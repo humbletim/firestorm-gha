@@ -50,7 +50,7 @@ jobs:
 
 
     - name: Populate ACTIONS_CACHE_URL
-      uses: ./fsvr/action.yml
+      uses: ./fsvr/actions_cache_url
 
     - name: gha-bootstrap
       run: |
