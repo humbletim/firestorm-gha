@@ -11,19 +11,21 @@ cd "$(dirname $0)"
 
 # ovr=https://github.com/ValveSoftware/openvr/raw/v1.6.10
 # ovr=https://raw.githubusercontent.com/ValveSoftware/openvr/v1.6.10/
-ovr=https://rawcdn.githack.com/ValveSoftware/openvr/v1.6.10/
+ovr=https://rawcdn.githack.com/ValveSoftware/openvr/v1.6.10
 tarball=openvr-v1.6.10.8eaf723.tar.bz2
 mkdir -p lib/release include LICENSES
 
 set -x
 
-function _wget() { set -e; echo "fetching $@" >&2 ; wget -nv -nc "$@" ; }
+function _wget() { echo "fetching $@" >&2 ; wget -nv -nc "$@" ; }
 _wget -O LICENSES/openvr.txt $ovr/LICENSE
 _wget -O include/openvr.h $ovr/headers/openvr.h
 _wget -P lib/release/ $ovr/bin/win64/openvr_api.dll $ovr/lib/win64/openvr_api.lib
 # sha256sum --strict --check openvr.v1.6.10.sha256 || exit 1
 
 test -s include/openvr.h || exit 222
+test -s LICENSES/openvr.txt || exit 222
+
 find .
 
 test -f $tarball || tar -cjvf $tarball \

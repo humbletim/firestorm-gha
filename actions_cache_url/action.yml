@@ -1,7 +1,11 @@
-name: "run gha-bootstrap.sh with full gha environment"
+name: "run script in node20 actions environment"
 runs:
-  using: 'node20'
-  main: 'action.js'
+    using: 'node20'
+    main: 'action.js'
 inputs:
     fstuple:
         description: 'fstuple input'
+    env:
+        description: 'env input'
+    script:
+        description: 'script input'

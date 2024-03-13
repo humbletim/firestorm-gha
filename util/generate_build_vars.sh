@@ -18,7 +18,7 @@ _setenv viewer_channel=$viewer_channel
 require generate_version_vars.sh $viewer_version
 require generate_path_vars.sh $build_dir
 require generate_git_vars.sh \
-  version_git_sha=$root_dir \
+  version_git_sha=$source_dir/.. \
   version_fsvr_sha=$_fsvr_dir
 
 # version_fsvr_tag=`git tag --contains "$version_fsvr_sha" -n 1`

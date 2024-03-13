@@ -1,5 +1,5 @@
 // console.log(process.env.ACTIONS_CACHE_URL)
-console.log('::add-mask::'+process.env.ACTIONS_CACHE_URL);
+// console.log('::add-mask::'+process.env.ACTIONS_CACHE_URL);
 // const fs = require("fs")
 // fs.appendFileSync(process.env.GITHUB_OUTPUT, `ACTIONS_CACHE_URL=${process.env.ACTIONS_CACHE_URL}\n`);
 // fs.appendFileSync(process.env.GITHUB_ENV, `ACTIONS_CACHE_URL=${process.env.ACTIONS_CACHE_URL}\n`);
@@ -7,6 +7,10 @@ console.log('::add-mask::'+process.env.ACTIONS_CACHE_URL);
 const child_process = require('child_process');
 process.chdir(process.env.GITHUB_WORKSPACE);
 
+console.log('INPUT_fstuple', process.env.INPUT_fstuple)
+console.log('INPUT_script', process.env.INPUT_script)
+console.log('INPUT_env', process.env.INPUT_env)
+console.log('_fstuple', process.env._fstuple)
 console.log('base', process.env.base)
 console.log('foo', process.env.foo)
 console.log('inputs', process.env.inputs)

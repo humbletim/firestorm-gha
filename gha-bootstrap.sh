@@ -28,7 +28,7 @@ EOF
 # function dup_to_stderr() { $USERPROFILE/bin/bash -c 'tee >(cat >&2)' ;  }
 fsvr_path="$PATH"
 
-function _err() { local rc=$1 ; shift; echo "$@" >&2; return $rc; }
+function _err() { local rc=$1 ; shift; echo "[gha-bootstrap rc=$rc] $@" >&2; return $rc; }
 
 function initialize_gha_shell() {
     set -Euo pipefail
@@ -47,54 +47,99 @@ function initialize_gha_shell() {
     # cp -uav 'c:/Program Files/Git/usr/bin/tar.exe' bin/
     # export PATH=$userhome/bin:$PATH
 
-    mkdir -pv bin cache node_modules
+    mkdir -pv bin cache #node_modules
 
-    test -d node_modules/@actions/cache || {
-        echo "[gha-bootstrap] installing @actions/cache" >&2
-        "/c/Program Files/nodejs/npm" install --no-save @actions/cache 2>/dev/null
-    } || return `_err $? "[gha-bootstrap] npm i @actions/cache failed"`
+    # test -d node_modules/@actions/cache || {
+    #     echo "[gha-bootstrap] installing @actions/cache" >&2
+    #     "/c/Program Files/nodejs/npm" install --no-save @actions/cache 2>/dev/null
+    # } || return `_err $? "npm i @actions/cache failed"`
+}
+
+function quiet_clone() {
+    echo "[gha-bootstrap] quiet_clone $1 $2 $3" >&2
+    git clone --quiet --filter=tree:0 --single-branch \
+        https://github.com/$1 --branch $2 $3 2>&1 | grep -vE '^(remote:|Receive|Resolve)' || true
+    test -d $3/.git || return 1
 }
 
 function initialize_fsvr_gha_checkout() {
     set -Euo pipefail
-    test -d fsvr/.git || {
-      git clone --quiet --filter=tree:0 --single-branch --branch $fsvr_branch \
-      https://github.com/$fsvr_repo fsvr
-    }
+    test -d fsvr/.git || quiet_clone $fsvr_repo $fsvr_branch fsvr
+}
+
+function initialize_firestorm_checkout() {
+    set -Euo pipefail
+    test -d repo/$branch/.git || quiet_clone $repo $branch repo/$branch
+    test -d repo/fs-build-variables/.git || quiet_clone FirestormViewer/fs-build-variables master repo/fs-build-variables
+    test -d repo/p373r || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
+}
+
+function actions_cache_v4_save_only() {
+    INPUT_key=$1 INPUT_path=$2 "/c/Program Files/nodejs/node" \
+        /d/a/_actions/actions/cache/v4/dist/save-only/index.js \
+        | tr '\r' '\n' | grep -vE '^$|::debug::' | tee actions_cache_v4_save_only.$1.log
+    grep -vE '^$|::debug::' actions_cache_v4_save_only.$1.log >&2
+}
+
+function actions_cache_v4_restore_only() {
+    INPUT_key=$1 INPUT_path=$2 "/c/Program Files/nodejs/node" \
+        /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
+        | tr '\r' '\n' | grep -vE '^$' | tee actions_cache_v4_restore_only.$1.log \
+        | grep -Eo 'restored from key: .*$' | grep -Eo '[^ ]+$'
+    grep -vE '^$|::debug::' actions_cache_v4_restore_only.$1.log >&2
 }
 
 function _restore_gha_cache() {
     set -Euo pipefail
     local id=$1
-    local cache_id=undefined
-    if [[ -s restored_$id && `cat restored_$id` != undefined ]]; then
+    local cache_id=
+    if [[ -s restored_$id && `cat restored_$id` != "" ]]; then
         echo "[gha-bootstrap] restored_$id exists; skipping" >&2
         cache_id=`cat restored_$id`
     else
-        cache_id=$(NODE_DEBUG=1 $_fsvr_dir/util/actions-cache.sh restore "$@") \
-            || _die "[gha-bootstrap] actions-cache restore $id  failed $?"
-        if [[ $cache_id != undefined ]]; then
+        echo "[gha-bootstrap] restoring restored_$id ..." >&2
+        # cache_id=$(NODE_DEBUG=1 $_fsvr_dir/util/actions-cache.sh restore "$@")
+        cache_id=$(actions_cache_v4_restore_only "$@") \
+            || return `_err $? "actions-cache restore $id failed $?"`
+        if [[ $cache_id != "" ]]; then
             echo $cache_id > restored_$id
         fi
     fi
     echo $cache_id
 }
 
-restored_bin_id=undefined
-restored_node_modules_id=undefined
+restored_bin_id=
+# restored_node_modules_id=
+restored_repo_id=
 
 function restore_gha_caches() {
     set -Euo pipefail
-    restored_bin_id=$(_restore_gha_cache $base-bin-a bin) \
-        || _die "[gha-bootstrap] actions-cache restore bin failed $?"
-    echo "[gha-bootstrap] restored_bin_id=$restored_bin_id" >&2
-
-    restored_node_modules_id=$(_restore_gha_cache $base-node_modules-a node_modules) \
-        || _die "[gha-bootstrap] actions-cache restore node_modules failed $?"
-    echo "[gha-bootstrap] restored_node_modules_id=$restored_node_modules_id" >&2
+    for x in bin repo ; do
+        local vid=restored_${x}_id
+        local id=$(_restore_gha_cache $base-$x-b $x) \
+            || return `_err $? "actions-cache restore $x failed $?"`
+        echo "XXXXXXXXXXXXXXXXX $vid=$id" >&2
+        eval "$vid=$id"
+        echo "[gha-bootstrap] $vid=${!vid}" >&2
+    done
 }
 
-function ensure_gha_bin() {
+function save_gha_caches() {
+    # ls -1d node_modules/@actions/{core,github,cache,artifact} \
+    #     || return `_err $? "npm @actions setup incomplete"`
+
+    for x in bin repo ; do
+        local vid=restored_${x}_id
+        [[ -n "${!vid}" ]] || {
+            echo "[gha-bootstrap] attempting to save $x cache... ${!vid}" >&2
+            actions_cache_v4_save_only $base-$x-b $x \
+              || return `_err $? "error saving $x $vid"`
+            # $_fsvr_dir/util/actions-cache.sh save $base-bin-a bin || return 1
+        }
+    done
+}
+
+function ensure_gha_bin() {(
     set -Euo pipefail
     declare -A wgets=(
         [ninja]="
@@ -107,12 +152,12 @@ function ensure_gha_bin() {
         "
     )
 
-    if [[ $restored_bin_id == undefined ]]; then
+    if [[ -z $restored_bin_id ]]; then
         echo "[gha-bootstrap] provisioning ninja and parallel" >&2
         test -f bin/ninja.exe || {
             archive=`wget_sha256 ${wgets[ninja]} .`
             unzip -d bin $archive
-        } || _die "[gha-bootstrap] failed to provision ninja $?"
+        } || return `_err $? "failed to provision ninja $?"`
 
         test -x bin/hostname.exe || {
             # avoid entropy by hard-coding hostname used by parallel and other tools
@@ -121,10 +166,9 @@ function ensure_gha_bin() {
               #include <stdio.h>
               int main(int argc, char *argv[]) { printf(MESSAGE); return 0; }
             ' | $gcc "-DMESSAGE=\"windows-2022\"" -x c - -o bin/hostname.exe
-        } || _die "[gha-bootstrap] failed to provision hostname.exe $?"
+        } || return `_err $? "failed to provision hostname.exe $?"`
 
-        test -x bin/parallel || {
-
+        test -x bin/parallel -a -f bin/parallel-home/will-cite || {
             archive=`wget_sha256 ${wgets[parallel]} .`
             tar -C bin --strip-components=2 -vxf $archive usr/bin/parallel
 
@@ -136,42 +180,20 @@ function ensure_gha_bin() {
               Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
               Zenodo. https://doi.org/10.5281/zenodo.7347980
             " > bin/parallel-home/will-cite
-        } || _die "[gha-bootstrap] failed to provision parallel $?"
+        } || return `_err $? "failed to provision parallel $?"`
 
     fi
-    if [[ $restored_node_modules_id == undefined ]]; then
-        local npmi=$(for x in @actions/artifact @actions/github ; do
-            test -d node_modules/$x || echo $x
-        done)
-        test -n "$npmi" && {
-            echo "[gha-bootstrap] npm i $npmi" >&2
-            npm install --no-save $npmi 2>/dev/null
-        }
-    fi
-}
+    # if [[ -z $restored_node_modules_id ]]; then
+    #     local npmi=$(for x in @actions/artifact @actions/github ; do
+    #         test -d node_modules/$x || echo $x
+    #     done)
+    #     test -z "$npmi" || {
+    #         echo "[gha-bootstrap] npm i $npmi" >&2
+    #         npm install --no-save $npmi 2>/dev/null
+    #     }
+    # fi
+)}
 
-function save_gha_caches() {
-    set -Euo pipefail
-    (
-      set -e
-      parallel --version | head -1
-      echo -n 'ninja: ' ; ninja --version
-      _assert hostname [[ `hostname` =~ windows[-]?2022 ]]
-    ) || _die "[gha-bootstrap] testbin failed"
-
-    ls -1d node_modules/@actions/{core,github,cache,artifact} \
-        || _die "[gha-bootstrap] npm @actions setup incomplete"
-
-    [[ "$restored_bin_id" != undefined ]] || {
-        echo "[gha-bootstrap] attempting to save bin cache... $restored_bin_id" >&2
-        $_fsvr_dir/util/actions-cache.sh save $base-bin-a bin || return 1
-    }
-
-    [[ "$restored_node_modules_id" != undefined ]] || {
-        echo "[gha-bootstrap] attempting to save node_modules cache restored_node_modules_id" >&2
-        $_fsvr_dir/util/actions-cache.sh save $base-node_modules-a node_modules || return 1
-    }
-}
 
 function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
 if is_gha; then
@@ -191,7 +213,7 @@ else
     fsvr_path="$PATH"
     fsvr_repo=local
     fsvr_branch=`git branch --show-current`
-    fsvr_base=`echo $fsvr_branch | grep -Eo '\b[0-9]+[.][0-9]+[.][0-9]+'`
+    fsvr_base=`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`
 fi
 
 echo PATH=$fsvr_path | tee PATH.env
@@ -201,35 +223,55 @@ require_here=`readlink -f ${_fsvr_dir:-fsvr}`
 function require() { source $require_here/$@ ; }
 
 require util/_utils.sh
-
-if is_gha; then
-    restore_gha_caches || _die "!restore_gha_caches"
-    ensure_gha_bin || _die "!ensure_gha_bin"
-    save_gha_caches || _die "!save_gha_caches"
-fi
-
 _assert base test -n "$base"
 _assert repo test -n "$repo"
 _assert branch test -n "$branch"
 
+if is_gha; then
+    restore_gha_caches || _die "!restore_gha_caches"
+    ensure_gha_bin || _die "!ensure_gha_bin"
+
+    # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
+    # (for now this replicates to the "other" non-msys home location)
+    ht-ln bin/parallel-home /c/Users/runneradmin/.parallel
+    
+    initialize_firestorm_checkout || _die "!firestorm_checkout"
+
+    (
+      set -xEuo pipefail
+      set -xe
+      test -f bin/parallel-home/will-cite
+      parallel --version | head -1
+      ninja --version
+      _assert hostname [[ `hostname` =~ windows[-]?2022 ]]
+    ) || _die "bin precache test failed"
+    save_gha_caches || _die "!save_gha_caches"
+
+    echo "$(cat <<EOF
+#!/bin/bash
+set -a -Euo pipefail
+PATH="/bin:/usr/bin:$fsvr_path:/c/Windows/system32"
+. gha-bootstrap.env
+. build/build_vars.env
+./fsvr/util/build.sh "\$@"
+EOF
+)" | tee tmatecmd.sh
+chmod a+x tmatecmd.sh
+
+fi
+
 pwd=`_realpath $PWD`
 
 vars="$(cat <<EOF
+    PARALLEL_HOME=$pwd/bin/parallel-home
+    _home=`_realpath ${USERPROFILE:-$HOME}`
     _bash=$BASH
-    _fsbase=$base
-    _fsrepo=$repo
-    _fsbranch=$branch
-    fsvr_base=$fsvr_base
-    fsvr_repo=$fsvr_repo
-    fsvr_branch=$fsvr_branch
+    firestorm=$repo@$base\#$branch
+    fsvr=$fsvr_repo@$fsvr_branch\#$fsvr_base
     fsvr_path=$fsvr_path
     nunja_dir=$pwd/fsvr/$base
-    p373r_dir=$pwd/p373r-vrmod
-    _home=`_realpath $USERPROFILE`
-    _home_bin=$pwd/bin
+    p373r_dir=$pwd/repo/p373r
     _fsvr_cache=$pwd/cache
-    _path=$fsvr_path
-    PARALLEL_HOME=$pwd/bin/parallel-home
 EOF
 )"
 

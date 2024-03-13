@@ -6,7 +6,6 @@ on:
       inputs:
         fstuple:
           type: string
-          description: fstuple
           default: base=6.6.17 repo=FirestormViewer/phoenix-firestorm branch=Firestorm_6.6.17
           options:
             - base=6.6.17 repo=FirestormViewer/phoenix-firestorm branch=Firestorm_6.6.17
@@ -15,6 +14,8 @@ on:
 defaults:
   run:
     shell: bash
+#   shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+#   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
 env:
    PATH: /c/Program Files/Git/bin:/c/Program Files/Git/usr/bin
@@ -23,30 +24,21 @@ jobs:
   windows_build:
     runs-on: windows-2022
     steps:
+
+    # no-op that pre-populates system-level restore-only and save-only in /d/a/_actions/actions
     - uses: actions/cache@v4
       with:
         lookup-only: true
         key: /dev/null
         path: /dev/null
+
     - name: Output Inputs
       shell: bash
       run: echo "${{ toJSON(github.event.inputs) }}"
 
-    # shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
-#     - name: Probe Git+Bash
-#       shell: bash
-#       run: declare -x > ../_stock_bash.env
-# 
-#     - name: Probe MSYS2 Bash
-#       shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
-#       run: declare -x > ../_msys2_bash.env
-
     - name: Initial Bootstrapping
-      env:
-          GITHUB_TOKEN: ${{ github.token }}
       run: |
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
-        echo "${{ github.token }}" > ~/.github_token
         for x in ${{github.event.inputs.fstuple}}; do
           echo $x | tee -a $GITHUB_ENV
         done
@@ -54,11 +46,12 @@ jobs:
     - name: Run as Action
       uses: ./fsvr/actions_cache_url
       env:
-        foo: var
         _fstuple: ${{github.event.inputs.fstuple}}
         inputs_json: ${{ toJSON(github.event.inputs) }}
       with:
         fstuple: ${{ github.event.inputs.fstuple }}
+        script: ./gha-bootstrap.sh
+        env: ${{ github.event.inputs.fstuple }}
 
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
@@ -66,111 +59,13 @@ jobs:
         foo: bar
       with:
         limit-access-to-actor: true
-    # - name: gha-bootstrap
-    #   run: |
-    #     echo ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL
-    #     env ${{github.event.inputs.fstuple}} ./fsvr/gha-bootstrap.sh
 
-
-    # - name: Initial Bootstrapping
-    #   shell: bash
-    #   env:
-    #       GITHUB_TOKEN: ${{ github.token }}
-    #   run: |
-    #     "/c/Program Files/nodejs/npm" i @actions/cache # @actions/artifact @actions/github
-    #     echo "${{ github.token }}" > ~/.github_token
-    #     # C:/msys64/usr/bin/wget.exe -q https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF}/gha-bootstrap.sh
-    #     # chmod a+x gha-bootstrap.sh
-    #     git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
-    #     env ${{inputs.fstuple}} ./fsvr/gha-bootstrap.sh
-
-#     - name: GHA-specific Tool Installation
-#       run: |
-#         set -Euo pipefail
-# 
-#         mkdir -pv cache/tools
-#         unzip -d $_home_bin $(wget_sha256
-#             bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f
-#             https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-#             cache/tools
-#         )
-# 
-#         tar -xf -C $_home_bin $(wget_sha256
-#             3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782
-#             https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst
-#             cache/tools
-#         )
-# 
-#         # In the spirit of open source collaboration, this build automation
-#         # recognizes the contributions of GNU Parallel, developed by O. Tange.
-#         mkdir -pv ~/.parallel
-#         cat <<_EOF_ > ~/.parallel/will-cite
-#           Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
-#           Zenodo. https://doi.org/10.5281/zenodo.7347980
-#         _EOF_
-#         # preset linelen (avoids "first run" painfully slow autocalculation)
-#         echo 65535 > ~/.parallel/linelen
-# 
-#         # git helper for maybe faster initial clones
-#         cat <<_EOF_ > $_home_bin/git-ghafastclone
-#         #/bin/bash
-#         [[ "$@" =~ --(help|version) ]] && { echo "inline" ; exit 0 ; }
-#         set -Exuo pipefail
-#         git clone --quiet --recurse-submodules --filter=tree:0 \
-#             https://github.com/$1.git --branch $2 $3
-#         _EOF_
-# 
-#     - name: Preflight
-#       run: |
-#         echo SHELL=$SHELL BASH=$BASH BASH_SOURCE=$BASH_SOURCE
-#         bash --version | head -1
-#         python --version | head -1
-#         ninja --version | head -1
-#         wget --version | head -1
-#         parallel --version | head -1
-#         git --version | head -1
-#         git ghafastclone --version | head -1
-#     
-#     # - name: cache upstream checkout
-#     #   id: upstream_cache
-#     #   uses: actions/cache@v4
-#     #   with:
-#     #     path: upstream/
-#     #     key: ${{ runner.os }}-${{ env._fsrepo }}-${{ env._fsbranch }}
-# 
-#     - name: Clone Upstreams
-#       # if: steps.upstream_cache.outputs.cache-hit != 'true'
-#       run: |
-#         pwd && pwd -W
-#         set -E
-#         eval `echo checkout=$_fsvr_cache/checkout | tee -a $GITHUB_ENV`
-#         mkdir -pv $checkout
-#         git ghafastclone FirestormViewer/fs-build-variables master ${checkout}/fs-build-variables
-#         git ghafastclone ${_fsrepo} ${_fsbranch} ${checkout}/${_fsbase}
-#  
-#     - name: Clone Sidestreams
-#       run: |
-#         ht-ln ${checkout}/${_fsbase} ${GITHUB_WORKSPACE}
-#         git ghafastclone ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} ${checkout}/fsvr
-#         cd ${checkout}/fsvr
-#         git worktree add ../p373r P373R_6.6.8
-#         # git ghafastclone ${GITHUB_REPOSITORY} P373R_6.6.8 ${checkout}/p373r
-# 
-#     - name: Setup tmate session
-#       uses: mxschmitt/action-tmate@v3
-#       with:
-#         limit-access-to-actor: true
-# 
-#     - name: Nunja Mapping
+#      - name: Nunja Mapping
 #       run: |
 #         mkdir -pv build
 #         ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat $nunja_dir/viewer_version.txt` build/ | tee build/build_vars.env | tee $GITHUB_ENV
 #         ./fsvr/util/generate_msvc_env.bat > build/msvc.env
 # 
-#     # - name: Setup tmate session
-#     #   uses: mxschmitt/action-tmate@v3
-#     #   with:
-#     #     limit-access-to-actor: true
 # 
 #     - name: 010_ensure_build_directories
 #       run: ./fsvr/util/build.sh 010
@@ -184,14 +79,6 @@ jobs:
 #     - name: 050_generate_packages_info_text
 #       run: ./fsvr/util/build.sh 050
 # 
-#     - name: _fsvr_cache
-#       id: _fsvr_cache
-#       uses: actions/cache@v4
-#       with:
-#         path: c:/_fsvr_cache
-#         key: ${{ runner.os }}-${{ env.viewer_version }}-${{ env.version_git_sha }}
-#       # if: steps._fsvr_cache.outputs.cache-hit != 'true'
-# 
 #     - name: 060_download_packages
 #       run: ./fsvr/util/build.sh 060
 # 
@@ -204,21 +91,16 @@ jobs:
 #     - name: 085_prepare_msys_msvc
 #       run: ./fsvr/util/build.sh 085
 # 
-#     # - name: Setup tmate session
-#     #   uses: mxschmitt/action-tmate@v3
-#     #   with:
-#     #     limit-access-to-actor: true
-# 
 #     - name: 090_ninja_preflight
 #       run: ./fsvr/util/build.sh 090
 # 
-# #     - name: 0a0_ninja_build
-# #       run: ./fsvr/util/build.sh 0a0
-# # 
-# #     - name: 0b0_bundle
-# #       run: ./fsvr/util/build.sh 0b0
+#     - name: 0a0_ninja_build
+#       run: ./fsvr/util/build.sh 0a0
 # 
-#     # - name: Setup tmate session
-#     #   uses: mxschmitt/action-tmate@v3
-#     #   with:
-#     #     limit-access-to-actor: true
+#     - name: 0b0_bundle
+#       run: ./fsvr/util/build.sh 0b0
+# 
+#     - name: Setup tmate session
+#       uses: mxschmitt/action-tmate@v3
+#       with:
+#         limit-access-to-actor: true

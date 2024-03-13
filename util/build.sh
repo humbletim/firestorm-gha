@@ -201,7 +201,7 @@ function 070_verify_downloads() {(
 function 080_untar_packages() {(
     _dbgopts
     jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep -vE '^null$' \
-     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && tar -xf $_fsvr_cache/$(basename {})' \
+     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && tar --force-local -xf $_fsvr_cache/$(basename {})' \
        || _die "untar failed $?"
 )}
 
@@ -239,6 +239,10 @@ function 0b0_bundle() {(
 
 function _steps() {
     declare -f | grep '^0.*()' | sed 's@^@    @g;s@()@@' | sort 
+}
+
+function load-level() {
+ /c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoLogo -Command "Get-Counter -Counter '\Processor(_Total)\% Processor Time'  -MaxSamples 1" 2>&1 | /usr/bin/xargs /usr/bin/echo| /usr/bin/grep -Eo '[^ ]+$'
 }
 
 # Check if the script is being sourced
