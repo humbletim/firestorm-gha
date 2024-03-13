@@ -49,7 +49,7 @@ jobs:
         echo "${{ github.token }}" > ~/.github_token
 
     - name: Test action.yml
-      uses: fsvr
+      uses: ./fsvr
 
     # - name: Initial Bootstrapping
     #   shell: bash
