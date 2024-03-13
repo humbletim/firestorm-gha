@@ -52,7 +52,7 @@ jobs:
     - name: Run as Action
       uses: ./fsvr/actions-node-script
       with:
-        environment: *=process.env
+        environment: '*=process.env'
         shell: bash
         run: |
             echo testing 1 2 3
