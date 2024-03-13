@@ -11,7 +11,7 @@ runs:
     - name: test
       shell: bash
       run: |
-        env ${{inputs.fstuple}} ./fsvr/gha-bootstrap.sh
+        env ${{github.event.inputs}} ./fsvr/gha-bootstrap.sh
     # - name: Report migration status
     #   id: database-migration-report
     #   run: if [ $? -eq 0 ]; then echo "report=Migrated database successfully" >> $GITHUB_OUTPUT; else echo "report=Failed to migrate database" >> $GITHUB_OUTPUT; fi
