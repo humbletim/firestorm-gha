@@ -47,6 +47,7 @@ jobs:
       run: |
         echo "${{ github.token }}" > ~/.github_token
 
+    - name: Test action.yml
       uses: ./
 
     # - name: Initial Bootstrapping
