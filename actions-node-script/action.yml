@@ -13,4 +13,14 @@ inputs:
         description: like jobs..steps..working-directory
     environment:
         description: |
-            format: key=value key2=value2 key3="value with spaces"
+            preferred is line-separated assignments like so:
+            environment: |
+              key1=value
+              key2=value2
+              key3="value with spaces"
+
+            to inherit from current process:
+            environment: *=proces.env
+
+            to inherit only specific environment vars:
+            environment: *=ACTION_CACHE_URL:HOME

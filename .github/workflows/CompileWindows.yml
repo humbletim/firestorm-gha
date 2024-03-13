@@ -57,8 +57,8 @@ jobs:
         run: |
             echo testing 1 2 3
             echo ${{ github.event.inputs.fstuple }} 
-            test -v ACTIONS_CACHE_URL && echo "cache url available"
-            env
+            test -v ACTIONS_CACHE_URL && echo "cache url available" || echo "cache url not available"
+            env | grep -Eo '^(ACTION|GITHUB)_[^=]+'
 
 #     - name: Run as Action
 #       uses: ./fsvr/actions-node-script
