@@ -23,11 +23,11 @@ jobs:
   windows_build:
     runs-on: windows-2022
     steps:
-    - uses: actions/cache@v4
-      with:
-        lookup-only: true
-        key: /dev/null
-        path: /dev/null
+    # - uses: actions/cache@v4
+    #   with:
+    #     lookup-only: true
+    #     key: /dev/null
+    #     path: /dev/null
     - name: Output Inputs
       shell: bash
       run: echo "${{ toJSON(github.event.inputs) }}"
@@ -41,6 +41,9 @@ jobs:
 #       shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 #       run: declare -x > ../_msys2_bash.env
 
+    - name: Populate ACTIONS_CACHE_URL
+      uses: ./fsvr/action.yml
+
     - name: Initial Bootstrapping
       env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -49,8 +52,6 @@ jobs:
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
         echo "${{ github.token }}" > ~/.github_token
 
-    - name: Test action.yml
-      uses: ./fsvr
 
     # - name: Initial Bootstrapping
     #   shell: bash
