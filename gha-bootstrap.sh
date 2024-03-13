@@ -1,32 +1,34 @@
 #!/bin/bash
+set -Euo pipefail
 
 fdbgopts="set -Eou pipefail ; trap 'echo err \$? ; exit 1' ERR"
 
-set -Euo pipefail
 echo test to stdout
 echo test to stderr >&2
 
 echo base=$base repo=$repo branch=$branch >&2
 
-
 _gha_PATH=`echo "$(cat <<EOF
 /c/tools/zstd
-/c/PROGRA~1/Git/bin
-/c/PROGRA~1/Git/usr/bin
+/c/Program Files/Git/bin
+/c/Program Files/Git/usr/bin
 /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts
 /c/hostedtoolcache/windows/Python/3.9.13/x64
-/c/PROGRA~1/OpenSSL/bin
+/c/Program Files/OpenSSL/bin
 /c/Windows/System32/OpenSSH
-/c/PROGRA~1/nodejs
-/c/PROGRA~1/LLVM/bin
+/c/Program Files/nodejs
+/c/Program Files/LLVM/bin
 /c/ProgramData/Chocolatey/bin
 EOF
-)" | tr '\n' ':'`
+)" | tr '\n' ':' | sed -e 's@^:@@;s@:$@@'`
 
+# ( while read line; do cygpath -ua "$line" ; done ) | 
 
 # function dup_to_stderr() { $USERPROFILE/bin/bash -c 'tee >(cat >&2)' ;  }
+fsvr_path="$PATH"
 
 function initialize_gha_shell() {
+    set -Euo pipefail
     local userhome=`cygpath -ua $USERPROFILE`
     mkdir -pv $userhome/bin
     fsvr_path="$userhome/bin:$fsvr_path"
@@ -51,6 +53,7 @@ function initialize_gha_shell() {
 }
 
 function initialize_fsvr_gha_checkout() {
+    set -Euo pipefail
     test -d fsvr/.git || {
       git clone --quiet --filter=tree:0 --single-branch --branch $fsvr_branch \
       https://github.com/$fsvr_repo fsvr
@@ -58,6 +61,7 @@ function initialize_fsvr_gha_checkout() {
 }
 
 function _restore_gha_cache() {
+    set -Euo pipefail
     local id=$1
     local cache_id=undefined
     if [[ -s restored_$id && `cat restored_$id` != undefined ]]; then
@@ -77,6 +81,7 @@ restored_bin_id=undefined
 restored_node_modules_id=undefined
 
 function restore_gha_caches() {
+    set -Euo pipefail
     restored_bin_id=$(_restore_gha_cache $base-bin-a bin) \
         || _die "[gha-bootstrap] actions-cache restore bin failed $?"
     echo "[gha-bootstrap] restored_bin_id=$restored_bin_id" >&2
@@ -186,8 +191,8 @@ else
     fsvr_base=`echo $fsvr_branch | grep -Eo '\b[0-9]+[.][0-9]+[.][0-9]+'`
 fi
 
-export PATH=$fsvr_path
-echo PATH=$PATH | tee PATH.env
+echo PATH=$fsvr_path | tee PATH.env
+export "PATH=$fsvr_path"
 
 require_here=`readlink -f ${_fsvr_dir:-fsvr}`
 function require() { source $require_here/$@ ; }
