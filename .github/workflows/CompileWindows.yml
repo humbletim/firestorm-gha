@@ -55,7 +55,7 @@ jobs:
       uses: ./fsvr/actions_cache_url
       env:
         foo: var
-        inputs: ${{ github.event.inputs }}
+        _fstuple: ${{github.event.inputs.fstuple}}
         inputs_json: ${{ toJSON(github.event.inputs) }}
       with:
         fstuple: ${{ github.event.inputs.fstuple }}
