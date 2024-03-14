@@ -19,10 +19,9 @@ _gha_PATH=`echo "$(cat <<EOF
 EOF
 )" | tr '\n' ':' | sed -e 's@^:@@;s@:$@@'`
 
-# ( while read line; do cygpath -ua "$line" ; done ) | 
+# ( while read line; do cygpath -ua "$line" ; done ) |
 
 # function dup_to_stderr() { $USERPROFILE/bin/bash -c 'tee >(cat >&2)' ;  }
-fsvr_path="$PATH"
 
 function _err() { local rc=$1 ; shift; echo "[gha-bootstrap rc=$rc] $@" >&2; return $rc; }
 
@@ -30,7 +29,6 @@ function initialize_gha_shell() {
     set -Euo pipefail
     local userhome=`cygpath -ua $USERPROFILE`
     mkdir -pv $userhome/bin
-    fsvr_path="$userhome/bin:$fsvr_path"
     # if [[ ! -s $userhome/.github_token && -v GITHUB_TOKEN ]]; then
     #   echo "$GITHUB_TOKEN" > $userhome/.github_token
     # fi
@@ -182,7 +180,7 @@ def main():
             sys.stderr.write(line)
 
         # Attempt to read any remaining data (non-blocking)
-        last_data = os.read(STDIN_FILENO, 1024) 
+        last_data = os.read(STDIN_FILENO, 1024)
         if last_data:
             sys.stdout.write(last_data.decode())
             sys.stderr.write(last_data.decode())
@@ -229,25 +227,33 @@ function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
 if is_gha; then
     cd "${GITHUB_WORKSPACE}"
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
-    fsvr_path="$(cygpath -ua bin):$_gha_PATH:/c/Windows/system32"
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
     initialize_gha_shell || exit 100
+    fsvr_path="$(cygpath -ua bin):$_gha_PATH:/c/Windows/system32"
     initialize_fsvr_gha_checkout || exit 99
     fsvr_dir=${fsvr_dir:-fsvr}
 else
     echo "[gha-bootstrap] local dev testing mode" >&2
     # fsvr_path="$(cygpath -ua bin):$PATH"
     fsvr_dir=${fsvr_dir:-.}
-    fsvr_path="$PATH"
+    fsvr_path=$PWD/bin
     fsvr_repo=${fsvr_repo:-local}
     fsvr_branch=${fsvr_branch:-`git branch --show-current`}
     fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
 fi
 
-echo "PATH=$fsvr_path" | tee PATH.env
-export "PATH=$fsvr_path"
+
+# limit path augmentation to values not already imposed from above
+remove_a_from_b() {
+  local a="$1" b="$2"
+  comm -13 <(echo "$a" | tr ':' '\n' | sort -u) <(echo "$b" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
+}
+fsvr_path=$(remove_a_from_b "$PATH" "$fsvr_path")
+
+echo "PATH=$fsvr_path:$PATH" | tee PATH.env
+export "PATH=$fsvr_path:$PATH"
 
 require_here=`readlink -f ${fsvr_dir:-fsvr}`
 function require() { source $require_here/$@ || { echo "error: $@ == $?" >&2 ; exit 253 ; } }
@@ -264,7 +270,7 @@ if is_gha; then
     # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
     # (for now this replicates to the "other" non-msys home location)
     ht-ln bin/parallel-home /c/Users/runneradmin/.parallel
-    
+
     initialize_firestorm_checkout || _die "!firestorm_checkout"
 
     (
@@ -326,12 +332,12 @@ EOF
 # xecho "__hyphen-=yup"
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
+echo "... gha-bootstrap.env" >&2
+eval "$cmds" | tee gha-bootstrap.env
 
 echo "... github_env" >&2
-eval "$cmds" | tee gha-bootstrap.env | {
-  test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; tee -a $GITHUB_ENV ; } 
-}
-test ! -v GITHUB_ENV || {  echo "PATH=$fsvr_path" | tee -a $GITHUB_ENV ; }
+test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; cat gha-bootstrap.env | tee -a $GITHUB_ENV ; }
+# test ! -v GITHUB_ENV || {  echo "PATH=$fsvr_path" | tee -a $GITHUB_ENV ; }
 
 # ( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
 #   | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV

@@ -18,7 +18,7 @@ defaults:
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
 env:
-   PATH: /c/Program Files/Git/bin:/c/Program Files/Git/usr/bin
+   PATH: ${{ env.USERPROFILE }}/bin:${{ github.workspace }}/bin:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin
 
 jobs:
   windows_build:
@@ -88,6 +88,7 @@ jobs:
         which hostname
         which hostname.exe
         hostname
+        test "$hostname" == "windows-2022" || exit 2022
         test -v nunja_dir
         test -d "$nunja_dir"
         
