@@ -69,6 +69,8 @@ jobs:
             *=process.env
 
     - name: Nunja Mapping
+      env:
+        source_dir: repo/$branch
       run: |
         mkdir -pv build
         ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat fsvr/$base/viewer_version.txt` build/ \
