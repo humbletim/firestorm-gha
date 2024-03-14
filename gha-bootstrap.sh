@@ -262,24 +262,24 @@ vars="$(cat <<EOF
     PARALLEL_HOME=$pwd/bin/parallel-home
     _home=`_realpath ${USERPROFILE:-$HOME}`
     _bash=$BASH
-    firestorm=$repo@$base\#$branch
-    fsvr=$fsvr_repo@$fsvr_branch\#$fsvr_base
     fsvr_path=$fsvr_path
     nunja_dir=$pwd/fsvr/$base
     p373r_dir=$pwd/repo/p373r
     _fsvr_cache=$pwd/cache
 EOF
 )"
+    # firestorm=$repo@$base\#$branch
+    # fsvr=$fsvr_repo@$fsvr_branch\#$fsvr_base
 
 echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
 echo "GITHUB_ENV=${GITHUB_ENV:-}"
 
-eval "$cmds" | tee gha-bootstrap.env
+eval "$cmds" | tee gha-bootstrap.env $GITHUB_ENV
 
-( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
-  | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV
+# ( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
+#   | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV
 
 test ! -v GITHUB_PATH || { echo "GITHUB_PATH=$GITHUB_PATH" ; cygpath -pw "$fsvr_path" | tee -a "$GITHUB_PATH" ; }
 
