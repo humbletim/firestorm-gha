@@ -63,7 +63,7 @@ jobs:
     - name: Run as Action
       uses: ./fsvr/actions-node-script
       with:
-        script: ./fsvr/gha-bootstrap.sh
+        run: ./fsvr/gha-bootstrap.sh
         environment: |
             ${{ github.event.inputs.fstuple }}
             *=process.env
