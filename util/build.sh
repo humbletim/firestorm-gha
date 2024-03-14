@@ -52,6 +52,9 @@ function 020_perform_replacements() {(
     # TODO: see if there is a way to opt-out via configuration from flickr/discord integration
     ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
     ht-ln $source_dir/newview/fsdiscordkey.h.in $build_dir/newview/fsdiscordkey.h
+
+    # workaround a windows64 ninja viewer_manifest.py path quirkinesses
+    ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
 )}
 
 function get_msvcdir() {(
@@ -79,9 +82,6 @@ function 085_prepare_msys_msvc() {(
         # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
         python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
     fi
-
-    # workaround a windows64 ninja viewer_manifest.py path quirkinesses
-    ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
 
     # make msvcp140.dll redists easy to reference as build/msvc/
     msvc_dir=$(get_msvcdir) || _die "could not get msvc_dir $(ls -l $build_dir/)"
