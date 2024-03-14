@@ -1,4 +1,7 @@
 #!/bin/bash
+
+incoming_path=$PATH
+
 set -Euo pipefail
 
 fdbgopts="set -Eou pipefail ; trap 'echo err \$? ; exit 1' ERR"
@@ -27,7 +30,8 @@ function _err() { local rc=$1 ; shift; echo "[gha-bootstrap rc=$rc] $@" >&2; ret
 
 function initialize_gha_shell() {
     set -Euo pipefail
-    local userhome=`cygpath -ua $USERPROFILE`
+    which cygpath >/dev/null || return `_err $? "cygpath not found"`;
+    local userhome=`/usr/bin/cygpath -ua $USERPROFILE`
     mkdir -pv $userhome/bin
     # if [[ ! -s $userhome/.github_token && -v GITHUB_TOKEN ]]; then
     #   echo "$GITHUB_TOKEN" > $userhome/.github_token
@@ -41,8 +45,6 @@ function initialize_gha_shell() {
     # cp -uav 'c:/Program Files/Git/usr/bin/tar.exe' bin/
     # export PATH=$userhome/bin:$PATH
 
-    mkdir -pv bin cache #node_modules
-
     # test -d node_modules/@actions/cache || {
     #     echo "[gha-bootstrap] installing @actions/cache" >&2
     #     "/c/Program Files/nodejs/npm" install --no-save @actions/cache 2>/dev/null
@@ -54,11 +56,6 @@ function quiet_clone() {
     git clone --quiet --filter=tree:0 --single-branch \
         https://github.com/$1 --branch $2 $3 2>&1 | grep -vE '^(remote:|Receive|Resolve)' || true
     test -d $3/.git || return 1
-}
-
-function initialize_fsvr_gha_checkout() {
-    set -Euo pipefail
-    test -d fsvr/.git || quiet_clone $fsvr_repo $fsvr_branch fsvr
 }
 
 function initialize_firestorm_checkout() {
@@ -230,10 +227,18 @@ if is_gha; then
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
-    initialize_gha_shell || exit 100
+
+    mkdir -pv bin cache
     fsvr_path="$(cygpath -ua bin):$_gha_PATH:/c/Windows/system32"
+    PATH="$fsvr_path"
+    (
+      set -euo pipefail
+      initialize_gha_shell || exit 100
+      test -d fsvr/.git || quiet_clone $fsvr_repo $fsvr_branch fsvr || exit 233
+    )
+    mkdir -pv bin cache #node_modules
     initialize_fsvr_gha_checkout || exit 99
-    fsvr_dir=${fsvr_dir:-fsvr}
+    fsvr_dir=$PWD/repo/fsvr
 else
     echo "[gha-bootstrap] local dev testing mode" >&2
     # fsvr_path="$(cygpath -ua bin):$PATH"
@@ -250,12 +255,12 @@ remove_a_from_b() {
   local a="$1" b="$2"
   comm -13 <(echo "$a" | tr ':' '\n' | sort -u) <(echo "$b" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
 }
-fsvr_path=$(remove_a_from_b "$PATH" "$fsvr_path")
+fsvr_path=$(remove_a_from_b "$incoming_path" "$fsvr_path")
 
-echo "PATH=$fsvr_path:$PATH" | tee PATH.env
-export "PATH=$fsvr_path:$PATH"
+echo "PATH=$fsvr_path:$incoming_path" | tee PATH.env
+export "PATH=$fsvr_path:$incoming_path"
 
-require_here=`readlink -f ${fsvr_dir:-fsvr}`
+require_here=`readlink -f $fsvr_dir`
 function require() { source $require_here/$@ || { echo "error: $@ == $?" >&2 ; exit 253 ; } }
 
 require util/_utils.sh

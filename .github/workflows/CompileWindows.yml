@@ -40,12 +40,15 @@ jobs:
   
     - name: Output Inputs
       shell: bash
-      run: echo "${{ toJSON(github.event.inputs) }}"
+      run: |
+        echo "${{ toJSON(github.event.inputs) }}"
+        declare -xp PATH
 
     - name: Initial Bootstrapping
       run: |
         # env | sort > initial.env
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
+        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr \
+          && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
         for x in ${{github.event.inputs.fstuple}}; do
           echo $x | tee -a $GITHUB_ENV
         done
