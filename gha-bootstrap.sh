@@ -259,6 +259,8 @@ fi
 pwd=`_realpath $PWD`
 
 vars="$(cat <<EOF
+    firestorm=$repo@$base#$branch
+    fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
     PARALLEL_HOME=$pwd/bin/parallel-home
     _home=`_realpath ${USERPROFILE:-$HOME}`
     _bash=$BASH
@@ -269,26 +271,23 @@ vars="$(cat <<EOF
 EOF
 )"
 
-function xecho() { test -v GITHUB_ENV || return; echo "$@" | tee -a $GITHUB_ENV ; }
-xecho "__slash/=yup"
-xecho "__space =yup"
-xecho "__at@=yup"
-xecho "__percent%=yup"
-xecho "__carrot^=yup"
-xecho "__parens()=yup"
-xecho "__brackets[]=yup"
-xecho "__dots.=yup"
-xecho "__semis;=yup"
-xecho "__commas,=yup"
-xecho "__amper&=yup"
-xecho "__esclaims!=yup"
-xecho "__plus+=yup"
-xecho "__pipe|=yup"
-xecho "__hash#=yup"
-xecho "__hyphen-=yup"
-test ! -v GITHUB_ENV || { echo "firestorm=$repo@$base\\#$branch" | tee -a $GITHUB_ENV ; }
-test ! -v GITHUB_ENV || { echo "fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base" | tee -a $GITHUB_ENV ; }
-
+# function xecho() { test -v GITHUB_ENV || return; echo "$@" | tee -a $GITHUB_ENV ; }
+# xecho "__slash/=yup"
+# xecho "__space =yup"
+# xecho "__at@=yup"
+# xecho "__percent%=yup"
+# xecho "__carrot^=yup"
+# xecho "__parens()=yup"
+# xecho "__brackets[]=yup"
+# xecho "__dots.=yup"
+# xecho "__semis;=yup"
+# xecho "__commas,=yup"
+# xecho "__amper&=yup"
+# xecho "__esclaims!=yup"
+# xecho "__plus+=yup"
+# xecho "__pipe|=yup"
+# xecho "__hash#=yup"
+# xecho "__hyphen-=yup"
 echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
