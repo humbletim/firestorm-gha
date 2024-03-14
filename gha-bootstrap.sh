@@ -221,7 +221,7 @@ EOF
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
-    fsvr_dir=$PWD/repo/fsvr
+    fsvr_dir=${fsvr_dir:-$PWD/repo/fsvr}
 
     export_clean_PATH "$fsvr_path" "$incoming_path"
 
@@ -229,7 +229,7 @@ EOF
     cp -uav 'c:/msys64/usr/bin/wget.exe' $userprofile/bin/
 
     echo "[gha-bootstrap] (interim) PATH=$PATH" >&2
-    test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch fsvr || exit 99
+    test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch $fsvr_dir || exit 99
 
     restore_gha_caches || exit `_err $? "!restore_gha_caches"`
     ensure_gha_bin || exit `_err 4? "!ensure_gha_bin"`
