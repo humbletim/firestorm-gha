@@ -54,8 +54,8 @@ jobs:
             echo $x | tee -a $GITHUB_ENV
           done
           echo fsvr_dir=$PWD/repo/fsvr
-          echo fsvr-action=./repo/fsvr/actions-node-script
         ) | tee -a $GITHUB_ENV
+        ./fsvr/util/_utils.sh ht-ln ./repo/fsvr/actions-node-script ./fsvr-action
 
 #     - name: Run as Action
 #       uses: ./fsvr/actions-node-script
@@ -78,7 +78,7 @@ jobs:
 #         test "$__test" == "true"
 
     - name: GHA Bootstrapping
-      uses: ${{ env.fsvr-action }}
+      uses: ./fsvr-action
       with:
         run: ./fsvr/gha-bootstrap.sh
         environment: |
@@ -133,7 +133,7 @@ jobs:
 #       run: ./fsvr/util/build.sh 070
 # 
     - name: 080_untar_packages
-      uses: ${{ env.fsvr-action }}
+      uses: ./fsvr-action
       with:
         environment: '*=process.env'
         run: |
