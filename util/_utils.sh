@@ -108,7 +108,7 @@ function ht-ln() {
     # note: /J junctions are used; /D directory symbolic links is another option to consider
     test -d $source && opts="/J"
     test -f $source && opts="/H"
-    cmd="env MSYS_NO_PATHCONV=1 $COMSPEC /C \"mklink $opts $(cygpath -w $linkname) $(cygpath -w $source)\""
+    cmd="env MSYS_NO_PATHCONV=1 ${cygpath -m $COMSPEC) /C \"mklink $opts $(cygpath -w $linkname) $(cygpath -w $source)\""
   fi
 
   _relativize "[ht-ln] $cmd" >&2
