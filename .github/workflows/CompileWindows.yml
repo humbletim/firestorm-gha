@@ -63,9 +63,10 @@ jobs:
     - name: Run as Action
       uses: ./fsvr/actions-node-script
       with:
-        fstuple: ${{ github.event.inputs.fstuple }}
-        script: ./gha-bootstrap.sh
-        env: ${{ github.event.inputs.fstuple }}
+        script: ./fsvr/gha-bootstrap.sh
+        environment: |
+            ${{ github.event.inputs.fstuple }}
+            *=process.env
 # 
 #     - name: Setup tmate session
 #       uses: mxschmitt/action-tmate@v3
