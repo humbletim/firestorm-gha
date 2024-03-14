@@ -294,7 +294,7 @@ echo ""
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
 
 echo "GITHUB_ENV=${GITHUB_ENV:-}"
-test ! -v GITHUB_ENV || { eval "$cmds" | tee gha-bootstrap.env $GITHUB_ENV ; }
+test ! -v GITHUB_ENV || { eval "$cmds" | tee gha-bootstrap.env | tee -a $GITHUB_ENV ; }
 
 # ( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
 #   | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV
