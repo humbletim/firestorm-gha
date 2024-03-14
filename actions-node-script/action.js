@@ -5,7 +5,6 @@ const child_process = require('child_process');
 
 var {
     INPUT_environment: environment,
-    INPUT_inputs: inputs,
     INPUT_run: run,
     INPUT_shell: shell,
     "INPUT_working-directory": working_directory,
