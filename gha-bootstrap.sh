@@ -275,5 +275,6 @@ echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
 eval "$cmds" || tee gha-bootstrap.env $GITHUB_ENV
-test ! -v GITHUB_PATH || { echo "$fsvr_path" >> $GITHUB_PATH ; }
+test ! -v GITHUB_PATH || { echo "$fsvr_path" | tee $GITHUB_PATH ; }
+
 exit 0

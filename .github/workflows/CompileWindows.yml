@@ -68,6 +68,12 @@ jobs:
             ${{ github.event.inputs.fstuple }}
             *=process.env
 
+    - name: PATH preflight tests
+      run: |
+        jq --version
+        which cmd.exe
+        hostname
+        
     - name: Nunja Mapping
       env:
         root_dir: repo/${{ env.branch }}
