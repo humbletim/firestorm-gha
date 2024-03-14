@@ -230,7 +230,7 @@ if is_gha; then
 
     mkdir -pv bin cache
     fsvr_path="$(cygpath -ua bin):$_gha_PATH:/c/Windows/system32"
-    PATH="$fsvr_path"
+    export PATH="$fsvr_path"
     (
       set -euo pipefail
       initialize_gha_shell || exit 100
@@ -255,10 +255,10 @@ remove_a_from_b() {
   local a="$1" b="$2"
   comm -13 <(echo "$a" | tr ':' '\n' | sort -u) <(echo "$b" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
 }
-fsvr_path=$(remove_a_from_b "$incoming_path" "$fsvr_path")
+remainder_path=$(remove_a_from_b "$fsvr_path" "$incoming_path")
 
-echo "PATH=$fsvr_path:$incoming_path" | tee PATH.env
-export "PATH=$fsvr_path:$incoming_path"
+echo "PATH=$fsvr_path:$remainder_path" | tee PATH.env
+export "PATH=$fsvr_path:$remainder_path"
 
 require_here=`readlink -f $fsvr_dir`
 function require() { source $require_here/$@ || { echo "error: $@ == $?" >&2 ; exit 253 ; } }
