@@ -195,7 +195,7 @@ function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
 if is_gha; then
     cd "${GITHUB_WORKSPACE}"
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
-    fsvr_path="$(cygpath -ua bin):$_gha_PATH::/c/Windows/system32"
+    fsvr_path="$(cygpath -ua bin):$_gha_PATH:/c/Windows/system32"
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
@@ -246,7 +246,7 @@ if is_gha; then
     echo "$(cat <<EOF
 #!/bin/bash
 set -a -Euo pipefail
-PATH="/bin:/usr/bin:$fsvr_path:/c/Windows/system32"
+PATH="/bin:/usr/bin:$fsvr_path"
 . gha-bootstrap.env
 . build/build_vars.env
 ./fsvr/util/build.sh "\$@"
@@ -275,6 +275,6 @@ echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
 eval "$cmds" || tee gha-bootstrap.env $GITHUB_ENV
-test ! -v GITHUB_PATH || { echo "$fsvr_path" | tee $GITHUB_PATH ; }
+test ! -v GITHUB_PATH || { cygpath -pw "$fsvr_path" | tee $GITHUB_PATH ; }
 
 exit 0
