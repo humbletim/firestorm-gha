@@ -52,7 +52,7 @@ var options = {
 
 var tmp = JSON.parse(JSON.stringify(options));
 if (parsedEnv['*'] === 'process.env') tmp.env = '{ /* inherit process.env + parsed */ }'; 
-console.debug('PARSED_', { exe, 'args: '+JSON.stringify(args), options: tmp, forwardEnv: Object.keys(forwardEnv).length, parsedEnv: parsedEnv })
+console.debug('PARSED_', { exe, args:JSON.stringify(args), options: tmp, forwardEnv: Object.keys(forwardEnv).length, parsedEnv: parsedEnv })
 
 const bash = child_process.spawn(exe, args, options );
 
