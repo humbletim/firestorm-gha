@@ -97,8 +97,7 @@ jobs:
         ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat fsvr/$base/viewer_version.txt` build/ \
            | tee build/build_vars.env | tee $GITHUB_ENV
         ./fsvr/util/generate_msvc_env.bat > build/msvc.env
-        set -x
-        $COMSPEC /C "mklink /J indra $(cygpath -w $root_dir/indra)"
+        ./fsvr/util/_utils.sh ht-ln $root_dir/indra/ indra
 
     - name: 010_ensure_build_directories
       run: ./fsvr/util/build.sh 010
