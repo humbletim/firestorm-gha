@@ -180,7 +180,7 @@ PATH="/bin:/usr/bin:$fsvr_path"
 . build/build_vars.env
 ./fsvr/util/build.sh "\$@"
 EOF
-)" | tee tmatecmd.sh
+)" > tmatecmd.sh
 
 )}
 
@@ -222,7 +222,10 @@ EOF
     fsvr_dir=${fsvr_dir:-$PWD/repo/fsvr}
 
     fsvr_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
-    export PATH="$fsvr_path:$incoming_path"
+    remainder_path=`subtract_paths "$incoming_path" "$fsvr_path"` || exit `_err $? "error"`
+    echo "[fsvr_path] $fsvr_path"
+    echo "[remainder_path ]$remainder_path"
+    export PATH="$fsvr_path:$remainder_path"
 
     mkdir -pv $userprofile/bin bin cache repo
     cp -uav 'c:/msys64/usr/bin/wget.exe' $userprofile/bin/
@@ -260,7 +263,10 @@ else
     fsvr_dir=${fsvr_dir:-.}
 
     fsvr_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
-    export PATH="$fsvr_path:$incoming_path"
+    remainder_path=`subtract_paths "$incoming_path" "$fsvr_path"` || exit `_err $? "error"`
+    echo "[fsvr_path] $fsvr_path"
+    echo "[remainder_path ]$remainder_path"
+    export PATH="$fsvr_path:$remainder_path"
 fi
 
 echo "[gha-bootstra] (final) PATH=$PATH" | /usr/bin/tee PATH.env >&2
