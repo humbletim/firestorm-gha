@@ -44,7 +44,7 @@ jobs:
 
     - name: Initial Bootstrapping
       run: |
-        env | sort > initial.env
+        # env | sort > initial.env
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
         for x in ${{github.event.inputs.fstuple}}; do
           echo $x | tee -a $GITHUB_ENV
@@ -66,7 +66,7 @@ jobs:
     - name: PATH/ENV preflight tests
       run: |
         set -x
-        env | sort > after.env ; diff initial.env after.env || true
+        # env | sort > after.env ; diff initial.env after.env || true
         test -v __test
         test "$__test" == "true"
 
@@ -81,11 +81,11 @@ jobs:
     - name: PATH/ENV preflight tests
       run: |
         set -x
-        env | sort > after-gha.env ; diff after.env after-gha.env || true
+        # env | sort > after-gha.env ; diff after.env after-gha.env || true
         jq --version
         which cmd.exe
         hostname
-        env
+        # env
         test -v nunja_dir
         test -d "$nunja_dir"
         
