@@ -49,9 +49,13 @@ jobs:
         # env | sort > initial.env
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} repo/fsvr \
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
-        for x in ${{github.event.inputs.fstuple}}; do
-          echo $x | tee -a $GITHUB_ENV
-        done
+        (
+          for x in ${{github.event.inputs.fstuple}}; do
+            echo $x | tee -a $GITHUB_ENV
+          done
+          echo fsvr_dir=$PWD/repo/fsvr
+          echo fsvr-action=./repo/fsvr/actions-node-script
+        ) | tee -a $GITHUB_ENV
 
 #     - name: Run as Action
 #       uses: ./fsvr/actions-node-script
@@ -74,7 +78,7 @@ jobs:
 #         test "$__test" == "true"
 
     - name: GHA Bootstrapping
-      uses: ./fsvr/actions-node-script
+      uses: ${{ env.fsvr-action }}
       with:
         run: ./fsvr/gha-bootstrap.sh
         environment: |
@@ -129,7 +133,7 @@ jobs:
 #       run: ./fsvr/util/build.sh 070
 # 
     - name: 080_untar_packages
-      uses: ./fsvr/actions-node-script
+      uses: ${{ env.fsvr-action }}
       with:
         environment: '*=process.env'
         run: |
