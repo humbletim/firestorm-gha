@@ -69,7 +69,6 @@ jobs:
         env | sort > after.env ; diff initial.env after.env || true
         test -v __test
         test "$__test" == "true"
-        exit 1
 
     - name: Run as Action
       uses: ./fsvr/actions-node-script
