@@ -190,7 +190,7 @@ function export_clean_PATH() {
   local a="$1" b="$2"
   function remove_a_from_b() {
     local a="$1" b="$2"
-    comm -13 <(echo "$a" | tr ':' '\n' | sort -u) <(echo "$b" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
+    PATH=/usr/bin:/bin comm -13 <(echo "$a" | tr ':' '\n' | sort -u) <(echo "$b" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
   }
   local remainder_path=$(remove_a_from_b "$a" "$b")
   export "PATH=$a:$b"
