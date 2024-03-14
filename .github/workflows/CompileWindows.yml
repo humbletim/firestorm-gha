@@ -67,6 +67,17 @@ jobs:
         environment: |
             ${{ github.event.inputs.fstuple }}
             *=process.env
+
+    - name: Nunja Mapping
+        run: |
+            mkdir -pv build
+            ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat fsvr/$base/viewer_version.txt` build/ \
+               | tee build/build_vars.env | tee $GITHUB_ENV
+            ./fsvr/util/generate_msvc_env.bat > build/msvc.env
+
+    - name: 010_ensure_build_directories
+      run: ./fsvr/util/build.sh 010
+
 # 
 #     - name: Setup tmate session
 #       uses: mxschmitt/action-tmate@v3
@@ -75,11 +86,6 @@ jobs:
 #       with:
 #         limit-access-to-actor: true
 
-#      - name: Nunja Mapping
-#       run: |
-#         mkdir -pv build
-#         ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat $nunja_dir/viewer_version.txt` build/ | tee build/build_vars.env | tee $GITHUB_ENV
-#         ./fsvr/util/generate_msvc_env.bat > build/msvc.env
 # 
 # 
 #     - name: 010_ensure_build_directories
