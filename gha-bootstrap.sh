@@ -274,6 +274,7 @@ EOF
 echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
+echo "GITHUB_ENV=$GITHUB_ENV"
 eval "$cmds" || tee gha-bootstrap.env $GITHUB_ENV
 test ! -v GITHUB_PATH || { cygpath -pw "$fsvr_path" | tee $GITHUB_PATH ; }
 
