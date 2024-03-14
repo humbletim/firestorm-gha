@@ -1,37 +1,43 @@
 #!/bin/bash
-
-incoming_path=$PATH
-
 set -Euo pipefail
-
-fdbgopts="set -Eou pipefail ; trap 'echo err \$? ; exit 1' ERR"
 
 echo base=$base repo=$repo branch=$branch >&2
 
-_gha_PATH=`echo "$(cat <<EOF
-/c/tools/zstd
-/c/Program Files/Git/bin
-/c/Program Files/Git/usr/bin
-/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts
-/c/hostedtoolcache/windows/Python/3.9.13/x64
-/c/Program Files/OpenSSL/bin
-/c/Windows/System32/OpenSSH
-/c/Program Files/nodejs
-/c/Program Files/LLVM/bin
-/c/ProgramData/Chocolatey/bin
+incoming_path=$PATH
+
+
+function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
+
+if is_gha ; then
+    programfiles=$(/usr/bin/cygpath -ua "$PROGRAMFILES")
+    _gha_PATH=$(cat<<EOF | /usr/bin/tr '\n' ':' | /usr/bin/sed -e 's@^ \+@@;s@: \+@:@g;s@^:@@;s@:$@@'
+      /c/tools/zstd
+      $programfiles/Git/bin
+      $programfiles/Git/usr/bin
+      /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts
+      /c/hostedtoolcache/windows/Python/3.9.13/x64
+      $programfiles/OpenSSL/bin
+      /c/Windows/System32/OpenSSH
+      $programfiles/nodejs
+      $programfiles/LLVM/bin
+      /c/ProgramData/Chocolatey/bin
 EOF
-)" | tr '\n' ':' | sed -e 's@^:@@;s@:$@@'`
+)
+    fsvr_path="$(/usr/bin/cygpath -ua bin):$_gha_PATH:/c/Windows/system32"
+    export PATH="$fsvr_path"
+    echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
+    echo "[gha-bootstrap] (interim) PATH=$PATH" >&2
+fi
 
+# fdbgopts="set -Eou pipefail ; trap 'echo err \$? ; exit 1' ERR"
 # ( while read line; do cygpath -ua "$line" ; done ) |
-
-# function dup_to_stderr() { $USERPROFILE/bin/bash -c 'tee >(cat >&2)' ;  }
 
 function _err() { local rc=$1 ; shift; echo "[gha-bootstrap rc=$rc] $@" >&2; return $rc; }
 
 function initialize_gha_shell() {
     set -Euo pipefail
     which cygpath >/dev/null || return `_err $? "cygpath not found"`;
-    local userhome=`/usr/bin/cygpath -ua $USERPROFILE`
+    local userhome=`cygpath -ua $USERPROFILE`
     mkdir -pv $userhome/bin
     # if [[ ! -s $userhome/.github_token && -v GITHUB_TOKEN ]]; then
     #   echo "$GITHUB_TOKEN" > $userhome/.github_token
@@ -220,25 +226,23 @@ EOF
 )}
 
 
-function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
 if is_gha; then
     cd "${GITHUB_WORKSPACE}"
-    echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
+
+    mkdir -pv bin cache
+
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
 
-    mkdir -pv bin cache
-    fsvr_path="$(cygpath -ua bin):$_gha_PATH:/c/Windows/system32"
-    export PATH="$fsvr_path"
     (
       set -euo pipefail
       initialize_gha_shell || exit 100
       test -d fsvr/.git || quiet_clone $fsvr_repo $fsvr_branch fsvr || exit 233
     )
-    mkdir -pv bin cache #node_modules
-    initialize_fsvr_gha_checkout || exit 99
     fsvr_dir=$PWD/repo/fsvr
+
+    initialize_fsvr_gha_checkout || exit 99
 else
     echo "[gha-bootstrap] local dev testing mode" >&2
     # fsvr_path="$(cygpath -ua bin):$PATH"
