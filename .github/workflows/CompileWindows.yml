@@ -123,7 +123,7 @@ jobs:
       with:
         environment: '*=process.env'
         run: |
-          INPUT_key=$base-build-packages-a INPUT_path=build/packages \
+          INPUT_key=$base-build-packages-b INPUT_path=build/packages \
             "/c/Program Files/nodejs/node" \
             /d/a/_actions/actions/cache/v4/dist/restore-only/index.js
 

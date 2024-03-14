@@ -268,15 +268,32 @@ vars="$(cat <<EOF
     _fsvr_cache=$pwd/cache
 EOF
 )"
-    # firestorm=$repo@$base\#$branch
-    # fsvr=$fsvr_repo@$fsvr_branch\#$fsvr_base
+test !-v GITHUB_ENV || { echo "firestorm=$repo@$base#$branch" | tee -a $GITHUB_ENV ; }
+test !-v GITHUB_ENV || { echo "fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base" | tee -a $GITHUB_ENV ; }
+
+echo "__hyphen-=yup"
+echo "__slash/=yup"
+echo "__space =yup"
+echo "__at@=yup"
+echo "__percent%=yup"
+echo "__carrot^=yup"
+echo "__hash#=yup"
+echo "__parens()=yup"
+echo "__brackets[]=yup"
+echo "__dots.=yup"
+echo "__semis;=yup"
+echo "__commas,=yup"
+echo "__amper&=yup"
+echo "__esclaims!=yup"
+echo "__plus+=yup"
+echo "__pipe|=yup"
 
 echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
-echo "GITHUB_ENV=${GITHUB_ENV:-}"
 
-eval "$cmds" | tee gha-bootstrap.env $GITHUB_ENV
+echo "GITHUB_ENV=${GITHUB_ENV:-}"
+test ! -v GITHUB_ENV || { eval "$cmds" | tee gha-bootstrap.env $GITHUB_ENV ; }
 
 # ( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
 #   | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV
