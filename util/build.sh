@@ -34,6 +34,27 @@ fsversionvalues=(
  VIEWER_VERSION_REVISION=$version_release
 )
 
+viewer_manifest_patch=$(cat <<'EOF'
+diff --git a/indra/newview/viewer_manifest.py b/indra/newview/viewer_manifest.py
+index 94636371fc..0130b34610 100755
+--- a/indra/newview/viewer_manifest.py
++++ b/indra/newview/viewer_manifest.py
+@@ -1009,10 +1009,10 @@ class Windows_x86_64_Manifest(ViewerManifest):
+                     nsis_path = possible_path
+                     break
+ 
+-        self.run_command([possible_path, '/V2', self.dst_path_of(tempfile)])
++        ###firestorm-gha### self.run_command([possible_path, '/V2', self.dst_path_of(tempfile)])
+ 
+         self.fs_sign_win_installer(substitution_strings) # <FS:ND/> Sign files, step two. Sign installer.
+-        self.fs_save_windows_symbols()
++        ###firestorm-gha###  self.fs_save_windows_symbols()
+ 
+         self.created_path(self.dst_path_of(installer_file))
+         self.package_file = installer_file
+EOF
+)
+
 function 020_perform_replacements() {(
     _dbgopts
 
@@ -55,6 +76,11 @@ function 020_perform_replacements() {(
 
     # workaround a windows64 ninja viewer_manifest.py path quirkinesses
     ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
+
+    grep '###firestorm-gha###' $root_dir/indra/newview/viewer_manifest.py || (
+      set -ex
+      cd $root_dir && echo "$viewer_manifest_patch" | patch -p1
+    )
 )}
 
 function get_msvcdir() {(

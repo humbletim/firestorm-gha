@@ -103,17 +103,21 @@ function ht-ln() {
   # default to linux style hard links
   local cmd="ln -v $source $linkname"
 
+  # but on Linux use symbolic links for directories
+  test -d $source && cmd="ln -vs $source $linkname"
+
   # but on Windows / msys use mklink instead
   if [[ "$OSTYPE" == "msys" ]]; then
-    # note: /J junctions are used; /D directory symbolic links is another option to consider
+    # note: /J junctions are used; /D (directory symbolic) is another option to consider
     test -d $source && opts="/J"
     test -f $source && opts="/H"
-    cmd="env MSYS_NO_PATHCONV=1 $(cygpath -m $COMSPEC) /C \"mklink $opts $(cygpath -w $linkname) $(cygpath -w $source)\""
+    function escape_cygpath() { cygpath "$@" | sed 's@\\@\\\\@g' ; }
+    cmd="env MSYS_NO_PATHCONV=1 $(cygpath -m $COMSPEC) /C \"mklink $opts $(escape_cygpath -w $linkname) $(escape_cygpath -w $source)\""
   fi
 
-  _relativize "[ht-ln] $cmd" >&2
+  type -t _relativize >/dev/null && _relativize "[ht-ln] $cmd" >&2
   test -e "$linkname" && { false && _relativize "skipping (exists) $linkname" >&2 ; return 0; }
-  eval "$cmd"
+  eval "$cmd" || exit $?
 }
 
 # usage: __main__ ${BASH_SOURCE[0]} ${0}
