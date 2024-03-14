@@ -10,7 +10,7 @@ function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
 
 if is_gha ; then
     programfiles=$(/usr/bin/cygpath -ua "$PROGRAMFILES")
-    _gha_PATH=$(cat<<EOF | /usr/bin/tr '\n' ':' | /usr/bin/sed -e 's@^ \+@@;s@: \+@:@g;s@^:@@;s@:$@@'
+    _gha_PATH=$(/usr/bin/cat<<EOF | /usr/bin/tr '\n' ':' | /usr/bin/sed -e 's@^ \+@@;s@: \+@:@g;s@^:@@;s@:$@@'
       /c/tools/zstd
       $programfiles/Git/bin
       $programfiles/Git/usr/bin
@@ -36,7 +36,7 @@ function _err() { local rc=$1 ; shift; echo "[gha-bootstrap rc=$rc] $@" >&2; ret
 
 function initialize_gha_shell() {
     set -Euo pipefail
-    which cygpath >/dev/null || return `_err $? "cygpath not found"`;
+    cygpath -ma . >/dev/null || return `_err $? "cygpath not found"`;
     local userhome=`cygpath -ua $USERPROFILE`
     mkdir -pv $userhome/bin
     # if [[ ! -s $userhome/.github_token && -v GITHUB_TOKEN ]]; then
