@@ -5,57 +5,13 @@ echo base=$base repo=$repo branch=$branch >&2
 
 incoming_path=$PATH
 
-
 function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
 
-if is_gha ; then
-    programfiles=$(/usr/bin/cygpath -ua "$PROGRAMFILES")
-    _gha_PATH=$(/usr/bin/cat<<EOF | /usr/bin/tr '\n' ':' | /usr/bin/sed -e 's@^ \+@@;s@: \+@:@g;s@^:@@;s@:$@@'
-      /c/tools/zstd
-      $programfiles/Git/bin
-      $programfiles/Git/usr/bin
-      /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts
-      /c/hostedtoolcache/windows/Python/3.9.13/x64
-      $programfiles/OpenSSL/bin
-      /c/Windows/System32/OpenSSH
-      $programfiles/nodejs
-      $programfiles/LLVM/bin
-      /c/ProgramData/Chocolatey/bin
-EOF
-)
-    fsvr_path="$(/usr/bin/cygpath -ua bin):$_gha_PATH:/c/Windows/system32"
-    export PATH="$fsvr_path"
-    echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
-    echo "[gha-bootstrap] (interim) PATH=$PATH" >&2
-fi
 
 # fdbgopts="set -Eou pipefail ; trap 'echo err \$? ; exit 1' ERR"
 # ( while read line; do cygpath -ua "$line" ; done ) |
 
 function _err() { local rc=$1 ; shift; echo "[gha-bootstrap rc=$rc] $@" >&2; return $rc; }
-
-function initialize_gha_shell() {
-    set -Euo pipefail
-    cygpath -ma . >/dev/null || return `_err $? "cygpath not found"`;
-    local userhome=`cygpath -ua $USERPROFILE`
-    mkdir -pv $userhome/bin
-    # if [[ ! -s $userhome/.github_token && -v GITHUB_TOKEN ]]; then
-    #   echo "$GITHUB_TOKEN" > $userhome/.github_token
-    # fi
-    # cherry-pick msys64 (to avoid bringing in msys64/usr/bin/*.* to PATH)
-    cp -uav 'c:/msys64/usr/bin/wget.exe' $userhome/bin/
-    # cp -uav 'c:/msys64/usr/bin/more.exe' $userhome/bin/
-    # cp -uav 'c:/Program Files/Git/usr/bin/bash.exe' $userhome/bin/
-    # cp -uav 'c:/msys64/usr/bin/tee.exe' $userhome/bin/
-    # cp -uav 'c:/msys64/usr/bin/cat.exe' $userhome/bin/
-    # cp -uav 'c:/Program Files/Git/usr/bin/tar.exe' bin/
-    # export PATH=$userhome/bin:$PATH
-
-    # test -d node_modules/@actions/cache || {
-    #     echo "[gha-bootstrap] installing @actions/cache" >&2
-    #     "/c/Program Files/nodejs/npm" install --no-save @actions/cache 2>/dev/null
-    # } || return `_err $? "npm i @actions/cache failed"`
-}
 
 function quiet_clone() {
     echo "[gha-bootstrap] quiet_clone $1 $2 $3" >&2
@@ -214,71 +170,73 @@ EOF
         } || return `_err $? "failed to provision parallel $?"`
 
     fi
-    # if [[ -z $restored_node_modules_id ]]; then
-    #     local npmi=$(for x in @actions/artifact @actions/github ; do
-    #         test -d node_modules/$x || echo $x
-    #     done)
-    #     test -z "$npmi" || {
-    #         echo "[gha-bootstrap] npm i $npmi" >&2
-    #         npm install --no-save $npmi 2>/dev/null
-    #     }
-    # fi
+
+    # for using tmate to debug, create a helper script that invokes with current paths
+    echo "$(cat <<EOF
+#!/bin/bash
+set -a -Euo pipefail
+PATH="/bin:/usr/bin:$fsvr_path"
+. gha-bootstrap.env
+. build/build_vars.env
+./fsvr/util/build.sh "\$@"
+EOF
+)" | tee tmatecmd.sh
+
 )}
 
 
-if is_gha; then
+# limit path augmentation to values not already imposed from runner/host environment
+function export_clean_PATH() {
+  local a="$1" b="$2"
+  function remove_a_from_b() {
+    local a="$1" b="$2"
+    comm -13 <(echo "$a" | tr ':' '\n' | sort -u) <(echo "$b" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
+  }
+  local remainder_path=$(remove_a_from_b "$a" "$b")
+  export "PATH=$a:$b"
+}
+
+if is_gha ; then
+    echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
     cd "${GITHUB_WORKSPACE}"
 
-    mkdir -pv bin cache
+    programfiles=`/usr/bin/cygpath -ua "$PROGRAMFILES"`
+    userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
 
+    _gha_PATH=$(/usr/bin/cat<<EOF | /usr/bin/tr '\n' ':' | /usr/bin/sed -e 's@^ \+@@;s@: \+@:@g;s@^:@@;s@:$@@'
+      /c/tools/zstd
+      ${programfiles}/Git/bin
+      ${programfiles}/Git/usr/bin
+      /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts
+      /c/hostedtoolcache/windows/Python/3.9.13/x64
+      ${programfiles}/OpenSSL/bin
+      /c/Windows/System32/OpenSSH
+      ${programfiles}/nodejs
+      ${programfiles}/LLVM/bin
+      /c/ProgramData/Chocolatey/bin
+EOF
+)
+
+    fsvr_path="$userprofile/bin:$PWD/bin:$_gha_PATH:/c/Windows/system32"
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
-
-    (
-      set -euo pipefail
-      initialize_gha_shell || exit 100
-      test -d fsvr/.git || quiet_clone $fsvr_repo $fsvr_branch fsvr || exit 233
-    )
     fsvr_dir=$PWD/repo/fsvr
 
-    initialize_fsvr_gha_checkout || exit 99
-else
-    echo "[gha-bootstrap] local dev testing mode" >&2
-    # fsvr_path="$(cygpath -ua bin):$PATH"
-    fsvr_dir=${fsvr_dir:-.}
-    fsvr_path=$PWD/bin
-    fsvr_repo=${fsvr_repo:-local}
-    fsvr_branch=${fsvr_branch:-`git branch --show-current`}
-    fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
-fi
+    export_clean_PATH "$fsvr_path" "$incoming_path"
 
+    mkdir -pv $userprofile/bin bin cache repo
+    cp -uav 'c:/msys64/usr/bin/wget.exe' $userprofile/bin/
 
-# limit path augmentation to values not already imposed from above
-remove_a_from_b() {
-  local a="$1" b="$2"
-  comm -13 <(echo "$a" | tr ':' '\n' | sort -u) <(echo "$b" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
-}
-remainder_path=$(remove_a_from_b "$fsvr_path" "$incoming_path")
+    echo "[gha-bootstrap] (interim) PATH=$PATH" >&2
+    test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch fsvr || exit 99
 
-echo "PATH=$fsvr_path:$remainder_path" | tee PATH.env
-export "PATH=$fsvr_path:$remainder_path"
-
-require_here=`readlink -f $fsvr_dir`
-function require() { source $require_here/$@ || { echo "error: $@ == $?" >&2 ; exit 253 ; } }
-
-require util/_utils.sh
-_assert base test -n "$base"
-_assert repo test -n "$repo"
-_assert branch test -n "$branch"
-
-if is_gha; then
     restore_gha_caches || _die "!restore_gha_caches"
     ensure_gha_bin || _die "!ensure_gha_bin"
 
     # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
     # (for now this replicates to the "other" non-msys home location)
-    ht-ln bin/parallel-home /c/Users/runneradmin/.parallel
+    $fsvr_dir/util/_utils.sh ht-ln bin/parallel-home $userprofile/.parallel
 
     initialize_firestorm_checkout || _die "!firestorm_checkout"
 
@@ -290,29 +248,31 @@ if is_gha; then
       ninja --version
       _assert hostname [[ `hostname` =~ windows[-]?2022 ]]
     ) || _die "bin precache test failed"
+
     save_gha_caches || _die "!save_gha_caches"
 
-    echo "$(cat <<EOF
-#!/bin/bash
-set -a -Euo pipefail
-PATH="/bin:/usr/bin:$fsvr_path"
-. gha-bootstrap.env
-. build/build_vars.env
-./fsvr/util/build.sh "\$@"
-EOF
-)" | tee tmatecmd.sh
-chmod a+x tmatecmd.sh
+else
+    echo "[gha-bootstrap] local dev testing mode" >&2
+    fsvr_path=$PWD/bin
+    # fsvr_path="$(cygpath -ua bin):$PATH"
+    fsvr_repo=${fsvr_repo:-local}
+    fsvr_branch=${fsvr_branch:-`git branch --show-current`}
+    fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
+    fsvr_dir=${fsvr_dir:-.}
 
+    export_clean_PATH "$fsvr_path" "$incoming_path"
 fi
 
-pwd=`_realpath $PWD`
+echo "[gha-bootstra] (final) PATH=$PATH" | /usr/bin/tee PATH.env >&2
 
-vars="$(cat <<EOF
+pwd=`readlink -f "$PWD"`
+
+vars=$(cat <<EOF
+_home=`readlink -f "${USERPROFILE:-$HOME}"`
+_bash=$BASH
     firestorm=$repo@$base#$branch
     fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
     PARALLEL_HOME=$pwd/bin/parallel-home
-    _home=`_realpath ${USERPROFILE:-$HOME}`
-    _bash=$BASH
     fsvr_path=$fsvr_path
     nunja_dir=$pwd/fsvr/$base
     fsvr_dir=$pwd/repo/fsvr
@@ -320,29 +280,10 @@ vars="$(cat <<EOF
     p373r_dir=$pwd/repo/p373r
     fsvr_cache_dir=$pwd/cache
 EOF
-)"
+)
 
-# function xecho() { test -v GITHUB_ENV || return; echo "$@" | tee -a $GITHUB_ENV ; }
-# xecho "__slash/=yup"
-# xecho "__space =yup"
-# xecho "__at@=yup"
-# xecho "__percent%=yup"
-# xecho "__carrot^=yup"
-# xecho "__parens()=yup"
-# xecho "__brackets[]=yup"
-# xecho "__dots.=yup"
-# xecho "__semis;=yup"
-# xecho "__commas,=yup"
-# xecho "__amper&=yup"
-# xecho "__esclaims!=yup"
-# xecho "__plus+=yup"
-# xecho "__pipe|=yup"
-# xecho "__hash#=yup"
-# xecho "__hyphen-=yup"
-
-cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
 echo "... gha-bootstrap.env" >&2
-eval "$cmds" | tee gha-bootstrap.env
+echo "$vars" | tee gha-bootstrap.env
 
 echo "... github_env" >&2
 test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; cat gha-bootstrap.env | tee -a $GITHUB_ENV ; }
