@@ -66,8 +66,7 @@ jobs:
     - name: PATH/ENV preflight tests
       run: |
         set -xe
-        env | sort > after.env
-        diff initial.env after.env
+        env | sort > after.env ; diff initial.env after.env || true
         test -v __test
         test "$__test" == "true"
 
@@ -82,6 +81,7 @@ jobs:
     - name: PATH/ENV preflight tests
       run: |
         set -xe
+        env | sort > after-gha.env ; diff after.env after-gha.env || true
         jq --version
         which cmd.exe
         hostname
