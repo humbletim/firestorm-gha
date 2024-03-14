@@ -70,9 +70,10 @@ jobs:
 
     - name: Nunja Mapping
       env:
-        source_dir: repo/$branch
+        root_dir: repo/${{ env.branch }}
       run: |
         mkdir -pv build
+        cmd.exe -c "mklink indra $source_dir/indra"
         ./fsvr/util/generate_build_vars.sh Firestorm-VR-GHA `cat fsvr/$base/viewer_version.txt` build/ \
            | tee build/build_vars.env | tee $GITHUB_ENV
         ./fsvr/util/generate_msvc_env.bat > build/msvc.env
