@@ -268,25 +268,26 @@ vars="$(cat <<EOF
     _fsvr_cache=$pwd/cache
 EOF
 )"
-test !-v GITHUB_ENV || { echo "firestorm=$repo@$base#$branch" | tee -a $GITHUB_ENV ; }
-test !-v GITHUB_ENV || { echo "fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base" | tee -a $GITHUB_ENV ; }
 
-echo "__hyphen-=yup"
-echo "__slash/=yup"
-echo "__space =yup"
-echo "__at@=yup"
-echo "__percent%=yup"
-echo "__carrot^=yup"
-echo "__hash#=yup"
-echo "__parens()=yup"
-echo "__brackets[]=yup"
-echo "__dots.=yup"
-echo "__semis;=yup"
-echo "__commas,=yup"
-echo "__amper&=yup"
-echo "__esclaims!=yup"
-echo "__plus+=yup"
-echo "__pipe|=yup"
+function xecho() { test -v GITHUB_ENV || return; echo "$@" | tee -a $GITHUB_ENV ; }
+xecho "__slash/=yup"
+xecho "__space =yup"
+xecho "__at@=yup"
+xecho "__percent%=yup"
+xecho "__carrot^=yup"
+xecho "__parens()=yup"
+xecho "__brackets[]=yup"
+xecho "__dots.=yup"
+xecho "__semis;=yup"
+xecho "__commas,=yup"
+xecho "__amper&=yup"
+xecho "__esclaims!=yup"
+xecho "__plus+=yup"
+xecho "__pipe|=yup"
+xecho "__hash#=yup"
+xecho "__hyphen-=yup"
+test ! -v GITHUB_ENV || { echo "firestorm=$repo@$base\\#$branch" | tee -a $GITHUB_ENV ; }
+test ! -v GITHUB_ENV || { echo "fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base" | tee -a $GITHUB_ENV ; }
 
 echo ""
 

@@ -11,15 +11,18 @@ var {
     GITHUB_WORKSPACE: workspace,
 } = process.env;
 
-console.debug('INPUT_', { run, shell, environment, workspace, working_directory })
+// console.debug('INPUT_', { run, shell, environment, workspace, working_directory })
 
-if (!shell || shell == 'bash') {
-    var bash_exe = process.env.PROGRAMFILES ? `${process.env.PROGRAMFILES}\\Git\\usr\\bin\\bash.exe` : 'bash';
-    shell = `"${bash_exe}" --noprofile --norc -e -o pipefail {0}`
-}
+if (!shell || shell === 'bash' || shell === 'msys2') {
+const exes = {
+  bash: process.env.PROGRAMFILES ? `${process.env.PROGRAMFILES}\\Git\\usr\\bin\\bash.exe` : 'bash',
+  msys2: process.env.GHCUP_MSYS2 ? `${process.env.GHCUP_MSYS2}\\usr\\bin\\bash.exe` : 'msys2',
+};
 
-var exe;
-var args = shell
+var exe = exes[shell] || shell;
+var cmd = `"${exe}" --noprofile --norc -e -o pipefail {0}`;
+    
+var args = cmd
     .replace(/^"([^\"]+)" |^([^ ]+) /, (_, a, b) => { exe=a || b; return ''; })
     .split(/ +/).filter(x=>x!=='');
 
@@ -49,7 +52,7 @@ var options = {
 
 var tmp = JSON.parse(JSON.stringify(options));
 if (parsedEnv['*'] === 'process.env') tmp.env = '{ /* inherit process.env + parsed */ }'; 
-console.debug('PARSED_', { exe, args, options: tmp, forwardEnv: Object.keys(forwardEnv).length, parsedEnv: parsedEnv })
+console.debug('PARSED_', { exe, 'args: '+JSON.stringify(args), options: tmp, forwardEnv: Object.keys(forwardEnv).length, parsedEnv: parsedEnv })
 
 const bash = child_process.spawn(exe, args, options );
 

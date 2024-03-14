@@ -125,7 +125,7 @@ jobs:
           INPUT_key=$base-build-packages-b INPUT_path=build/packages \
             /c/Program\ Files/nodejs/node \
             /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-            | tee /dev/stderr | grep -i 'cache restored' && echo 'yup' || echo 'nope' 
+            | grep -i 'cache restored' && echo 'yup' || echo 'nope' 
 
     # - name: 080_untar_packages
     #   run: ./fsvr/util/build.sh 080
