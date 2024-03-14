@@ -108,9 +108,9 @@ jobs:
 
     - name: 085_prepare_msys_msvc
       run: ./fsvr/util/build.sh 085
-# 
-#     - name: 090_ninja_preflight
-#       run: ./fsvr/util/build.sh 090
+
+    - name: 090_ninja_preflight
+      run: ./fsvr/util/build.sh 090
 # 
 #     - name: 0a0_ninja_build
 #       run: ./fsvr/util/build.sh 0a0
