@@ -1,11 +1,7 @@
 #!/bin/bash
-echo test to stdout $ACTIONS_CACHE_URL
-echo test to stderr >&2
-
 set -Euo pipefail
 
 fdbgopts="set -Eou pipefail ; trap 'echo err \$? ; exit 1' ERR"
-
 
 echo base=$base repo=$repo branch=$branch >&2
 
@@ -278,6 +274,6 @@ EOF
 echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
-eval "$cmds" | tee gha-bootstrap.env
+eval "$cmds" | tee gha-bootstrap.env $GITHUB_ENV
 
 exit 0
