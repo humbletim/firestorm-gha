@@ -18,7 +18,7 @@ defaults:
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
 env:
-   PATH: ${{ env.USERPROFILE }}/bin:${{ github.workspace }}/bin:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin
+   PATH: ${{ github.workspace }}/bin
 
 jobs:
   windows_build:
