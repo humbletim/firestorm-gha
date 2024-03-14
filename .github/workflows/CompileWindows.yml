@@ -74,6 +74,7 @@ jobs:
         jq --version
         which cmd.exe
         hostname
+        env
         test -v nunja_dir
         test -d "$nunja_dir"
         
