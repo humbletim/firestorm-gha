@@ -4,7 +4,7 @@
 
 _fsvr_utils_dir=$(readlink -f $(dirname "$BASH_SOURCE"))
 
-function _dbgopts() { set -Euo pipefail ; }
+_dbgopts='set -Euo pipefail'
 
 _die_exit_code=128
 function _die() { echo -e "[_die] error: $@" >&2 ; exit ${_die_exit_code:-1} ; }
@@ -20,13 +20,9 @@ function _assert() {
 # reverse-susbstitute well known paths for use as tidier debug logging
 function _relativize() {
     local rel="$@"
-    test ! -v build_dir   || rel=${rel//$build_dir/\$build_dir}
-    test ! -v source_dir  || rel=${rel//$source_dir/\$source_dir}
-    test ! -v root_dor    || rel=${rel//$root_dir/\$root_dir}
-    test ! -v _fsvr_dir   || rel=${rel//$_fsvr_dir/\$_fsvr_dir}
-    test ! -v _fsvr_cache || rel=${rel//$_fsvr_cache/\$_fsvr_cache}
-    test ! -v nunja_dir   || rel=${rel//$nunja_dir/\$nunja_dir}
-    test ! -v p373r_dir   || rel=${rel//$p373r_dir/\$p373r_dir}
+    for x in build_dir source_dir root_dir fsvr_dir fsvr_cache_dir nunja_dir p373r_dir openvr_dir ; do
+      test ! -v $x || rel=${rel//${!x}/\{${x}\}}
+    done
     echo $rel
 }
 
@@ -108,8 +104,9 @@ function ht-ln() {
 
   # but on Windows / msys use mklink instead
   if [[ "$OSTYPE" == "msys" ]]; then
-    # note: /J junctions are used; /D (directory symbolic) is another option to consider
+    # for directories /J junctions are used; /D (directory symbolic) is another option to consider
     test -d $source && opts="/J"
+    # for files /H hardlinks are used
     test -f $source && opts="/H"
     function escape_cygpath() { cygpath "$@" | sed 's@\\@\\\\@g' ; }
     cmd="env MSYS_NO_PATHCONV=1 $(cygpath -m $COMSPEC) /C \"mklink $opts $(escape_cygpath -w $linkname) $(escape_cygpath -w $source)\""

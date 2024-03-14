@@ -14,16 +14,19 @@ _assert "invalid channel name" '[[ $viewer_channel =~ ^[-_a-zA-Z0-9.]+$ ]]'
 _assert "invalid version"      '[[ $viewer_version =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]'
 _assert "invalid build_dir"    'test -d $build_dir'
 
+test -v source_dir
+test -v fsvr_dir
+
 _setenv viewer_channel=$viewer_channel
 require generate_version_vars.sh $viewer_version
 require generate_path_vars.sh $build_dir
 require generate_git_vars.sh \
   version_git_sha=$source_dir/.. \
-  version_fsvr_sha=$_fsvr_dir
+  version_fsvr_sha=$fsvr_dir
 
 # version_fsvr_tag=`git tag --contains "$version_fsvr_sha" -n 1`
 # test -n "$version_fsvr_tag" ||
-version_fsvr_tag=`git -C $_fsvr_dir describe --all --always|sed -e 's@.*/@@'`
+version_fsvr_tag=`git -C $fsvr_dir describe --all --always|sed -e 's@.*/@@'`
 # version_fsvr_tag=`git branch --contains "$version_fsvr_sha" --format "%(refname:lstrip=-1)"`
 
 _setenv version_fsvr_tag=$version_fsvr_tag

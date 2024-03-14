@@ -94,7 +94,7 @@ function _restore_gha_cache() {
         cache_id=`cat restored_$id`
     else
         echo "[gha-bootstrap] restoring restored_$id ..." >&2
-        # cache_id=$(NODE_DEBUG=1 $_fsvr_dir/util/actions-cache.sh restore "$@")
+        # cache_id=$(NODE_DEBUG=1 $fsvr_dir/util/actions-cache.sh restore "$@")
         cache_id=$(actions_cache_v4_restore_only "$@") \
             || return `_err $? "actions-cache restore $id failed $?"`
         if [[ $cache_id != "" ]]; then
@@ -130,7 +130,7 @@ function save_gha_caches() {
             echo "[gha-bootstrap] attempting to save $x cache... ${!vid}" >&2
             actions_cache_v4_save_only $base-$x-b $x \
               || return `_err $? "error saving $x $vid"`
-            # $_fsvr_dir/util/actions-cache.sh save $base-bin-a bin || return 1
+            # $fsvr_dir/util/actions-cache.sh save $base-bin-a bin || return 1
         }
     done
 }
@@ -157,12 +157,46 @@ function ensure_gha_bin() {(
 
         test -x bin/hostname.exe || {
             # avoid entropy by hard-coding hostname used by parallel and other tools
-            local gcc=$(cygpath -ms '/c/Program Files/LLVM/bin/clang')
+            local gcc=${CC:-$(cygpath -ms '/c/Program Files/LLVM/bin/clang')}
             echo '
               #include <stdio.h>
-              int main(int argc, char *argv[]) { printf(MESSAGE); return 0; }
+              int main(int argc, char *argv[]) { printf("%s\n", MESSAGE); return 0; }
             ' | $gcc "-DMESSAGE=\"windows-2022\"" -x c - -o bin/hostname.exe
         } || return `_err $? "failed to provision hostname.exe $?"`
+
+        test -x bin/tee || {
+cat <<'EOF' > bin/tee
+#/usr/bin/env python
+import sys
+import os
+import subprocess
+
+def main():
+    if len(sys.argv) >= 2 and sys.argv[1] == "/dev/stderr":
+        # Emulate tee behavior - copy input to both stdout and stderr
+        while True:
+            line = sys.stdin.readline()
+            if not line:
+                break
+            sys.stdout.write(line)
+            sys.stderr.write(line)
+
+        # Attempt to read any remaining data (non-blocking)
+        last_data = os.read(STDIN_FILENO, 1024) 
+        if last_data:
+            sys.stdout.write(last_data.decode())
+            sys.stderr.write(last_data.decode())
+
+    else:
+        # Forward to tar with remaining arguments
+        sys.exitcode = subprocess.call(["/usr/bin/tee"] + sys.argv[1:])
+
+if __name__ == "__main__":
+    main()
+EOF
+          chmod a+x bin/tee
+          echo tee test | tee /dev/stderr >/dev/null
+        }
 
         test -x bin/parallel -a -f bin/parallel-home/will-cite || {
             archive=`wget_sha256 ${wgets[parallel]} .`
@@ -201,22 +235,22 @@ if is_gha; then
     fsvr_base=$base
     initialize_gha_shell || exit 100
     initialize_fsvr_gha_checkout || exit 99
-    _fsvr_dir=fsvr
+    fsvr_dir=${fsvr_dir:-fsvr}
 else
     echo "[gha-bootstrap] local dev testing mode" >&2
     # fsvr_path="$(cygpath -ua bin):$PATH"
-    _fsvr_dir=.
+    fsvr_dir=${fsvr_dir:-.}
     fsvr_path="$PATH"
-    fsvr_repo=local
-    fsvr_branch=`git branch --show-current`
-    fsvr_base=`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`
+    fsvr_repo=${fsvr_repo:-local}
+    fsvr_branch=${fsvr_branch:-`git branch --show-current`}
+    fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
 fi
 
 echo PATH=$fsvr_path | tee PATH.env
 export "PATH=$fsvr_path"
 
-require_here=`readlink -f ${_fsvr_dir:-fsvr}`
-function require() { source $require_here/$@ ; }
+require_here=`readlink -f ${fsvr_dir:-fsvr}`
+function require() { source $require_here/$@ || { echo "error: $@ == $?" >&2 ; exit 253 ; } }
 
 require util/_utils.sh
 _assert base test -n "$base"
@@ -266,8 +300,10 @@ vars="$(cat <<EOF
     _bash=$BASH
     fsvr_path=$fsvr_path
     nunja_dir=$pwd/fsvr/$base
+    fsvr_dir=$pwd/repo/fsvr
+    openvr_dir=$pwd/repo/openvr
     p373r_dir=$pwd/repo/p373r
-    _fsvr_cache=$pwd/cache
+    fsvr_cache_dir=$pwd/cache
 EOF
 )"
 
@@ -292,8 +328,9 @@ echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
 
-echo "GITHUB_ENV=${GITHUB_ENV:-}"
-test ! -v GITHUB_ENV || { eval "$cmds" | tee gha-bootstrap.env | tee -a $GITHUB_ENV ; }
+eval "$cmds" | tee gha-bootstrap.env | {
+  test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; tee -a $GITHUB_ENV ; } 
+}
 
 # ( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
 #   | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV
@@ -303,4 +340,4 @@ test ! -v GITHUB_PATH || { echo "GITHUB_PATH=$GITHUB_PATH" ; cygpath -pw "$fsvr_
 # echo "test_from_gha-bootstrap=true" | tee -a $GITHUB_ENV
 # echo "/c/test_from_gha" | tee -a $GITHUB_PATH
 
-exit 0
+# exit 0

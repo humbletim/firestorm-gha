@@ -50,27 +50,27 @@ jobs:
           echo $x | tee -a $GITHUB_ENV
         done
 
-    - name: Run as Action
-      uses: ./fsvr/actions-node-script
-      with:
-        environment: '*=process.env'
-        shell: bash
-        run: |
-            echo testing 1 2 3
-            echo ${{ github.event.inputs.fstuple }} 
-            test -v ACTIONS_CACHE_URL && echo "cache url available" || echo "cache url not available"
-            env | grep -Eo '^(ACTIONS|GITHUB)_[^=]+'
-            echo "__test=true" | tee -a $GITHUB_ENV
-            echo "/c/nonexistent" | tee -a $GITHUB_PATH
+#     - name: Run as Action
+#       uses: ./fsvr/actions-node-script
+#       with:
+#         environment: '*=process.env'
+#         shell: bash
+#         run: |
+#             echo testing 1 2 3
+#             echo ${{ github.event.inputs.fstuple }} 
+#             test -v ACTIONS_CACHE_URL && echo "cache url available" || echo "cache url not available"
+#             env | grep -Eo '^(ACTIONS|GITHUB)_[^=]+'
+#             echo "__test=true" | tee -a $GITHUB_ENV
+#             echo "/c/nonexistent" | tee -a $GITHUB_PATH
+# 
+#     - name: PATH/ENV preflight tests
+#       run: |
+#         set -x
+#         # env | sort > after.env ; diff initial.env after.env || true
+#         test -v __test
+#         test "$__test" == "true"
 
-    - name: PATH/ENV preflight tests
-      run: |
-        set -x
-        # env | sort > after.env ; diff initial.env after.env || true
-        test -v __test
-        test "$__test" == "true"
-
-    - name: Run as Action
+    - name: GHA Bootstrapping
       uses: ./fsvr/actions-node-script
       with:
         run: ./fsvr/gha-bootstrap.sh
@@ -84,11 +84,18 @@ jobs:
         # env | sort > after-gha.env ; diff after.env after-gha.env || true
         jq --version
         which cmd.exe
+        which hostname
+        which hostname.exe
         hostname
         # env
         test -v nunja_dir
         test -d "$nunja_dir"
         
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: Nunja Mapping
       env:
         root_dir: repo/${{ env.branch }}

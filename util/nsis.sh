@@ -15,7 +15,7 @@ echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $b
 
 tail -2 $build_dir/installer.txt
 
-cat $_fsvr_dir/util/load_with_settings_and_cache_here.bat | envsubst > $build_dir/newview/
+cat $fsvr_dir/util/load_with_settings_and_cache_here.bat | envsubst > $build_dir/newview/
 
 ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
 
@@ -30,7 +30,7 @@ function make_7z() {
 #echo cd $build_dir \&\& echo 7z -bt -t7z a "$root_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"
 #echo cd build-vc170-64 \&\& echo 7z -bt -tzip a "$root_dir/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"
 
-function files2json(){ 
+function files2json(){
   echo { \"$(< $build_dir/installer.txt sed 's/,/":"/g' | paste -s -d, - | sed 's/,/", "/g')\" } |tr '\\' '/' > files.json
 }
 
