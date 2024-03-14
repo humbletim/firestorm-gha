@@ -59,6 +59,15 @@ jobs:
             echo ${{ github.event.inputs.fstuple }} 
             test -v ACTIONS_CACHE_URL && echo "cache url available" || echo "cache url not available"
             env | grep -Eo '^(ACTIONS|GITHUB)_[^=]+'
+            echo "__test=true" | tee -a $GITHUB_ENV
+            echo "/c/nonexistent" | tee -a $GITHUB_PATH
+
+    - name: PATH/ENV preflight tests
+      run: |
+        set -xe
+        env
+        test -v __test
+        test "$__test" == "true"
 
     - name: Run as Action
       uses: ./fsvr/actions-node-script
