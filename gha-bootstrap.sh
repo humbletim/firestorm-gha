@@ -231,14 +231,14 @@ EOF
     echo "[gha-bootstrap] (interim) PATH=$PATH" >&2
     test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch fsvr || exit 99
 
-    restore_gha_caches || _die "!restore_gha_caches"
-    ensure_gha_bin || _die "!ensure_gha_bin"
+    restore_gha_caches || exit `_err $? "!restore_gha_caches"`
+    ensure_gha_bin || exit `_err 4? "!ensure_gha_bin"`
 
     # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
     # (for now this replicates to the "other" non-msys home location)
     $fsvr_dir/util/_utils.sh ht-ln bin/parallel-home $userprofile/.parallel
 
-    initialize_firestorm_checkout || _die "!firestorm_checkout"
+    initialize_firestorm_checkout || `_err $? "!firestorm_checkout"`
 
     (
       set -xEuo pipefail
@@ -246,10 +246,10 @@ EOF
       test -f bin/parallel-home/will-cite
       parallel --version | head -1
       ninja --version
-      _assert hostname [[ `hostname` =~ windows[-]?2022 ]]
-    ) || _die "bin precache test failed"
+      [[ `hostname` =~ windows[-]?2022 ]]
+    ) || exit `_err $? "bin precache test failed"`;
 
-    save_gha_caches || _die "!save_gha_caches"
+    save_gha_caches || `_err $? "!save_gha_caches"`;
 
 else
     echo "[gha-bootstrap] local dev testing mode" >&2
