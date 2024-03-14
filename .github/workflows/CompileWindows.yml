@@ -49,13 +49,13 @@ jobs:
         # env | sort > initial.env
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} repo/fsvr \
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
-        (
+        eval `(
           for x in ${{github.event.inputs.fstuple}}; do
             echo $x | tee -a $GITHUB_ENV
           done
           echo fsvr_dir=$PWD/repo/fsvr
-        ) | tee -a $GITHUB_ENV
-        ./fsvr/util/_utils.sh ht-ln ./repo/fsvr/actions-node-script ./fsvr-action
+        ) | tee -a $GITHUB_ENV`
+        $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
 #     - name: Run as Action
 #       uses: ./fsvr/actions-node-script
