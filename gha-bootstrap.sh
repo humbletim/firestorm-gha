@@ -246,7 +246,7 @@ else
     fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
 fi
 
-echo PATH=$fsvr_path | tee PATH.env
+echo "PATH=$fsvr_path" | tee PATH.env
 export "PATH=$fsvr_path"
 
 require_here=`readlink -f ${fsvr_dir:-fsvr}`
@@ -324,19 +324,19 @@ EOF
 # xecho "__pipe|=yup"
 # xecho "__hash#=yup"
 # xecho "__hyphen-=yup"
-echo ""
 
 cmds="$(echo "$vars" | sed -e 's@^ *@_setenv @')"
 
+echo "... github_env" >&2
 eval "$cmds" | tee gha-bootstrap.env | {
   test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; tee -a $GITHUB_ENV ; } 
 }
-
 test ! -v GITHUB_ENV || {  echo "PATH=$fsvr_path" | tee -a $GITHUB_ENV ; }
 
 # ( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
 #   | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV
 
+echo "... github_path" >&2
 test ! -v GITHUB_PATH || { echo "GITHUB_PATH=$GITHUB_PATH" ; cygpath -pw "$fsvr_path" | tee -a "$GITHUB_PATH" ; }
 
 # echo "test_from_gha-bootstrap=true" | tee -a $GITHUB_ENV
