@@ -186,15 +186,13 @@ EOF
 
 
 # limit path augmentation to values not already imposed from runner/host environment
-function export_clean_PATH() {
-    local a="$1" b="$2"
-    function remove_a_from_b() {
-      local a="$1" b="$2"
-      comm -13 <(echo "$a" | tr ':' '\n' | sort -u) <(echo "$b" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
-    }
-    local remainder_path=$(PATH=/usr/bin:/bin:$PATH remove_a_from_b "$a" "$b")
-    export "PATH=$a:$b"
-}
+function subtract_paths() {(
+    set -aEuo pipefail
+    local candidate="$1" toremove="$2"
+    PATH=/usr/bin:/bin:$PATH
+    comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
+    echo ""
+)}
 
 if is_gha ; then
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
@@ -223,7 +221,8 @@ EOF
     fsvr_base=$base
     fsvr_dir=${fsvr_dir:-$PWD/repo/fsvr}
 
-    export_clean_PATH "$fsvr_path" "$incoming_path"
+    fsvr_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
+    export PATH="$fsvr_path:$incoming_path"
 
     mkdir -pv $userprofile/bin bin cache repo
     cp -uav 'c:/msys64/usr/bin/wget.exe' $userprofile/bin/
@@ -260,7 +259,8 @@ else
     fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
     fsvr_dir=${fsvr_dir:-.}
 
-    export_clean_PATH "$fsvr_path" "$incoming_path"
+    fsvr_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
+    export PATH="$fsvr_path:$incoming_path"
 fi
 
 echo "[gha-bootstra] (final) PATH=$PATH" | /usr/bin/tee PATH.env >&2
@@ -270,15 +270,15 @@ pwd=`readlink -f "$PWD"`
 vars=$(cat <<EOF
 _home=`readlink -f "${USERPROFILE:-$HOME}"`
 _bash=$BASH
-    firestorm=$repo@$base#$branch
-    fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
-    PARALLEL_HOME=$pwd/bin/parallel-home
-    fsvr_path=$fsvr_path
-    nunja_dir=$pwd/fsvr/$base
-    fsvr_dir=$pwd/repo/fsvr
-    openvr_dir=$pwd/repo/openvr
-    p373r_dir=$pwd/repo/p373r
-    fsvr_cache_dir=$pwd/cache
+firestorm=$repo@$base#$branch
+fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
+PARALLEL_HOME=$pwd/bin/parallel-home
+fsvr_path=$fsvr_path
+nunja_dir=$pwd/fsvr/$base
+fsvr_dir=$pwd/repo/fsvr
+openvr_dir=$pwd/repo/openvr
+p373r_dir=$pwd/repo/p373r
+fsvr_cache_dir=$pwd/cache
 EOF
 )
 
