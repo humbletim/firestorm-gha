@@ -58,14 +58,14 @@ jobs:
             echo testing 1 2 3
             echo ${{ github.event.inputs.fstuple }} 
             test -v ACTIONS_CACHE_URL && echo "cache url available" || echo "cache url not available"
-            env | grep -Eo '^(ACTION|GITHUB)_[^=]+'
+            env | grep -Eo '^(ACTIONS|GITHUB)_[^=]+'
 
-#     - name: Run as Action
-#       uses: ./fsvr/actions-node-script
-#       with:
-#         fstuple: ${{ github.event.inputs.fstuple }}
-#         script: ./gha-bootstrap.sh
-#         env: ${{ github.event.inputs.fstuple }}
+    - name: Run as Action
+      uses: ./fsvr/actions-node-script
+      with:
+        fstuple: ${{ github.event.inputs.fstuple }}
+        script: ./gha-bootstrap.sh
+        env: ${{ github.event.inputs.fstuple }}
 # 
 #     - name: Setup tmate session
 #       uses: mxschmitt/action-tmate@v3
