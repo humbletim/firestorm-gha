@@ -81,13 +81,13 @@ jobs:
     - name: PATH/ENV preflight tests
       run: |
         set -x
+        declare -xp PATH
         # env | sort > after-gha.env ; diff after.env after-gha.env || true
         jq --version
         which cmd.exe
         which hostname
         which hostname.exe
         hostname
-        # env
         test -v nunja_dir
         test -d "$nunja_dir"
         

@@ -332,6 +332,8 @@ eval "$cmds" | tee gha-bootstrap.env | {
   test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; tee -a $GITHUB_ENV ; } 
 }
 
+test ! -v GITHUB_ENV || {  echo "PATH=$fsvr_path" | tee -a $GITHUB_ENV ; }
+
 # ( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
 #   | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV
 
