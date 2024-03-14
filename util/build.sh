@@ -113,7 +113,7 @@ function 040_generate_package_infos() {(
     local openvr_dir=$_fsvr_dir/openvr
     _assert openvr 'test -d "$openvr_dir"'
     # set -x
-    if ls -l $_fsvr_cache/openvr-*.tar.* || true; then
+    if ls -l $_fsvr_cache/openvr-*.tar.*; then
       echo "using cached openvr" >&2
     else
       bash $openvr_dir/improvise.sh || _die "openvr/improvise failed"
