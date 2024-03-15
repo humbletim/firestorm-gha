@@ -255,6 +255,34 @@ function 0b0_bundle() {( $_dbgopts;
   make_7zip
 )}
 
+function upload_artifact() {( $_dbgopts;
+    local script=/d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js
+    local INPUT=(zed
+      name
+      path
+      retention-days=1
+      compression-level=0
+      overwrite=false
+      if-no-files-found=error
+    )
+    function _getenv(){ env | grep -E "^$1=" | cut -d '=' -f 2- || true ; }
+    local args=`echo $(for i in "${!INPUT[@]}"; do
+      name="${INPUT[$i]/=*/}"
+      value="${INPUT[$i]/#$name=/}"
+      iv=$(_getenv $name)
+      value="${!i:-${iv:-$value}}"
+      echo INPUT_$name=$(printf "%q" "$value")
+    done) | tee /dev/stderr`
+    local cmd='ls $script ; echo INPUT_name=$INPUT_name hi'
+    PATH="/c/Program Files/nodejs:$PATH" eval env $args "node $script" | tr -d '\n'
+)}
+
+function 0c0_upload_artifacts() {( $_dbgopts;
+  upload_artifact Installer `find . -type f -name Phoenix*.exe |head -1`
+  upload_artifact 7z `find . -type f -name F*.7z |head -1`
+)}
+
+
 function _steps() {
     declare -f | grep '^0.*()' | sed 's@^@    @g;s@()@@' | sort 
 }

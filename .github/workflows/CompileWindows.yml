@@ -173,10 +173,13 @@ jobs:
  
     - name: 0a0_ninja_build
       run: $fsvr_step 0a0
-# 
-#     - name: 0b0_bundle
-#       run: $fsvr_step 0b0
-# 
+
+    - name: 0b0_bundle
+      run: $fsvr_step 0b0
+
+    - name: 0c0_upload_artifacts
+      run: $fsvr_step 0c0
+
     - name: Setup tmate session
       if: failure()
       uses: mxschmitt/action-tmate@v3
