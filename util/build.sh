@@ -33,20 +33,22 @@ fsversionvalues=(
  VIEWER_VERSION_REVISION=$version_release
 )
 
+##############################################################################
 viewer_manifest_patch=$(cat <<'EOF'
 diff --git a/indra/newview/viewer_manifest.py b/indra/newview/viewer_manifest.py
-index 94636371fc..cd5453cc3a 100755
+index 94636371fc..16577204d7 100755
 --- a/indra/newview/viewer_manifest.py
 +++ b/indra/newview/viewer_manifest.py
 @@ -1009,6 +1009,7 @@ class Windows_x86_64_Manifest(ViewerManifest):
                      nsis_path = possible_path
                      break
  
-+        return print("[###firestorm-gha### early exit]") 
++        return print("[###firestorm-gha### early exit]", setattr(self, 'package_file', self.dst_path_of(tempfile)) 
          self.run_command([possible_path, '/V2', self.dst_path_of(tempfile)])
  
          self.fs_sign_win_installer(substitution_strings) # <FS:ND/> Sign files, step two. Sign installer.
 EOF
+##############################################################################
 )
 
 function 020_perform_replacements() {( $_dbgopts;

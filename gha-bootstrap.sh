@@ -122,6 +122,7 @@ function ensure_gha_bin() {(
         } || return `_err $? "failed to provision hostname.exe $?"`
 
         test -x bin/tee || {
+##############################################################################
 cat <<'EOF' > bin/tee
 #/usr/bin/env python
 import sys
@@ -151,6 +152,7 @@ def main():
 if __name__ == "__main__":
     main()
 EOF
+##############################################################################
           chmod a+x bin/tee
           echo tee test | tee /dev/stderr >/dev/null
         }
@@ -162,58 +164,35 @@ EOF
             mkdir -pv bin/parallel-home/tmp/sshlogin/`hostname`/
             echo 65535 > bin/parallel-home/tmp/sshlogin/`hostname`/linelen
 
-                # hereby recognize contributions of GNU Parallel, developed by O. Tange.
+            # hereby recognize contributions of GNU Parallel, developed by O. Tange.
             echo "
               Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
               Zenodo. https://doi.org/10.5281/zenodo.7347980
             " > bin/parallel-home/will-cite
         } || return `_err $? "failed to provision parallel $?"`
-
     fi
 
     # for using tmate to debug, create a helper script that invokes with current paths
-    echo "$(cat <<EOF
+    echo "$(cat <<EOF | envsubst '$fsvr_path'
+##############################################################################
 #!/bin/bash
 set -a -Euo pipefail
 PATH="/bin:/usr/bin:$fsvr_path"
 . gha-bootstrap.env
 . build/build_vars.env
-./fsvr/util/build.sh "\$@"
+./fsvr/util/build.sh "$@"
 EOF
+##############################################################################
 )" > tmatecmd.sh
 
 )}
 
-
-# limit path augmentation to values not already imposed from runner/host environment
-# function subtract_paths() {(
-#     set -aEuo pipefail
-#     local candidate="$1" toremove="$2"
-#     PATH=/usr/bin:/bin:$PATH
-#     comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
-#     echo ""
-# )}
-
-# function subtract_paths() {(
-#   set -aEuo pipefail
-#   local candidate="$1" toremove="$2"
-#   PATH=/usr/bin:/bin:$PATH
-#   local subset=$(comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u))
-#   echo "$subset" | tr '\n' ':' | sed 's/:$//'
-# )}
-
 function subtract_paths() {(
   PATH=/usr/bin:/bin:$PATH
-  set -aEuo pipefail
-  local candidate="$1" toremove="$2"
-  local subset=$(comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u))
-  local output=""
-  while read -r dir; do
-      [[ -z $dir || ! $subset =~ $dir ]] || output+="$dir:"
-  done < <(echo "$candidate" | tr ':' '\n')
-  echo "$output" | sed -e 's@^:+|:+$@@g;'
+  grep -x -vf <(echo "$2" | tr ':' '\n') <(echo "$1" | tr ':' '\n') \
+    | awk '!seen[$0]++' | tr '\n' ':' | sed 's@:$@@' 
+  return 0
 )}
-
 
 if is_gha ; then
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
@@ -242,11 +221,7 @@ EOF
     fsvr_base=$base
     fsvr_dir=${fsvr_dir:-$PWD/repo/fsvr}
 
-    fsvr_path="$userprofile/bin:$PWD/bin:`subtract_paths "$fsvr_path" "$incoming_path:$userprofile/bin:$PWD/bin"`" || exit `_err $? "error"`
-    remainder_path=`subtract_paths "$incoming_path" "$fsvr_path"` || exit `_err $? "error"`
-    echo "[fsvr_path] $fsvr_path"
-    echo "[remainder_path] $remainder_path"
-    export PATH="$fsvr_path:$remainder_path"
+    export PATH=`subtract_paths "$fsvr_path" ""` || exit `_err $? "error"`
 
     mkdir -pv $userprofile/bin bin cache repo
     cp -uav 'c:/msys64/usr/bin/wget.exe' $userprofile/bin/
@@ -276,25 +251,22 @@ EOF
 
 else
     echo "[gha-bootstrap] local dev testing mode" >&2
-    fsvr_path=$PWD/bin
-    # fsvr_path="$(cygpath -ua bin):$PATH"
     fsvr_repo=${fsvr_repo:-local}
     fsvr_branch=${fsvr_branch:-`git branch --show-current`}
     fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
     fsvr_dir=${fsvr_dir:-.}
 
-    fsvr_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
-    remainder_path=`subtract_paths "$incoming_path" "$fsvr_path"` || exit `_err $? "error"`
-    echo "[fsvr_path] $fsvr_path"
-    echo "[remainder_path] $remainder_path"
-    export PATH="$fsvr_path:$remainder_path"
+    echo "[incoming_path] $incoming_path"
+    fsvr_path=${fsvr_path:-$PWD/bin:/usr/bin:/bin}
+    export PATH=`subtract_paths "$fsvr_path" ""`
 fi
 
 echo "[gha-bootstra] (final) PATH=$PATH" | /usr/bin/tee PATH.env >&2
 
 pwd=`readlink -f "$PWD"`
-
+##############################################################################
 vars=$(cat <<EOF
+#!/bin/bash
 _home=`readlink -f "${USERPROFILE:-$HOME}"`
 _bash=$BASH
 firestorm=$repo@$base#$branch
@@ -307,6 +279,7 @@ openvr_dir=$pwd/repo/openvr
 p373r_dir=$pwd/repo/p373r
 fsvr_cache_dir=$pwd/cache
 EOF
+##############################################################################
 )
 
 echo "... gha-bootstrap.env" >&2
@@ -314,15 +287,11 @@ echo "$vars" | tee gha-bootstrap.env
 
 echo "... github_env" >&2
 test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; cat gha-bootstrap.env | tee -a $GITHUB_ENV ; }
-# test ! -v GITHUB_ENV || {  echo "PATH=$fsvr_path" | tee -a $GITHUB_ENV ; }
-
-# ( set -a ; . gha-bootstrap.env ; declare -xp $(grep -Eo "^[^=]+" ./gha-bootstrap.env) ) \
-#   | sed -e 's@declare -x @@' | tee -a $GITHUB_ENV
 
 echo "... github_path" >&2
-test ! -v GITHUB_PATH || { echo "GITHUB_PATH=$GITHUB_PATH" ; cygpath -pw "$fsvr_path" | tee -a "$GITHUB_PATH" ; }
-
-# echo "test_from_gha-bootstrap=true" | tee -a $GITHUB_ENV
-# echo "/c/test_from_gha" | tee -a $GITHUB_PATH
-
-# exit 0
+test ! -v GITHUB_PATH || {
+  echo "GITHUB_PATH=$GITHUB_PATH"
+  new_github_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
+  echo "[new_github_path] $new_github_path"
+  cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
+}

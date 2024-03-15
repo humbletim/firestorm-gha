@@ -163,7 +163,8 @@ jobs:
 #     - name: 0b0_bundle
 #       run: $fsvr_step 0b0
 # 
-#     - name: Setup tmate session
-#       uses: mxschmitt/action-tmate@v3
-#       with:
-#         limit-access-to-actor: true
+    - name: Setup tmate session
+      if: failed()
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
