@@ -173,7 +173,7 @@ EOF
     fi
 
     # for using tmate to debug, create a helper script that invokes with current paths
-    echo "$(cat <<EOF | envsubst '$fsvr_path'
+    echo "$(cat <<'EOF' | envsubst '$fsvr_path'
 ##############################################################################
 #!/bin/bash
 set -a -Euo pipefail
@@ -268,7 +268,7 @@ else
     export PATH=`subtract_paths "$fsvr_path" ""`
 fi
 
-echo "[gha-bootstra] (final) PATH=$PATH" | /usr/bin/tee PATH.env >&2
+echo -n "[gha-bootstra] (final) "; echo "PATH=$PATH" | /usr/bin/tee PATH.env
 
 ##############################################################################
 vars=$(cat <<EOF
@@ -303,5 +303,5 @@ test ! -v GITHUB_PATH || {
   echo "GITHUB_PATH=$GITHUB_PATH"
   new_github_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
   echo "[new_github_path] $new_github_path"
-  cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
+  test -z $new_github_path || cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
 }

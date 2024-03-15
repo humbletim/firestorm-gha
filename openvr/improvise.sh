@@ -31,6 +31,7 @@ cd "$(dirname $0)"
 
 mkdir -pv stage
 
+cp -avu autobuild-package.xml stage/
 (
   set -xEou pipefail
   cd stage
@@ -53,9 +54,9 @@ FILES=(
  lib/release/openvr_api.{dll,lib}
 )
 
-for x in ${FILES[@]} ; do test -s $x || { echo "'$s' invalid" >&2 ; exit 38 ; } ; done
+for x in ${FILES[@]} ; do test -s stage/$x || { echo "'$x' invalid" >&2 ; exit 38 ; } ; done
 
-tar -cjvf $tarball ${FILES[@]}
+tar -C stage -cjvf $tarball ${FILES[@]}
 
 hash=($(md5sum $tarball))
 url="file:///$tarball"
