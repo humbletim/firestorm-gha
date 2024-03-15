@@ -101,14 +101,14 @@ jobs:
         which hostname
         which hostname.exe
         hostname
-        test "$hostname" == "windows-2022" || exit 2022
+        test `hostname` == "windows-2022" || exit 2022
         test -v nunja_dir
         test -d "$nunja_dir"
         
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+    # - name: Setup tmate session
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true
 
     - name: Nunja Mapping
       env:
