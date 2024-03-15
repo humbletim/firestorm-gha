@@ -215,12 +215,12 @@ if is_gha ; then
 EOF
 )
 
-    fsvr_path="$_gha_PATH:/c/Windows/system32"
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
     fsvr_dir=${fsvr_dir:-$PWD/repo/fsvr}
 
+    fsvr_path="$userprofile/bin:$PWD/bin:$_gha_PATH:/c/Windows/system32"
     export PATH=`subtract_paths "$fsvr_path" ""` || exit `_err $? "error"`
 
     mkdir -pv $userprofile/bin bin cache repo
