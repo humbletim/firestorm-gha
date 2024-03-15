@@ -43,7 +43,7 @@ index 94636371fc..16577204d7 100755
                      nsis_path = possible_path
                      break
  
-+        return print("[###firestorm-gha### early exit]", setattr(self, 'package_file', self.dst_path_of(tempfile)) 
++        return print("[###firestorm-gha### early exit]", setattr(self, 'package_file', self.dst_path_of(tempfile)))
          self.run_command([possible_path, '/V2', self.dst_path_of(tempfile)])
  
          self.fs_sign_win_installer(substitution_strings) # <FS:ND/> Sign files, step two. Sign installer.
