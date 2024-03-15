@@ -194,7 +194,8 @@ function subtract_paths() {(
   return 0
 )}
 
-pwd=`readlink -f "$PWD"`
+pwd=$PWD
+if [[ -x /usr/bin/readlink ]]; then pwd=`/usr/bin/readlink -f "$PWD"`; fi
 
 if is_gha ; then
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
