@@ -194,6 +194,8 @@ function subtract_paths() {(
   return 0
 )}
 
+pwd=`readlink -f "$PWD"`
+
 if is_gha ; then
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
     cd "${GITHUB_WORKSPACE}"
@@ -202,6 +204,8 @@ if is_gha ; then
     userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
 
     _gha_PATH=$(/usr/bin/cat<<EOF | /usr/bin/tr '\n' ':' | /usr/bin/sed -e 's@^ \+@@;s@: \+@:@g;s@^:@@;s@:$@@'
+      $userprofile/bin
+      $pwd/bin
       /c/tools/zstd
       ${programfiles}/Git/bin
       ${programfiles}/Git/usr/bin
@@ -212,15 +216,16 @@ if is_gha ; then
       ${programfiles}/nodejs
       ${programfiles}/LLVM/bin
       /c/ProgramData/Chocolatey/bin
+      /c/Windows/system32
 EOF
 )
 
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
-    fsvr_dir=${fsvr_dir:-$PWD/repo/fsvr}
+    fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
 
-    fsvr_path="$userprofile/bin:$PWD/bin:$_gha_PATH:/c/Windows/system32"
+    fsvr_path="$_gha_PATH"
     export PATH=`subtract_paths "$fsvr_path" ""` || exit `_err $? "error"`
 
     mkdir -pv $userprofile/bin bin cache repo
@@ -258,13 +263,12 @@ else
     fsvr_dir=${fsvr_dir:-.}
 
     echo "[incoming_path] $incoming_path"
-    fsvr_path=${fsvr_path:-$PWD/bin:/usr/bin:/bin}
+    fsvr_path=${fsvr_path:-$pwd/bin:/usr/bin:/bin}
     export PATH=`subtract_paths "$fsvr_path" ""`
 fi
 
 echo "[gha-bootstra] (final) PATH=$PATH" | /usr/bin/tee PATH.env >&2
 
-pwd=`readlink -f "$PWD"`
 ##############################################################################
 vars=$(cat <<EOF
 _home=`readlink -f "${USERPROFILE:-$HOME}"`
@@ -286,12 +290,18 @@ echo "... gha-bootstrap.env" >&2
 echo "$vars" | tee gha-bootstrap.env
 
 echo "... github_env" >&2
-test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; cat gha-bootstrap.env | tee -a $GITHUB_ENV ; }
+test ! -v GITHUB_ENV || {
+  echo "GITHUB_ENV=${GITHUB_ENV:-}"
+  (
+    echo "PATH=$(cygpath -pw "`subtract_paths "$fsvr_path" ""`")"
+    cat gha-bootstrap.env
+  ) | tee -a $GITHUB_ENV
+}
 
 echo "... github_path" >&2
 test ! -v GITHUB_PATH || {
   echo "GITHUB_PATH=$GITHUB_PATH"
-  new_github_path=`subtract_paths "$userprofile/bin:$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
+  new_github_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
   echo "[new_github_path] $new_github_path"
   cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
 }
