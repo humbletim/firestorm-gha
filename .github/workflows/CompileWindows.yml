@@ -61,6 +61,10 @@ jobs:
         (
           set +e
           rm -v /c/Windows/system32/hostname.exe
+          rm -v /c/msys64/usr/bin/hostname.exe
+          rm -v /c/msys64/bin/hostname.exe
+          rm -v '/c/Program Files/Git/usr/bin/hostname.exe'
+          rm -v '/c/Program Files/Git/bin/hostname.exe'
           which hostname.exe 2>/dev/null && rm `which hostname.exe`
           which hostname.exe 2>/dev/null && rm `which hostname.exe`
         ) || true

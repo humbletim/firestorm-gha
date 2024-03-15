@@ -163,6 +163,8 @@ EOF
 
             mkdir -pv bin/parallel-home/tmp/sshlogin/`hostname`/
             echo 65535 > bin/parallel-home/tmp/sshlogin/`hostname`/linelen
+            test ! -v HOSTNAME || mkdir -pv bin/parallel-home/tmp/sshlogin/$HOSTNAME/
+            test ! -v HOSTNAME || echo 65535 > bin/parallel-home/tmp/sshlogin/$HOSTNAME/linelen
 
             # hereby recognize contributions of GNU Parallel, developed by O. Tange.
             echo "
