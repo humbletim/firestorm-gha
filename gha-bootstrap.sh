@@ -224,7 +224,8 @@ EOF
     export PATH=`subtract_paths "$fsvr_path" ""` || exit `_err $? "error"`
 
     mkdir -pv $userprofile/bin bin cache repo
-    cp -uav 'c:/msys64/usr/bin/wget.exe' $userprofile/bin/
+    cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
+      $userprofile/bin/
 
     echo "[gha-bootstrap] (interim) PATH=$PATH" >&2
     test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch $fsvr_dir || exit 99
