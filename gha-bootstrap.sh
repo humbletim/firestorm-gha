@@ -203,16 +203,17 @@ EOF
 # )}
 
 function subtract_paths() {(
-  set -aEuo pipefail
-  local candidate="$1" toremove="$2"
-  PATH=/usr/bin:/bin:$PATH
-  local subset=$(comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u))
+  PATH=/usr/bin:/bin:$PATH
+  set -aEuo pipefail
+  local candidate="$1" toremove="$2"
+  local subset=$(comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u))
   local output=""
   while read -r dir; do
       [[ ! $subset =~ $dir ]] || output+="$dir:"
   done < <(echo "$candidate" | tr ':' '\n')
   echo "${output::-1}"
 )}
+
 
 if is_gha ; then
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
