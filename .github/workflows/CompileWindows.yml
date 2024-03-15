@@ -129,6 +129,12 @@ jobs:
     - name: 020_perform_replacements
       run: $fsvr_step 020
 
+    - name: 038_provision_openvr
+      run: $fsvr_step 038
+
+    - name: 039_provision_p373r
+      run: $fsvr_step 039
+
     - name: 040_generate_package_infos
       run: $fsvr_step 040
 
