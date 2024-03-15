@@ -63,7 +63,7 @@ jobs:
           rm -v /c/Windows/system32/hostname.exe
           which hostname.exe 2>/dev/null && rm `which hostname.exe`
           which hostname.exe 2>/dev/null && rm `which hostname.exe`
-        )
+        ) || true
         exit 0
 
 #     - name: Run as Action
