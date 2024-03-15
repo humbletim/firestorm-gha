@@ -280,7 +280,6 @@ PARALLEL_HOME=$pwd/bin/parallel-home
 fsvr_path=$fsvr_path
 fsvr_dir=$pwd/repo/fsvr
 nunja_dir=`$fsvr_dir/util/_utils.sh _realpath $fsvr_dir/$base`
-openvr_dir=$pwd/repo/openvr
 p373r_dir=$pwd/repo/p373r
 fsvr_cache_dir=$pwd/cache
 EOF

@@ -121,14 +121,16 @@ function merge_packages_info() {( $_dbgopts;
 )}
 
 function 038_provision_openvr() {( $_dbgopts;
-    _assert openvr_dir test -v openvr_dir
-    _assert openvr_dir 'test -d "$openvr_dir"'
-    if ls -l $fsvr_cache_dir/openvr-*.tar.*; then
+    # _assert openvr_dir test -v openvr_dir
+    # _assert openvr_dir 'test -d "$openvr_dir"'
+    if ls -l $fsvr_cache_dir/openvr-*.tar.* $fsvr_cache_dir/openvr-*.tar.*.json; then
       echo "using cached openvr" >&2
     else
-      bash $openvr_dir/improvise.sh || _die "openvr/improvise failed"
-      bash $openvr_dir/install.sh || _die "openvr/install failed"
+      bash $fsvr_dir/openvr/improvise.sh || _die "openvr/improvise failed"
+      # bash $openvr_dir/install.sh || _die "openvr/install failed"
     fi
+    # mkdir -pv $openvr_dir/meta
+    # ht-ln $fsvr_cache_dir/openvr-*.tar.*.json $openvr_dir/meta/packages-info.json
     #cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
 )}
 
@@ -149,7 +151,7 @@ function 040_generate_package_infos() {( $_dbgopts;
     cat $fsvr_dir/meta/packages-info.json | envsubst | merge_packages_info
 
     merge_packages_info $nunja_dir/packages-info.json
-    merge_packages_info $openvr_dir/meta/packages-info.json
+    merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json
     merge_packages_info $p373r_dir/meta/packages-info.json
 )}
 
