@@ -291,7 +291,7 @@ test ! -v GITHUB_ENV || { echo "GITHUB_ENV=${GITHUB_ENV:-}" ; cat gha-bootstrap.
 echo "... github_path" >&2
 test ! -v GITHUB_PATH || {
   echo "GITHUB_PATH=$GITHUB_PATH"
-  new_github_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
+  new_github_path=`subtract_paths "$userprofile/bin:$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
   echo "[new_github_path] $new_github_path"
   cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
 }
