@@ -209,9 +209,9 @@ function subtract_paths() {(
   local subset=$(comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u))
   local output=""
   while read -r dir; do
-      [[ ! $subset =~ $dir ]] || output+="$dir:"
+      [[ -z $dir || ! $subset =~ $dir ]] || output+="$dir:"
   done < <(echo "$candidate" | tr ':' '\n')
-  echo "${output::-1}"
+  echo "$output" | sed -e 's@^:+|:+$@@g;'
 )}
 
 
@@ -242,10 +242,10 @@ EOF
     fsvr_base=$base
     fsvr_dir=${fsvr_dir:-$PWD/repo/fsvr}
 
-    fsvr_path=$userprofile/bin:$PWD/bin:`subtract_paths "$fsvr_path" "$incoming_path:$userprofile/bin:$PWD/bin"` || exit `_err $? "error"`
+    fsvr_path="$userprofile/bin:$PWD/bin:`subtract_paths "$fsvr_path" "$incoming_path:$userprofile/bin:$PWD/bin"`" || exit `_err $? "error"`
     remainder_path=`subtract_paths "$incoming_path" "$fsvr_path"` || exit `_err $? "error"`
     echo "[fsvr_path] $fsvr_path"
-    echo "[remainder_path ]$remainder_path"
+    echo "[remainder_path] $remainder_path"
     export PATH="$fsvr_path:$remainder_path"
 
     mkdir -pv $userprofile/bin bin cache repo
@@ -286,7 +286,7 @@ else
     fsvr_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
     remainder_path=`subtract_paths "$incoming_path" "$fsvr_path"` || exit `_err $? "error"`
     echo "[fsvr_path] $fsvr_path"
-    echo "[remainder_path ]$remainder_path"
+    echo "[remainder_path] $remainder_path"
     export PATH="$fsvr_path:$remainder_path"
 fi
 
