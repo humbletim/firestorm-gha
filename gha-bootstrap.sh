@@ -108,8 +108,8 @@ function ensure_gha_bin() {(
     if [[ -z $restored_bin_id ]]; then
         echo "[gha-bootstrap] provisioning ninja and parallel" >&2
         test -f bin/ninja.exe || {
-            archive=`wget_sha256 ${wgets[ninja]} .`
-            unzip -d bin $archive
+            archive=`$fsvr_dir/util/_utils.sh wget_sha256 ${wgets[ninja]} .` \
+            && unzip -d bin $archive
         } || return `_err $? "failed to provision ninja $?"`
 
         test -x bin/hostname.exe || {
@@ -158,7 +158,7 @@ EOF
         }
 
         test -x bin/parallel -a -f bin/parallel-home/will-cite || {
-            archive=`wget_sha256 ${wgets[parallel]} .`
+            archive=`$fsvr_dir/util/_utils.sh wget_sha256 ${wgets[parallel]} .`
             tar -C bin --strip-components=2 -vxf $archive usr/bin/parallel
 
             mkdir -pv bin/parallel-home/tmp/sshlogin/`hostname`/
@@ -239,7 +239,7 @@ EOF
     test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch $fsvr_dir || exit 99
 
     restore_gha_caches || exit `_err $? "!restore_gha_caches"`
-    ensure_gha_bin || exit `_err 4? "!ensure_gha_bin"`
+    ensure_gha_bin || exit `_err $? "!ensure_gha_bin"`
 
     # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
     # (for now this replicates to the "other" non-msys home location)

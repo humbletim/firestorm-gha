@@ -10,6 +10,7 @@ on:
           options:
             - base=6.6.17 repo=FirestormViewer/phoenix-firestorm branch=Firestorm_6.6.17
             - base=7.1.2 repo=FirestormViewer/phoenix-firestorm-alpha branch=master
+            - base=7.1.2 repo=FirestormViewer/phoenix-firestorm branch=7.1.4_Mar14_preview
 
 defaults:
   run:
