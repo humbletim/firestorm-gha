@@ -186,12 +186,32 @@ EOF
 
 
 # limit path augmentation to values not already imposed from runner/host environment
+# function subtract_paths() {(
+#     set -aEuo pipefail
+#     local candidate="$1" toremove="$2"
+#     PATH=/usr/bin:/bin:$PATH
+#     comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
+#     echo ""
+# )}
+
+# function subtract_paths() {(
+#   set -aEuo pipefail
+#   local candidate="$1" toremove="$2"
+#   PATH=/usr/bin:/bin:$PATH
+#   local subset=$(comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u))
+#   echo "$subset" | tr '\n' ':' | sed 's/:$//'
+# )}
+
 function subtract_paths() {(
-    set -aEuo pipefail
-    local candidate="$1" toremove="$2"
-    PATH=/usr/bin:/bin:$PATH
-    comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u) | tr '\n' ':' | sed 's/:$//'
-    echo ""
+  set -aEuo pipefail
+  local candidate="$1" toremove="$2"
+  PATH=/usr/bin:/bin:$PATH
+  local subset=$(comm -13 <(echo "$toremove" | tr ':' '\n' | sort -u) <(echo "$candidate" | tr ':' '\n' | sort -u))
+  local output=""
+  while read -r dir; do
+      [[ ! $subset =~ $dir ]] || output+="$dir:"
+  done < <(echo "$candidate" | tr ':' '\n')
+  echo "${output::-1}"
 )}
 
 if is_gha ; then
