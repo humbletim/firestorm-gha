@@ -64,6 +64,7 @@ jobs:
           which hostname.exe 2>/dev/null && rm `which hostname.exe`
           which hostname.exe 2>/dev/null && rm `which hostname.exe`
         )
+        exit 0
 
 #     - name: Run as Action
 #       uses: ./repo/fsvr/actions-node-script
