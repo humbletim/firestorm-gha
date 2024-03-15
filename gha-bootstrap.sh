@@ -138,6 +138,14 @@ function ensure_gha_bin() {(
         } || return `_err $? "failed to provision parallel $?"`
     fi
 
+    $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/util/tee.py bin/tee
+    (
+      set -ex
+      test `cygpath -ua $(which tee)` == `cygpath -ua bin/tee`
+      test `$( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null` == stderr
+      test `$( echo stdout ; echo stderr >&2 ) | tee /dev/stderr 2>/dev/null` == stdout
+    ) || exit `_err $? "!tee.py setup"`
+
     # for using tmate to debug, create a helper script that invokes with current paths
     echo "$(cat <<'EOF' | envsubst '$fsvr_path'
 ##############################################################################
@@ -204,15 +212,6 @@ EOF
 
     restore_gha_caches || exit `_err $? "!restore_gha_caches"`
     ensure_gha_bin || exit `_err $? "!ensure_gha_bin"`
-
-    $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/util/tee.py bin/tee
-
-    (
-      set -ex
-      test `cygpath -ua $(which tee)` == `cygpath -ua bin/tee`
-      test $( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null) == stderr
-      test $( echo stdout ; echo stderr >&2 ) | tee /dev/stderr 2>/dev/null) == stdout
-    ) || exit `_err $? "!tee.py setup"`
 
     # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
     # (for now this replicates to the "other" non-msys home location)
