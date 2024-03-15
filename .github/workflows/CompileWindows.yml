@@ -58,10 +58,12 @@ jobs:
         ) | tee -a $GITHUB_ENV`
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
-        which hostname.exe && rm -v `which hostname.exe` || true
-        hash || true
-        which hostname && rm -v `which hostname.exe` || true
-        which hostname || true
+        (
+          set +e
+          rm -v /c/Windows/system32/hostname.exe
+          which hostname.exe 2>/dev/null && rm `which hostname.exe`
+          which hostname.exe 2>/dev/null && rm `which hostname.exe`
+        )
 
 #     - name: Run as Action
 #       uses: ./repo/fsvr/actions-node-script
