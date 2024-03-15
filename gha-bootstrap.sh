@@ -267,7 +267,6 @@ echo "[gha-bootstra] (final) PATH=$PATH" | /usr/bin/tee PATH.env >&2
 pwd=`readlink -f "$PWD"`
 ##############################################################################
 vars=$(cat <<EOF
-#!/bin/bash
 _home=`readlink -f "${USERPROFILE:-$HOME}"`
 _bash=$BASH
 firestorm=$repo@$base#$branch
