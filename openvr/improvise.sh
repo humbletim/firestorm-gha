@@ -8,7 +8,7 @@ tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
 function verify_from_packages_json() {
   local tarball=$1 json=${2:-$1.json}
   jq --arg tarball "$tarball" -r '.openvr.hash + "\t" + $tarball' $json \
-     tr -d '\r' | tee >(cat >&2) | md5sum --strict --check
+    | tr -d '\r' | tee >(cat >&2) | md5sum --strict --check
 }
 
 if [[ -s $tarball.json && -s $tarball ]]; then
