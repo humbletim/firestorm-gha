@@ -141,9 +141,9 @@ function ensure_gha_bin() {(
     $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/util/tee.py bin/tee
     (
       set -ex
-      test `cygpath -ua $(which tee)` == `cygpath -ua bin/tee`
-      test `$( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null` == stderr
-      test `$( echo stdout ; echo stderr >&2 ) | tee /dev/stderr 2>/dev/null` == stdout
+      [[ "`cygpath -ua $(which tee)`" == "`cygpath -ua bin/tee`" ]]
+      [[ `$( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null` == stderr ]]
+      [[ `$( echo stdout ; echo stderr >&2 ) | tee /dev/stderr 2>/dev/null` == stdout ]]
     ) || exit `_err $? "!tee.py setup"`
 
     # for using tmate to debug, create a helper script that invokes with current paths
