@@ -121,42 +121,6 @@ function ensure_gha_bin() {(
             ' | $gcc "-DMESSAGE=\"windows-2022\"" -x c - -o bin/hostname.exe
         } || return `_err $? "failed to provision hostname.exe $?"`
 
-        test -x bin/tee || {
-##############################################################################
-cat <<'EOF' > bin/tee
-#/usr/bin/env python
-import sys
-import os
-import subprocess
-
-def main():
-    if len(sys.argv) >= 2 and sys.argv[1] == "/dev/stderr":
-        # Emulate tee behavior - copy input to both stdout and stderr
-        while True:
-            line = sys.stdin.readline()
-            if not line:
-                break
-            sys.stdout.write(line)
-            sys.stderr.write(line)
-
-        # Attempt to read any remaining data (non-blocking)
-        last_data = os.read(STDIN_FILENO, 1024)
-        if last_data:
-            sys.stdout.write(last_data.decode())
-            sys.stderr.write(last_data.decode())
-
-    else:
-        # Forward to tar with remaining arguments
-        sys.exitcode = subprocess.call(["/usr/bin/tee"] + sys.argv[1:])
-
-if __name__ == "__main__":
-    main()
-EOF
-##############################################################################
-          chmod a+x bin/tee
-          echo tee test | tee /dev/stderr >/dev/null
-        }
-
         test -x bin/parallel -a -f bin/parallel-home/will-cite || {
             archive=`$fsvr_dir/util/_utils.sh wget_sha256 ${wgets[parallel]} .`
             tar -C bin --strip-components=2 -vxf $archive usr/bin/parallel
@@ -241,6 +205,15 @@ EOF
     restore_gha_caches || exit `_err $? "!restore_gha_caches"`
     ensure_gha_bin || exit `_err $? "!ensure_gha_bin"`
 
+    $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/util/tee.py bin/tee
+
+    (
+      set -ex
+      test `cygpath -ua $(which tee)` == `cygpath -ua bin/tee`
+      test $( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null) == stderr
+      test $( echo stdout ; echo stderr >&2 ) | tee /dev/stderr 2>/dev/null) == stdout
+    ) || exit `_err $? "!tee.py setup"`
+
     # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
     # (for now this replicates to the "other" non-msys home location)
     $fsvr_dir/util/_utils.sh ht-ln bin/parallel-home $userprofile/.parallel
@@ -305,5 +278,5 @@ test ! -v GITHUB_PATH || {
   echo "GITHUB_PATH=$GITHUB_PATH"
   new_github_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
   echo "[new_github_path] $new_github_path"
-  test -z $new_github_path || cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
+  test -z "$new_github_path" || cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
 }
