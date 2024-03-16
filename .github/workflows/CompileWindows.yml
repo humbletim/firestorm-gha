@@ -125,8 +125,8 @@ jobs:
         test ! -s $_workspace/gha-bootstrap.env || source $_workspace/gha-bootstrap.env
         test ! -s $_workspace/build/build_vars.env || source $_workspace/build/build_vars.env
         if [[ "\${BASH_SOURCE[0]}" == "\${0}" ]]; then
-          echo "[SHELL.sh '\$PATH'] running args='\$@'" >&2
-          exec \$BASH --noprofile --norc -e -o pipefail -c "\${@//\\\\/\\\\\\\\}"
+          echo "[SHELL.sh '\$PATH'] evaluating args='\$@'" >&2
+          eval "\${@//\\\\/\\\\\\\\}"
         else
           echo "[SHELL.sh '\$PATH'] sourced (ignored args='\$@')" >&2
         fi

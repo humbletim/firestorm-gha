@@ -54,6 +54,9 @@ EOF
 function 020_perform_replacements() {( $_dbgopts;
 
     echo "BASH_SOURCE=${BASH_SOURCE[@]}"
+    echo "PATH=$PATH"
+    echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
+
     ls -l /usr/bin/envsubst.exe || true
     which envsubst || exit 58
 
