@@ -167,7 +167,7 @@ jobs:
             echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
         )}
 
-        exec _test_PATH "$@"
+        _test_PATH "$@"
         EOF
         
 
