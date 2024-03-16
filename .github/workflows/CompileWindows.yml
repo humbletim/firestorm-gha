@@ -136,18 +136,18 @@ jobs:
         chmod a+x SHELL.sh
 
         echo "------------------------------------------------------------"
-        echo -e '#!/bin/bash\ndeclare -xp fsvr_dir PATH BASH BASH_SOURCE\nwhich envsubst' | tee SHELL.sh.test.sh
+        echo -e '#!/bin/bash\necho a=\$a | a=b envsubst ' | tee SHELL.sh.test.sh
 
-        set -x
-        ( echo stdout ; echo stderr >&2 ) | 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
-        ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
-        ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
-        ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
-        ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 tee /dev/stderr >/dev/null || true
-        ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
+        # set -x
+        # ( echo stdout ; echo stderr >&2 ) | 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
+        # ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
+        # ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
+        # ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
+        # ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 tee /dev/stderr >/dev/null || true
+        # ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
         mv -v '/c/Program Files/Git/usr/bin/tee.exe' '/c/Program Files/Git/usr/bin/tee.orig.exe'
-        ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
-        ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
+        # ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
+        # ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
 
         echo "------------------------------------------------------------"
         ./SHELL.sh -c '( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true' || true
@@ -160,6 +160,9 @@ jobs:
 
     - name: SHELL.sh test
       run: $_workspace/SHELL.sh.test.sh
+
+    - name: 020_perform_replacements
+      run: $fsvr_step _getenv fsvr_dir PATH
 
     - name: Initial Bootstrapping
       run: |
@@ -181,9 +184,8 @@ jobs:
       with:
         shell: ${{ env.shell }}
         run: |
-          a=b
-          echo $a
-          echo 'a=$a' | envsubst
+          export a=b
+          echo 'a=$a' | env a=b envsubst
 
     - name: GHA Bootstrapping
       uses: ./fsvr-action
