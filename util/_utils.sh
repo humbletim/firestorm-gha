@@ -119,10 +119,20 @@ fi
   eval "$cmd" || exit $?
 }
 
-# usage: __main__ ${BASH_SOURCE[0]} ${0}
+# prevent aggressive /usr/bin:/bin system-level prefixing disrupting custom PATH
+function ht-xpreclude() {
+  exe=$(which "${1}.exe" 2>/dev/null)
+  if [[ -f "$exe" ]]; then mv -v "$exe" "${exe/.exe/.orig.exe}" ; fi
+  exe=$(which "${1}.exe" 2>/dev/null)
+  if [[ -f "$exe" ]]; then mv -v "$exe" "${exe/.exe/.orig.exe}" ; fi
+  exe=$(which "${1}.exe" 2>/dev/null)
+  if [[ -f "$exe" ]]; then mv -v "$exe" "${exe/.exe/.orig.exe}" ; fi
+}
+
+# usage: __utils_main__ ${BASH_SOURCE[0]} ${0}
 #   => if first argument is a declared function, invoke with args
 #      (otherwise no-op)
-function __main__() {
+function __utils_main__() {
   if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     if declare -f "$1" &>/dev/null; then
         # echo "__main__ ${BASH_SOURCE[0]} ${0}" >&2
@@ -133,4 +143,4 @@ function __main__() {
   fi
 }
 
-__main__ "$@"
+__utils_main__ "$@"

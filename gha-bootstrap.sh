@@ -143,7 +143,7 @@ function ensure_gha_bin() {(
       hash
       /usr/bin/which tee
       declare -px PATH
-      [[ "`/usr/bin/cygpath -ma $(/usr/bin/which tee)`" == "`/usr/bin/cygpath -ma bin/tee`" ]] || exit 146
+      [[ "`/usr/bin/cygpath -ma "$(/usr/bin/which tee)"`" == "`/usr/bin/cygpath -ma bin/tee`" ]] || exit 146
       [[ `( echo stdout | tee /dev/stderr | /usr/bin/sed 's@stdout@processed@g') 2>&1` =~ stdout.*processed ]] || exit 147
       [[ `(( echo stdout | tee /dev/stderr ) >/dev/null) 2>&1` =~ stdout ]] || exit 148
     ) || exit `_err $? "!tee.py setup"`
