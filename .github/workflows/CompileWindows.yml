@@ -121,7 +121,7 @@ jobs:
         exit 0
 
     - name: SHELL.sh test
-      run: SHELL.sh.test.sh
+      run: ./SHELL.sh.test.sh
 
     - name: Initial Bootstrapping
       run: |
