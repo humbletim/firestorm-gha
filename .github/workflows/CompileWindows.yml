@@ -167,7 +167,7 @@ jobs:
             echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
         )}
         EOF
-        ;
+        
 
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
@@ -307,5 +307,7 @@ jobs:
     - name: Setup tmate session
       if: failure()
       uses: mxschmitt/action-tmate@v3
+      env:
+         PATH: /c/msys64/usr/bin:${{ env.PATH}}
       with:
         limit-access-to-actor: true
