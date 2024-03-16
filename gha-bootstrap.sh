@@ -136,6 +136,8 @@ function ensure_gha_bin() {(
               Zenodo. https://doi.org/10.5281/zenodo.7347980
             " > bin/parallel-home/will-cite
         } || return `_err $? "failed to provision parallel $?"`
+        $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home $userprofile/.parallel
+        $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home /home/$USERNAME/.parallel
   
     # for using tmate to debug, create a helper script that invokes with current paths
     echo "$(/usr/bin/cat <<'EOF'
@@ -149,6 +151,7 @@ EOF
 ##############################################################################
 )" > tmatecmd.sh
 
+    test ! -f bin/tee || rm -v bin/tee
 )}
 
 function subtract_paths() {(
@@ -171,8 +174,6 @@ if is_gha ; then
 
     userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
     mkdir -pv $userprofile/bin bin cache repo
-    $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home $userprofile/.parallel
-    $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home /home/$USERNAME/.parallel
     cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
       $userprofile/bin/
 
