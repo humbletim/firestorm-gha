@@ -24,8 +24,8 @@ defaults:
 
 env:
     BASH_ENV: ${{ github.workspace }}/SHELL.env
-    SHELL: c:/PROGRA~1/Git/usr/bin/bash.exe
-    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
+    # SHELL: c:/PROGRA~1/Git/usr/bin/bash.exe
+    SHELL: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
 
 
 jobs:
@@ -233,7 +233,7 @@ jobs:
     - name: ./fsvr-action test
       uses: ./fsvr-action
       with:
-        shell: ${{ env.shell }}
+        shell: ${{ env.SHELL }}
         run: |
           export a=b
           echo 'a=$a' | env a=b envsubst
@@ -241,7 +241,7 @@ jobs:
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
-        shell: ${{ env.shell }}
+        shell: ${{ env.SHELL }}
         run: ${{ env.fsvr_dir}}/gha-bootstrap.sh
         environment: |
             ${{ github.event.inputs.fstuple }}
@@ -302,7 +302,7 @@ jobs:
       uses: ./fsvr-action
       with:
         environment: '*=process.env'
-        shell: ${{ env.shell }}
+        shell: ${{ env.SHELL }}
         run: |
           INPUT_key=$base-build-packages-b INPUT_path=build/packages \
             /c/Program\ Files/nodejs/node \
