@@ -28,6 +28,10 @@ function _relativize() {
     echo $rel
 }
 
+#_getenv bypasses bash variables and queries system-level environment (via env)
+# usage: _getenv NAME
+function _getenv(){ /usr/bin/env | /usr/bin/grep -E "^$1=" | /usr/bin/cut -d '=' -f 2- || true ; }
+
 # _setenv exports and emits to stdout a canonicalized name=value argument
 # escaping attempts to emerge both ninja and bash compatible variable assignments
 # example scenarios and escaping:

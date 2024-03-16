@@ -288,8 +288,6 @@ function 0c0_upload_artifacts() {( $_dbgopts;
   upload_artifact 7z `find . -type f -name F*.7z |head -1`
 )}
 
-function _getenv(){ /usr/bin/env | /usr/bin/grep -E "^$1=" | /usr/bin/cut -d '=' -f 2- || true ; }
-
 function _steps() {
     declare -f | grep '^0.*()' | sed 's@^@    @g;s@()@@' | sort 
 }

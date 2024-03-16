@@ -167,7 +167,8 @@ jobs:
         env bash -c 'echo $root_dir'
 
     - name: 020_perform_replacements
-      run: $fsvr_dir/util/_utils.sh _getenv PATH
+      run: |
+        $fsvr_dir/util/_utils.sh _getenv PATH
 
     - name: Initial Bootstrapping
       run: |
