@@ -104,8 +104,8 @@ jobs:
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname "\$@" ; }
         function paralell() { $PWD/bin/paralell "\$@" ; }
-        function envsubst() { $PWD/bin/envsubst "\$@" ; }
-        function wget() { $PWD/bin/wget "\$@" ; }
+        function envsubst() { $_userprofile/bin/envsubst "\$@" ; }
+        function wget() { $_userprofile/bin/wget "\$@" ; }
         declare -xf tee hostname parallel wget
         declare -x PATH="\$PATH::\$_PRESHELL_PATH"
         #echo "[\$BASH_SOURCE SHELL.env... fsvr_dir='\$fsvr_dir' root_dir='\${root_dir:-}'/'\$(env|grep root_dir||true)' '\$(echo \"\$PATH\" | grep -Eo Mongo || true)'"
