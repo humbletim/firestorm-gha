@@ -60,14 +60,14 @@ jobs:
         ) | tee -a $GITHUB_ENV`
 
         ######################################################################
-        echo "$(cat<<'EOF' | fsvr_dir=$fsvr_dir /c/msys64/usr/bin/envsubst.exe '$USERNAME,$PWD,$fsvr_dir'
+        echo "$(cat<<'EOF'
         #!/bin/bash
-        function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "$@" ; }
+        function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
-        declare -x PATH="/c/Users/$USERNAME/bin:$PWD/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
-        if [[ "$1" == "-c" ]] ; then shift ; fi
-        exec "/c/Program Files/Git/usr/bin/bash.exe" -Euo pipefail -c "${@//\\/\\\\}"
+        declare -x PATH="/c/Users/$USERNAME/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
+        if [[ "\$1" == "-c" ]] ; then shift ; fi
+        exec "/c/Program Files/Git/usr/bin/bash.exe" -Euo pipefail -c "\${@//\\\\/\\\\\\\\}"
         EOF
         ######################################################################
         )" | tee SHELL.sh
