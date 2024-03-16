@@ -109,16 +109,14 @@ function ht-ln() {
     test -d "$source" && opts="/J"
     # for files /H hardlinks are used
     test -f "$source" && opts="/H"
-    function escape_cygpath() { /usr/bin/cygpath -ma "$@" | /usr/bin/sed 's@/@\\@g' ; }
-    cmd=$(cat<<EOF
-"$COMSPEC" /C 'mklink $opts "`escape_cygpath "$linkname"`" "`escape_cygpath "$source"`"'
-EOF
-)
-  fi
+    PATH=/usr/bin
+    COMMAND="mklink $opts \"$(/usr/bin/cygpath -wa "$linkname")\" \"$(/usr/bin/cygpath -wa "$source")\""
+    cmd="/c/Windows/system32/cmd.exe //C call $(echo "$COMMAND" | /usr/bin/sed 's@/@//@g;s@\\@\\\\@g') "
+fi
 
   type -t _relativize >/dev/null && _relativize "[ht-ln] $cmd" >&2
   test -e "$linkname" && { false && _relativize "skipping (exists) $linkname" >&2 ; return 0; }
-  MSYS_NO_PATHCONV=1 eval "$cmd" || exit $?
+  eval "$cmd" || exit $?
 }
 
 # usage: __main__ ${BASH_SOURCE[0]} ${0}
