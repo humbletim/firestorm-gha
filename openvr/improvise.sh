@@ -56,6 +56,7 @@ FILES=(
 
 for x in ${FILES[@]} ; do test -s stage/$x || { echo "'$x' invalid" >&2 ; exit 38 ; } ; done
 
+set -x
 tar --force-local -C stage -cjvf $tarball ${FILES[@]}
 
 hash=($(md5sum $tarball))
