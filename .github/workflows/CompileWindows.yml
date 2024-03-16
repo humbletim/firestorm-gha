@@ -56,7 +56,7 @@ jobs:
 
         (
           for x in ${{github.event.inputs.fstuple}}; do
-            echo $x | tee -a $GITHUB_ENV
+            echo $x
           done
           echo fsvr_dir=$PWD/fsvr
           echo fsvr_step=$PWD/fsvr/util/build.sh
@@ -64,10 +64,8 @@ jobs:
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
         ) | tee -a $GITHUB_ENV
 
-        set -x
-
-        . $GITHUB_ENV
-
+        declare -x `cat $GITHUB_ENV`
+        set +a
         env | grep -E '^[_a-z][a-z]'
 
         test -d "$userprofile" || exit 68
