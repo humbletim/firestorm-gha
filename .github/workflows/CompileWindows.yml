@@ -63,9 +63,9 @@ jobs:
         exit 0
 
     - name: XPrecludes
-      env:
-        PATH: '/usr/bin:/bin:/c/Windows/system32:/c/Program Files/Git/usr/bin:/c/Program Files/Git/bin:/c/msys64/bin:/c/msys64/usr/bin'
       run: |
+        export PATH="/c/Users/runneradmin/bin:/d/a/firestorm-gha/firestorm-gha/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32:/c/msys64/usr/bin:/c/msys64/bin"
+        $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 
