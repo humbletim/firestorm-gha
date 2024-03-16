@@ -137,7 +137,6 @@ function ensure_gha_bin() {(
             " > bin/parallel-home/will-cite
         } || return `_err $? "failed to provision parallel $?"`
     # fi
-    cp -auv $fsvr_dir/util/tee.py bin/tee
     (
       set +e
       hash
@@ -213,6 +212,7 @@ EOF
     test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch $fsvr_dir || exit 99
 
     restore_gha_caches || exit `_err $? "!restore_gha_caches"`
+    cp -auv $fsvr_dir/util/tee.py bin/tee
     ensure_gha_bin || exit `_err $? "!ensure_gha_bin"`
 
     # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
