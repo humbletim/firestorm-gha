@@ -62,6 +62,13 @@ jobs:
         $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 
+    - name: XPrecludes
+      env:
+        PATH: '/usr/bin:/bin:/c/Windows/system32'
+      run: |
+        $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
+        exit 0
+
 #     - name: Run as Action
 #       uses: ./repo/fsvr/actions-node-script
 #       with:
