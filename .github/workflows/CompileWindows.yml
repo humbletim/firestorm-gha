@@ -64,8 +64,9 @@ jobs:
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
         ) | tee -a $GITHUB_ENV
 
-        declare -x `cat $GITHUB_ENV`
-        set +a
+
+        set +e
+        declare -x `cat "$GITHUB_ENV"`
         env | grep -E '^[_a-z][a-z]'
 
         test -d "$userprofile" || exit 68
@@ -74,7 +75,6 @@ jobs:
         declare -xp PATH
 
         echo PATH="$PATH" | tee -a $GITHUB_ENV || exit 71
-
 
         which envsubst || true
         mkdir -pv $userprofile/bin
@@ -102,6 +102,8 @@ jobs:
         )" | tee SHELL.sh || exit 75
         chmod a+x SHELL.sh
 
+        echo -e '#!/bin/bash\ndeclare -xp fsvr_dir PATH BASH BASH_SOURCE\nwhich envsubst' | tee SHELL.sh.test.sh
+
         set -x
         ( echo stdout ; echo stderr >&2 ) | 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
         ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
@@ -118,6 +120,9 @@ jobs:
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
 
+    - name: SHELL.sh test
+      run: SHELL.sh.test.sh
+
     - name: Initial Bootstrapping
       run: |
         declare -f tee
@@ -128,12 +133,9 @@ jobs:
         )
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
-        echo -e '#!/bin/bash\ndeclare -xp fsvr_dir PATH BASH BASH_SOURCE\nwhich envsubst' | tee SHELL.sh.test.sh
         # $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 
-    - name: SHELL.sh test
-      run: SHELL.sh.test.sh
 
 
     - name: ./fsvr-action test
