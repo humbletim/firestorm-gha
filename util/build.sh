@@ -51,14 +51,19 @@ EOF
 ##############################################################################
 )
 
-function 020_perform_replacements() {( $_dbgopts;
-
+function _test_PATH() {( $_dbgopts;
     echo "BASH_SOURCE=${BASH_SOURCE[@]}"
     echo "PATH=$PATH"
     echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
 
     ls -l /usr/bin/envsubst.exe || true
     which envsubst || exit 58
+
+    echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
+)}
+
+function 020_perform_replacements() {( $_dbgopts;
+
 
     echo $version_xyzw | tee $build_dir/newview/viewer_version.txt >&2
     ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/

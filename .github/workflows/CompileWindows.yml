@@ -168,7 +168,8 @@ jobs:
 
     - name: 020_perform_replacements
       run: |
-        $fsvr_dir/util/_utils.sh _getenv PATH
+        $fsvr_dir/util/_utils.sh _test_PATH
+        exit 172
 
     - name: Initial Bootstrapping
       run: |
