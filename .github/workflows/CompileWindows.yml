@@ -105,7 +105,7 @@ jobs:
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
         declare -x PATH="\$PATH::\$_PRESHELL_PATH"
-        echo "[\$BASH_SOURCE SHELL.env... fsvr_dir='\$fsvr_dir' root_dir='\${root_dir:-}'/'\$(env|grep root_dir||true)' '\$(echo \"\$PATH\" | grep -Eo Mongo || true)'"
+        #echo "[\$BASH_SOURCE SHELL.env... fsvr_dir='\$fsvr_dir' root_dir='\${root_dir:-}'/'\$(env|grep root_dir||true)' '\$(echo \"\$PATH\" | grep -Eo Mongo || true)'"
         EOF
         )" | tee -a SHELL.env
         echo "------------------------------------------------------------"
