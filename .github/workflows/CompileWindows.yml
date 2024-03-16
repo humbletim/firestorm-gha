@@ -54,6 +54,9 @@ jobs:
 
         . fsvr/util/_utils.sh
 
+        set -xu
+        _setenv setenv_test=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
+        test -d "$setenv_test" || exit `_err $? "!$setenv_test"`
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
         {
@@ -65,11 +68,12 @@ jobs:
           _setenv workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
           _setenv userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
         } | tee -a SHELL.env $GITHUB_ENV
+
         # declare -x `cat "$GITHUB_ENV"`
         env | grep -E '^[_a-z][a-z]'
 
-        test -d "$userprofile" || exit 68
-        test -d "$workspace" || exit 69
+        test -d "$userprofile" || exit `_err $? "!$userprofile"`
+        test -d "$workspace" || exit `_err $? "!$workspace"`
 
         _setenv PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32" | tee -a SHELL.env $GITHUB_ENV 
 
