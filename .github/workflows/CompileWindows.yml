@@ -67,7 +67,7 @@ jobs:
         declare -xf tee hostname
         declare -x PATH="/c/Users/$USERNAME/bin:$PWD/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
         if [[ "\$1" == "-c" ]] ; then shift ; fi
-        exec "/c/Program Files/Git/usr/bin/bash.exe" -Euo pipefail -c "${@//\\/\\\\}"
+        exec "/c/Program Files/Git/usr/bin/bash.exe" -Euo pipefail -c "\${@//\\/\\\\}"
         EOF
         ######################################################################
         )" | tee SHELL.sh
