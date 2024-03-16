@@ -49,8 +49,7 @@ jobs:
         #!/bin/bash
         if [[ "\$1" == "-c" ]] ; then shift ; fi
         declare -x PATH="/c/Users/$USERNAME/bin:$PWD/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
-        test -n "\$@" && exec "\$@"
-        exit 0
+        exec "\$@"
         EOF)" | tee PATH.sh
         chmod a+x PATH.sh
         . PATH.sh
@@ -71,6 +70,8 @@ jobs:
         ) | tee -a $GITHUB_ENV`
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
+
+        while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         # $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 

@@ -12,7 +12,7 @@ import sys, io, os, subprocess
   getattr(sys.stderr, 'buffer', sys.stderr),
 ]
 stream_map = [
-    [sys_stdout, 'C:/Program Files/Git/usr/bin/tee.exe'],  # Default/fallback
+    [sys_stdout, 'C:/Program Files/Git/usr/bin/tee.orig.exe'],  # Default/fallback
     [sys_stdout, '/dev/stdout'],  # For troubleshooting tty issues
     [sys_stderr, '/dev/stderr'],
 ]

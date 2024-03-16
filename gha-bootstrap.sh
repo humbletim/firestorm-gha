@@ -105,7 +105,7 @@ function ensure_gha_bin() {(
         "
     )
 
-    if [[ -z $restored_bin_id ]]; then
+    # if [[ -z $restored_bin_id ]]; then
         echo "[gha-bootstrap] provisioning ninja and parallel" >&2
         test -f bin/ninja.exe || {
             archive=`$fsvr_dir/util/_utils.sh wget_sha256 ${wgets[ninja]} .` \
@@ -136,10 +136,10 @@ function ensure_gha_bin() {(
               Zenodo. https://doi.org/10.5281/zenodo.7347980
             " > bin/parallel-home/will-cite
         } || return `_err $? "failed to provision parallel $?"`
-    fi
-    $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/util/tee.py bin/tee
+    # fi
+    cp -auv $fsvr_dir/util/tee.py bin/tee
     (
-      set -ex
+      set +e
       hash
       /usr/bin/which tee
       declare -px PATH
