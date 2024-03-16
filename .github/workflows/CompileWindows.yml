@@ -64,8 +64,9 @@ jobs:
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
         ) | tee -a $GITHUB_ENV
 
-        cat $GITHUB_ENV
-        declare -x "$(cat $GITHUB_ENV)"
+        . $GITHUB_ENV
+
+        env | grep -E '^[_a-z][a-z]'
 
         set -x
         test -d "$userprofile" || exit 68
