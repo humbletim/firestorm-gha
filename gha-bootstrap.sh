@@ -193,10 +193,12 @@ if is_gha ; then
     (
       set -xEuo pipefail
       set -xe
-      test -f bin/parallel-home/will-cite
-      parallel --version | head -1
-      ninja --version
-      [[ `hostname` =~ windows[-]?2022 ]]
+      declare -x PATH
+      ls -lrtha bin/
+      test -f bin/parallel-home/will-cite || exit 196
+      parallel --version | head -1 || exit 197
+      ninja --version || exit 198
+      [[ `hostname` =~ windows[-]?2022 ]] || exit 199
     ) || exit `_err $? "bin precache test failed"`;
 
     save_gha_caches || `_err $? "!save_gha_caches"`;
