@@ -72,7 +72,7 @@ jobs:
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
         echo "--shell.env setup-------------------------------------------"
-        echo '_PRESHELL_PATH="$PATH"' | tee -a SHELL.env
+        echo 'test -v _PRESHELL_PATH || _PRESHELL_PATH="$PATH"' | tee -a SHELL.env
 
         eval "declare -x -- `{
           for x in ${{github.event.inputs.fstuple}}; do
@@ -95,7 +95,7 @@ jobs:
         test -d "$_userprofile" || exit `_err $? "!$_userprofile"`
         test -d "$_workspace" || exit `_err $? "!$_workspace"`
         eval "declare -x -- `{
-          _setenv PATH=$_userprofile/bin:$_workspace/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32:\\\$_PRESHELL_PATH
+          _setenv PATH=$_userprofile/bin:$_workspace/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32
         } | tee -a SHELL.env`"
 
         echo "------------------------------------------------------------"
@@ -104,7 +104,7 @@ jobs:
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
-        declare -x PATH
+        declare -x PATH="\$PATH::\$_PRESHELL_PATH"
         echo "SHELL.env... '\$PATH' '\$fsvr_dir'"
         EOF
         )" | tee -a SHELL.env
