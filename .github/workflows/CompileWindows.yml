@@ -57,6 +57,7 @@ jobs:
           done
           echo fsvr_dir=$PWD/fsvr
           echo fsvr_step=$PWD/fsvr/util/build.sh
+          echo workspace=$(/usr/bin/cygpath -ma "$GITHUB_WORKSPACE")
         ) | tee -a $GITHUB_ENV`
 
         ######################################################################
