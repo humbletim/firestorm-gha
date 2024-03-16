@@ -47,7 +47,7 @@ jobs:
         declare -xp PATH
 
         # env | sort > initial.env
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} repo/fsvr \
+        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr \
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
 
         reponame=$(basename "${GITHUB_REPOSITORY}")
@@ -55,8 +55,8 @@ jobs:
           for x in ${{github.event.inputs.fstuple}}; do
             echo $x | tee -a $GITHUB_ENV
           done
-          echo fsvr_dir=$PWD/repo/fsvr
-          echo fsvr_step=$PWD/repo/fsvr/util/build.sh
+          echo fsvr_dir=$PWD/fsvr
+          echo fsvr_step=$PWD/fsvr/util/build.sh
         ) | tee -a $GITHUB_ENV`
 
         ######################################################################
