@@ -132,10 +132,10 @@ jobs:
         root_dir: repo/${{ env.branch }}
       run: |
         mkdir -pv build
+        $fsvr_dir/util/_utils.sh ht-ln $root_dir/indra indra
         $fsvr_dir/util/generate_build_vars.sh Firestorm-VR-GHA `cat $fsvr_dir/$base/viewer_version.txt` build/ \
            | tee build/build_vars.env | tee $GITHUB_ENV
         $fsvr_dir/util/generate_msvc_env.bat > build/msvc.env
-        $fsvr_dir/util/_utils.sh ht-ln $root_dir/indra indra
 
     - name: 010_ensure_build_directories
       run: $fsvr_step 010
