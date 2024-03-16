@@ -4,8 +4,7 @@ require_here=`readlink -f $(dirname $BASH_SOURCE)`
 function require() { source $require_here/$@ ; }
 require _utils.sh
 
-echo "root_dir=$root_dir" >&2
-
+# echo "root_dir=$root_dir" >&2
 _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
 _assert "version_xyzw" test -n "$version_xyzw"
@@ -52,19 +51,6 @@ index 94636371fc..16577204d7 100755
 EOF
 ##############################################################################
 )
-
-function _test_PATH() {( $_dbgopts;
-    set -x
-    set +e
-    echo "BASH_SOURCE=${BASH_SOURCE[@]}"
-    echo "PATH=$PATH"
-    echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
-
-    ls -l /usr/bin/envsubst.exe || true
-    which envsubst || exit 58
-
-    echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
-)}
 
 function 020_perform_replacements() {( $_dbgopts;
 
