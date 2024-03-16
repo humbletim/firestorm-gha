@@ -161,8 +161,13 @@ jobs:
     - name: SHELL.sh test
       run: $_workspace/SHELL.sh.test.sh
 
+    - name: SHELL.sh env test
+      run: |
+        env bash -c 'echo $PATH'
+        env bash -c 'echo $root_dir'
+
     - name: 020_perform_replacements
-      run: $fsvr_step _getenv fsvr_dir PATH
+      run: $fsvr_dir/util/_utils.sh _getenv PATH
 
     - name: Initial Bootstrapping
       run: |
