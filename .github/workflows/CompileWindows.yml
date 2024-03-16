@@ -26,7 +26,6 @@ env:
     BASH_ENV: ${{ github.workspace }}/SHELL.env
     SHELL: c:/PROGRA~1/Git/usr/bin/bash.exe
     shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
-#    PATH: ${{ github.workspace }}\bin
 
 
 jobs:
@@ -105,16 +104,39 @@ jobs:
         declare -xf tee hostname
         declare -x PATH
         echo "SHELL.env... '$PATH' '$fsvr_dir'"
-        EOF)" | tee -a SHELL.env
+        EOF
+        )" | tee -a SHELL.env
+        echo "------------------------------------------------------------"
+        echo -e '#!/bin/bash\necho a=\$a | a=b envsubst ' | tee SHELL.sh.test.sh
+        cat <<'EOF' > _test_PATH.sh
+        function _test_PATH() {(
+            set -x
+            set +e
+            echo "BASH_SOURCE=${BASH_SOURCE[@]}"
+            echo "PATH=$PATH"
+            echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
 
-#         echo "-SHELL.env--------------------------------------------------"
-#         cat SHELL.env
-#         echo "------------------------------------------------------------"
-#         declare -xp fsvr_dir PATH
-# 
-#         # set -a
-#         bash -c '. SHELL.env ; declare -p PATH fsvr_dir'
-#         echo "------------------------------------------------------------"
+            ls -l /usr/bin/envsubst.exe || true
+            which envsubst || exit 58
+
+            echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
+        )}
+
+        _test_PATH "$@"
+        EOF
+        
+
+        # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
+        exit 0
+
+        # echo "-SHELL.env--------------------------------------------------"
+        # cat SHELL.env
+        # echo "------------------------------------------------------------"
+        # declare -xp fsvr_dir PATH
+        # 
+        # # set -a
+        # bash -c '. SHELL.env ; declare -p PATH fsvr_dir'
+        # echo "------------------------------------------------------------"
 
         # which envsubst || true
         # (
@@ -148,8 +170,6 @@ jobs:
 #         )" | tee SHELL.sh || exit 75
 #         chmod a+x SHELL.sh
 # 
-        echo "------------------------------------------------------------"
-        echo -e '#!/bin/bash\necho a=\$a | a=b envsubst ' | tee SHELL.sh.test.sh
 
         # set -x
         # ( echo stdout ; echo stderr >&2 ) | 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
@@ -166,26 +186,6 @@ jobs:
         # ./SHELL.sh -c '( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true' || true
 
 
-        cat <<'EOF' > _test_PATH.sh
-        function _test_PATH() {(
-            set -x
-            set +e
-            echo "BASH_SOURCE=${BASH_SOURCE[@]}"
-            echo "PATH=$PATH"
-            echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
-
-            ls -l /usr/bin/envsubst.exe || true
-            which envsubst || exit 58
-
-            echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
-        )}
-
-        _test_PATH "$@"
-        EOF
-        
-
-        # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
-        exit 0
 
     - name: SHELL.env test 0
       run: echo "${BASH_SOURCE[@]}"
