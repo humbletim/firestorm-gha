@@ -60,7 +60,7 @@ jobs:
         ) | tee -a $GITHUB_ENV`
 
         ######################################################################
-        echo "$(cat<<'EOF' | /usr/bin/envsubst '$USERNAME,$PWD,$fsvr_dir'
+        echo "$(cat<<'EOF' | /c/msys64/usr/bin/envsubst.exe '$USERNAME,$PWD,$fsvr_dir'
         #!/bin/bash
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "$@" ; }
         function hostname() { $PWD/bin/hostname ; }
