@@ -193,8 +193,9 @@ if is_gha ; then
     (
       set -xEuo pipefail
       set -xe
-      declare -x PATH
+      declare -px PATH
       ls -lrtha bin/
+      which ninja || exit 195
       test -f bin/parallel-home/will-cite || exit 196
       parallel --version | head -1 || exit 197
       ninja --version || exit 198
