@@ -145,8 +145,11 @@ jobs:
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
 
+    - name: SHELL.sh test 0
+      run: echo "${BASH_SOURCE[@]}"
+
     - name: SHELL.sh test
-      run: ./SHELL.sh.test.sh
+      run: $_workspace/SHELL.sh.test.sh
 
     - name: Initial Bootstrapping
       run: |
