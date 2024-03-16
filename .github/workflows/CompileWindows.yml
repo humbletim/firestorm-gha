@@ -55,19 +55,19 @@ jobs:
         mkdir -pv $_userprofile/bin
         cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe $_userprofile/bin/
 
-        echo "------------------------------------------------------------"
+        echo "--clone-----------------------------------------------------"
         # env | sort > initial.env
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr \
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
 
-        echo "------------------------------------------------------------"
+        echo "--utils-----------------------------------------------------"
         . fsvr/util/_utils.sh
 
-        set -xu
+        set -u
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
-        echo "------------------------------------------------------------"
-        declare -x -- "`{
+        echo "--shell.env setup-------------------------------------------"
+        eval "declare -x -- `{
           for x in ${{github.event.inputs.fstuple}}; do
             _setenv $x
           done
@@ -79,7 +79,7 @@ jobs:
           _setenv _comspec=$_comspec
         } | tee -a SHELL.env $GITHUB_ENV`"
 
-        echo "------------------------------------------------------------"
+        echo "--lc env ---------------------------------------------------"
         # declare -x `cat "$GITHUB_ENV"`
         env | grep -E '^[_a-z][a-z]'
         echo "------------------------------------------------------------"
@@ -87,7 +87,7 @@ jobs:
         test -d "$fsvr_dir" || exit `_err $? "!$fsvr_dir"`
         test -d "$_userprofile" || exit `_err $? "!$_userprofile"`
         test -d "$_workspace" || exit `_err $? "!$_workspace"`
-        declare -x -- "`{
+        eval "declare -x -- `{
           _setenv PATH=$_userprofile/bin:$_workspace/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32
         } | tee -a SHELL.env $GITHUB_ENV`"
 
