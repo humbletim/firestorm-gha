@@ -43,10 +43,14 @@ jobs:
     - name: Output Inputs
       shell: bash
       run: |
-        echo "${{ toJSON(github.event.inputs) }}"
+        echo "${{ toJSON(github.event) }}"
         declare -xp PATH
-        reponame=$(basename "${GITHUB_REPOSITORY}")
 
+        # env | sort > initial.env
+        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} repo/fsvr \
+          && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
+
+        reponame=$(basename "${GITHUB_REPOSITORY}")
         eval `(
           for x in ${{github.event.inputs.fstuple}}; do
             echo $x | tee -a $GITHUB_ENV
@@ -69,13 +73,12 @@ jobs:
         )" | tee SHELL.sh
         chmod a+x SHELL.sh
 
+        ( echo stdout ; echo stderr >&@ ) | tee /dev/stderr >/dev/null
+
     - name: Initial Bootstrapping
       run: |
-        declare -xp PATH
-        echo stdout | tee /dev/stderr >/dev/null
-        # env | sort > initial.env
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} repo/fsvr \
-          && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
+        ( echo stdout ; echo stderr >&@ ) | tee /dev/stderr >/dev/null
+
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')

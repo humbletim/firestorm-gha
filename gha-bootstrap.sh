@@ -172,7 +172,7 @@ if is_gha ; then
     userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
     mkdir -pv $userprofile/bin bin cache repo
     $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home $userprofile/.parallel
-    $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home /home/$USER/.parallel
+    $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home /home/$USERNAME/.parallel
     cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
       $userprofile/bin/
 
