@@ -65,6 +65,7 @@ jobs:
         ) | tee -a $GITHUB_ENV
         declare -x "`cat $GITHUB_ENV`"
 
+        set -x
         test -d "$userprofile" || exit 68
         test -d "$workspace" || exit 69
         export PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
