@@ -15,7 +15,8 @@ on:
 defaults:
   run:
     # shell: bash
-    shell: bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
+    shell: '"c:/Program Files/Git/usr/bin/bash.exe" --noprofile --norc -e -o pipefail ./SHELL.sh {0}'
+#    shell: c:\Program Files\Git\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
 env:
@@ -41,7 +42,8 @@ jobs:
         path: /dev/null
   
     - name: Output Inputs
-      shell: bash
+      shell: '"c:/Program Files/Git/usr/bin/bash.exe" --noprofile --norc -e -o pipefail {0}'
+      # shell: bash
       run: |
         echo "${{ toJSON(github.event.inputs) }}"
         declare -xp PATH
@@ -65,7 +67,10 @@ jobs:
         mkdir -pv $userprofile/bin
         cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
           $userprofile/bin/
-        [[ "$(which envsubst.exe)" == "$(cygpath -ua $userprofile/bin/envsubst.exe)" ]] || exit 69
+        (
+          set -x
+          [[ "$(which envsubst.exe)" == "$(cygpath -ua $userprofile/bin/envsubst.exe)" ]] || exit 69
+        )
 
         ######################################################################
         echo "$(cat<<EOF
@@ -111,7 +116,7 @@ jobs:
         )
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
-        echo -e '#!/bin/bash\ndeclare -xp PATH BASH BASH_SOURCE\nwhich envsubst' | tee SHELL.sh.test.sh
+        echo -e '#!/bin/bash\ndeclare -xp fsvr_dir PATH BASH BASH_SOURCE\nwhich envsubst' | tee SHELL.sh.test.sh
         # $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 
