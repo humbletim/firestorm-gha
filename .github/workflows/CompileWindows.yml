@@ -153,21 +153,21 @@ jobs:
         ./SHELL.sh -c '( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true' || true
 
 
-cat <<'EOF' > _test_PATH.sh
-function _test_PATH() {(
-    set -x
-    set +e
-    echo "BASH_SOURCE=${BASH_SOURCE[@]}"
-    echo "PATH=$PATH"
-    echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
+        cat <<'EOF' > _test_PATH.sh
+        function _test_PATH() {(
+            set -x
+            set +e
+            echo "BASH_SOURCE=${BASH_SOURCE[@]}"
+            echo "PATH=$PATH"
+            echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
 
-    ls -l /usr/bin/envsubst.exe || true
-    which envsubst || exit 58
+            ls -l /usr/bin/envsubst.exe || true
+            which envsubst || exit 58
 
-    echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
-)}
-EOF
-;
+            echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
+        )}
+        EOF
+        ;
 
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
