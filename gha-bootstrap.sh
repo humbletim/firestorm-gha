@@ -177,12 +177,10 @@ if is_gha ; then
     fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
 
     userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
-    mkdir -pv $userprofile/bin bin cache repo
-    cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
-      $userprofile/bin/
+    mkdir -pv bin cache repo
 
     echo "[gha-bootstrap] (interim) PATH=$PATH" >&2
-    test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch $fsvr_dir || exit 99
+    test -d $fsvr_dir/.git || exit 183 #quiet_clone $fsvr_repo $fsvr_branch $fsvr_dir || exit 99
 
     restore_gha_caches || exit `_err $? "!restore_gha_caches"`
 

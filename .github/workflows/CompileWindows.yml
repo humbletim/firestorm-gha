@@ -58,6 +58,7 @@ jobs:
           echo fsvr_dir=$PWD/fsvr
           echo fsvr_step=$PWD/fsvr/util/build.sh
           echo workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
+          echo userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
         ) | tee -a $GITHUB_ENV`
 
         ######################################################################
@@ -66,7 +67,7 @@ jobs:
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
-        declare -x PATH="/c/Users/$USERNAME/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
+        declare -x PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
         if [[ "\$1" == "-c" ]] ; then shift ; fi
         exec "/c/Program Files/Git/usr/bin/bash.exe" -Euo pipefail -c "\${@//\\\\/\\\\\\\\}"
         EOF
@@ -76,7 +77,16 @@ jobs:
 
         ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
 
-        rm -v '/c/Program Files/Git/usr/bin/tee.exe'
+        which envsubst || true
+
+        mv -v '/c/Program Files/Git/usr/bin/tee.exe' '/c/Program Files/Git/usr/bin/tee.orig.exe'
+
+        mkdir -pv $userprofile/bin
+        cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
+          $userprofile/bin/
+
+        which envsubst || exit 88
+
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
 
@@ -86,7 +96,7 @@ jobs:
         (
           set -x
           ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null
-          [[ $((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null) 2>&1) =~ stdout.*stderr ]] || exit 83
+          [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
         )
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
@@ -119,8 +129,9 @@ jobs:
         jq --version
         hostname
         test `hostname` == "windows-2022" || exit 2022
-        test -v nunja_dir
-        test -d "$nunja_dir"
+        test -v nunja_dir || exit 122
+        test -d "$nunja_dir" || exit 123
+        echo 'test $a' | env a=b envsubst || exit 124
         
     # - name: Setup tmate session
     #   uses: mxschmitt/action-tmate@v3

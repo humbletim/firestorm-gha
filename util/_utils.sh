@@ -8,6 +8,7 @@ _dbgopts='set -Euo pipefail'
 
 _die_exit_code=128
 function _die() { echo -e "[_die] error: $@" >&2 ; exit ${_die_exit_code:-1} ; }
+function _err() { local rc=$1 ; shift; echo "[_err rc=$rc] $@" >&2; return $rc; }
 
 # assert "message" [test expression...]
 function _assert() {
