@@ -65,7 +65,7 @@ jobs:
         mkdir -pv $userprofile/bin
         cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
           $userprofile/bin/
-        which envsubst || exit 88
+        [[ "$(which envsubst.exe)" == "$(cygpath -ua $userprofile/bin/envsubst.exe)" ]] || exit 69
 
         ######################################################################
         echo "$(cat<<EOF
@@ -79,7 +79,7 @@ jobs:
         set -a
         test ! -s $workspace/gha-bootstrap.env || source $workspace/gha-bootstrap.env
         test ! -s $workspace/build/build_vars.env || source $workspace/build/build_vars.env
-        exec "/c/Program Files/Git/usr/bin/bash.exe" -Euo pipefail -c "\${@//\\\\/\\\\\\\\}"
+        exec "/c/Program Files/Git/usr/bin/bash.exe" --noprofile --norc -e -o pipefail -c "\${@//\\\\/\\\\\\\\}"
         EOF
         ######################################################################
         )" | tee SHELL.sh || exit 75
@@ -111,17 +111,24 @@ jobs:
         )
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
+        echo -e '#!/bin/bash\ndeclare -xp PATH BASH BASH_SOURCE\nwhich envsubst' | tee SHELL.sh.test.sh
         # $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 
+    - name: SHELL.sh test
+      run: 
+
 
     - name: ./fsvr-action test
+      run: SHELL.sh.test.sh
+
       uses: ./fsvr-action
       with:
         shell: ${{ env.shell }}
         run: |
           a=b
-          echo $a 
+          echo $a
+          echo 'a=$a' | envsubst
 
     - name: GHA Bootstrapping
       uses: ./fsvr-action
