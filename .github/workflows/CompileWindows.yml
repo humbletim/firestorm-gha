@@ -54,10 +54,7 @@ jobs:
 
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
-        export PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
-        declare -xp PATH
-
-        declare -x `(
+        (
           for x in ${{github.event.inputs.fstuple}}; do
             echo $x | tee -a $GITHUB_ENV
           done
@@ -65,11 +62,16 @@ jobs:
           echo fsvr_step=$PWD/fsvr/util/build.sh
           echo workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
-        ) | tee -a $GITHUB_ENV` || exit 62
+        ) | tee -a $GITHUB_ENV
+        declare -x "`cat $GITHUB_ENV`"
 
-        declare -x `(
-          echo PATH="$PATH"
-        ) | tee -a $GITHUB_ENV` || exit 71
+        test -d "$userprofile" || exit 68
+        test -d "$workspace" || exit 69
+        export PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
+        declare -xp PATH
+
+        echo PATH="$PATH" | tee -a $GITHUB_ENV || exit 71
+
 
         which envsubst || true
         mkdir -pv $userprofile/bin
