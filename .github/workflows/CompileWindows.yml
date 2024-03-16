@@ -304,10 +304,18 @@ jobs:
         environment: '*=process.env'
         shell: ${{ env.SHELL }}
         run: |
-          INPUT_key=$base-build-packages-b INPUT_path=build/packages \
-            /c/Program\ Files/nodejs/node \
-            /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-            | grep -i 'cache restored' && echo 'yup' || echo 'nope' 
+          export INPUT_key=$base-build-packages-b INPUT_path=build/packages
+          /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
+            | grep -i 'cache restored' && echo 'yup' || {
+              echo 'nope' 
+              $fsvr_step 060 || exit 60 
+              $fsvr_step 070 || exit 70
+              $fsvr_step 080 || exit 80
+              /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
+          }     
+# 
+#     - name: 070_verify_downloads
+#       run: $fsvr_step 070
 
     # - name: 080_untar_packages
     #   run: $fsvr_step 080
