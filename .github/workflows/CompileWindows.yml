@@ -74,6 +74,7 @@ jobs:
         chmod a+x SHELL.sh
 
         ( echo stdout ; echo stderr >&@ ) | tee /dev/stderr >/dev/null
+        exit 0
 
     - name: Initial Bootstrapping
       run: |
