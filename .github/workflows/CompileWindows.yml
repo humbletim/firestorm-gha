@@ -50,7 +50,6 @@ jobs:
       shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
       # shell: bash
       run: |
-        where.exe pacman.exe
         echo "${{ toJSON(github.event.inputs) }}"
         declare -xp PATH
 
@@ -95,7 +94,7 @@ jobs:
         test -d "$_workspace" || exit `_err $? "!$_workspace"`
         eval "declare -x -- `{
           _setenv PATH=$_userprofile/bin:$_workspace/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32
-        } | tee -a SHELL.env $GITHUB_ENV`"
+        } | tee -a PATH.env`"
 
         echo "-SHELL.env--------------------------------------------------"
         cat SHELL.env
