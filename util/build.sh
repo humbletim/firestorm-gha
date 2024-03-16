@@ -52,6 +52,8 @@ EOF
 )
 
 function _test_PATH() {( $_dbgopts;
+    set -x
+    set +e
     echo "BASH_SOURCE=${BASH_SOURCE[@]}"
     echo "PATH=$PATH"
     echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
