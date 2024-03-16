@@ -64,11 +64,12 @@ jobs:
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
         ) | tee -a $GITHUB_ENV
 
+        set -x
+
         . $GITHUB_ENV
 
         env | grep -E '^[_a-z][a-z]'
 
-        set -x
         test -d "$userprofile" || exit 68
         test -d "$workspace" || exit 69
         export PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
