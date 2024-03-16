@@ -116,12 +116,10 @@ jobs:
         exit 0
 
     - name: SHELL.sh test
-      run: 
+      run: SHELL.sh.test.sh
 
 
     - name: ./fsvr-action test
-      run: SHELL.sh.test.sh
-
       uses: ./fsvr-action
       with:
         shell: ${{ env.shell }}
