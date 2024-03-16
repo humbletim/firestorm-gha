@@ -120,11 +120,9 @@ jobs:
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
         if [[ "\$1" == "-c" ]] ; then shift ; fi
-        set -a
         test ! -s $_workspace/gha-bootstrap.env || source $_workspace/gha-bootstrap.env
         test ! -s $_workspace/build/build_vars.env || source $_workspace/build/build_vars.env
-        set +x
-        echo "[SHELL.sh] running '\$@'" >&2
+        echo "[SHELL.sh '$PATH'] running '\$@'" >&2
         exec "/c/Program Files/Git/usr/bin/bash.exe" --noprofile --norc -e -o pipefail -c "\${@//\\\\/\\\\\\\\}"
         EOF
         ######################################################################
