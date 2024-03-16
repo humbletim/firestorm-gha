@@ -18,7 +18,7 @@ defaults:
     shell: bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
- env:
+env:
     shell: bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #    PATH: ${{ github.workspace }}\bin
 
