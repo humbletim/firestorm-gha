@@ -48,6 +48,11 @@ jobs:
         echo "${{ toJSON(github.event.inputs) }}"
         declare -xp PATH
 
+        _workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
+        _userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
+        mkdir -pv $_userprofile/bin
+        cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe $_userprofile/bin/
+
         # env | sort > initial.env
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr \
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
@@ -55,8 +60,6 @@ jobs:
         . fsvr/util/_utils.sh
 
         set -xu
-        _setenv setenv_test=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
-        test -d "$setenv_test" || exit `_err $? "!$setenv_test"`
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
         {
@@ -65,17 +68,17 @@ jobs:
           done
           _setenv fsvr_dir=$PWD/fsvr
           _setenv fsvr_step=$PWD/fsvr/util/build.sh
-          _setenv workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
-          _setenv userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
+          _setenv _workspace=$_workspace
+          _setenv _userprofile=$_userprofile
         } | tee -a SHELL.env $GITHUB_ENV
 
         # declare -x `cat "$GITHUB_ENV"`
         env | grep -E '^[_a-z][a-z]'
 
-        test -d "$userprofile" || exit `_err $? "!$userprofile"`
-        test -d "$workspace" || exit `_err $? "!$workspace"`
+        test -d "$_userprofile" || exit `_err $? "!$_userprofile"`
+        test -d "$_workspace" || exit `_err $? "!$_workspace"`
 
-        _setenv PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32" | tee -a SHELL.env $GITHUB_ENV 
+        _setenv PATH="$_userprofile/bin:$_workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32" | tee -a SHELL.env $GITHUB_ENV 
 
         declare -xp fsvr_dir PATH
 
@@ -83,8 +86,6 @@ jobs:
         bash -c '. SHELL.env ; declare -p PATH fsvr_dir'
 
         which envsubst || true
-        mkdir -pv $userprofile/bin
-        cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe $userprofile/bin/
         (
           set -x
           [[ "$(which envsubst.exe)" == "$(cygpath -ua $userprofile/bin/envsubst.exe)" ]] || exit 69
