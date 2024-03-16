@@ -163,10 +163,12 @@ jobs:
 
     - name: SHELL.sh env test
       run: |
-        env bash -c 'echo $PATH'
-        env bash -c 'echo $root_dir'
+        env bash -c 'echo PATH=$PATH'
+        env bash -c 'echo root_dir=$root_dir'
 
     - name: 020_perform_replacements
+      env:
+        root_dir: repo/${{ env.branch }}
       run: $fsvr_step _test_PATH
 
     - name: Initial Bootstrapping
