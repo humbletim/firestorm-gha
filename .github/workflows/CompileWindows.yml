@@ -15,7 +15,7 @@ on:
 defaults:
   run:
     # shell: bash
-    shell: c:/PROGRA~1/Git/usr/bin/bash.exe" --noprofile --norc -e -o pipefail ./SHELL.sh {0}
+    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #    shell: c:\Program Files\Git\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
