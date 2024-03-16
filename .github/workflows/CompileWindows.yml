@@ -73,18 +73,18 @@ jobs:
         )" | tee SHELL.sh
         chmod a+x SHELL.sh
 
-        ( echo stdout ; echo stderr >&@ ) | tee /dev/stderr >/dev/null || true
+        ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
 
     - name: Initial Bootstrapping
       run: |
         declare -f tee
-        ( echo stdout ; echo stderr >&@ ) | tee /dev/stderr >/dev/null
+        ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null
 
         [[ $(($( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null) 2>&1) =~ stdout.*stderr ]] || exit 83
 
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
-        # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
+        while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         # $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 
