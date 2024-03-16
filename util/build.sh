@@ -3,7 +3,9 @@
 require_here=`readlink -f $(dirname $BASH_SOURCE)`
 function require() { source $require_here/$@ ; }
 require _utils.sh
- 
+
+echo "root_dir=$root_dir" >&2
+
 _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
 _assert "version_xyzw" test -n "$version_xyzw"

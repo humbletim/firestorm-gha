@@ -163,6 +163,7 @@ jobs:
 
     - name: SHELL.sh env test
       run: |
+        env bash -c 'echo PWD=$PWD'
         env bash -c 'echo PATH=$PATH'
         env bash -c 'echo root_dir=$root_dir'
 
