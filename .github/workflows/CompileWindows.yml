@@ -72,7 +72,7 @@ jobs:
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
         echo "--shell.env setup-------------------------------------------"
-        echo '_PRESHELL_PATH="\$PATH"' | tee -a SHELL.env
+        echo '_PRESHELL_PATH="$PATH"' | tee -a SHELL.env
 
         eval "declare -x -- `{
           for x in ${{github.event.inputs.fstuple}}; do
@@ -105,7 +105,7 @@ jobs:
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
         declare -x PATH
-        echo "SHELL.env... '$PATH' '$fsvr_dir'"
+        echo "SHELL.env... '\$PATH' '\$fsvr_dir'"
         EOF
         )" | tee -a SHELL.env
         echo "------------------------------------------------------------"
