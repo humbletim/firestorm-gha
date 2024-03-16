@@ -62,7 +62,7 @@ jobs:
         set -xu
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
-        {
+        eval `{
           for x in ${{github.event.inputs.fstuple}}; do
             _setenv $x
           done
@@ -70,11 +70,12 @@ jobs:
           _setenv fsvr_step=$PWD/fsvr/util/build.sh
           _setenv _workspace=$_workspace
           _setenv _userprofile=$_userprofile
-        } | tee -a SHELL.env $GITHUB_ENV
+        } | tee -a SHELL.env $GITHUB_ENV`
 
         # declare -x `cat "$GITHUB_ENV"`
         env | grep -E '^[_a-z][a-z]'
 
+        test -d "$fsvr_dir" || exit `_err $? "!$fsvr_dir"`
         test -d "$_userprofile" || exit `_err $? "!$_userprofile"`
         test -d "$_workspace" || exit `_err $? "!$_workspace"`
 
