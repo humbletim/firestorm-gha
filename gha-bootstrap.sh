@@ -137,21 +137,23 @@ function ensure_gha_bin() {(
             " > bin/parallel-home/will-cite
         } || return `_err $? "failed to provision parallel $?"`
     fi
-
     $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/util/tee.py bin/tee
     (
       set -ex
-      [[ "`cygpath -ua $(which tee)`" == "`cygpath -ua bin/tee`" ]]
-      [[ `$( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null` == stderr ]]
-      [[ `$( echo stdout ; echo stderr >&2 ) | tee /dev/stderr 2>/dev/null` == stdout ]]
+      hash
+      /usr/bin/which tee
+      declare -px PATH
+      [[ "`/usr/bin/cygpath -ma $(/usr/bin/which tee)`" == "`/usr/bin/cygpath -ma bin/tee`" ]] || exit 146
+      [[ `( echo stdout | tee /dev/stderr | /usr/bin/sed 's@stdout@processed@g') 2>&1` =~ stdout.*processed ]] || exit 147
+      [[ `(( echo stdout | tee /dev/stderr ) >/dev/null) 2>&1` =~ stdout ]] || exit 148
     ) || exit `_err $? "!tee.py setup"`
 
     # for using tmate to debug, create a helper script that invokes with current paths
-    echo "$(cat <<'EOF' | envsubst '$fsvr_path'
+    echo "$(/usr/bin/cat <<'EOF' | /usr/bin/envsubst '$fsvr_path'
 ##############################################################################
 #!/bin/bash
 set -a -Euo pipefail
-PATH="/bin:/usr/bin:$fsvr_path"
+PATH="/usr/bin:/bin:$fsvr_path"
 . gha-bootstrap.env
 . build/build_vars.env
 ./fsvr/util/build.sh "$@"
@@ -162,7 +164,7 @@ EOF
 )}
 
 function subtract_paths() {(
-  PATH=/usr/bin:/bin:$PATH
+  PATH=/usr/bin:$PATH
   grep -x -vf <(echo "$2" | tr ':' '\n') <(echo "$1" | tr ':' '\n') \
     | awk '!seen[$0]++' | tr '\n' ':' | sed 's@:$@@' 
   return 0
@@ -238,7 +240,7 @@ else
     fsvr_dir=${fsvr_dir:-.}
 
     echo "[incoming_path] $incoming_path"
-    fsvr_path=${fsvr_path:-$pwd/bin:/usr/bin:/bin}
+    fsvr_path=$pwd/bin:${fsvr_path:-/usr/bin:/bin}
     export PATH=`subtract_paths "$fsvr_path" ""`
 fi
 

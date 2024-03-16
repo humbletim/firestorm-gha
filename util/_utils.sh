@@ -19,6 +19,7 @@ function _assert() {
 
 # reverse-susbstitute well known paths for use as tidier debug logging
 function _relativize() {
+    test ! -v DEBUG || { echo "$@" ; return 0; }
     local rel="$@"
     for x in build_dir source_dir root_dir fsvr_dir fsvr_cache_dir nunja_dir p373r_dir openvr_dir ; do
       test ! -v $x || rel=${rel//${!x}/\{${x}\}}
@@ -87,11 +88,11 @@ function wget_sha256() {(
 # helper to create symbolic links
 # usage: ht-ln <SOURCE> <destination folder/ or desired link filepath>
 function ht-ln() {
-  local source=$1 linkname=$2 opts=""
+  local source="$1" linkname="$2" opts=""
   test -e "$source" || { echo "source does not exist '$source'" >&2 ; return 1; }
 
   # ht-ln source.file dir/
-  test ! -d "$source" && test -d "$linkname" && linkname=$linkname/$(basename "$source")
+  test ! -d "$source" && test -d "$linkname" && linkname="$linkname/$(basename "$source")"
 
   # verify destination link folder exists
   test -d "$(dirname "$linkname")" || { echo "link location does not exist '$(dirname "$linkname")'" >&2 ; return 1; }
@@ -100,21 +101,24 @@ function ht-ln() {
   local cmd="ln -v $source $linkname"
 
   # but on Linux use symbolic links for directories
-  test -d $source && cmd="ln -vs $source $linkname"
+  test -d "$source" && cmd="ln -vs \"$source\" \"$linkname\""
 
   # but on Windows / msys use mklink instead
   if [[ "$OSTYPE" == "msys" ]]; then
     # for directories /J junctions are used; /D (directory symbolic) is another option to consider
-    test -d $source && opts="/J"
+    test -d "$source" && opts="/J"
     # for files /H hardlinks are used
-    test -f $source && opts="/H"
-    function escape_cygpath() { cygpath "$@" | sed 's@\\@\\\\@g' ; }
-    cmd="env MSYS_NO_PATHCONV=1 $(cygpath -m $COMSPEC) /C \"mklink $opts $(escape_cygpath -w $linkname) $(escape_cygpath -w $source)\""
+    test -f "$source" && opts="/H"
+    function escape_cygpath() { /usr/bin/cygpath -ma "$@" | /usr/bin/sed 's@/@\\@g' ; }
+    cmd=$(cat<<EOF
+"$COMSPEC" /C 'mklink $opts "`escape_cygpath "$linkname"`" "`escape_cygpath "$source"`"'
+EOF
+)
   fi
 
   type -t _relativize >/dev/null && _relativize "[ht-ln] $cmd" >&2
   test -e "$linkname" && { false && _relativize "skipping (exists) $linkname" >&2 ; return 0; }
-  eval "$cmd" || exit $?
+  MSYS_NO_PATHCONV=1 eval "$cmd" || exit $?
 }
 
 # usage: __main__ ${BASH_SOURCE[0]} ${0}
