@@ -136,23 +136,12 @@ function ensure_gha_bin() {(
               Zenodo. https://doi.org/10.5281/zenodo.7347980
             " > bin/parallel-home/will-cite
         } || return `_err $? "failed to provision parallel $?"`
-    # fi
-    (
-      set +e
-      hash
-      /usr/bin/which tee
-      declare -px PATH
-      [[ "`/usr/bin/cygpath -ma "$(/usr/bin/which tee)"`" == "`/usr/bin/cygpath -ma bin/tee`" ]] || exit 146
-      [[ `( echo stdout | tee /dev/stderr | /usr/bin/sed 's@stdout@processed@g') 2>&1` =~ stdout.*processed ]] || exit 147
-      [[ `(( echo stdout | tee /dev/stderr ) >/dev/null) 2>&1` =~ stdout ]] || exit 148
-    ) || exit `_err $? "!tee.py setup"`
-
+  
     # for using tmate to debug, create a helper script that invokes with current paths
-    echo "$(/usr/bin/cat <<'EOF' | /usr/bin/envsubst '$fsvr_path'
+    echo "$(/usr/bin/cat <<'EOF'
 ##############################################################################
 #!/bin/bash
 set -a -Euo pipefail
-PATH="/usr/bin:/bin:$fsvr_path"
 . gha-bootstrap.env
 . build/build_vars.env
 ./fsvr/util/build.sh "$@"
@@ -169,42 +158,21 @@ function subtract_paths() {(
   return 0
 )}
 
-pwd=$PWD
-if [[ -x /usr/bin/readlink ]]; then pwd=`/usr/bin/readlink -f "$PWD"`; fi
+[[ -x /usr/bin/readlink ]] && pwd=`/usr/bin/readlink -f "$PWD"` || pwd=$PWD
 
 if is_gha ; then
     echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
     cd "${GITHUB_WORKSPACE}"
-
-    programfiles=`/usr/bin/cygpath -ua "$PROGRAMFILES"`
-    userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
-
-    _gha_PATH=$(/usr/bin/cat<<EOF | /usr/bin/tr '\n' ':' | /usr/bin/sed -e 's@^ \+@@;s@: \+@:@g;s@^:@@;s@:$@@'
-      $userprofile/bin
-      $pwd/bin
-      /c/tools/zstd
-      ${programfiles}/Git/bin
-      ${programfiles}/Git/usr/bin
-      /c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts
-      /c/hostedtoolcache/windows/Python/3.9.13/x64
-      ${programfiles}/OpenSSL/bin
-      /c/Windows/System32/OpenSSH
-      ${programfiles}/nodejs
-      ${programfiles}/LLVM/bin
-      /c/ProgramData/Chocolatey/bin
-      /c/Windows/system32
-EOF
-)
 
     fsvr_repo=${GITHUB_REPOSITORY}
     fsvr_branch=${GITHUB_REF_NAME}
     fsvr_base=$base
     fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
 
-    fsvr_path="$_gha_PATH"
-    export PATH=`subtract_paths "$fsvr_path" ""` || exit `_err $? "error"`
-
+    userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
     mkdir -pv $userprofile/bin bin cache repo
+    $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home $userprofile/.parallel
+    $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home /home/$USER/.parallel
     cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
       $userprofile/bin/
 
@@ -212,12 +180,8 @@ EOF
     test -d $fsvr_dir/.git || quiet_clone $fsvr_repo $fsvr_branch $fsvr_dir || exit 99
 
     restore_gha_caches || exit `_err $? "!restore_gha_caches"`
-    cp -auv $fsvr_dir/util/tee.py bin/tee
-    ensure_gha_bin || exit `_err $? "!ensure_gha_bin"`
 
-    # TODO: figure out why perl needs system-level env vars for PARALLEL_HOME to work
-    # (for now this replicates to the "other" non-msys home location)
-    $fsvr_dir/util/_utils.sh ht-ln bin/parallel-home $userprofile/.parallel
+    ensure_gha_bin || exit `_err $? "!ensure_gha_bin"`
 
     initialize_firestorm_checkout || `_err $? "!firestorm_checkout"`
 
@@ -240,11 +204,9 @@ else
     fsvr_dir=${fsvr_dir:-.}
 
     echo "[incoming_path] $incoming_path"
-    fsvr_path=$pwd/bin:${fsvr_path:-/usr/bin:/bin}
-    export PATH=`subtract_paths "$fsvr_path" ""`
 fi
 
-echo -n "[gha-bootstra] (final) "; echo "PATH=$PATH" | /usr/bin/tee PATH.env
+echo -n "[gha-bootstra] (final) "; echo "PATH=$PATH" | tee PATH.env
 
 ##############################################################################
 vars=$(cat <<EOF
@@ -252,8 +214,6 @@ _home=`readlink -f "${USERPROFILE:-$HOME}"`
 _bash=$BASH
 firestorm=$repo@$base#$branch
 fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
-PARALLEL_HOME=$pwd/bin/parallel-home
-fsvr_path=$fsvr_path
 fsvr_dir=$pwd/repo/fsvr
 nunja_dir=`$fsvr_dir/util/_utils.sh _realpath $fsvr_dir/$base`
 p373r_dir=$pwd/repo/p373r
@@ -269,15 +229,15 @@ echo "... github_env" >&2
 test ! -v GITHUB_ENV || {
   echo "GITHUB_ENV=${GITHUB_ENV:-}"
   (
-    echo "PATH=$(cygpath -pw "`subtract_paths "$fsvr_path" ""`")"
+    # echo "PATH=$(cygpath -pw "`subtract_paths "$fsvr_path" ""`")"
     cat gha-bootstrap.env
   ) | tee -a $GITHUB_ENV
 }
 
-echo "... github_path" >&2
-test ! -v GITHUB_PATH || {
-  echo "GITHUB_PATH=$GITHUB_PATH"
-  new_github_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
-  echo "[new_github_path] $new_github_path"
-  test -z "$new_github_path" || cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
-}
+# echo "... github_path" >&2
+# test ! -v GITHUB_PATH || {
+#   echo "GITHUB_PATH=$GITHUB_PATH"
+#   new_github_path=`subtract_paths "$fsvr_path" "$incoming_path"` || exit `_err $? "error"`
+#   echo "[new_github_path] $new_github_path"
+#   test -z "$new_github_path" || cygpath -pw "$new_github_path" | tee -a "$GITHUB_PATH"
+# }

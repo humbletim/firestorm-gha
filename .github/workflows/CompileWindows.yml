@@ -15,7 +15,7 @@ on:
 defaults:
   run:
     # shell: bash
-    shell: bash --noprofile --norc -e -o pipefail ./PATH.sh {0}
+    shell: bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
 # env:
@@ -45,22 +45,7 @@ jobs:
         echo "${{ toJSON(github.event.inputs) }}"
         declare -xp PATH
         reponame=$(basename "${GITHUB_REPOSITORY}")
-        echo "$(cat<<EOF
-        #!/bin/bash
-        if [[ "\$1" == "-c" ]] ; then shift ; fi
-        declare -x PATH="/c/Users/$USERNAME/bin:$PWD/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
-        exec "\$@"
-        EOF)" | tee PATH.sh
-        chmod a+x PATH.sh
-        . PATH.sh
-        declare -xp PATH
 
-    - name: Initial Bootstrapping
-      run: |
-        declare -xp PATH
-        # env | sort > initial.env
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} repo/fsvr \
-          && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
         eval `(
           for x in ${{github.event.inputs.fstuple}}; do
             echo $x | tee -a $GITHUB_ENV
@@ -68,38 +53,40 @@ jobs:
           echo fsvr_dir=$PWD/repo/fsvr
           echo fsvr_step=$PWD/repo/fsvr/util/build.sh
         ) | tee -a $GITHUB_ENV`
+
+        ######################################################################
+        echo "$(cat<<EOF
+        #!/bin/bash
+        if [[ "\$1" == "-c" ]] ; then shift ; fi
+        function tee() { /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "$@" ; }
+        function hostname() { $PWD/bin/hostname ; }
+        declare -xf tee hostname
+        declare -x PATH="/c/Users/$USERNAME/bin:$PWD/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
+        exec "\$@"
+        EOF
+        ######################################################################
+        )" | tee SHELL.sh
+        chmod a+x SHELL.sh
+
+    - name: Initial Bootstrapping
+      run: |
+        declare -xp PATH
+        echo stdout | tee /dev/stderr >/dev/null
+        # env | sort > initial.env
+        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} repo/fsvr \
+          && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
-        cp -auv $fsvr_dir/util/tee.py bin/tee
-
-        while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
+        # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         # $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 
-#     - name: Run as Action
-#       uses: ./repo/fsvr/actions-node-script
-#       with:
-#         environment: '*=process.env'
-#         shell: bash
-#         run: |
-#             echo testing 1 2 3
-#             echo ${{ github.event.inputs.fstuple }} 
-#             test -v ACTIONS_CACHE_URL && echo "cache url available" || echo "cache url not available"
-#             env | grep -Eo '^(ACTIONS|GITHUB)_[^=]+'
-#             echo "__test=true" | tee -a $GITHUB_ENV
-#             echo "/c/nonexistent" | tee -a $GITHUB_PATH
-# 
-#     - name: PATH/ENV preflight tests
-#       run: |
-#         set -x
-#         # env | sort > after.env ; diff initial.env after.env || true
-#         test -v __test
-#         test "$__test" == "true"
 
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
-        run: ./PATH.sh -c ${{ env.fsvr_dir}}/gha-bootstrap.sh
+        shell: ${{ defaults.run.shell }}
+        run: ${{ env.fsvr_dir}}/gha-bootstrap.sh
         environment: |
             ${{ github.event.inputs.fstuple }}
             *=process.env
@@ -110,9 +97,6 @@ jobs:
         declare -xp PATH
         # env | sort > after-gha.env ; diff after.env after-gha.env || true
         jq --version
-        which cmd.exe
-        which hostname
-        which hostname.exe
         hostname
         test `hostname` == "windows-2022" || exit 2022
         test -v nunja_dir
@@ -161,6 +145,7 @@ jobs:
       uses: ./fsvr-action
       with:
         environment: '*=process.env'
+        shell: ${{ defaults.run.shell }}
         run: |
           INPUT_key=$base-build-packages-b INPUT_path=build/packages \
             /c/Program\ Files/nodejs/node \

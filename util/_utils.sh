@@ -119,16 +119,6 @@ fi
   eval "$cmd" || exit $?
 }
 
-# prevent aggressive /usr/bin:/bin system-level prefixing disrupting custom PATH
-function ht-xpreclude() {
-  exe=$(which "${1}.exe" 2>/dev/null)
-  if [[ -f "$exe" ]]; then mv -v "$exe" "${exe/.exe/.orig.exe}" ; fi
-  exe=$(which "${1}.exe" 2>/dev/null)
-  if [[ -f "$exe" ]]; then mv -v "$exe" "${exe/.exe/.orig.exe}" ; fi
-  exe=$(which "${1}.exe" 2>/dev/null)
-  if [[ -f "$exe" ]]; then mv -v "$exe" "${exe/.exe/.orig.exe}" ; fi
-}
-
 # usage: __utils_main__ ${BASH_SOURCE[0]} ${0}
 #   => if first argument is a declared function, invoke with args
 #      (otherwise no-op)
