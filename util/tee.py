@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import sys, io, os, subprocess
 
 # emulate `command | tee /dev/stderr | command` style logging injection into pipelines
@@ -6,10 +6,15 @@ import sys, io, os, subprocess
 # supports /dev/stderr and /dev/stdout and otherwise forwards to tee.exe
 # -- humbletim 2024.03.15
 
+[ sys_stdin,  sys_stdout, sys_stderr] = [
+  getattr(sys.stdin, 'buffer', sys.stdin),
+  getattr(sys.stdout, 'buffer', sys.stdout),
+  getattr(sys.stderr, 'buffer', sys.stderr),
+]
 stream_map = [
-    [sys.stdout.buffer, 'C:/Program Files/Git/usr/bin/tee.exe'],  # Default/fallback 
-    [sys.stdout.buffer, '/dev/stdout'],  # For troubleshooting tty issues
-    [sys.stderr.buffer, '/dev/stderr'], 
+    [sys_stdout, 'C:/Program Files/Git/usr/bin/tee.exe'],  # Default/fallback
+    [sys_stdout, '/dev/stdout'],  # For troubleshooting tty issues
+    [sys_stderr, '/dev/stderr'],
 ]
 
 forward = stream_map[0]
@@ -30,7 +35,12 @@ write_streams = [v[0] for v in stream_map if v[2:]]
 
 # print(write_streams)
 
-while (data := sys.stdin.buffer.readline() or os.read(0, 1024)):
+data=True
+while data:
+    #print("fileno sys_stdin", sys_stdin.fileno())
+    try:
+      data = sys_stdin.readline() or os.read(sys_stdin.fileno(), 1024)
+    except KeyboardInterrupt: sys.exit(-1)
     for stream in write_streams:
         stream.write(data)
         stream.flush()
