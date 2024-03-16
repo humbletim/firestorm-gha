@@ -61,31 +61,40 @@ jobs:
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
         ) | tee -a $GITHUB_ENV` || exit 62
 
+        which envsubst || true
+        mkdir -pv $userprofile/bin
+        cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
+          $userprofile/bin/
+        which envsubst || exit 88
+
         ######################################################################
         echo "$(cat<<EOF
         #!/bin/bash
+        set -Euo pipefail
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
         declare -x PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
         if [[ "\$1" == "-c" ]] ; then shift ; fi
+        set -a
+        test ! -s $workspace/gha-bootstrap.env || source $workspace/gha-bootstrap.env
+        test ! -s $workspace/build/build_vars.env || source $workspace/build/build_vars.env
         exec "/c/Program Files/Git/usr/bin/bash.exe" -Euo pipefail -c "\${@//\\\\/\\\\\\\\}"
         EOF
         ######################################################################
         )" | tee SHELL.sh || exit 75
         chmod a+x SHELL.sh
 
+        set -x
+        ( echo stdout ; echo stderr >&2 ) | 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
+        ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
+        ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
+        ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
+        ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 tee /dev/stderr >/dev/null || true
         ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
-
-        which envsubst || true
-
-        mv -v '/c/Program Files/Git/usr/bin/tee.exe' '/c/Program Files/Git/usr/bin/tee.orig.exe'
-
-        mkdir -pv $userprofile/bin
-        cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe \
-          $userprofile/bin/
-
-        which envsubst || exit 88
+        mv -v  '/c/Program Files/Git/usr/bin/tee.orig.exe'
+        ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
+        ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
 
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
