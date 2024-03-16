@@ -59,7 +59,7 @@ jobs:
           echo fsvr_step=$PWD/fsvr/util/build.sh
           echo workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
-        ) | tee -a $GITHUB_ENV`
+        ) | tee -a $GITHUB_ENV` || exit 62
 
         ######################################################################
         echo "$(cat<<EOF
@@ -72,7 +72,7 @@ jobs:
         exec "/c/Program Files/Git/usr/bin/bash.exe" -Euo pipefail -c "\${@//\\\\/\\\\\\\\}"
         EOF
         ######################################################################
-        )" | tee SHELL.sh
+        )" | tee SHELL.sh || exit 75
         chmod a+x SHELL.sh
 
         ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
