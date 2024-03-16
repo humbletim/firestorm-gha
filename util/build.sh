@@ -53,8 +53,8 @@ EOF
 )
 
 function 020_perform_replacements() {( $_dbgopts;
-
-
+    source $_workspace/SHELL.env
+  
     echo $version_xyzw | tee $build_dir/newview/viewer_version.txt >&2
     ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 
