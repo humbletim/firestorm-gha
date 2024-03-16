@@ -53,7 +53,8 @@ EOF
 
 function 020_perform_replacements() {( $_dbgopts;
 
-    env bash -c 'declare -xp PATH BASH'
+    echo "BASH_SOURCE=${BASH_SOURCE[@]}"
+    env bash -c 'declare -xp PATH BASH_SOURCE'
     ls -l /usr/bin/envsubst.exe || true
     which envsubst || exit 58
     env bash -c 'declare -xp PATH BASH ; which envsubst || exit 59' || exit 59

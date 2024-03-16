@@ -17,10 +17,10 @@ test -n "$*" || _die 'usage: $0 [varname=gitdir] [varname2=gitdir2] ...'
 
 # git active commit short hash for a checkout folder
 function _git_sha() {
-  local path=$1
-  [[ "$path" ==~ .*/.git ]] && path=$(dirname $path)
-  test -d $path || _die "could not determine .git root from $1"
-  git -C $path describe --always --first-parent --abbrev=7 || _die "could not describe $path"
+  local path="$1"
+  [[ "$path" ==~ .*/.git ]] && path="$(dirname "$path")"
+  test -d "$path" || return `_err $? "could not determine .git root from $1"`
+  git -C "$path" describe --always --first-parent --abbrev=7 || return `_err $? "could not describe '$path'"`
 }
 set -e
 for kv in $* ; do
