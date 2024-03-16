@@ -64,7 +64,7 @@ jobs:
         set -xu
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
-        declare x -- `{
+        declare -x -- "`{
           for x in ${{github.event.inputs.fstuple}}; do
             _setenv $x
           done
@@ -74,7 +74,7 @@ jobs:
           _setenv _userprofile=$_userprofile
           _setenv _programfiles=$_programfiles
           _setenv _comspec=$_comspec
-        } | tee -a SHELL.env $GITHUB_ENV`
+        } | tee -a SHELL.env $GITHUB_ENV`"
 
         # declare -x `cat "$GITHUB_ENV"`
         env | grep -E '^[_a-z][a-z]'
@@ -82,9 +82,9 @@ jobs:
         test -d "$fsvr_dir" || exit `_err $? "!$fsvr_dir"`
         test -d "$_userprofile" || exit `_err $? "!$_userprofile"`
         test -d "$_workspace" || exit `_err $? "!$_workspace"`
-        declare x -- `{
+        declare -x -- "`{
           _setenv PATH=$_userprofile/bin:$_workspace/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32
-        } | tee -a SHELL.env $GITHUB_ENV`
+        } | tee -a SHELL.env $GITHUB_ENV`"
 
         declare -xp fsvr_dir PATH
 
