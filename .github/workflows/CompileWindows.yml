@@ -12,16 +12,19 @@ on:
             - base=7.1.2 repo=FirestormViewer/phoenix-firestorm-alpha branch=master
             - base=7.1.2 repo=FirestormViewer/phoenix-firestorm branch=7.1.4_Mar14_preview
 
-defaults:
-  run:
-    # shell: bash
-    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
+# shell: bash
+#bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
+#    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #    shell: c:\Program Files\Git\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
 env:
-    shell: bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
+    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #    PATH: ${{ github.workspace }}\bin
+
+defaults:
+  run:
+    shell: ${{ env.shell }}
 
 jobs:
   windows_build:
