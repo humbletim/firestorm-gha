@@ -58,7 +58,7 @@ jobs:
           echo fsvr_dir=$PWD/fsvr
           echo fsvr_step=$PWD/fsvr/util/build.sh
           echo workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
-          echo userprofile=`/usr/bin/cygpath -ua "$USERPROFILE"`
+          echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
         ) | tee -a $GITHUB_ENV`
 
         ######################################################################
