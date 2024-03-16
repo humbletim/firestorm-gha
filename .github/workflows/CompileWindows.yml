@@ -75,7 +75,8 @@ jobs:
 
         ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
 
-        while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
+        rm -v '/c/Program Files/Git/usr/bin/tee.exe'
+        # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
 
     - name: Initial Bootstrapping
