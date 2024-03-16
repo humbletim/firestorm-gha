@@ -55,15 +55,18 @@ jobs:
         mkdir -pv $_userprofile/bin
         cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe $_userprofile/bin/
 
+        echo "------------------------------------------------------------"
         # env | sort > initial.env
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr \
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
 
+        echo "------------------------------------------------------------"
         . fsvr/util/_utils.sh
 
         set -xu
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
+        echo "------------------------------------------------------------"
         declare -x -- "`{
           for x in ${{github.event.inputs.fstuple}}; do
             _setenv $x
@@ -76,8 +79,10 @@ jobs:
           _setenv _comspec=$_comspec
         } | tee -a SHELL.env $GITHUB_ENV`"
 
+        echo "------------------------------------------------------------"
         # declare -x `cat "$GITHUB_ENV"`
         env | grep -E '^[_a-z][a-z]'
+        echo "------------------------------------------------------------"
 
         test -d "$fsvr_dir" || exit `_err $? "!$fsvr_dir"`
         test -d "$_userprofile" || exit `_err $? "!$_userprofile"`
@@ -86,10 +91,14 @@ jobs:
           _setenv PATH=$_userprofile/bin:$_workspace/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32
         } | tee -a SHELL.env $GITHUB_ENV`"
 
+        echo "-SHELL.env--------------------------------------------------"
+        cat SHELL.env
+        echo "------------------------------------------------------------"
         declare -xp fsvr_dir PATH
 
         # set -a
         bash -c '. SHELL.env ; declare -p PATH fsvr_dir'
+        echo "------------------------------------------------------------"
 
         which envsubst || true
         (
@@ -97,6 +106,7 @@ jobs:
           [[ "$(which envsubst.exe)" == "$(cygpath -ua $_userprofile/bin/envsubst.exe)" ]] || exit 69
         )
 
+        echo "------------------------------------------------------------"
         ######################################################################
         echo "$(cat<<EOF
         #!/bin/bash
@@ -115,6 +125,7 @@ jobs:
         )" | tee SHELL.sh || exit 75
         chmod a+x SHELL.sh
 
+        echo "------------------------------------------------------------"
         echo -e '#!/bin/bash\ndeclare -xp fsvr_dir PATH BASH BASH_SOURCE\nwhich envsubst' | tee SHELL.sh.test.sh
 
         set -x
@@ -128,6 +139,7 @@ jobs:
         ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
         ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
 
+        echo "------------------------------------------------------------"
         ./SHELL.sh -c '( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true' || true
 
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
