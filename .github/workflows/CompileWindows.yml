@@ -18,7 +18,8 @@ defaults:
     shell: bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
-# env:
+ env:
+    shell: bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #    PATH: ${{ github.workspace }}\bin
 
 jobs:
@@ -85,7 +86,7 @@ jobs:
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
-        shell: ${{ defaults.run.shell }}
+        shell: ${{ env.shell }}
         run: ${{ env.fsvr_dir}}/gha-bootstrap.sh
         environment: |
             ${{ github.event.inputs.fstuple }}
@@ -145,7 +146,7 @@ jobs:
       uses: ./fsvr-action
       with:
         environment: '*=process.env'
-        shell: ${{ defaults.run.shell }}
+        shell: ${{ env.shell }}
         run: |
           INPUT_key=$base-build-packages-b INPUT_path=build/packages \
             /c/Program\ Files/nodejs/node \
