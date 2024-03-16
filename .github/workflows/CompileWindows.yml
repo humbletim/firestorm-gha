@@ -116,14 +116,15 @@ jobs:
         echo "$(cat<<EOF
         #!/bin/bash
         set -Euo pipefail
+        set -a
         source $_workspace/SHELL.env
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
-        declare -x PATH
         if [[ "\${1:-}" == "-c" ]] ; then shift ; fi
         test ! -s $_workspace/gha-bootstrap.env || source $_workspace/gha-bootstrap.env
         test ! -s $_workspace/build/build_vars.env || source $_workspace/build/build_vars.env
+        if [[ "\$PATH" =~ msys64 ]]; then { echo "bad PATH! '$PATH'" ; exit 127 ; }
         if [[ "\${BASH_SOURCE[0]}" == "\${0}" ]]; then
           echo "[SHELL.sh '\$PATH'] evaluating args='\$@'" >&2
           eval "\${@//\\\\/\\\\\\\\}"
