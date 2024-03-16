@@ -26,7 +26,7 @@ require generate_git_vars.sh \
 
 # version_fsvr_tag=`git tag --contains "$version_fsvr_sha" -n 1`
 # test -n "$version_fsvr_tag" ||
-version_fsvr_tag=`git -C $fsvr_dir describe --all --always|sed -e 's@.*/@@'`
+version_fsvr_tag=`git -C $fsvr_dir describe --all --always|sed -e 's@.*/@@'` || exit `_err $? "!version_fsvr_tag fsvr_dir='$fsvr_dir'"`
 # version_fsvr_tag=`git branch --contains "$version_fsvr_sha" --format "%(refname:lstrip=-1)"`
 
 _setenv version_fsvr_tag=$version_fsvr_tag
