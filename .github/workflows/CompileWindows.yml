@@ -92,9 +92,11 @@ jobs:
         ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
         ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 tee /dev/stderr >/dev/null || true
         ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
-        mv -v  '/c/Program Files/Git/usr/bin/tee.orig.exe'
+        mv -v '/c/Program Files/Git/usr/bin/tee.orig.exe' '/c/Program Files/Git/usr/bin/tee.orig.exe'
         ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
         ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
+
+        ./SHELL.sh -c '( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true' || true
 
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
