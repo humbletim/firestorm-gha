@@ -14,7 +14,9 @@ import sys, io, os, subprocess
 stream_map = [
     [sys_stdout, 'C:/Program Files/Git/usr/bin/tee.orig.exe'],  # Default/fallback
     [sys_stdout, '/dev/stdout'],  # For troubleshooting tty issues
+    [sys_stdout, '/proc/self/fd/1'],
     [sys_stderr, '/dev/stderr'],
+    [sys_stderr, '/proc/self/fd/2'],
 ]
 
 forward = stream_map[0]
