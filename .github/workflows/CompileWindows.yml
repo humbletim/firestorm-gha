@@ -50,6 +50,7 @@ jobs:
       shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
       # shell: bash
       run: |
+        where.exe pacman.exe
         echo "${{ toJSON(github.event.inputs) }}"
         declare -xp PATH
 
