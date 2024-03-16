@@ -21,7 +21,7 @@ fi
 cd "$(dirname $0)"
 
 #test -f openvr.tar.gz || curl -L -s https://api.github.com/repos/ValveSoftware/openvr/tarball/v1.6.10 -o openvr.tar.gz
-#tar --strip-components=1 -xvf openvr.tar.gz ValveSoftware-openvr-8eaf723/lib/win64 ValveSoftware-openvr-8eaf723/bin/win64 ValveSoftware-openvr-8eaf723/headers ValveSoftware-openvr-8eaf723/LICENSE
+#tar --force-local --strip-components=1 -xvf openvr.tar.gz ValveSoftware-openvr-8eaf723/lib/win64 ValveSoftware-openvr-8eaf723/bin/win64 ValveSoftware-openvr-8eaf723/headers ValveSoftware-openvr-8eaf723/LICENSE
 # cp -av LICENSE LICENSES/openvr.txt
 # cp -av headers/openvr.h include
 # cp -av bin/win64/openvr_api.dll lib/win64/openvr_api.lib lib/release/
@@ -56,7 +56,7 @@ FILES=(
 
 for x in ${FILES[@]} ; do test -s stage/$x || { echo "'$x' invalid" >&2 ; exit 38 ; } ; done
 
-tar -C stage -cjvf $tarball ${FILES[@]}
+tar --force-local -C stage -cjvf $tarball ${FILES[@]}
 
 hash=($(md5sum $tarball))
 url="file:///$tarball"
@@ -76,7 +76,7 @@ verify_from_packages_json $tarball $tarball.json \
 #     | awk '{ print $1 }'`
 
 
-#tar -tvf $tarball
+#tar --force-local -tvf $tarball
 
 #for x in md5sum sha1sum sha256sum ; do
 #  $x $tarball | tee $tarball.$x

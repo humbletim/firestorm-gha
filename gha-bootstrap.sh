@@ -136,9 +136,13 @@ function ensure_gha_bin() {(
               Zenodo. https://doi.org/10.5281/zenodo.7347980
             " > bin/parallel-home/will-cite
         } || return `_err $? "failed to provision parallel $?"`
-        $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home $userprofile/.parallel
-        $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home /home/$USERNAME/.parallel
-  
+        (
+          set +e
+          $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home $userprofile/.parallel
+          $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home ~/.parallel
+          $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home /home/$USERNAME/.parallel
+          $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home C:/msys64/home/$USERNAME/.parallel
+        )
     # for using tmate to debug, create a helper script that invokes with current paths
     echo "$(/usr/bin/cat <<'EOF'
 ##############################################################################

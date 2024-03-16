@@ -43,7 +43,7 @@ jobs:
     - name: Output Inputs
       shell: bash
       run: |
-        echo "${{ toJSON(github.event) }}"
+        echo "${{ toJSON(github.event.inputs) }}"
         declare -xp PATH
 
         # env | sort > initial.env
