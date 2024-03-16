@@ -53,7 +53,11 @@ jobs:
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
 
         reponame=$(basename "${GITHUB_REPOSITORY}")
-        eval `(
+
+        export PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
+        declare -xp PATH
+
+        declare -x `(
           for x in ${{github.event.inputs.fstuple}}; do
             echo $x | tee -a $GITHUB_ENV
           done
@@ -61,8 +65,11 @@ jobs:
           echo fsvr_step=$PWD/fsvr/util/build.sh
           echo workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
-          echo PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
         ) | tee -a $GITHUB_ENV` || exit 62
+
+        declare -x `(
+          echo PATH="$PATH"
+        ) | tee -a $GITHUB_ENV` || exit 71
 
         which envsubst || true
         mkdir -pv $userprofile/bin
