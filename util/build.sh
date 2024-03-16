@@ -54,10 +54,8 @@ EOF
 function 020_perform_replacements() {( $_dbgopts;
 
     echo "BASH_SOURCE=${BASH_SOURCE[@]}"
-    env bash -c 'declare -xp PATH BASH_SOURCE'
     ls -l /usr/bin/envsubst.exe || true
     which envsubst || exit 58
-    env bash -c 'declare -xp PATH BASH ; which envsubst || exit 59' || exit 59
 
     echo $version_xyzw | tee $build_dir/newview/viewer_version.txt >&2
     ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/

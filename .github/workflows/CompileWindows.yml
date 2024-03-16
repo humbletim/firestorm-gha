@@ -23,6 +23,7 @@ defaults:
     shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 
 env:
+    BASH_ENV: ${{ github.workspace }}/SHELL.env
     shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #    PATH: ${{ github.workspace }}\bin
 
@@ -119,11 +120,16 @@ jobs:
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
-        if [[ "\$1" == "-c" ]] ; then shift ; fi
+        declare -x PATH
+        if [[ "\${1:-}" == "-c" ]] ; then shift ; fi
         test ! -s $_workspace/gha-bootstrap.env || source $_workspace/gha-bootstrap.env
         test ! -s $_workspace/build/build_vars.env || source $_workspace/build/build_vars.env
-        echo "[SHELL.sh '$PATH'] running '\$@'" >&2
-        exec "/c/Program Files/Git/usr/bin/bash.exe" --noprofile --norc -e -o pipefail -c "\${@//\\\\/\\\\\\\\}"
+        if [[ "\${BASH_SOURCE[0]}" == "\${0}" ]]; then
+          echo "[SHELL.sh '\$PATH'] running args='\$@'" >&2
+          exec \$BASH --noprofile --norc -e -o pipefail -c "\${@//\\\\/\\\\\\\\}"
+        else
+          echo "[SHELL.sh '\$PATH'] sourced (ignored args='\$@')" >&2
+        fi
         EOF
         ######################################################################
         )" | tee SHELL.sh || exit 75
