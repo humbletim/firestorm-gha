@@ -77,7 +77,10 @@ jobs:
 
     - name: Initial Bootstrapping
       run: |
+        declare -f tee
         ( echo stdout ; echo stderr >&@ ) | tee /dev/stderr >/dev/null
+
+        [[ $(($( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null) 2>&1) =~ stdout.*stderr ]] || exit 83
 
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
