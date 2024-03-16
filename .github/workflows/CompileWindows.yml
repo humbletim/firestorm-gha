@@ -63,7 +63,7 @@ jobs:
           echo workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
           echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
         ) | tee -a $GITHUB_ENV
-        declare -x "`cat $GITHUB_ENV`"
+        declare -x `cat $GITHUB_ENV`
 
         set -x
         test -d "$userprofile" || exit 68
