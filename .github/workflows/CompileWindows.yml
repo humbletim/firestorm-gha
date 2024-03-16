@@ -14,12 +14,12 @@ on:
 
 defaults:
   run:
-    shell: bash
-#   shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+    # shell: bash
+    shell: bash --noprofile --norc -e -o pipefail ./PATH.sh {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 
-env:
-   PATH: ${{ github.workspace }}\bin
+# env:
+#    PATH: ${{ github.workspace }}\bin
 
 jobs:
   windows_build:
@@ -44,9 +44,21 @@ jobs:
       run: |
         echo "${{ toJSON(github.event.inputs) }}"
         declare -xp PATH
+        reponame=$(basename "${GITHUB_REPOSITORY}")
+        echo "$(cat<<EOF
+        #!/bin/bash
+        if [[ "\$1" == "-c" ]] ; then shift ; fi
+        declare -x PATH="/c/Users/$USERNAME/bin:$PWD/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32"
+        test -n "\$@" && exec "\$@"
+        exit 0
+        EOF)" | tee PATH.sh
+        chmod a+x PATH.sh
+        . PATH.sh
+        declare -xp PATH
 
     - name: Initial Bootstrapping
       run: |
+        declare -xp PATH
         # env | sort > initial.env
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} repo/fsvr \
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
@@ -59,14 +71,7 @@ jobs:
         ) | tee -a $GITHUB_ENV`
         $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
-        $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
-        exit 0
-
-    - name: XPrecludes
-      run: |
-        export PATH="/c/Users/runneradmin/bin:/d/a/firestorm-gha/firestorm-gha/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32:/c/msys64/usr/bin:/c/msys64/bin"
-        $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
-        $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
+        # $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
 
 #     - name: Run as Action
@@ -92,7 +97,7 @@ jobs:
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
-        run: ${{ env.fsvr_dir}}/gha-bootstrap.sh
+        run: ./PATH.sh -c ${{ env.fsvr_dir}}/gha-bootstrap.sh
         environment: |
             ${{ github.event.inputs.fstuple }}
             *=process.env
