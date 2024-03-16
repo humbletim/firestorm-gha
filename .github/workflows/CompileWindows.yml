@@ -52,29 +52,31 @@ jobs:
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr \
           && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
 
+        . fsvr/util/_utils.sh
+
         reponame=$(basename "${GITHUB_REPOSITORY}")
 
-        (
+        {
           for x in ${{github.event.inputs.fstuple}}; do
-            echo $x
+            _setenv $x
           done
-          echo fsvr_dir=$PWD/fsvr
-          echo fsvr_step=$PWD/fsvr/util/build.sh
-          echo workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
-          echo userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
-        ) | tee -a SHELL.env $GITHUB_ENV
-        declare -x `cat "$GITHUB_ENV"`
+          _setenv fsvr_dir=$PWD/fsvr
+          _setenv fsvr_step=$PWD/fsvr/util/build.sh
+          _setenv workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
+          _setenv userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
+        } | tee -a SHELL.env $GITHUB_ENV
+        # declare -x `cat "$GITHUB_ENV"`
         env | grep -E '^[_a-z][a-z]'
 
         test -d "$userprofile" || exit 68
         test -d "$workspace" || exit 69
 
-        echo PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32" | tee -a SHELL.env $GITHUB_ENV 
-
-        set -a
-        . SHELL.env
+        _setenv PATH="$userprofile/bin:$workspace/bin:/c/tools/zstd:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:/c/Program Files/OpenSSL/bin:/c/Windows/System32/OpenSSH:/c/Program Files/nodejs:/c/Program Files/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32" | tee -a SHELL.env $GITHUB_ENV 
 
         declare -xp fsvr_dir PATH
+
+        # set -a
+        bash -c '. SHELL.env ; declare -p PATH fsvr_dir'
 
         which envsubst || true
         mkdir -pv $userprofile/bin
@@ -92,7 +94,6 @@ jobs:
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
-        declare -x PATH="$PATH"
         if [[ "\$1" == "-c" ]] ; then shift ; fi
         set -a
         test ! -s $workspace/gha-bootstrap.env || source $workspace/gha-bootstrap.env
