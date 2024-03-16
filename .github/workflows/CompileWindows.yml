@@ -64,7 +64,7 @@ jobs:
 
     - name: XPrecludes
       env:
-        PATH: '/usr/bin:/bin:/c/Windows/system32'
+        PATH: '/usr/bin:/bin:/c/Windows/system32:/c/Program Files/Git/usr/bin:/c/Program Files/Git/bin:/c/msys64/bin:/c/msys64/usr/bin'
       run: |
         $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
