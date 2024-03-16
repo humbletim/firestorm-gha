@@ -20,11 +20,12 @@ on:
 
 defaults:
   run:
-    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
+    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
 
 env:
     BASH_ENV: ${{ github.workspace }}/SHELL.env
-    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
+    SHELL: c:/PROGRA~1/Git/usr/bin/bash.exe
+    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
 #    PATH: ${{ github.workspace }}\bin
 
 
@@ -94,48 +95,59 @@ jobs:
         test -d "$_workspace" || exit `_err $? "!$_workspace"`
         eval "declare -x -- `{
           _setenv PATH=$_userprofile/bin:$_workspace/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32
-        } | tee -a PATH.env`"
-
-        echo "-SHELL.env--------------------------------------------------"
-        cat SHELL.env
-        echo "------------------------------------------------------------"
-        declare -xp fsvr_dir PATH
-
-        # set -a
-        bash -c '. SHELL.env ; declare -p PATH fsvr_dir'
-        echo "------------------------------------------------------------"
-
-        which envsubst || true
-        (
-          set -x
-          [[ "$(which envsubst.exe)" == "$(cygpath -ua $_userprofile/bin/envsubst.exe)" ]] || exit 69
-        )
+        } | tee -a SHELL.env`"
 
         echo "------------------------------------------------------------"
         ######################################################################
         echo "$(cat<<EOF
-        #!/bin/bash
-        set -Euo pipefail
-        set -a
-        source $_workspace/SHELL.env
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname ; }
         declare -xf tee hostname
-        if [[ "\${1:-}" == "-c" ]] ; then shift ; fi
-        test ! -s $_workspace/gha-bootstrap.env || source $_workspace/gha-bootstrap.env
-        test ! -s $_workspace/build/build_vars.env || source $_workspace/build/build_vars.env
-        if [[ "\$PATH" =~ msys64 ]]; then echo "bad PATH! '\$PATH'" ; exit 127 ; fi
-        if [[ "\${BASH_SOURCE[0]}" == "\${0}" ]]; then
-          echo "[SHELL.sh '\$PATH'] evaluating args='\$@'" >&2
-          eval "\${@//\\\\/\\\\\\\\}"
-        else
-          echo "[SHELL.sh '\$PATH'] sourced (ignored args='\$@')" >&2
-        fi
-        EOF
-        ######################################################################
-        )" | tee SHELL.sh || exit 75
-        chmod a+x SHELL.sh
+        declare -x PATH
+        echo "SHELL.env... '$PATH' '$fsvr_dir'"
+        EOF)" | tee -a SHELL.env
 
+#         echo "-SHELL.env--------------------------------------------------"
+#         cat SHELL.env
+#         echo "------------------------------------------------------------"
+#         declare -xp fsvr_dir PATH
+# 
+#         # set -a
+#         bash -c '. SHELL.env ; declare -p PATH fsvr_dir'
+#         echo "------------------------------------------------------------"
+
+        # which envsubst || true
+        # (
+        #   set -x
+        #   [[ "$(which envsubst.exe)" == "$(cygpath -ua $_userprofile/bin/envsubst.exe)" ]] || exit 69
+        # )
+
+#         echo "------------------------------------------------------------"
+#         ######################################################################
+#         echo "$(cat<<EOF
+#         #!/bin/bash
+#         set -Euo pipefail
+#         set -a
+#         source $_workspace/PATH.env
+#         source $_workspace/SHELL.env
+#         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
+#         function hostname() { $PWD/bin/hostname ; }
+#         declare -xf tee hostname
+#         if [[ "\${1:-}" == "-c" ]] ; then shift ; fi
+#         test ! -s $_workspace/gha-bootstrap.env || source $_workspace/gha-bootstrap.env
+#         test ! -s $_workspace/build/build_vars.env || source $_workspace/build/build_vars.env
+#         if [[ "\$PATH" =~ Mongo ]]; then echo "bad PATH! '\$PATH'" ; exit 127 ; fi
+#         if [[ "\${BASH_SOURCE[0]}" == "\${0}" ]]; then
+#           echo "[SHELL.sh '\$PATH'] evaluating args='\$@'" >&2
+#           eval "\${@//\\\\/\\\\\\\\}"
+#         else
+#           echo "[SHELL.sh '\$PATH'] sourced (ignored args='\$@')" >&2
+#         fi
+#         EOF
+#         ######################################################################
+#         )" | tee SHELL.sh || exit 75
+#         chmod a+x SHELL.sh
+# 
         echo "------------------------------------------------------------"
         echo -e '#!/bin/bash\necho a=\$a | a=b envsubst ' | tee SHELL.sh.test.sh
 
@@ -146,12 +158,12 @@ jobs:
         # ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
         # ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 tee /dev/stderr >/dev/null || true
         # ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
-        mv -v '/c/Program Files/Git/usr/bin/tee.exe' '/c/Program Files/Git/usr/bin/tee.orig.exe'
+        # mv -v '/c/Program Files/Git/usr/bin/tee.exe' '/c/Program Files/Git/usr/bin/tee.orig.exe'
         # ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
         # ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
 
-        echo "------------------------------------------------------------"
-        ./SHELL.sh -c '( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true' || true
+        # echo "------------------------------------------------------------"
+        # ./SHELL.sh -c '( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true' || true
 
 
         cat <<'EOF' > _test_PATH.sh
@@ -175,7 +187,7 @@ jobs:
         # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
         exit 0
 
-    - name: SHELL.sh test 0
+    - name: SHELL.env test 0
       run: echo "${BASH_SOURCE[@]}"
 
     - name: SHELL.sh test 1
