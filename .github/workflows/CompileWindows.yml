@@ -42,7 +42,7 @@ jobs:
         path: /dev/null
   
     - name: Output Inputs
-      shell: '"c:/Program Files/Git/usr/bin/bash.exe" --noprofile --norc -e -o pipefail {0}'
+      shell: "c:/Program Files/Git/usr/bin/bash.exe" --noprofile --norc -e -o pipefail {0}
       # shell: bash
       run: |
         echo "${{ toJSON(github.event.inputs) }}"
@@ -222,8 +222,8 @@ jobs:
     - name: 0c0_upload_artifacts
       run: $fsvr_step 0c0
 
-    - name: Setup tmate session
-      if: failure()
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+    # - name: Setup tmate session
+    #   if: failure()
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true
