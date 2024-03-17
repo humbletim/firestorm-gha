@@ -336,13 +336,13 @@ jobs:
     - name: 0c0_upload_artifacts
       run: $fsvr_step 0c0
 
-    # - name: Setup tmate session
-    #   if: failure()
-    #   uses: mxschmitt/action-tmate@v3
-    #   env:
-    #      PATH: /c/msys64/usr/bin:${{ env.PATH}}
-    #   with:
-    #     limit-access-to-actor: true
+    - name: Setup tmate session
+      if: failure()
+      uses: mxschmitt/action-tmate@v3
+      env:
+         PATH: /c/msys64/usr/bin:${{ env.PATH}}
+      with:
+        limit-access-to-actor: true
 # 
 # 
 #     - name: Setup tmate session
