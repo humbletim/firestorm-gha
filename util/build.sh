@@ -169,14 +169,18 @@ function _parallel() {( $_dbgopts;
     local funcname=$1
     shift
     test -f $build_dir/$funcname.txt && rm -v $build_dir/$funcname.txt
+    declare -f parallel
+    which parallel
+    hostname
+    env hostname
+    echo $HOME
+    ls -l ~/ -a
     parallel --joblog $build_dir/$funcname.txt --halt-on-error 2 "$@" \
       || { rc=$? ; _relativize "see $build_dir/$funcname.txt" >&2 ; return $rc ; }
 )}
 
 function 060_download_packages() {( $_dbgopts;
     _assert fsvr_cache_dir 'test -d "$fsvr_cache_dir"'
-    declare -f parallel
-    which parallel
     jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep http \
       | _parallel "$FUNCNAME" -j4 'set -e ; echo {} >&2 ; wget -nv -N -P "$fsvr_cache_dir" -N {} ; test -s $fsvr_cache_dir/$(basename {}); exit 0'
 )}
