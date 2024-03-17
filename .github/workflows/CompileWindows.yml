@@ -10,7 +10,7 @@ on:
           options:
             - base=6.6.17 repo=FirestormViewer/phoenix-firestorm branch=Firestorm_6.6.17
             - base=7.1.2 repo=FirestormViewer/phoenix-firestorm-alpha branch=master
-            - base=7.1.2 repo=FirestormViewer/phoenix-firestorm branch=7.1.4_Mar14_preview
+            - base=7.1.4 repo=FirestormViewer/phoenix-firestorm branch=7.1.4_Mar14_preview
 
 # shell: bash
 #bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
@@ -305,7 +305,7 @@ jobs:
         shell: ${{ env.SHELL }}
         run: |
           source $BASH_ENV
-          export INPUT_key=$base-build-packages-b INPUT_path=build/packages
+          export INPUT_key=$base-build-packages-c INPUT_path=build/packages
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && echo 'yup' || {
               echo 'nope' 
