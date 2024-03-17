@@ -1,0 +1,14 @@
+cmd_exe       = cmd.exe
+ninja_exe     = ninja.exe
+python_exe    = python.exe
+
+cl_exe        = cl.exe
+lib_exe       = lib.exe
+link_exe      = lld-link.exe
+mt_exe        = mt.exe
+rc_exe        = rc.exe
+
+cmake_exe     = cmake.exe
+cmake_gui_exe = cmake.exe
+cmcldeps_exe  = cmcldeps.exe
+cmake_pch     = newview\cmake_pch
