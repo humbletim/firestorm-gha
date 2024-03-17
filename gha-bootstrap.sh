@@ -118,7 +118,9 @@ function ensure_gha_bin() {(
             echo '
               #include <stdio.h>
               #include <io.h>
-              #include <fnctl.h>
+              extern int _setmode(int, int);
+              #define _O_BINARY 0x8000
+              //#include <fnctl.h>
               int main(int argc, char *argv[]) { _setmode(1,_O_BINARY); printf("%s\n", MESSAGE); return 0; }
             ' | $gcc "-DMESSAGE=\"windows-2022\"" -x c - -o bin/hostname.exe
         } || return `_err $? "failed to provision hostname.exe $?"`
