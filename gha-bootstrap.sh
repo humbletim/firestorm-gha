@@ -112,30 +112,36 @@ function ensure_gha_bin() {(
             && unzip -d bin $archive
         } || return `_err $? "failed to provision ninja $?"`
 
-        test -x bin/hostname.exe || {
+        false && test -x bin/hostname.exe || {
             # avoid entropy by hard-coding hostname used by parallel and other tools
             local gcc=${CC:-$(cygpath -ms '/c/Program Files/LLVM/bin/clang')}
             echo '
               #include <stdio.h>
-              int main(int argc, char *argv[]) { printf("%s\n", MESSAGE); return 0; }
+              #include <io.h>
+              #include <fnctl.h>
+              int main(int argc, char *argv[]) { _setmode(1,_O_BINARY); printf("%s\n", MESSAGE); return 0; }
             ' | $gcc "-DMESSAGE=\"windows-2022\"" -x c - -o bin/hostname.exe
         } || return `_err $? "failed to provision hostname.exe $?"`
 
         test -x bin/parallel -a -f bin/parallel-home/will-cite || {
             archive=`$fsvr_dir/util/_utils.sh wget_sha256 ${wgets[parallel]} .`
             tar -C bin --strip-components=2 -vxf $archive usr/bin/parallel
-
-            mkdir -pv bin/parallel-home/tmp/sshlogin/`hostname`/
-            echo 65535 > bin/parallel-home/tmp/sshlogin/`hostname`/linelen
-            test ! -v HOSTNAME || mkdir -pv bin/parallel-home/tmp/sshlogin/$HOSTNAME/
-            test ! -v HOSTNAME || echo 65535 > bin/parallel-home/tmp/sshlogin/$HOSTNAME/linelen
-
-            # hereby recognize contributions of GNU Parallel, developed by O. Tange.
-            echo "
-              Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
-              Zenodo. https://doi.org/10.5281/zenodo.7347980
-            " > bin/parallel-home/will-cite
         } || return `_err $? "failed to provision parallel $?"`
+        {
+          mkdir -pv bin/parallel-home/tmp/sshlogin/`hostname`/
+          echo 65535 > bin/parallel-home/tmp/sshlogin/`hostname`/linelen
+          mkdir -pv bin/parallel-home/tmp/sshlogin/`/usr/bin/hostname`/
+          echo 65535 > bin/parallel-home/tmp/sshlogin/`/usr/bin/hostname`/linelen
+          test ! -v HOSTNAME || mkdir -pv bin/parallel-home/tmp/sshlogin/$HOSTNAME/
+          test ! -v HOSTNAME || echo 65535 > bin/parallel-home/tmp/sshlogin/$HOSTNAME/linelen
+
+          # hereby recognize contributions of GNU Parallel, developed by O. Tange.
+          echo "
+            Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
+            Zenodo. https://doi.org/10.5281/zenodo.7347980
+          " > bin/parallel-home/will-cite
+        } || return `_err $? "failed to provision parallel $?"`
+
         (
           set +e
           $fsvr_dir/util/_utils.sh ht-ln $pwd/bin/parallel-home $userprofile/.parallel
