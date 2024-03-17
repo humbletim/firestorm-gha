@@ -103,7 +103,7 @@ jobs:
         echo "$(cat<<EOF
         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
         function hostname() { $PWD/bin/hostname "\$@" ; }
-        function paralell() { $PWD/bin/paralell "\$@" ; }
+        function parallel() { PARALLEL_HOME=$PWD/bin/parallel-home $PWD/bin/parallel "\$@" ; }
         function envsubst() { $_userprofile/bin/envsubst "\$@" ; }
         function wget() { $_userprofile/bin/wget "\$@" ; }
         declare -xf tee hostname parallel wget
@@ -304,6 +304,7 @@ jobs:
         environment: '*=process.env'
         shell: ${{ env.SHELL }}
         run: |
+          source $BASH_ENV
           export INPUT_key=$base-build-packages-b INPUT_path=build/packages
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && echo 'yup' || {

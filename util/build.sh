@@ -175,6 +175,8 @@ function _parallel() {( $_dbgopts;
 
 function 060_download_packages() {( $_dbgopts;
     _assert fsvr_cache_dir 'test -d "$fsvr_cache_dir"'
+    declare -f parallel
+    which parallel
     jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep http \
       | _parallel "$FUNCNAME" -j4 'set -e ; echo {} >&2 ; wget -nv -N -P "$fsvr_cache_dir" -N {} ; test -s $fsvr_cache_dir/$(basename {}); exit 0'
 )}
