@@ -34,7 +34,7 @@ base="$base"
 repo="$repo"
 branch="$branch"
 fsvr_dir="$PWD/fsvr"
-fsvr_step="$PWD/fsvr/util/build.sh"
+fsvr_step="source $PWD/gha-bootstrap.env && $PWD/fsvr/util/build.sh"
 
 _workspace="$_workspace"
 _userprofile="$_userprofile"
