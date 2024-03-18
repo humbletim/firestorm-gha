@@ -83,9 +83,9 @@ jobs:
       uses: ./fsvr-action
       with:
         # shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
-        environment: |
-            BASH_ENV=SHELL.env
-            *=process.env
+        # environment: |
+        #     BASH_ENV=SHELL.env
+        #     *=process.env
         run: |
           (
             export a=b
