@@ -55,9 +55,8 @@ jobs:
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
 
     - name: Generate SHELL.env
-      env: ${{ github.event.inputs.fstuple }}
       run: |
-        fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
+        ${{ github.event.inputs.fstuple }} fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
         fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
 
     - name: SHELL.env test 0
