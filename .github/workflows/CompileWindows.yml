@@ -67,7 +67,6 @@ jobs:
       run: |
         env bash -c 'echo PWD=$PWD'
         env bash -c 'echo PATH=$PATH'
-        env bash -c 'echo p373r_dir=$p373r_dir'
         declare -f tee
 
     - name: Initial Bootstrapping
@@ -87,6 +86,7 @@ jobs:
         run: |
           export a=b
           echo 'a=$a' | env a=b envsubst
+          declare -f tee
 
     - name: GHA Bootstrapping
       uses: ./fsvr-action
@@ -97,8 +97,10 @@ jobs:
         run: |
           echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
 
+          declare -f ninja
+
           function xxtest_bin() {
-            which ninja                         || return 195
+            declare -f ninja || which ninja     || return 195
             test -f bin/parallel-home/will-cite || return 196
             parallel --version | head -1        || return 197
             ninja --version                     || return 198
