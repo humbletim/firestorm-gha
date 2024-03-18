@@ -54,10 +54,11 @@ jobs:
         mkdir -pv bin cache repo build
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
 
+    - name: Generate SHELL.env
+      env: ${{ github.event.inputs.fstuple }}
+      run: |
         fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
-        source SHELL.env
-
-        $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
+        fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
 
     - name: SHELL.env test 0
       run: echo fsvr_dir=$fsvr_dir "${BASH_SOURCE[@]}"
