@@ -191,7 +191,7 @@ jobs:
         environment: '*=process.env'
         # shell: ${{ env.SHELL }}
         run: |
-          __fsvr__
+          set -Euo pipefail
           export INPUT_key=$base-build-packages-c INPUT_path=build/packages
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && echo 'yup' || {
