@@ -28,23 +28,17 @@ _PRESHELL_PATH=`subtract_paths "$_PRESHELL_PATH" "$PATH"`
 
 ######################################################################
 echo "$(cat<<EOF
-set -a
+$!/bin/bash
+_PRESHELL_PATH="$_PRESHELL_PATH"
 
+set -a
 base="$base"
 repo="$repo"
 branch="$branch"
 fsvr_dir="$PWD/fsvr"
 
-function __fsvr__() {
-  source $PWD/gha-bootstrap.env
-  test ! -f $PWD/build/build_vars.env || source $PWD/build/build_vars.env
-}
-
-function fsvr_step() {
-  set -eao pipefail
-  __fsvr__
-  $PWD/fsvr/util/build.sh "\$@" || return \$(_err \$? "\$@ failed");
-}
+test ! -f $PWD/gha-bootstrap.env    || source $PWD/gha-bootstrap.env
+test ! -f $PWD/build/build_vars.env || source $PWD/build/build_vars.env
 
 _workspace="$_workspace"
 _userprofile="$_userprofile"
@@ -59,13 +53,11 @@ function ninja() { "$PWD/bin/ninja.exe" "\$@" ; }
 function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
 function envsubst() { "$ENVSUBST" "\$@" ; }
 function wget() { "$WGET" "\$@" ; }
+function fsvr_step() { set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; }
 
-declare -xf _err tee hostname parallel wget envsubst ninja fsvr_step __fsvr__
-
-_PRESHELL_PATH="$_PRESHELL_PATH"
-
+declare -xf _err tee hostname parallel wget envsubst ninja fsvr_step
 declare -x PATH="\$PATH::\$_PRESHELL_PATH"
-
+set +a
 set -Eo pipefail
 EOF
 )"
