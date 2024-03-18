@@ -24,8 +24,7 @@ defaults:
 
 env:
     BASH_ENV: ${{ github.workspace }}/SHELL.env
-    # SHELL: c:/PROGRA~1/Git/usr/bin/bash.exe
-    SHELL: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
+    # SHELL: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
 
 
 jobs:
@@ -47,173 +46,28 @@ jobs:
         path: /dev/null
   
     - name: Output Inputs
-      shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
-      # shell: bash
       run: |
         echo "${{ toJSON(github.event.inputs) }}"
-        declare -xp PATH
 
-        _workspace=$(/usr/bin/cygpath -ua "$GITHUB_WORKSPACE")
-        _userprofile=$(/usr/bin/cygpath -ua "$USERPROFILE")
-        _programfiles=$(/usr/bin/cygpath -ua "$PROGRAMFILES") # | /usr/bin/sed -e 's@[cC]:/@/c/@')
-        _comspec=$(/usr/bin/cygpath -ua "$COMSPEC") # | /usr/bin/sed -e 's@[cC]:/@/c/@')
-        mkdir -pv $_userprofile/bin
-        cp -uav c:/msys64/usr/bin/wget.exe c:/msys64/usr/bin/envsubst.exe $_userprofile/bin/
+    - name: Clone
+      run: |
+        mkdir -pv bin cache repo build
+        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
 
-        echo "--clone-----------------------------------------------------"
-        # env | sort > initial.env
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr \
-          && echo "cloned ${GITHUB_REPOSITORY} into ./fsvr" >&2
+        fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
+        source SHELL.env
 
-        echo "--utils-----------------------------------------------------"
-        . fsvr/util/_utils.sh
-
-        set -u
-        reponame=$(basename "${GITHUB_REPOSITORY}")
-
-        echo "--shell.env setup-------------------------------------------"
-        echo 'test -v _PRESHELL_PATH || _PRESHELL_PATH="$PATH"' | tee -a SHELL.env
-
-        eval "declare -x -- `{
-          for x in ${{github.event.inputs.fstuple}}; do
-            _setenv $x
-          done
-          _setenv fsvr_dir=$PWD/fsvr
-          _setenv fsvr_step=$PWD/fsvr/util/build.sh
-          _setenv _workspace=$_workspace
-          _setenv _userprofile=$_userprofile
-          _setenv _programfiles=$_programfiles
-          _setenv _comspec=$_comspec
-        } | tee -a SHELL.env $GITHUB_ENV`"
-
-        echo "--lc env ---------------------------------------------------"
-        # declare -x `cat "$GITHUB_ENV"`
-        env | grep -E '^[_a-z][a-z]'
-        echo "------------------------------------------------------------"
-
-        test -d "$fsvr_dir" || exit `_err $? "!$fsvr_dir"`
-        test -d "$_userprofile" || exit `_err $? "!$_userprofile"`
-        test -d "$_workspace" || exit `_err $? "!$_workspace"`
-        eval "declare -x -- `{
-          _setenv PATH=$_userprofile/bin:$_workspace/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:/c/Windows/system32
-        } | tee -a SHELL.env`"
-
-        echo "------------------------------------------------------------"
-        ######################################################################
-        echo "$(cat<<EOF
-        function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
-        function hostname() { $PWD/bin/hostname "\$@" ; }
-        function parallel() { PARALLEL_HOME=$PWD/bin/parallel-home $PWD/bin/parallel "\$@" ; }
-        function envsubst() { $_userprofile/bin/envsubst "\$@" ; }
-        function wget() { $_userprofile/bin/wget "\$@" ; }
-        declare -xf tee hostname parallel wget
-        declare -x PATH="\$PATH::\$_PRESHELL_PATH"
-        #echo "[\$BASH_SOURCE SHELL.env... fsvr_dir='\$fsvr_dir' root_dir='\${root_dir:-}'/'\$(env|grep root_dir||true)' '\$(echo \"\$PATH\" | grep -Eo Mongo || true)'"
-        EOF
-        )" | tee -a SHELL.env
-        echo "------------------------------------------------------------"
-        echo -e '#!/bin/bash\necho a=\$a | a=b envsubst ' | tee SHELL.sh.test.sh
-        cat <<'EOF' > _test_PATH.sh
-        function _test_PATH() {(
-            set -x
-            set +e
-            echo "BASH_SOURCE=${BASH_SOURCE[@]}"
-            echo "PATH=$PATH"
-            echo "BASH=$(/usr/bin/cygpath -ma "$BASH")"
-
-            ls -l /usr/bin/envsubst.exe || true
-            which envsubst || exit 58
-
-            echo 'key=$value' | env ${fsversionvalues[@]} envsubst '$value' || return `_err $? "_test_PATH failed"`    
-        )}
-
-        _test_PATH "$@"
-        EOF
-        
-
-        # while read name ; do mv -v "$name" "${name/.exe/.orig.exe}" ; done < <(/c/Windows/system32/where.exe hostname.exe tee.exe | tr -d '\r' | tr '\\' '/')
-        exit 0
-
-        # echo "-SHELL.env--------------------------------------------------"
-        # cat SHELL.env
-        # echo "------------------------------------------------------------"
-        # declare -xp fsvr_dir PATH
-        # 
-        # # set -a
-        # bash -c '. SHELL.env ; declare -p PATH fsvr_dir'
-        # echo "------------------------------------------------------------"
-
-        # which envsubst || true
-        # (
-        #   set -x
-        #   [[ "$(which envsubst.exe)" == "$(cygpath -ua $_userprofile/bin/envsubst.exe)" ]] || exit 69
-        # )
-
-#         echo "------------------------------------------------------------"
-#         ######################################################################
-#         echo "$(cat<<EOF
-#         #!/bin/bash
-#         set -Euo pipefail
-#         set -a
-#         source $_workspace/PATH.env
-#         source $_workspace/SHELL.env
-#         function tee() { TEE=c:/msys64/usr/bin/tee.exe /c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe $fsvr_dir/util/tee.py "\$@" ; }
-#         function hostname() { $PWD/bin/hostname ; }
-#         declare -xf tee hostname
-#         if [[ "\${1:-}" == "-c" ]] ; then shift ; fi
-#         test ! -s $_workspace/gha-bootstrap.env || source $_workspace/gha-bootstrap.env
-#         test ! -s $_workspace/build/build_vars.env || source $_workspace/build/build_vars.env
-#         if [[ "\$PATH" =~ Mongo ]]; then echo "bad PATH! '\$PATH'" ; exit 127 ; fi
-#         if [[ "\${BASH_SOURCE[0]}" == "\${0}" ]]; then
-#           echo "[SHELL.sh '\$PATH'] evaluating args='\$@'" >&2
-#           eval "\${@//\\\\/\\\\\\\\}"
-#         else
-#           echo "[SHELL.sh '\$PATH'] sourced (ignored args='\$@')" >&2
-#         fi
-#         EOF
-#         ######################################################################
-#         )" | tee SHELL.sh || exit 75
-#         chmod a+x SHELL.sh
-# 
-
-        # set -x
-        # ( echo stdout ; echo stderr >&2 ) | 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
-        # ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 'c:/Program Files/Git/usr/bin/tee.exe' /dev/stderr >/dev/null || true
-        # ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
-        # ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
-        # ( echo stdout ; echo stderr >&2 ) | MSYS_NO_PATHCONV=1 tee /dev/stderr >/dev/null || true
-        # ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
-        # mv -v '/c/Program Files/Git/usr/bin/tee.exe' '/c/Program Files/Git/usr/bin/tee.orig.exe'
-        # ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true
-        # ( echo stdout ; echo stderr >&2 ) | c:/msys64/usr/bin/tee.exe /dev/stderr >/dev/null || true
-
-        # echo "------------------------------------------------------------"
-        # ./SHELL.sh -c '( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null || true' || true
-
-
+        $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
     - name: SHELL.env test 0
-      run: echo "${BASH_SOURCE[@]}"
-
-    - name: SHELL.sh test 1
-      run: $_workspace/_test_PATH.sh
-
-    - name: SHELL.sh test
-      run: $_workspace/SHELL.sh.test.sh
+      run: echo fsvr_dir=$fsvr_dir "${BASH_SOURCE[@]}"
 
     - name: SHELL.sh env test
       run: |
         env bash -c 'echo PWD=$PWD'
         env bash -c 'echo PATH=$PATH'
-        env bash -c 'echo root_dir=$root_dir'
-
-#     - name: xx020_perform_replacements
-#       env:
-#         root_dir: ..
-#         build_dir: ..
-#         version_xyw: ...
-#       run: $fsvr_step _test_PATH
-# 
+        env bash -c 'echo p373r_dir=$p373r_dir'
+        declare -f tee
 
     - name: Initial Bootstrapping
       run: |
@@ -223,17 +77,12 @@ jobs:
           ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null
           [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
         )
-        $fsvr_dir/util/_utils.sh ht-ln $fsvr_dir/actions-node-script ./fsvr-action
-
-        # $fsvr_dir/util/_utils.sh ht-xpreclude hostname tee
         exit 0
-
-
 
     - name: ./fsvr-action test
       uses: ./fsvr-action
       with:
-        shell: ${{ env.SHELL }}
+        # shell: ${{ env.SHELL }}
         run: |
           export a=b
           echo 'a=$a' | env a=b envsubst
@@ -241,38 +90,52 @@ jobs:
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
-        shell: ${{ env.SHELL }}
-        run: ${{ env.fsvr_dir}}/gha-bootstrap.sh
         environment: |
             ${{ github.event.inputs.fstuple }}
             *=process.env
+        run: |
+          echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
+
+          function xxtest_bin() {
+            which ninja                         || return 195
+            test -f bin/parallel-home/will-cite || return 196
+            parallel --version | head -1        || return 197
+            ninja --version                     || return 198
+            [[ `hostname` =~ windows[-]?2022 ]] || return 199
+          }
+
+          fsvr_repo=${GITHUB_REPOSITORY}
+          fsvr_branch=${GITHUB_REF_NAME}
+          fsvr_base=$base
+          fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
+
+          . $fsvr_dir/gha-bootstrap.sh
+
+          restore_gha_caches            || exit `_err $? "!restore_gha_caches"`
+          ensure_gha_bin && xxtest_bin  || exit `_err $? "!ensure_gha_bin"`
+          initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
+          save_gha_caches               || exit `_err $? "!save_gha_caches"`;
+
+          get_bootstrap_vars | tee gha-bootstrap.env
+          
 
     - name: PATH/ENV preflight tests
       run: |
-        set -x
-        declare -xp PATH
-        # env | sort > after-gha.env ; diff after.env after-gha.env || true
         jq --version
-        hostname
         test `hostname` == "windows-2022" || exit 2022
         test -v nunja_dir || exit 122
         test -d "$nunja_dir" || exit 123
         echo 'test $a' | env a=b envsubst || exit 124
-        
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
 
-    - name: Nunja Mapping
-      env:
+    - name: Generate Build Vars
         root_dir: repo/${{ env.branch }}
       run: |
-        mkdir -pv build
         $fsvr_dir/util/_utils.sh ht-ln $root_dir/indra indra
         $fsvr_dir/util/generate_build_vars.sh Firestorm-VR-GHA `cat $fsvr_dir/$base/viewer_version.txt` build/ \
            | tee build/build_vars.env | tee $GITHUB_ENV
-        $fsvr_dir/util/generate_msvc_env.bat > build/msvc.env
+
+    - name: Detect MSVC
+      run: $fsvr_dir/util/generate_msvc_env.bat > build/msvc.env
 
     - name: 010_ensure_build_directories
       run: $fsvr_step 010
@@ -302,16 +165,16 @@ jobs:
       uses: ./fsvr-action
       with:
         environment: '*=process.env'
-        shell: ${{ env.SHELL }}
+        # shell: ${{ env.SHELL }}
         run: |
           source $BASH_ENV
           export INPUT_key=$base-build-packages-c INPUT_path=build/packages
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && echo 'yup' || {
               echo 'nope' 
-              $fsvr_step 060 || exit 60 
-              $fsvr_step 070 || exit 70
-              $fsvr_step 080 || exit 80
+              $fsvr_step 060_download_packages || exit 60
+              $fsvr_step 070_verify_downloads  || exit 70
+              $fsvr_step 080_untar_packages    || exit 80
               /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
           }     
 # 
@@ -339,8 +202,8 @@ jobs:
     - name: Setup tmate session
       if: failure()
       uses: mxschmitt/action-tmate@v3
-      env:
-         PATH: /c/msys64/usr/bin:${{ env.PATH}}
+      # env:
+      #    PATH: /c/msys64/usr/bin:${{ env.PATH}}
       with:
         limit-access-to-actor: true
 # 

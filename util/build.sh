@@ -27,8 +27,8 @@ function 010_ensure_build_directories() {( $_dbgopts;
 fsversionvalues=(
  CMAKE_BUILD_TYPE=Release
  VIEWER_CHANNEL=$viewer_channel
- VIEWER_VERSION_GITHASH=\"$version_shas\"
- VIEWER_VERSION_MAJOR=$version_major 
+ "VIEWER_VERSION_GITHASH=\\\"$version_shas\\\""
+ VIEWER_VERSION_MAJOR=$version_major
  VIEWER_VERSION_MINOR=$version_minor
  VIEWER_VERSION_PATCH=$version_patch
  VIEWER_VERSION_REVISION=$version_release
@@ -53,10 +53,6 @@ EOF
 )
 
 function 020_perform_replacements() {( $_dbgopts;
-    source $_workspace/SHELL.env
-
-    echo "PATH=$PATH"
-  
     echo $version_xyzw | tee $build_dir/newview/viewer_version.txt >&2
     ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 
@@ -64,10 +60,10 @@ function 020_perform_replacements() {( $_dbgopts;
     ht-ln $fsvr_dir/newview/cmake_pch.cxx $build_dir/newview/
 
     cat $source_dir/newview/fsversionvalues.h.in | sed -E 's~@([A-Z_]+)@~$\1~g' \
-      | env ${fsversionvalues[@]} $_userprofile/bin/envsubst.exe > $build_dir/newview/fsversionvalues.h || return `_err $? "envsubst fsversionvalues.h.in"`
+      | eval "${fsversionvalues[@]} envsubst" > $build_dir/newview/fsversionvalues.h || return `_err $? "envsubst fsversionvalues.h.in"`
 
     cat $source_dir/newview/res/viewerRes.rc \
-      | env ${fsversionvalues[@]} $_userprofile/bin/envsubst.exe > $build_dir/newview/viewerRes.rc || return `_err $? "envsubst viewerRes.rc"`
+      | eval "${fsversionvalues[@]} envsubst" > $build_dir/newview/viewerRes.rc || return `_err $? "envsubst viewerRes.rc"`
 
     # TODO: see if there is a way to opt-out via configuration from flickr/discord integration
     ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
@@ -97,7 +93,7 @@ function get_msvcdir() {( $_dbgopts;
 function 085_prepare_msys_msvc() {( $_dbgopts;
     [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
 
-    if [[ -n "$GITHUB_ACTIONS" ]] ; then
+    if [[ -v GITHUB_ACTIONS ]] ; then
         # TODO: masking the NSIS folder usefully disrupts viewer_manifest.py
         #   past manifest processing and workable firestorm_setup_tmp.nsi emerging
         # see: indra/newview/viewer_manifest.py:    def nsi_file_commands
@@ -169,12 +165,7 @@ function _parallel() {( $_dbgopts;
     local funcname=$1
     shift
     test -f $build_dir/$funcname.txt && rm -v $build_dir/$funcname.txt
-    declare -f parallel
-    which parallel
-    hostname
-    env hostname
-    echo $HOME
-    ls -l ~/ -a
+    declare -f parallel >/dev/null || return `_err $? "parallel() not defined"`;
     parallel --joblog $build_dir/$funcname.txt --halt-on-error 2 "$@" \
       || { rc=$? ; _relativize "see $build_dir/$funcname.txt" >&2 ; return $rc ; }
 )}

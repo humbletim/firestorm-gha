@@ -68,6 +68,15 @@ function _setenv_ma() {
   _setenv "$name=$value"
 }
 
+# subtract_paths(a,b) => a less b, de-duplicated and normalized
+# subtract_paths(a,"") => a de-duplicated and normalized
+function subtract_paths() {(
+  PATH=/usr/bin:$PATH
+  grep -x -vf <(echo "$2" | tr ':' '\n') <(echo "$1" | tr ':' '\n') \
+    | awk '!seen[$0]++' | tr '\n' ':' | sed 's@:$@@' 
+  return 0
+)}
+
 
 function _realpath() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
 function _relative_path() { realpath --relative-to "$2" "$1" ; }
