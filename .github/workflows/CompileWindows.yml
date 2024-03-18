@@ -67,11 +67,11 @@ jobs:
       run: |
         env bash -c 'echo PWD=$PWD'
         env bash -c 'echo PATH=$PATH'
-        declare -f tee
+        declare -f tee | head -1
 
     - name: Initial Bootstrapping
       run: |
-        declare -f tee
+        declare -f tee | head -1
         (
           set -x
           ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null
@@ -86,11 +86,11 @@ jobs:
         environment: |
             *=process.env
         run: |
-          declare -f tee || echo no f tee
+          declare -f tee | head -1 || echo " no tee?"
           export a=b
           echo 'a=$a' | env a=b envsubst
           set -x
-          declare -f tee
+          declare -f tee | head -1
 
     - name: ./fsvr-action  2test
       uses: ./fsvr-action
@@ -99,11 +99,9 @@ jobs:
           ${{ github.event.inputs.fstuple }}
           *=process.env
         run: |
-          declare -f tee || echo no f tee
+          declare -f tee | head -1 || echo " no tee?"
           export a=b
           echo 'a=$a' | env a=b envsubst
-          set -x
-          declare -f tee
 
     - name: GHA Bootstrapping
       uses: ./fsvr-action
@@ -115,11 +113,8 @@ jobs:
           set -aEuo pipefail
           echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
 
-          declare -f tee
-          declare -f ninja
-
           function xxtest_bin() {
-            declare -f ninja || which ninja     || return 195
+            declare -f ninja | head -1          || return 195
             test -f bin/parallel-home/will-cite || return 196
             parallel --version | head -1        || return 197
             ninja --version                     || return 198
@@ -129,7 +124,7 @@ jobs:
           fsvr_repo=${GITHUB_REPOSITORY}
           fsvr_branch=${GITHUB_REF_NAME}
           fsvr_base=$base
-          fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
+          # fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
 
           source $fsvr_dir/gha-bootstrap.sh
 

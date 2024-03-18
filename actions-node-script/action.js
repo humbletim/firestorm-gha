@@ -52,10 +52,9 @@ var options = {
 
 var tmp = JSON.parse(JSON.stringify(options));
 if (parsedEnv['*'] === 'process.env') tmp.env = '{ /* inherit process.env + parsed */ }'; 
-console.debug('PARSED_', { exe: exe, args: JSON.stringify(args), options: tmp, forwardEnv: Object.keys(forwardEnv).length, parsedEnv: parsedEnv });
+if (process.env.DEBUG) console.debug('PARSED_', { exe: exe, args: JSON.stringify(args), options: tmp, forwardEnv: Object.keys(forwardEnv).length, parsedEnv: parsedEnv });
 
 const bash = child_process.spawn(exe, args, options );
-
 bash.on('exit', (c)=>{ console.log('exit code', c); process.exit(c); });
 
 //////////////////////////////////////////////////////////////////////////////
@@ -76,7 +75,7 @@ function parseKeyValueString(input) {
             matches[label]=re.exec(str);
         }
         var used = matches.dquoted || matches.squoted || matches.fallback;
-        if (!used) throw new Error(`parseKeyValueString error:\n\t[input] ${input}\n\t[cur] ${str}\n`)
+        if (!used) throw new Error(`parseKeyValueString error:\n\t[input] '${input}'\n\t[cur] '${str}'\n`)
         var [, key, value] = used;
         if (used === matches.dquoted) value = value.replace(/\\([\"])/g, '$1');
         if (used === matches.fallback) value = value.trim().replace(/\\ /g, ' ');
