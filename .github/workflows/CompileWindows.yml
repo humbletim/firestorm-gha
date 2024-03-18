@@ -143,7 +143,7 @@ jobs:
 
     - name: PATH/ENV preflight tests
       run: |
-        source gha-bootstrap.env
+        __fsvr__
         jq --version
         test `hostname` == "windows-2022" || exit 2022
         test -v nunja_dir || exit 122
@@ -156,34 +156,34 @@ jobs:
         root_dir=repo/$branch
         $fsvr_dir/util/_utils.sh ht-ln $root_dir/indra indra
         $fsvr_dir/util/generate_build_vars.sh Firestorm-VR-GHA `cat $fsvr_dir/$base/viewer_version.txt` build/ \
-           | tee build/build_vars.env | tee $GITHUB_ENV
+           | tee build/build_vars.env #| tee $GITHUB_ENV
 
     - name: Detect MSVC
       run: $fsvr_dir/util/generate_msvc_env.bat > build/msvc.env
 
     - name: 010_ensure_build_directories
-      run: $fsvr_step 010
+      run: fsvr_step 010
 
     - name: 020_perform_replacements
-      run: $fsvr_step 020
+      run: fsvr_step 020
 
     - name: 038_provision_openvr
-      run: $fsvr_step 038
+      run: fsvr_step 038
 
     - name: 039_provision_p373r
-      run: $fsvr_step 039
+      run: fsvr_step 039
 
     - name: 040_generate_package_infos
-      run: $fsvr_step 040
+      run: fsvr_step 040
 
     - name: 050_generate_packages_info_text
-      run: $fsvr_step 050
+      run: fsvr_step 050
 # 
 #     - name: 060_download_packages
-#       run: $fsvr_step 060
+#       run: fsvr_step 060
 # 
 #     - name: 070_verify_downloads
-#       run: $fsvr_step 070
+#       run: fsvr_step 070
 # 
     - name: 080_untar_packages
       uses: ./fsvr-action
@@ -191,37 +191,37 @@ jobs:
         environment: '*=process.env'
         # shell: ${{ env.SHELL }}
         run: |
-          source $BASH_ENV
+          __fsvr__
           export INPUT_key=$base-build-packages-c INPUT_path=build/packages
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && echo 'yup' || {
               echo 'nope' 
-              $fsvr_step 060_download_packages || exit 60
-              $fsvr_step 070_verify_downloads  || exit 70
-              $fsvr_step 080_untar_packages    || exit 80
+              fsvr_step 060_download_packages || exit 60
+              fsvr_step 070_verify_downloads  || exit 70
+              fsvr_step 080_untar_packages    || exit 80
               /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
           }     
 # 
 #     - name: 070_verify_downloads
-#       run: $fsvr_step 070
+#       run: fsvr_step 070
 
     # - name: 080_untar_packages
-    #   run: $fsvr_step 080
+    #   run: fsvr_step 080
 
     - name: 085_prepare_msys_msvc
-      run: $fsvr_step 085
+      run: fsvr_step 085
 
     - name: 090_ninja_preflight
-      run: $fsvr_step 090
+      run: fsvr_step 090
  
     - name: 0a0_ninja_build
-      run: $fsvr_step 0a0
+      run: fsvr_step 0a0
 
     - name: 0b0_bundle
-      run: $fsvr_step 0b0
+      run: fsvr_step 0b0
 
     - name: 0c0_upload_artifacts
-      run: $fsvr_step 0c0
+      run: fsvr_step 0c0
 
     - name: Setup tmate session
       # if: failure()

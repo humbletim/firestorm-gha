@@ -34,7 +34,17 @@ base="$base"
 repo="$repo"
 branch="$branch"
 fsvr_dir="$PWD/fsvr"
-fsvr_step="source $PWD/gha-bootstrap.env && $PWD/fsvr/util/build.sh"
+
+function __fsvr__() {
+  source $PWD/gha-bootstrap.env
+  source $PWD/build/build_vars.env
+}
+
+function fsvr_step() {
+  set -eao pipefail
+  __fsvr__
+  $PWD/fsvr/util/build.sh "\$@" || return \$(_err \$? "\$@ failed");
+}
 
 _workspace="$_workspace"
 _userprofile="$_userprofile"
@@ -50,7 +60,7 @@ function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel"
 function envsubst() { "$ENVSUBST" "\$@" ; }
 function wget() { "$WGET" "\$@" ; }
 
-declare -xf _err tee hostname parallel wget envsubst ninja
+declare -xf _err tee hostname parallel wget envsubst ninja fsvr_step __fsvr__
 
 _PRESHELL_PATH="$_PRESHELL_PATH"
 
