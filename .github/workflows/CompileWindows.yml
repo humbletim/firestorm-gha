@@ -56,7 +56,8 @@ jobs:
 
     - name: Generate SHELL.env
       run: |
-        ${{ github.event.inputs.fstuple }} fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
+        fsvr_dir=$PWD/fsvr ${{ github.event.inputs.fstuple }} \
+          fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
         fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
 
     - name: SHELL.env test 0
