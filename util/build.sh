@@ -253,7 +253,7 @@ function 0a0_ninja_build() {( $_dbgopts;
 function 0b0_bundle() {( $_dbgopts;
   . $fsvr_dir/util/nsis.sh
   make_installer
-  make_7zip
+  make_7z
 )}
 
 function upload_artifact() {( $_dbgopts;
