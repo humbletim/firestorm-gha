@@ -111,6 +111,7 @@ jobs:
             [[ `hostname` =~ windows[-]?2022 ]] || return 199
           }
 
+          set -a
           fsvr_repo=${GITHUB_REPOSITORY}
           fsvr_branch=${GITHUB_REF_NAME}
           fsvr_base=$base
