@@ -92,6 +92,19 @@ jobs:
           set -x
           declare -f tee
 
+    - name: ./fsvr-action  2test
+      uses: ./fsvr-action
+      with:
+        environment: |
+          ${{ github.event.inputs.fstuple }}
+          *=process.env
+        run: |
+          declare -f tee || echo no f tee
+          export a=b
+          echo 'a=$a' | env a=b envsubst
+          set -x
+          declare -f tee
+
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
@@ -102,6 +115,7 @@ jobs:
           set -xaEuo pipefail
           echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
 
+          declare -f tee
           declare -f ninja
 
           function xxtest_bin() {
