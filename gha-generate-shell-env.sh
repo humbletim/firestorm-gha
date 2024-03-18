@@ -28,8 +28,12 @@ _PRESHELL_PATH=`subtract_paths "$_PRESHELL_PATH" "$PATH"`
 
 ######################################################################
 echo "$(cat<<EOF
-$!/bin/bash
 _PRESHELL_PATH="$_PRESHELL_PATH"
+_workspace="$_workspace"
+_userprofile="$_userprofile"
+_programfiles="$_programfiles"
+_comspec="$_comspec"
+_PATH="$PATH"
 
 set -a
 base="$base"
@@ -39,12 +43,6 @@ fsvr_dir="$PWD/fsvr"
 
 test ! -f $PWD/gha-bootstrap.env    || source $PWD/gha-bootstrap.env
 test ! -f $PWD/build/build_vars.env || source $PWD/build/build_vars.env
-
-_workspace="$_workspace"
-_userprofile="$_userprofile"
-_programfiles="$_programfiles"
-_comspec="$_comspec"
-_PATH="$PATH"
 
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 function tee() { TEE="$TEE" "$PYTHON" "$fsvr_dir/util/tee.py" "\$@" ; }
