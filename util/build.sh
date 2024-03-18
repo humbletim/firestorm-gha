@@ -278,8 +278,16 @@ function upload_artifact() {( $_dbgopts;
 )}
 
 function 0c0_upload_artifacts() {( $_dbgopts;
-  upload_artifact Installer `find . -type f -name Phoenix*.exe |head -1`
-  upload_artifact 7z `find . -type f -name F*.7z |head -1`
+  local Installer=`find build -type f -name Phoenix*.exe |head -1`
+  local InstallerName=$(basename $Installer)
+  local InstallerExe=${InstallerName/.exe/-$version_shas.exe}
+  mv -iv $Installer $InstallerExe
+  upload_artifact ${InstallerExe/.exe/} $InstallerExe
+
+  local Portable=`find . -type f -name F*.7z |head -1`
+  mv -iv $Portable .
+  
+  upload_artifact ${Portable/.7z/} $Portable
 )}
 
 function _steps() {
