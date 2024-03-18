@@ -148,6 +148,7 @@ function get_bootstrap_vars() {(
   [[ -x /usr/bin/readlink ]] && pwd=`/usr/bin/readlink -f "$PWD"` || pwd=$PWD
   if is_gha ; then
       echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
+      set -x
   else
       echo "[gha-bootstrap] local dev testing mode" >&2
       fsvr_repo=${fsvr_repo:-local}

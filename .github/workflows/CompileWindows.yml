@@ -87,47 +87,43 @@ jobs:
             *=process.env
         run: |
           declare -f tee || echo no f tee
-          (
-            export a=b
-            echo 'a=$a' | env a=b envsubst
-            set -x
-            declare -f tee
-          )
+          export a=b
+          echo 'a=$a' | env a=b envsubst
+          set -x
+          declare -f tee
 
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
         environment: |
-            ${{ github.event.inputs.fstuple }}
-            *=process.env
+          ${{ github.event.inputs.fstuple }}
+          *=process.env
         run: |
-          (
-            echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
+          echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
 
-            declare -f ninja
+          declare -f ninja
 
-            function xxtest_bin() {
-              declare -f ninja || which ninja     || return 195
-              test -f bin/parallel-home/will-cite || return 196
-              parallel --version | head -1        || return 197
-              ninja --version                     || return 198
-              [[ `hostname` =~ windows[-]?2022 ]] || return 199
-            }
+          function xxtest_bin() {
+            declare -f ninja || which ninja     || return 195
+            test -f bin/parallel-home/will-cite || return 196
+            parallel --version | head -1        || return 197
+            ninja --version                     || return 198
+            [[ `hostname` =~ windows[-]?2022 ]] || return 199
+          }
 
-            fsvr_repo=${GITHUB_REPOSITORY}
-            fsvr_branch=${GITHUB_REF_NAME}
-            fsvr_base=$base
-            fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
+          fsvr_repo=${GITHUB_REPOSITORY}
+          fsvr_branch=${GITHUB_REF_NAME}
+          fsvr_base=$base
+          fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
 
-            . $fsvr_dir/gha-bootstrap.sh
+          source $fsvr_dir/gha-bootstrap.sh
 
-            restore_gha_caches            || exit `_err $? "!restore_gha_caches"`
-            ensure_gha_bin && xxtest_bin  || exit `_err $? "!ensure_gha_bin"`
-            initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
-            save_gha_caches               || exit `_err $? "!save_gha_caches"`;
+          restore_gha_caches            || exit `_err $? "!restore_gha_caches"`
+          ensure_gha_bin && xxtest_bin  || exit `_err $? "!ensure_gha_bin"`
+          initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
+          save_gha_caches               || exit `_err $? "!save_gha_caches"`;
 
-            get_bootstrap_vars | tee gha-bootstrap.env
-          )
+          get_bootstrap_vars | tee gha-bootstrap.env
 
     - name: PATH/ENV preflight tests
       run: |
