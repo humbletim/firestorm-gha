@@ -127,7 +127,7 @@ jobs:
             save_gha_caches               || exit `_err $? "!save_gha_caches"`;
 
             get_bootstrap_vars | tee gha-bootstrap.env
-        )
+          )
 
     - name: PATH/ENV preflight tests
       run: |
