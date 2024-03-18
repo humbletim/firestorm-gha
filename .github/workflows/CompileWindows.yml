@@ -99,6 +99,7 @@ jobs:
           ${{ github.event.inputs.fstuple }}
           *=process.env
         run: |
+          set -xaEuo pipefail
           echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
 
           declare -f ninja
@@ -111,7 +112,6 @@ jobs:
             [[ `hostname` =~ windows[-]?2022 ]] || return 199
           }
 
-          set -a
           fsvr_repo=${GITHUB_REPOSITORY}
           fsvr_branch=${GITHUB_REF_NAME}
           fsvr_base=$base
@@ -124,7 +124,8 @@ jobs:
           initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
           save_gha_caches               || exit `_err $? "!save_gha_caches"`;
 
-          get_bootstrap_vars | tee gha-bootstrap.env
+          get_bootstrap_vars | tee gha-bootstrap.env || exit 127
+          exit 0
 
     - name: PATH/ENV preflight tests
       run: |
