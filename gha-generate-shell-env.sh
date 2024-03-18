@@ -44,12 +44,13 @@ _PATH="$PATH"
 
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 function tee() { TEE="$TEE" "$PYTHON" "$fsvr_dir/util/tee.py" "\$@" ; }
-function hostname() { "$PWD/bin/hostname" "\$@" ; }
+function hostname() { "$PWD/bin/hostname.exe" "\$@" ; }
+function ninja() { "$PWD/bin/ninja.exe" "\$@" ; }
 function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
 function envsubst() { "$ENVSUBST" "\$@" ; }
 function wget() { "$WGET" "\$@" ; }
 
-declare -xf _err tee hostname parallel wget envsubst
+declare -xf _err tee hostname parallel wget envsubst ninja
 
 _PRESHELL_PATH="$_PRESHELL_PATH"
 
