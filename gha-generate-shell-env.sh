@@ -37,7 +37,7 @@ fsvr_dir="$PWD/fsvr"
 
 function __fsvr__() {
   source $PWD/gha-bootstrap.env
-  source $PWD/build/build_vars.env
+  test ! -f $PWD/build/build_vars.env || source $PWD/build/build_vars.env
 }
 
 function fsvr_step() {
