@@ -224,7 +224,7 @@ jobs:
       run: fsvr_step 0c0
 
     - name: Setup tmate session
-      # if: failure()
+      if: failure()
       uses: mxschmitt/action-tmate@v3
       # env:
       #    PATH: /c/msys64/usr/bin:${{ env.PATH}}
