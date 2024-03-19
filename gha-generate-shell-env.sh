@@ -36,6 +36,10 @@ _programfiles="$_programfiles"
 _comspec="$_comspec"
 _PATH="$PATH"
 
+_xpath="\$_PATH"
+if [[ -v msvc_path ]]; then _xpath="\$(/usr/bin/cygpath -p "\$msvc_path"):\$_xpath" ; fi
+if [[ -n "\$_PRESHELL_PATH" ]]; then _xpath="\$_xpath:\$_PRESHELL_PATH" ; fi
+
 set -a
 base="$base"
 repo="$repo"
@@ -55,7 +59,7 @@ function wget() { "$WGET" "\$@" ; }
 function fsvr_step() { set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; }
 
 declare -xf _err tee hostname parallel wget envsubst ninja fsvr_step
-declare -x PATH="\$_PATH::\$_PRESHELL_PATH:::\$(/usr/bin/cygpath -pua "\${msvc_env_PATH:-.}")"
+declare -x PATH="\$_xpath"
 set +a
 set -Eo pipefail
 EOF

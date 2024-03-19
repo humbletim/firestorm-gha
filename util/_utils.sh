@@ -70,10 +70,11 @@ function _setenv_ma() {
 
 # subtract_paths(a,b) => a less b, de-duplicated and normalized
 # subtract_paths(a,"") => a de-duplicated and normalized
-function subtract_paths() {(
-  PATH=/usr/bin:$PATH
+# note: the order of elements from 'a' is preserved
+function subtract_paths() {( $_dbgopts;
+  PATH="/usr/bin:$PATH"
   grep -x -vf <(echo "$2" | tr ':' '\n') <(echo "$1" | tr ':' '\n') \
-    | awk '!seen[$0]++' | tr '\n' ':' | sed 's@:$@@' 
+    | awk '!seen[$0]++' | tr '\n' ':' | sed 's@[: ]*$@@g'
   return 0
 )}
 
@@ -142,7 +143,7 @@ function __utils_main__() {
         # echo "__main__ ${BASH_SOURCE[0]} ${0}" >&2
         function_name=$1
         shift
-        eval "$function_name $@" || _die "invocation $function_name $@ failed $?"
+        $function_name "$@" || _die "invocation $function_name $@ failed $?"
     fi
   fi
 }

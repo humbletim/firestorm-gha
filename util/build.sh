@@ -238,9 +238,8 @@ function 090_ninja_preflight() {( $_dbgopts;
     _assert msvc.env 'test -f $build_dir/msvc.env'
     set -a
     . $build_dir/msvc.env
-    . "$BASH_ENV"
 
-    bash -c 'echo $PATH'
+    bash -c 'echo $msvc_path'
     bash -c 'which cl.exe > /dev/null' || return 241
     local out="$(ninja -C "$build_dir" -n 2>&1)" || _die_exit_code=$? _die "ninja -n failed\n$out"
     echo "$out" | head -3
@@ -252,8 +251,8 @@ function 0a0_ninja_build() {( $_dbgopts;
     _assert msvc.env 'test -f $build_dir/msvc.env'
     set -a
     . $build_dir/msvc.env
-    . "$BASH_ENV"
     (
+      echo "PATH=$PATH" >&2
       ninja -C "$build_dir" llpackage
     ) || _die_exit_code=$? _die "ninja failed"
 )}
