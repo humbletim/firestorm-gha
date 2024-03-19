@@ -221,8 +221,14 @@ jobs:
     - name: 090_ninja_preflight
       run: fsvr_step 090
  
-    - name: 0a0_ninja_build
-      run: fsvr_step 0a0
+    - name: 0a0_ninja_build SLPlugin.exe
+      run: fsvr_step 0a0 SLPlugin.exe
+
+    - name: 0a0_ninja_build firestorm-bin.exe
+      run: fsvr_step 0a0 firestorm-bin.exe
+
+    - name: 0a0_ninja_build llpackage
+      run: fsvr_step 0a0 llpackage
 
     - name: 0b0_bundle
       run: fsvr_step 0b0
@@ -230,11 +236,25 @@ jobs:
     - name: 0c0_upload_artifacts
       run: fsvr_step 0c0
 
+    - name: log env on error
+      if: failure()
+      run: |
+        declare -xp | tee -a declare.txt
+        env | tee -a env.txt
+        fsvr_step upload_artifact debug "$(cat <<EOF
+        declare.txt
+        env.txt
+        gha-bootstrap.env
+        SHELL.env
+        build/build_vars.env
+        build/msvc.env
+        build/msvc.nunja.env
+        EOF
+        )"
+
     - name: Setup tmate session
       if: failure()
       uses: mxschmitt/action-tmate@v3
-      # env:
-      #    PATH: /c/msys64/usr/bin:${{ env.PATH}}
       with:
         limit-access-to-actor: true
 # 
