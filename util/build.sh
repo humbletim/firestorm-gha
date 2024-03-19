@@ -242,8 +242,7 @@ function 090_ninja_preflight() {( $_dbgopts;
 
     bash -c 'echo $PATH'
     bash -c 'which cl.exe > /dev/null' || return 241
-    local out=
-    out="$(ninja -C "$build_dir" -n 2>&1)" || _die_exit_code=$? _die "ninja -n failed\n$out"
+    local out="$(ninja -C "$build_dir" -n 2>&1)" || _die_exit_code=$? _die "ninja -n failed\n$out"
     echo "$out" | head -3
     echo "..."
     echo "$out" | tail -3
@@ -254,7 +253,9 @@ function 0a0_ninja_build() {( $_dbgopts;
     set -a
     . $build_dir/msvc.env
     . "$BASH_ENV"
-    ninja -C "$build_dir" -j4 llpackage
+    (
+      ninja -C "$build_dir" llpackage
+    ) || _die_exit_code=$? _die "ninja failed"
 )}
 
 
