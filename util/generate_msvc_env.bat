@@ -3,7 +3,7 @@ REM calculates a bash-style native x86_64 VS2022 environment variable set to std
 
 set BASH_ENV=
 
-bash -c 'declare -x |sort | sed s@^PATH=@msvc_env_PATH=@' > before
+bash -c 'declare -x |sort | sed -e s@^PATH=@msvc_env_PATH=@' > before
 
 if exist "%VS170COMNTOOLS%" (
   set "VS2022_COMMON_TOOLS=%VS170COMNTOOLS%"
@@ -22,7 +22,7 @@ call "%VS2022_COMMON_TOOLS%"\VsDevCmd.bat -arch=x64 -host_arch=x64 -no_logo >&2
 REM call C:\PROGRA~1\MICROS~2\2022\ENTERP~1\Common7\Tools\VsDevCmd.bat -arch=x64 -host_arch=x64 -no_logo
 @echo off
 
-bash -c 'declare -x |sort | sed s@^PATH=@msvc_env_PATH=@' > after
+bash -c 'declare -x |sort | sed -e s@^PATH=@msvc_env_PATH=@' > after
 bash -c "diff before after | grep '^[>]' | sed -e 's@^> @@'"
 
 exit 0
