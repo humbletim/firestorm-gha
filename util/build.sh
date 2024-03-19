@@ -149,11 +149,11 @@ function 039_provision_p373r() {( $_dbgopts;
 function 040_generate_package_infos() {( $_dbgopts;
     _assert $fsvr_dir/meta/packages-info.json 'test -s "$fsvr_dir/meta/packages-info.json"'
 
-    cat $fsvr_dir/meta/packages-info.json | envsubst | merge_packages_info
+    cat $fsvr_dir/meta/packages-info.json | envsubst | merge_packages_info || return `_err $? meta-packages-info`
 
-    merge_packages_info $nunja_dir/packages-info.json
-    merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json
-    merge_packages_info $p373r_dir/meta/packages-info.json
+    merge_packages_info $nunja_dir/packages-info.json || return `_err $? nunja-packages-info`
+    merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json || return `_err $? openvr-packages-info`
+    merge_packages_info $p373r_dir/meta/packages-info.json || return `_err $? p373r-packages-info`
 )}
 
 function 050_generate_packages_info_text() {( $_dbgopts;

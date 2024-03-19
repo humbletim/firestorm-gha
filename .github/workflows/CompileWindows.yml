@@ -172,7 +172,7 @@ jobs:
           export INPUT_key=$base-cache-openvr-c INPUT_path="$(echo -e "$tarball\n$tarball.json")"
 
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-            | grep -i 'cache restored' && echo 'yup' || {
+            | grep -i 'cache restored' && { echo 'yup' ; ls -l $fsvr_cache_dir ; } || {
               echo 'nope'
               fsvr_step 038_provision_openvr || exit 38
               /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
@@ -231,13 +231,13 @@ jobs:
     - name: 0c0_upload_artifacts
       run: fsvr_step 0c0
 
-    - name: Setup tmate session
-      if: failure()
-      uses: mxschmitt/action-tmate@v3
-      # env:
-      #    PATH: /c/msys64/usr/bin:${{ env.PATH}}
-      with:
-        limit-access-to-actor: true
+    # - name: Setup tmate session
+    #   if: failure()
+    #   uses: mxschmitt/action-tmate@v3
+    #   # env:
+    #   #    PATH: /c/msys64/usr/bin:${{ env.PATH}}
+    #   with:
+    #     limit-access-to-actor: true
 # 
 # 
 #     - name: Setup tmate session
