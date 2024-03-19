@@ -129,7 +129,7 @@ function 038_provision_openvr() {( $_dbgopts;
       bash $fsvr_dir/openvr/improvise.sh || _die "openvr/improvise failed"
       # bash $openvr_dir/install.sh || _die "openvr/install failed"
     fi
-    echo "openvr_tarball_json=\"`cat $fsvr_cache_dir/openvr-*.tar.*.json`\"" | tee -a $GITHUB_OUTPUT
+    # echo "openvr_tarball_json=\"`cat $fsvr_cache_dir/openvr-*.tar.*.json`\"" | tee -a $GITHUB_OUTPUT
     # mkdir -pv $openvr_dir/meta
     # ht-ln $fsvr_cache_dir/openvr-*.tar.*.json $openvr_dir/meta/packages-info.json
     #cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
@@ -266,7 +266,7 @@ function make_installer() {
   local InstallerName=$(basename $build_dir/newview/Phoenix*${viewer_version//./-}*.exe)
   local InstallerExe=${InstallerName/.exe/-$version_shas.exe}
   mv -v $build_dir/newview/Phoenix*${viewer_version//./-}*.exe $build_dir/$InstallerExe
-  echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
+  # echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
 }
 
 function make_7z() {( set -Euo pipefail;
@@ -297,7 +297,7 @@ function make_7z() {( set -Euo pipefail;
 
   ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
   bash -c 'echo $PATH ; which 7z ; cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
-  echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
+  # echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
 )}
 
 function files2json(){
