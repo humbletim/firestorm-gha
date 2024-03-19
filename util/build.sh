@@ -269,13 +269,27 @@ function make_installer() {
   echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
 }
 
-function make_7z() {( set -xEuo pipefail;
+function make_7z() {( set -Euo pipefail;
   local nsi=$build_dir/newview/firestorm_setup_tmp.nsi
   grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
+
+  echo "-----------------------------------"
+  cat $fsvr_dir/util/load_with_settings_and_cache_here.bat;
+  echo "-----------------------------------"
+  echo APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst
+  echo "-----------------------------------"
+
+  cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
+    | APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst
+  echo "-----------------------------------"
+
+
   cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
    | APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst \
    | tee $build_dir/newview/load_with_settings_and_cache_here.bat
+
   ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
+
   test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
     || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
   echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
