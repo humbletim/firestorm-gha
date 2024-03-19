@@ -361,7 +361,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   cmd=$1
   shift
   if [[ $cmd =~ ^[0-9a-fA-F]{3}$ ]] ; then
-    cmd=$(_steps | grep $cmd | xargs echo)
+    cmd=$(echo $(_steps | grep $cmd))
     echo "cmd=$cmd" >&2
   fi
   test -n "$cmd" || _die "!cmd $cmd $@"
