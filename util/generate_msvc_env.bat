@@ -16,11 +16,9 @@ if exist "%VS170COMNTOOLS%" (
     exit 170
 )
 
-@echo on
 echo "%VS2022_COMMON_TOOLS%"\VsDevCmd.bat -arch=x64 -host_arch=x64 -no_logo >&2
 call "%VS2022_COMMON_TOOLS%"\VsDevCmd.bat -arch=x64 -host_arch=x64 -no_logo >&2
 REM call C:\PROGRA~1\MICROS~2\2022\ENTERP~1\Common7\Tools\VsDevCmd.bat -arch=x64 -host_arch=x64 -no_logo
-@echo off
 
 bash -c 'declare -x |sort | sed "s@ PATH=@ msvc_env_PATH=@"' > after
 bash -c "diff before after | grep '^[>]' | sed -e 's@^> @@'"

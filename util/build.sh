@@ -238,7 +238,7 @@ function 090_ninja_preflight() {( $_dbgopts;
     _assert msvc.env 'test -f $build_dir/msvc.env'
     . $build_dir/msvc.env
 
-    cl.exe --version || return 241
+    which cl.exe > /dev/null || return 241
     local out=
     out="$(ninja -C $build_dir -n 2>&1)" || _die_exit_code=$? _die "ninja -n failed\n$out"
     echo "$out" | head -3
