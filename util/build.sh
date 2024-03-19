@@ -296,7 +296,7 @@ function make_7z() {( set -Euo pipefail;
   tail -2 $build_dir/installer.txt
 
   ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
-  bash -c 'which 7z ; cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
+  bash -c 'echo $PATH ; which 7z ; cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
   echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
 )}
 
