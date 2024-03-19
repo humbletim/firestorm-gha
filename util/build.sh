@@ -236,9 +236,11 @@ function 090_ninja_preflight() {( $_dbgopts;
       cat $nunja_dir/cl.arrant.nunja
     ) > $build_dir/build.ninja
     _assert msvc.env 'test -f $build_dir/msvc.env'
+    set -a
     . $build_dir/msvc.env
 
-    which cl.exe > /dev/null || return 241
+    bash -c 'echo $PATH'
+    bash -c 'which cl.exe > /dev/null' || return 241
     local out=
     out="$(ninja -C $build_dir -n 2>&1)" || _die_exit_code=$? _die "ninja -n failed\n$out"
     echo "$out" | head -3
