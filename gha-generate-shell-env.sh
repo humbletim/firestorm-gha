@@ -55,7 +55,7 @@ function wget() { "$WGET" "\$@" ; }
 function fsvr_step() { set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; }
 
 declare -xf _err tee hostname parallel wget envsubst ninja fsvr_step
-declare -x PATH="\$_PATH::\$_PRESHELL_PATH"
+declare -x PATH="\$_PATH::\$_PRESHELL_PATH:::\${msvc_env_PATH:-}"
 set +a
 set -Eo pipefail
 EOF
