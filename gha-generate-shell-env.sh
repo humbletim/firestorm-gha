@@ -12,7 +12,7 @@ _PRESHELL_PATH="$PATH"
 if [[ -v GITHUB_WORKSPACE ]]; then
   TEE=c:/msys64/usr/bin/tee.exe
   WGET=c:/msys64/usr/bin/wget.exe
-  ENVSUBST=`which envsubst`
+  ENVSUBST=c:/msys64/usr/bin/envsubst.exe
   PYTHON=/c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe 
 else
   TEE=`which tee`
