@@ -269,7 +269,7 @@ function make_installer() {
   echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
 }
 
-function make_7z() {
+function make_7z() {( set -xEuo pipefail;
   local nsi=$build_dir/newview/firestorm_setup_tmp.nsi
   grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
   cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
@@ -284,7 +284,7 @@ function make_7z() {
   ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
   bash -c 'which 7z ; cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
   echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
-}
+)}
 
 function files2json(){
   echo { \"$(< $build_dir/installer.txt sed 's/,/":"/g' | paste -s -d, - | sed 's/,/", "/g')\" } |tr '\\' '/' > files.json
