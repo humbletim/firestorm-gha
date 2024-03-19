@@ -129,6 +129,7 @@ function 038_provision_openvr() {( $_dbgopts;
       bash $fsvr_dir/openvr/improvise.sh || _die "openvr/improvise failed"
       # bash $openvr_dir/install.sh || _die "openvr/install failed"
     fi
+    echo "openvr_tarball_json=\"`cat $fsvr_cache_dir/openvr-*.tar.*.json`\"" | tee -a $GITHUB_OUTPUT
     # mkdir -pv $openvr_dir/meta
     # ht-ln $fsvr_cache_dir/openvr-*.tar.*.json $openvr_dir/meta/packages-info.json
     #cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
@@ -250,8 +251,40 @@ function 0a0_ninja_build() {( $_dbgopts;
     ninja -C $build_dir -j4 llpackage
 )}
 
+
+function make_installer() {
+  cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
+  nsi=$build_dir/newview/firestorm_setup_tmp.nsi
+  #s@^SetCompressor .*$@SetCompressor zlib@g; 
+  grep "openvr_api.dll" $nsi \
+    || perl -i.bak  -pe 's@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
+       $nsi
+  PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $build_dir/newview/firestorm_setup_tmp.nsi
+
+  local InstallerName=$(basename $build_dir/newview/Phoenix*${viewer_version//./-}*.exe)
+  local InstallerExe=${InstallerName/.exe/-$version_shas.exe}
+  mv -v $build_dir/newview/Phoenix*${viewer_version//./-}*.exe $build_dir/$InstallerExe
+  echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
+}
+
+function make_7z() {
+  grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
+  cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
+   | APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst \
+   | tee $build_dir/newview/load_with_settings_and_cache_here.bat
+  echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
+  tail -2 $build_dir/installer.txt
+
+  ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
+  sh -c 'cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
+  echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
+}
+
+function files2json(){
+  echo { \"$(< $build_dir/installer.txt sed 's/,/":"/g' | paste -s -d, - | sed 's/,/", "/g')\" } |tr '\\' '/' > files.json
+}
+
 function 0b0_bundle() {( $_dbgopts;
-  . $fsvr_dir/util/nsis.sh
   make_installer
   make_7z
 )}
