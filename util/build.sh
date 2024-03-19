@@ -254,7 +254,7 @@ function 0a0_ninja_build() {( $_dbgopts;
 
 function make_installer() {
   cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
-  nsi=$build_dir/newview/firestorm_setup_tmp.nsi
+  local nsi=$build_dir/newview/firestorm_setup_tmp.nsi
   #s@^SetCompressor .*$@SetCompressor zlib@g; 
   grep "openvr_api.dll" $nsi \
     || perl -i.bak  -pe 's@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
@@ -270,6 +270,7 @@ function make_installer() {
 }
 
 function make_7z() {
+  local nsi=$build_dir/newview/firestorm_setup_tmp.nsi
   grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
   cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
    | APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst \
@@ -280,7 +281,7 @@ function make_7z() {
   tail -2 $build_dir/installer.txt
 
   ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
-  bash -c 'cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
+  bash -c 'which 7z ; cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
   echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
 }
 
