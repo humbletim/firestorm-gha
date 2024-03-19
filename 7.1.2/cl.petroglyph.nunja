@@ -12006,7 +12006,7 @@ build newview\CMakeFiles\firestorm-bin.dir\llviewercontrollistener.cpp.obj: CXX_
   TARGET_PDB = newview\firestorm-bin.pdb
 
 build newview\CMakeFiles\firestorm-bin.dir\llviewerdisplay.cpp.obj: CXX_COMPILER__firestorm-bin_unscanned_Release $source_dir\newview\llviewerdisplay.cpp | $cmake_pch.hxx $cmake_pch.cxx.pch || cmake_object_order_depends_target_firestorm-bin
-  DEFINES = -DADDRESS_SIZE=64 -DBOOST_BIND_GLOBAL_PLACEHOLDERS -DLIB_NDOF=1 -DLL_OPENAL=1 -DLL_OS_DRAGDROP_ENABLED=1 -DNOMINMAX -DOPENSIM
+  DEFINES = -DADDRESS_SIZE=64 -DBOOST_BIND_GLOBAL_PLACEHOLDERS -DLIB_NDOF=1 -DLL_OPENAL=1 -DLL_OS_DRAGDROP_ENABLED=1 -DNOMINMAX -DOPENSIM "-DmScreen=mRT->screen"
   FLAGS = $WX /bigobj $PCH
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin.dir
