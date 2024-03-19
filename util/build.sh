@@ -340,10 +340,10 @@ function 0c0_upload_artifacts() {( $_dbgopts;
   ( cd dist && upload_artifact ${InstallerExe/.exe/} $InstallerExe )
 
   local Portable=`ls build/Firestorm*.7z |head -1`
-  local PortableExe=$branch-$(basename $Portable)
-  ht-ln $Portable dist/$PortableExe
+  local PortableArchive=$branch-$(basename $Portable)
+  ht-ln $Portable dist/$PortableArchive
   
-  ( cd dist && upload_artifact ${Portable/.7z/} $Portable )
+  ( cd dist && upload_artifact ${PortableArchive/.7z/} $PortableArchive )
 )}
 
 function _steps() {
