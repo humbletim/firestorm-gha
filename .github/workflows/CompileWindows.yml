@@ -163,7 +163,20 @@ jobs:
       run: fsvr_step 020
 
     - name: 038_provision_openvr
-      run: fsvr_step 038
+      uses: ./fsvr-action
+      with:
+        environment: '*=process.env'
+        run: |
+          set -Euo pipefail
+          tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
+          export INPUT_key=$base-cache-openvr-c INPUT_path="$tarball $tarball.json"
+
+          /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
+            | grep -i 'cache restored' && echo 'yup' || {
+              echo 'nope'
+              fsvr_step 038_provision_openvr || exit 38
+              /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
+          }
 
     - name: 039_provision_p373r
       run: fsvr_step 039
@@ -190,12 +203,12 @@ jobs:
           export INPUT_key=$base-build-packages-c INPUT_path=build/packages
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && echo 'yup' || {
-              echo 'nope' 
+              echo 'nope'
               fsvr_step 060_download_packages || exit 60
               fsvr_step 070_verify_downloads  || exit 70
               fsvr_step 080_untar_packages    || exit 80
               /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
-          }     
+          }
 # 
 #     - name: 070_verify_downloads
 #       run: fsvr_step 070
