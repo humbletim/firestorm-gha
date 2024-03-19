@@ -254,7 +254,8 @@ function 0a0_ninja_build() {( $_dbgopts;
     . $build_dir/msvc.env
     . $BASH_ENV
     which cl.exe > /dev/null || return 256
-    ninja -C "$build_dir" llpackage || _die_exit_code=$? _die "ninja failed"
+    echo "[$FUNCNAME] ninja -C $build_dir ${@:-llpackage}" >&2
+    ninja -C "$build_dir" "${@:-llpackage}" || _die_exit_code=$? _die "ninja failed"
 )}
 
 
