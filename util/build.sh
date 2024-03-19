@@ -259,6 +259,8 @@ function make_installer() {
   grep "openvr_api.dll" $nsi \
     || perl -i.bak  -pe 's@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
        $nsi
+
+  export XZ_DEFAULTS=-T0
   PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $build_dir/newview/firestorm_setup_tmp.nsi
 
   local InstallerName=$(basename $build_dir/newview/Phoenix*${viewer_version//./-}*.exe)
@@ -276,7 +278,7 @@ function make_7z() {
   tail -2 $build_dir/installer.txt
 
   ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
-  sh -c 'cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
+  bash -c 'cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
   echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
 }
 
