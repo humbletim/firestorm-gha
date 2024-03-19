@@ -169,7 +169,7 @@ jobs:
         run: |
           set -Euo pipefail
           tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
-          export INPUT_key=$base-cache-openvr-c INPUT_path="$tarball $tarball.json"
+          export INPUT_key=$base-cache-openvr-c INPUT_path="$(echo -e "$tarball\n$tarball.json")"
 
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && echo 'yup' || {
