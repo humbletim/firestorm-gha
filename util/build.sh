@@ -274,6 +274,8 @@ function make_7z() {
   cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
    | APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst \
    | tee $build_dir/newview/load_with_settings_and_cache_here.bat
+  test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
+    || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
   echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
   tail -2 $build_dir/installer.txt
 
