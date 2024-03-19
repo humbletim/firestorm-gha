@@ -65,6 +65,7 @@ function 020_perform_replacements() {( $_dbgopts;
     cat $source_dir/newview/res/viewerRes.rc \
       | eval "${fsversionvalues[@]} envsubst" > $build_dir/newview/viewerRes.rc || return `_err $? "envsubst viewerRes.rc"`
 
+    grep ProductVersion $source_dir/newview/res/viewerRes.rc $build_dir/newview/viewerRes.rc >&2
     # TODO: see if there is a way to opt-out via configuration from flickr/discord integration
     ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
     ht-ln $source_dir/newview/fsdiscordkey.h.in $build_dir/newview/fsdiscordkey.h

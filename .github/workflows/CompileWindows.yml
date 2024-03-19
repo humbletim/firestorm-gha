@@ -238,19 +238,22 @@ jobs:
 
     - name: log env on error
       if: failure()
-      run: |
-        declare -xp | tee -a declare.txt
-        env | tee -a env.txt
-        fsvr_step upload_artifact debug "$(cat <<EOF
-        declare.txt
-        env.txt
-        gha-bootstrap.env
-        SHELL.env
-        build/build_vars.env
-        build/msvc.env
-        build/msvc.nunja.env
-        EOF
-        )"
+      uses: ./fsvr-action
+      with:
+        environment: '*=process.env'
+        run: |
+          declare -xp > declare.txt
+          env > env.txt
+          fsvr_step upload_artifact debug "$(cat <<EOF
+          declare.txt
+          env.txt
+          gha-bootstrap.env
+          SHELL.env
+          build/build_vars.env
+          build/msvc.env
+          build/msvc.nunja.env
+          EOF
+          )"
 
     - name: Setup tmate session
       if: failure()

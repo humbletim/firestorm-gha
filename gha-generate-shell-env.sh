@@ -12,7 +12,7 @@ _PRESHELL_PATH="$PATH"
 if [[ -v GITHUB_WORKSPACE ]]; then
   TEE=c:/msys64/usr/bin/tee.exe
   WGET=c:/msys64/usr/bin/wget.exe
-  ENVSUBST=c:/msys64/usr/bin/envsubst.exe
+  ENVSUBST=$_programfiles/Git/mingw64/bin/envsubst.exe #/mingw64/bin/envsubst.exe #c:/msys64/usr/bin/envsubst.exe
   PYTHON=/c/hostedtoolcache/windows/Python/3.9.13/x64/python3.exe 
 else
   TEE=`which tee`
@@ -21,7 +21,7 @@ else
   PYTHON=`which python3`
 fi
 
-PATH="$_workspace/bin:$_userprofile/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:$_programfiles/CMake/bin:/c/Windows/system32:/usr/bin:/bin:/c/msys64/usr/bin"
+PATH="$_workspace/bin:$_userprofile/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:$_programfiles/Git/mingw64/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:$_programfiles/CMake/bin:/c/Windows/system32:/usr/bin:/bin:/c/msys64/usr/bin"
 
 #. $(dirname $0)/util/_utils.sh 
 _PRESHELL_PATH=
