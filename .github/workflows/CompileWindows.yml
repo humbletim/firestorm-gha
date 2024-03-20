@@ -96,12 +96,6 @@ jobs:
           set -x
           declare -f tee | head -1
 
-    - name: 000_fsvr_action_test
-      uses: ./fsvr-action
-      with:
-        environment: '*=process.env'
-        run: fsvr_step _steps
-
     # - name: ./fsvr-action  2test
     #   uses: ./fsvr-action
     #   with:
