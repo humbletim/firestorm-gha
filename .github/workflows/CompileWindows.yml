@@ -60,14 +60,14 @@ jobs:
           fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
         fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
 
-    - name: SHELL.env test 0
-      run: echo fsvr_dir=$fsvr_dir "${BASH_SOURCE[@]}"
-
-    - name: SHELL.sh env test
-      run: |
-        env bash -c 'echo PWD=$PWD'
-        env bash -c 'echo PATH=$PATH'
-        declare -f tee | head -1
+#     - name: SHELL.env test 0
+#       run: echo fsvr_dir=$fsvr_dir "${BASH_SOURCE[@]}"
+# 
+#     - name: SHELL.sh env test
+#       run: |
+#         env bash -c 'echo PWD=$PWD'
+#         env bash -c 'echo PATH=$PATH'
+#         declare -f tee | head -1
 
     - name: Initial Bootstrapping
       run: |
@@ -87,21 +87,31 @@ jobs:
             *=process.env
         run: |
           declare -f tee | head -1 || echo " no tee?"
-          export a=b
-          echo 'a=$a' | env a=b envsubst
+          a=c
+          test "$(echo 'a=$a' | envsubst)" == 'a=' || exit 97
+          export a=c
+          test "$(echo 'a=$a' | envsubst)" == 'a=c' || exit 99
+          test "$(echo 'a=$a' | env envsubst)" == 'a=c' || exit 100
+          test "$(echo 'a=$a' | env a=b envsubst)" == 'a=b' || exit 101
           set -x
           declare -f tee | head -1
 
-    - name: ./fsvr-action  2test
+    - name: 000_fsvr_action_test
       uses: ./fsvr-action
       with:
-        environment: |
-          ${{ github.event.inputs.fstuple }}
-          *=process.env
-        run: |
-          declare -f tee | head -1 || echo " no tee?"
-          export a=b
-          echo 'a=$a' | env a=b envsubst
+        environment: '*=process.env'
+        run: fsvr_step _steps
+
+    # - name: ./fsvr-action  2test
+    #   uses: ./fsvr-action
+    #   with:
+    #     environment: |
+    #       ${{ github.event.inputs.fstuple }}
+    #       *=process.env
+    #     run: |
+    #       declare -f tee | head -1 || echo " no tee?"
+    #       export a=b
+    #       echo 'a=$a' | env a=b envsubst
 
     - name: GHA Bootstrapping
       uses: ./fsvr-action
@@ -196,7 +206,6 @@ jobs:
       uses: ./fsvr-action
       with:
         environment: '*=process.env'
-        # shell: ${{ env.SHELL }}
         run: |
           set -Euo pipefail
           export INPUT_key=$base-build-packages-c INPUT_path=build/packages
@@ -234,7 +243,10 @@ jobs:
       run: fsvr_step 0b0
 
     - name: 0c0_upload_artifacts
-      run: fsvr_step 0c0
+      uses: ./fsvr-action
+      with:
+        environment: '*=process.env'
+        run: fsvr_step 0c0
 
     - name: log env on error
       if: failure()

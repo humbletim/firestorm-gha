@@ -334,7 +334,6 @@ function upload_artifact() {( $_dbgopts;
       value="${!i:-${iv:-$value}}"
       echo INPUT_$name=$(printf "%q" "$value")
     done) | tee /dev/stderr`
-    local cmd='ls $script ; echo INPUT_name=$INPUT_name hi'
     PATH="/c/Program Files/nodejs:$PATH" eval env $args "node $script" | tr -d '\n'
 )}
 
@@ -374,7 +373,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   test -n "$cmd" || _die "!cmd $cmd $@"
   #echo "running command: $cmd" >&2
   
-  eval "$cmd $@" || _die "command $cmd $@ failed $?"
+  $cmd "$@" || _die "command $cmd '$@' failed $?"
   if [[ ! $cmd =~ ^_ ]]; then
     for x in `_steps 2> /dev/null` ; do
      [[ $x != $cmd && $x > $cmd ]] && echo "    $x"
