@@ -6,12 +6,12 @@ on:
       inputs:
         fstuple:
           type: string
-          default:  '{ "base":"6.6.17", "repo":"FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }'
-          options:
-            - '{ "base":"6.6.17", "repo":"FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }'
-            - '{ "base":"7.1.2", "repo":"FirestormViewer/phoenix-firestorm-alpha", "branch": "master" }'
-            - '{ "base":"7.1.2", "repo":"Sgeo/phoenix-firestorm-alpha", "branch": "VR_Sgeo_2024" }'
-            - '{ "base":"7.1.4", "repo":"FirestormViewer/phoenix-firestorm", "branch": "7.1.4_Mar14_preview" }'
+          default: '{ "base":"6.6.17", "repo":"FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }'
+          options: |
+            { "base":"6.6.17", "repo":"FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }
+            { "base":"7.1.2", "repo":"FirestormViewer/phoenix-firestorm-alpha", "branch": "master" }
+            { "base":"7.1.2", "repo":"Sgeo/phoenix-firestorm-alpha", "branch": "VR_Sgeo_2024" }
+            { "base":"7.1.4", "repo":"FirestormViewer/phoenix-firestorm", "branch": "7.1.4_Mar14_preview" }
 
 run-name: ${{ fromJSON(inputs.fstuple).branch }} @ ${{ fromJSON(inputs.fstuple).base }}
 
@@ -51,7 +51,7 @@ jobs:
     - name: Output Inputs
       run: |
         echo "${{ github.event.inputs.fstuple }}"
-        echo '${{ inputs.fstuple }}' | jq 'to_entries[]|[.key,.value]|join("=")]' -r | tee -a $GITHUB_ENV
+        echo "${{ inputs.fstuple }}" | jq 'to_entries[]|[.key,.value]|join("=")]' -r | tee -a $GITHUB_ENV
 
     - name: Clone
       run: |
