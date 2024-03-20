@@ -155,7 +155,7 @@ function upload_artifact() {( set -Euo pipefail ;
       echo INPUT_$name=$(printf "%q" "$value")
     done) | tee /dev/stderr`
     echo "----------------------------------------" >&2
-    PATH="/c/Program Files/nodejs:$PATH" env "$args" node $script | tr -d '\n'
+    PATH="/c/Program Files/nodejs:$PATH" env $args node $script | tr -d '\n'
 )}
 
 # usage: __utils_main__ ${BASH_SOURCE[0]} ${0}
