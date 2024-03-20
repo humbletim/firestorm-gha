@@ -12,6 +12,9 @@ on:
             - base=7.1.2 repo=FirestormViewer/phoenix-firestorm-alpha branch=master
             - base=7.1.4 repo=FirestormViewer/phoenix-firestorm branch=7.1.4_Mar14_preview
 
+
+run-name: ${{ inputs.fstuple }}
+
 # shell: bash
 #bash --noprofile --norc -e -o pipefail ./SHELL.sh {0}
 #    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail ./SHELL.sh {0}
