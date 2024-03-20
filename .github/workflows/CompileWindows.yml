@@ -50,7 +50,8 @@ jobs:
   
     - name: Output Inputs
       run: |
-        echo "${{ toJSON(github.event.inputs) }}"
+        echo "${{ github.event.inputs.fstuple }}"
+        echo '${{ inputs.fstuple }}' | jq 'to_entries[]|[.key,.value]|join("=")]' -r | tee -a $GITHUB_ENV
 
     - name: Clone
       run: |
@@ -59,8 +60,7 @@ jobs:
 
     - name: Generate SHELL.env
       run: |
-        fsvr_dir=$PWD/fsvr ${{ github.event.inputs.fstuple }} \
-          fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
+        fsvr_dir=$PWD/fsvr fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
         fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
 
 #     - name: SHELL.env test 0
@@ -113,9 +113,7 @@ jobs:
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
-        environment: |
-          ${{ github.event.inputs.fstuple }}
-          *=process.env
+        environment: '*=process.env'
         run: |
           set -aEuo pipefail
           echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
