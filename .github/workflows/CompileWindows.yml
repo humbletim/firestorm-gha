@@ -256,7 +256,7 @@ jobs:
         run: |
           declare -xp > declare.txt
           env > env.txt
-          fsvr_step upload_artifact debug "$(cat <<EOF
+          ./fsvr/util/_utils.sh upload_artifact debug "$(cat <<EOF
           declare.txt
           env.txt
           gha-bootstrap.env

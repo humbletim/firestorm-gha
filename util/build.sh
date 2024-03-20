@@ -317,26 +317,6 @@ function 0b0_bundle() {( $_dbgopts;
   make_7z
 )}
 
-function upload_artifact() {( $_dbgopts;
-    local script=/d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js
-    local INPUT=(zed
-      name
-      path
-      retention-days=1
-      compression-level=0
-      overwrite=false
-      if-no-files-found=error
-    )
-    local args=`echo $(for i in "${!INPUT[@]}"; do
-      name="${INPUT[$i]/=*/}"
-      value="${INPUT[$i]/#$name=/}"
-      iv=$(_getenv $name)
-      value="${!i:-${iv:-$value}}"
-      echo INPUT_$name=$(printf "%q" "$value")
-    done) | tee /dev/stderr`
-    PATH="/c/Program Files/nodejs:$PATH" eval env $args "node $script" | tr -d '\n'
-)}
-
 function 0c0_upload_artifacts() {( $_dbgopts;
   local Installer=`ls build/Phoenix*.exe |head -1`
   local InstallerName=$(basename $Installer)

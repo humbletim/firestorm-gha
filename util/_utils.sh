@@ -134,6 +134,30 @@ fi
   eval "$cmd" || exit $?
 }
 
+function upload_artifact() {( set -Euo pipefail ;
+    local script=/d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js
+    test -f $script || return `_err $? "$script missing"`
+    test -v ACTIONS_RUNTIME_TOKEN || return `_err $? "ACTIONS_RUNTIME_TOKEN missing"`
+    local INPUT=(zed
+      name
+      path
+      retention-days=1
+      compression-level=0
+      overwrite=false
+      if-no-files-found=error
+    )
+    echo "----------------------------------------" >&2
+    local args=`echo $(for i in "${!INPUT[@]}"; do
+      name="${INPUT[$i]/=*/}"
+      value="${INPUT[$i]/#$name=/}"
+      iv=$(_getenv $name)
+      value="${!i:-${iv:-$value}}"
+      echo INPUT_$name=$(printf "%q" "$value")
+    done) | tee /dev/stderr`
+    echo "----------------------------------------" >&2
+    PATH="/c/Program Files/nodejs:$PATH" eval "$args node $script" | tr -d '\n'
+)}
+
 # usage: __utils_main__ ${BASH_SOURCE[0]} ${0}
 #   => if first argument is a declared function, invoke with args
 #      (otherwise no-op)
