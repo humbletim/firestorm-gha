@@ -51,9 +51,8 @@ jobs:
     - name: Output Inputs
       run: |
         echo "${{ github.event.inputs.fstuple }}"
-        jq 'to_entries[]|[.key,.value]|join("=")]' <<'JSON' | tee -a $GITHUB_ENV
-        ${{ inputs.fstuple }}
-        JSON
+        echo '${{ inputs.fstuple }}'
+        echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")]' | tee -a $GITHUB_ENV
 
     - name: Clone
       run: |
