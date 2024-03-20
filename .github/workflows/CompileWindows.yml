@@ -54,7 +54,6 @@ jobs:
         jq 'to_entries[]|[.key,.value]|join("=")]' <<'JSON' | tee -a $GITHUB_ENV
         ${{ inputs.fstuple }}
         JSON
-        
 
     - name: Clone
       run: |
