@@ -58,11 +58,6 @@ jobs:
         fsvr_dir=$PWD/fsvr fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
         fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
-
     - name: Generate bin/ proxies
       run: |
         test -d "$fsvr_dir" || exit 63
@@ -81,11 +76,6 @@ jobs:
         tee --version
         parallel --version
         hostname --version
-
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
 
     - name: Initial Bootstrapping
       run: |
