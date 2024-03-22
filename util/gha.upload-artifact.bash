@@ -5,29 +5,42 @@
 
 # usage: 
 #  upload_artifacts <name> "<paths>" [retention-days=1] [compression-level=0]
+
+source $(dirname $BASH_SOURCE)/gha._utils.bash
+
 function upload-artifact() {(
     set -Euo pipefail
 
     local PATH="$PATH:/usr/bin"
-    local node="/c/Program Files/nodejs/node"
-    local script="/d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js"
+    local node="${node:-/c/Program Files/nodejs/node}"
+    local actions_artifact_dir="${actions_artifact_dir:-/d/a/_actions/actions/upload-artifact/v4}"
+    local script="${script:-${actions_artifact_dir}/dist/upload/index.js}"
 
-    test -f $script || { echo "$script missing" >&2 ; return 7; }
-    test -v ACTIONS_RUNTIME_TOKEN || { echo "env ACTIONS_RUNTIME_TOKEN missing" >&2 ; return 8; }
-
-    local -a inputs=(
-      INPUT_name=$(printf "%q" "$1")
-      INPUT_path=$(printf "%q" "$2")
+    local -a Input=(
+      INPUT_name="`gha_esc "$1"`"
+      INPUT_path="`gha_esc "$2"`"
+      INPUT_if-no-files-found=error # warn | error | ignore
       INPUT_retention-days=${3:-1}
       INPUT_compression-level=${4:-0}
       INPUT_overwrite=false
-      INPUT_if-no-files-found=error
     )
-    
+
+    local -a Command=(
+      `gha_esc $node`
+      `gha_esc $script`
+    )
+
+    local -a Output=(
+        artifact-id
+        artifact-url
+    )
+
+    local -a Invocation=("${Input[@]}" "${Command[@]}")
+
     echo "----------------------------------------" >&2
-    echo "env ${inputs[@]} $node $script" >&2
+    # declare -p Invocation 
     echo "----------------------------------------" >&2
-    eval "env ${inputs[@]} $node $script"
+    gha-invoke-action "${Invocation[@]}"
     echo "----------------------------------------" >&2
 )}
 

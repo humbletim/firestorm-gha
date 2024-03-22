@@ -115,6 +115,12 @@ jobs:
     #       export a=b
     #       echo 'a=$a' | env a=b envsubst
 
+    - name: Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '000'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
@@ -262,6 +268,7 @@ jobs:
           build/msvc.nunja.env
           EOF
           )"
+
 
     - name: Setup tmate session
       if: failure()
