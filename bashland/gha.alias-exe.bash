@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function make-stub() {
-  CC=${CC:-'/c/Program Files/LLVM/bin/clang'}
+  CC=${CC:-'/c/mingw64/bin/gcc'}
   #'-DDEBUG_COMMAND_STRING' 
   "${CC}" '-DBASH="c:/PROGRA~1/Git/usr/bin/bash.exe"' \
     fsvr/bashland/BASH_FUNC_invoke.c -o "${1:-bin/BASH_FUNC_invoke.exe}"
