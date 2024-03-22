@@ -124,9 +124,8 @@ jobs:
           echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
 
           function xxtest_bin() {
-            declare -f ninja | head -1          || return 195
             test -f bin/parallel-home/will-cite || return 196
-            parallel --version | head -1        || return 197
+            parallel -- --version | head -1        || return 197
             ninja --version                     || return 198
             [[ `hostname` =~ windows[-]?2022 ]] || return 199
           }

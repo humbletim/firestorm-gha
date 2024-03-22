@@ -136,6 +136,9 @@ function get_hostname() {(
 )}
 
 # LITERALLY determine whether an EXACT filename ACTUALLY exists
+# NOTE: `ls bin/parallel` (even `stat 'bin/parallel'`) both falsely
+# match when there exists a `bin/parallel.exe`; as of yet no known
+# way to prevent such false existential positives; hence the long route here...
 function literally_exists() {
   local dir="$(dirname "$1")"
   local name="$(basename "$1")"
