@@ -61,8 +61,8 @@ jobs:
     - name: Generate bin/ proxies
       run: |
         test -d "$fsvr_dir" || exit 63
-        . bashland/gha.alias-exe.bash
-        make-stub
+        . fsvr/bashland/gha.alias-exe.bash
+        make-stub bin/BASH_FUNC_invoke.exe
         fsvr/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
         ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
         ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
