@@ -20,7 +20,8 @@ test -d $CRT || { echo "msvc CRT '$CRT' does not exist" &>2 ; return 20 ; }
 
 {
   echo msvc_dir=$CRT
+  PATH="$msvc_path:$PATH:/usr/bin:/c/Windows/system32"
   for x in cl lib link mt rc cmake ninja python cmcldeps cmd; do
-    echo ${x}_exe=$(PATH="$msvc_path:$PATH:/usr/bin:/c/Windows/system32" cygpath -msa "$(which $x.exe)")
+    echo ${x}_exe=$(cygpath -msa "$(which $x.exe)")
   done
 } | tee build/msvc.nunja.env

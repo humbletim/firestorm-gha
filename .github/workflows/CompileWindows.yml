@@ -163,7 +163,7 @@ jobs:
            | tee build/build_vars.env #| tee $GITHUB_ENV
 
     - name: Detect MSVC
-      run: $fsvr_dir/util/generate_msvc_env.bat > build/msvc.env
+      run: $fsvr_dir/util/generate_msvc_env.sh
 
     - name: 010_ensure_build_directories
       run: fsvr_step 010
