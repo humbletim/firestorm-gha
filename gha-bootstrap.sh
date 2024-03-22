@@ -90,7 +90,7 @@ function save_gha_caches() {
 }
 
 function get_ninja() {(
-    local archive=$( $fsvr_dir/util/_utils.sh wget_sha256 \
+    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
         bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f \
         https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip \
       .
@@ -99,7 +99,7 @@ function get_ninja() {(
 )}
 
 function get_parallel() {(
-    local archive=$( $fsvr_dir/util/_utils.sh wget_sha256 \
+    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
       3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 \
       https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst \
       .
@@ -135,13 +135,18 @@ function get_hostname() {(
   ls -l bin/hostname.exe
 )}
 
+# LITERALLY determine whether an EXACT filename ACTUALLY exists
+function literally_exists() {
+  local dir="$(dirname "$1")"
+  local name="$(basename "$1")"
+  command -p ls -1 "$dir" | command -p grep -Fx "$name" >/dev/null && true || false
+}
+
 function ensure_gha_bin() {(
     set -Euo pipefail
     echo "[gha-bootstrap] provisioning bin/ tools" >&2
-    test -f bin/hostname.exe || get_hostname "windows-2022" || return `_err $? "failed to provision hostname $?"`
-    test -f bin/ninja.exe    || get_ninja || return `_err $? "failed to provision ninja $?"`
-    test -f bin/parallel     || get_parallel || return `_err $? "failed to provision parallel $?"`
-    test ! -f bin/tee        || rm -v bin/tee
+    literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
+    literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
 )}
 
 function get_bootstrap_vars() {(
