@@ -33,7 +33,7 @@ test ! -f $PWD/build/build_vars.env || source $PWD/build/build_vars.env
 _xpath="\$_PATH"
 [[ -v msvc_path ]] && _xpath="\$msvc_path:\$_xpath"
 [[ -n "\$_PRESHELL_PATH" ]] && _xpath="\$_xpath:\$_PRESHELL_PATH"
-export PATH="\$_xpath"
+declare -x PATH="\$_xpath"
 
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 

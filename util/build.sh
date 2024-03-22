@@ -63,10 +63,10 @@ function 020_perform_replacements() {( $_dbgopts;
     ht-ln $fsvr_dir/newview/cmake_pch.cxx $build_dir/newview/
 
     cat $source_dir/newview/fsversionvalues.h.in | sed -E 's~@([A-Z_]+)@~$\1~g' \
-      | eval "${fsversionvalues[@]} envsubst" > $build_dir/newview/fsversionvalues.h || return `_err $? "envsubst fsversionvalues.h.in"`
+      | eval "${fsversionvalues[@]} C:/PROGRA~1/Git/mingw64/bin/envsubst.exe" > $build_dir/newview/fsversionvalues.h || return `_err $? "envsubst fsversionvalues.h.in"`
 
     cat $source_dir/newview/res/viewerRes.rc \
-      | eval "${fsversionvalues[@]} envsubst" > $build_dir/newview/viewerRes.rc || return `_err $? "envsubst viewerRes.rc"`
+      | eval "${fsversionvalues[@]} C:/PROGRA~1/Git/mingw64/bin/envsubst.exe" > $build_dir/newview/viewerRes.rc || return `_err $? "envsubst viewerRes.rc"`
 
     grep ProductVersion $source_dir/newview/res/viewerRes.rc $build_dir/newview/viewerRes.rc >&2
     # TODO: see if there is a way to opt-out via configuration from flickr/discord integration
