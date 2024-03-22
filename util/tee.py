@@ -45,4 +45,6 @@ while data:
     except KeyboardInterrupt: sys.exit(-1)
     for stream in write_streams:
         stream.write(data)
-        stream.flush()
+        try:
+          stream.flush()
+        except BrokenPipeError: sys.exit(-2)

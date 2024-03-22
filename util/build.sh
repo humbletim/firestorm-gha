@@ -4,6 +4,9 @@ require_here=`readlink -f $(dirname $BASH_SOURCE)`
 function require() { source $require_here/$@ ; }
 require _utils.sh
 
+require gha.upload-artifact.bash
+require gha.load-level.bash
+
 # echo "root_dir=$root_dir" >&2
 _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
@@ -79,18 +82,6 @@ function 020_perform_replacements() {( $_dbgopts;
     )
 )}
 
-function get_msvcdir() {( $_dbgopts;
-  _assert "fsvr_dir/util" test -f "$fsvr_dir/util/generate_msvc_env.bat"
-  _assert "$build_dir/msvc.env" test -s $build_dir/msvc.env
-  . $build_dir/msvc.env
-  test -n "$VCToolsVersion" || _die "!VCToolsVersion"
-  test -d "$VCToolsRedistDir" || _die "!VCToolsRedistDir"
-  local TOOLSVER=$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@')
-  local CRT=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$TOOLSVER.CRT/")
-  test -d $CRT || { echo "msvc CRT '$CRT' does not exist" &>2 ; return 1 ; }
-  echo "$CRT"
-)}
-
 function 085_prepare_msys_msvc() {( $_dbgopts;
     [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
 
@@ -102,12 +93,6 @@ function 085_prepare_msys_msvc() {( $_dbgopts;
         # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
         python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
     fi
-
-    # make msvcp140.dll redists easy to reference as build/msvc/
-    msvc_dir=$(get_msvcdir) || _die "could not get msvc_dir $(ls -l $build_dir/)"
-    # ht-ln $msvc_dir $build_dir/msvc
-    grep msvc_dir $build_dir/build_vars.env >/dev/null \
-      || { echo "msvc_dir=$msvc_dir" | tee -a $build_dir/build_vars.env ; }  
 )}
 
 function merge_packages_info() {( $_dbgopts;
@@ -231,14 +216,18 @@ function 080_untar_packages() {( $_dbgopts;
 
 function 090_ninja_preflight() {( $_dbgopts;
     _assert nunja_dir 'test -d "$nunja_dir"'
-    ( 
-      echo "include build_vars.env"
-      echo "nunja_dir=$nunja_dir" ;
-      cat $nunja_dir/cl.arrant.nunja
-    ) > $build_dir/build.ninja
+
+cat << EOF > $build_dir/build.ninja
+include build_vars.env
+include msvc.nunja.env
+nunja_dir=$nunja_dir
+include \$nunja_dir/cl.arrant.nunja
+EOF
+
     _assert msvc.env 'test -f $build_dir/msvc.env'
     set -a
     . $build_dir/msvc.env
+    . $build_dir/msvc_path.env
     . $BASH_ENV
 
     echo $msvc_path
@@ -253,6 +242,7 @@ function 0a0_ninja_build() {( $_dbgopts;
     _assert msvc.env 'test -f $build_dir/msvc.env'
     set -a
     . $build_dir/msvc.env
+    . $build_dir/msvc_path.env
     . $BASH_ENV
     which cl.exe > /dev/null || return 256
     echo "[$FUNCNAME] ninja -C $build_dir ${@:-llpackage}" >&2
@@ -324,21 +314,17 @@ function 0c0_upload_artifacts() {( $_dbgopts;
   mkdir dist
   ht-ln $Installer dist/$InstallerExe
 
-  ( cd dist && upload_artifact ${InstallerExe/.exe/} $InstallerExe )
+  ( cd dist && upload-artifact ${InstallerExe/.exe/} $InstallerExe )
 
   local Portable=`ls build/Firestorm*.7z |head -1`
   local PortableArchive=$branch-$(basename $Portable)
   ht-ln $Portable dist/$PortableArchive
   
-  ( cd dist && upload_artifact ${PortableArchive/.7z/} $PortableArchive )
+  ( cd dist && upload-artifact ${PortableArchive/.7z/} $PortableArchive )
 )}
 
 function _steps() {
     declare -f | grep '^0.*()' | sed 's@^@    @g;s@()@@' | sort 
-}
-
-function load-level() {
- /c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoLogo -Command "Get-Counter -Counter '\Processor(_Total)\% Processor Time'  -MaxSamples 1" 2>&1 | /usr/bin/xargs /usr/bin/echo| /usr/bin/grep -Eo '[^ ]+$'
 }
 
 # Check if the script is being sourced

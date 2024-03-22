@@ -4,6 +4,10 @@
 
 _fsvr_utils_dir=$(readlink -f $(dirname "$BASH_SOURCE"))
 
+source $_fsvr_utils_dir/gha.reduce-paths.bash
+source $_fsvr_utils_dir/gha.wget-sha256.bash
+source $_fsvr_utils_dir/gha.ht-ln.bash
+
 _dbgopts='set -Euo pipefail'
 
 _die_exit_code=128
@@ -31,6 +35,16 @@ function _relativize() {
 #_getenv bypasses bash variables and queries system-level environment (via env)
 # usage: _getenv NAME
 function _getenv(){ /usr/bin/env | /usr/bin/grep -E "^$1=" | /usr/bin/cut -d '=' -f 2- || true ; }
+
+# extract environment variable value
+# while supporting hyphens in names AND ALSO newlines/etc. in values
+# eg: local value="$(__getenv INPUT_x-y-z)"
+function __getenv() {
+  local eenv="$(printf "%q" "$( echo ; env ; echo )")"
+  eenv="$(echo "$eenv" | sed -E 's@\\n?([-_A-Za-z0-9%.]+)=@\n\n\n\1=@g')"
+  local evalue="$(echo "$eenv" | grep -Eo "^$1=.*" | cut -d '=' -f 2-)"
+  echo -e "$evalue" | sed "s@\\\'@'@g;"
+}
 
 # _setenv exports and emits to stdout a canonicalized name=value argument
 # escaping attempts to emerge both ninja and bash compatible variable assignments
@@ -68,16 +82,6 @@ function _setenv_ma() {
   _setenv "$name=$value"
 }
 
-# subtract_paths(a,b) => a less b, de-duplicated and normalized
-# subtract_paths(a,"") => a de-duplicated and normalized
-# note: the order of elements from 'a' is preserved
-function subtract_paths() {( $_dbgopts;
-  PATH="/usr/bin:$PATH"
-  grep -x -vf <(echo "$2" | tr ':' '\n') <(echo "$1" | tr ':' '\n') \
-    | awk '!seen[$0]++' | tr '\n' ':' | sed 's@[: ]*$@@g'
-  return 0
-)}
-
 
 function _realpath() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
 function _relative_path() { realpath --relative-to "$2" "$1" ; }
@@ -87,76 +91,6 @@ function _git_sha() {
   git -C "$1" describe --always --first-parent --abbrev=7
 }
 
-# helper to download + checksum verify using wget
-# usage: wget_sha256 <sha256sumhex> <url> <outputdir>
-#  returns the resulting outputdir/filename to stdout
-function wget_sha256() {(
-  set -Euo pipefail
-  local hash=$1 url=$2 dir=${3:-.}
-  local filename=`basename $url`
-  test ! -d "$dir" || cd $dir
-  wget -q -N $url >&2
-  echo "$hash $filename" | sha256sum --strict --check >&2
-  echo $dir/$filename
-)}
-
-# helper to create symbolic links
-# usage: ht-ln <SOURCE> <destination folder/ or desired link filepath>
-function ht-ln() {
-  local source="$1" linkname="$2" opts=""
-  test -e "$source" || { echo "source does not exist '$source'" >&2 ; return 1; }
-
-  # ht-ln source.file dir/
-  test ! -d "$source" && test -d "$linkname" && linkname="$linkname/$(basename "$source")"
-
-  # verify destination link folder exists
-  test -d "$(dirname "$linkname")" || { echo "link location does not exist '$(dirname "$linkname")'" >&2 ; return 1; }
-
-  # default to linux style hard links
-  local cmd="ln -v $source $linkname"
-
-  # but on Linux use symbolic links for directories
-  test -d "$source" && cmd="ln -vs \"$source\" \"$linkname\""
-
-  # but on Windows / msys use mklink instead
-  if [[ "$OSTYPE" == "msys" ]]; then
-    # for directories /J junctions are used; /D (directory symbolic) is another option to consider
-    test -d "$source" && opts="/J"
-    # for files /H hardlinks are used
-    test -f "$source" && opts="/H"
-    PATH=/usr/bin
-    COMMAND="mklink $opts \"$(/usr/bin/cygpath -wa "$linkname")\" \"$(/usr/bin/cygpath -wa "$source")\""
-    cmd="/c/Windows/system32/cmd.exe //C call $(echo "$COMMAND" | /usr/bin/sed 's@/@//@g;s@\\@\\\\@g') "
-fi
-
-  type -t _relativize >/dev/null && _relativize "[ht-ln] $cmd" >&2
-  test -e "$linkname" && { false && _relativize "skipping (exists) $linkname" >&2 ; return 0; }
-  eval "$cmd" || exit $?
-}
-
-function upload_artifact() {( set -Euo pipefail ;
-    local script=/d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js
-    test -f $script || return `_err $? "$script missing"`
-    test -v ACTIONS_RUNTIME_TOKEN || return `_err $? "ACTIONS_RUNTIME_TOKEN missing"`
-    local INPUT=(zed
-      name
-      path
-      retention-days=1
-      compression-level=0
-      overwrite=false
-      if-no-files-found=error
-    )
-    echo "----------------------------------------" >&2
-    local args=`echo $(for i in "${!INPUT[@]}"; do
-      name="${INPUT[$i]/=*/}"
-      value="${INPUT[$i]/#$name=/}"
-      iv=$(_getenv $name)
-      value="${!i:-${iv:-$value}}"
-      echo INPUT_$name=$(printf "%q" "$value")
-    done) | tee /dev/stderr`
-    echo "----------------------------------------" >&2
-    PATH="/c/Program Files/nodejs:$PATH" eval "env $args node $script" | tr -d '\n'
-)}
 
 # usage: __utils_main__ ${BASH_SOURCE[0]} ${0}
 #   => if first argument is a declared function, invoke with args
