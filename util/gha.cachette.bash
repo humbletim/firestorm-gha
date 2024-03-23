@@ -35,10 +35,7 @@ function cache-exists() {(
       `gha_esc "$node"`
       `gha_esc "$script"`
     )
-    local -a Invocation=(
-      "${Input[@]}"
-      "${Command[@]}"
-    )
+
     gha-invoke-action "${Input[@]}" "${Command[@]}"
 )}
 

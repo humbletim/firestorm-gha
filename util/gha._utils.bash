@@ -79,7 +79,6 @@ function gha-invoke-action() {(
     echo "env ${Eval[@]}" >&2
     echo "----------------------------------------" >&2
 
-    # exit 5
     test -v ACTIONS_RUNTIME_TOKEN || return `gha_err 81 "ACTIONS_RUNTIME_TOKEN missing"`
 
     eval "env ${Eval[@]}" | gha_stdmap >&2
