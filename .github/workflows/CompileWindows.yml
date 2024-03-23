@@ -93,7 +93,7 @@ jobs:
     - name: Populated bin/
       uses: ./fsvr-action
       with:
-      run: |
+        run: |
           test -d "$fsvr_dir" || exit 63
 
           source fsvr/gha-bootstrap.sh
