@@ -10,6 +10,7 @@ source $(dirname $BASH_SOURCE)/gha._utils.bash
 
 function gha-upload-artifact() {(
     set -Euo pipefail
+    gha-have-runtime || { echo "gha runtime unavailable" && exit 13 ; }
 
     local PATH="$PATH:/usr/bin"
     local node="${node:-/c/Program Files/nodejs/node}"

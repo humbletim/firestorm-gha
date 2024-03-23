@@ -10,6 +10,8 @@ source $(dirname $BASH_SOURCE)/gha._utils.bash
 
 function gha-cache-exists() {(
     set -Euo pipefail
+    gha-have-runtime || { echo "gha runtime unavailable" && exit 13 ; }
+    # gha-have-runtime || return `gha-err $? gha runtime unavailable`
 
     local PATH="$PATH:/usr/bin"
     local node="${node:-/c/Program Files/nodejs/node}"
@@ -53,6 +55,7 @@ function gha-cache-exists() {(
 
 function gha-cache-restore() {(
     set -Euo pipefail
+    gha-have-runtime || { echo "gha runtime unavailable" && exit 13 ; }
 
     local PATH="$PATH:/usr/bin"
     local node="${node:-/c/Program Files/nodejs/node}"
@@ -95,6 +98,7 @@ function gha-cache-restore() {(
 
 function gha-cache-save() {(
     set -Euo pipefail
+    gha-have-runtime || { echo "gha runtime unavailable" && exit 13 ; }
 
     local PATH="$PATH:/usr/bin"
     local node="${node:-/c/Program Files/nodejs/node}"

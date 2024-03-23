@@ -4,8 +4,8 @@ require_here=`readlink -f $(dirname $BASH_SOURCE)`
 function require() { source $require_here/$@ ; }
 require _utils.sh
 
-require gha.upload-artifact.bash
 require gha.load-level.bash
+require gha.upload-artifact.bash
 require gha.cachette.bash
 
 # echo "root_dir=$root_dir" >&2

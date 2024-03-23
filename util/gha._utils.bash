@@ -1,9 +1,6 @@
 #!/bin/bash
 
-test -v ACTIONS_RUNTIME_TOKEN || {
-  echo "::error::ACTIONS_RUNTIME_TOKEN environment variable missing; caching unavailable" | tee -a $GITHUB_STEP_SUMMARY /dev/stderr
-  exit 5
-}
+gha-have-runtime()(test -v ACTIONS_RUNTIME_TOKEN && test -n "$ACTIONS_RUNTIME_TOKEN")
 
 gha-err(){ echo $1 && echo "[gha-err rc=$1] $@" >&2 && exit $1 ; }
 
@@ -155,8 +152,6 @@ function gha-invoke-action() {(
     echo "----------------------------------------" >&2
     echo "env ${Eval[@]}" >&2
     echo "----------------------------------------" >&2
-
-    test -v ACTIONS_RUNTIME_TOKEN || return `gha-err 81 "ACTIONS_RUNTIME_TOKEN missing"`
 
     eval "env ${Eval[@]}" | gha-stdmap Github >&2
     echo "----------------------------------------" >&2
