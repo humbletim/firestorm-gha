@@ -163,7 +163,7 @@ function gha-invoke-action() {(
         gha-kv-raw data "$((
           gha-kv-json Invocation "${Invocation[@]}"
           for i in "${!Github[@]}"; do
-             gha-kv-json $i "$(cat "${Github[$i]}")"
+             gha-kv-json $i "$(cat "${Github[$i]}" | tr -d '\r')"
           done
         ) | jq -Ss from_entries)"
     ) | jq -s from_entries

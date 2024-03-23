@@ -78,7 +78,7 @@ function gha-cache-restore() {(
 
     local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
     echo "$json"
-    if [[ $(jq -r '.["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit -1 ; fi
+    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit -1 ; fi
 
 #     local -a Output=(
 #         cache-hit
@@ -113,7 +113,17 @@ function gha-cache-save() {(
       `gha-esc "$script"`
     )
 
-    gha-invoke-action "${Input[@]}" "${Command[@]}"
+    local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
+    if [[ $json =~ Failed\ to\ save:(.*)\\n ]]; then
+      echo "Failed to save: ${BASH_REMATCH[1]}" >&2
+      json="$(jq '.outputs += { error: $error }' --arg error "${BASH_REMATCH[1]}" <<< "$json")"
+    fi
+    for x in 'Cache saved with key:' 'File Size:' 'Cache Size:' ; do
+      if [[ $json =~ $x\ (.*)\\n ]]; then
+        echo "x=$x y=${BASH_REMATCH[1]}" >&2
+      fi
+    done
+    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit -1 ; fi
 
     # local -a Output=(
     #     cache-hit
