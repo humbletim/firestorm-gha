@@ -101,11 +101,12 @@ jobs:
               set -Euo pipefail
               literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
               literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
-              ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
+              literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
               gha-cache-save $base-bin-b bin 2>/dev/null  || exit 85
           )
           function xxtest_bin() {
             test -f bin/parallel-home/will-cite || return 196
+            which parallel.exe
             parallel -- --version | head -1     || return 197
             ninja --version | head -1           || return 198
             [[ `hostname` =~ windows[-]?2022 ]] || return 199
