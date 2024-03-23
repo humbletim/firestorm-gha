@@ -11,7 +11,7 @@ function gha_mktemp_cleanup_temp_files() {
     done
 }
 _gha_mktemp_pid=${1:-BASHPID}
-_gha_mktemp_pid_tmpdir="$(dirname "$(mktemp -u -p "" --suffix=.$pid.gha_mktemp.XXX)")"
+_gha_mktemp_pid_tmpdir="$(dirname "$(mktemp -u -p "" --suffix=.$_gha_mktemp_pid.gha_mktemp.XXX)")"
 ( test -n "$_gha_mktemp_pid_tmpdir" && test -d "$_gha_mktemp_pid_tmpdir" ) || { echo "!tmpdir=$_gha_mktemp_pid_tmpdir" >&2 ; exit 7 ; }
 trap "gha_mktemp_cleanup_temp_files '$_gha_mktemp_pid_tmpdir' '$_gha_mktemp_pid_tmpdir'" EXIT
 
