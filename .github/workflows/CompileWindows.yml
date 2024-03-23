@@ -118,7 +118,7 @@ jobs:
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
-        env:
+        env: |
           key: value
           other: "a value with spaces"
           multiline: |
