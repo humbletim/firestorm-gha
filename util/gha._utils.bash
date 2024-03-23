@@ -55,7 +55,7 @@ function gha-invoke-action() {(
     # shift
 
     local -a Invocation=("$@")
-    declare -p Invocation
+    declare -p Invocation >&2
 
     local -A Github=()
     local -a Env=()
@@ -74,7 +74,7 @@ function gha-invoke-action() {(
     done
 
     local -a Eval=("${Env[@]}" "${Invocation[@]}")
-    declare -p Github
+    declare -p Github >&2
     echo "----------------------------------------" >&2
     echo "env ${Eval[@]}" >&2
     echo "----------------------------------------" >&2
