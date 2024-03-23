@@ -30,10 +30,10 @@ function upload-artifact() {(
       `gha-esc "$script"`
     )
 
-    local -a Output=(
-        artifact-id
-        artifact-url
-    )
+    # local -a Output=(
+    #     artifact-id
+    #     artifact-url
+    # )
 
     local -a Invocation=("${Input[@]}" "${Command[@]}")
 

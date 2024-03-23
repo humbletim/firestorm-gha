@@ -22,21 +22,25 @@ function cache-exists() {(
         INPUT_lookup-only=true
         INPUT_fail-on-cache-miss=ignore
     )
-    local -a Output=(
-        cache-hit
-        cache-primary-key
-        cache-matched-key
-    )
-    local -a State=(
-      CACHE_KEY
-      CACHE_RESULT
-    )
+
     local -a Command=(
       `gha-esc "$node"`
       `gha-esc "$script"`
     )
 
     gha-invoke-action "${Input[@]}" "${Command[@]}"
+
+    # local -a Output=(
+    #     cache-hit
+    #     cache-primary-key
+    #     cache-matched-key
+    # )
+
+    # local -a State=(
+    #   CACHE_KEY
+    #   CACHE_RESULT
+    # )
+
 )}
 
 function restore-only() {(
@@ -53,15 +57,6 @@ function restore-only() {(
         # INPUT_restore-keys=
         # INPUT_fail-on-cache-miss=error
     )
-    local -a Output=(
-        cache-hit
-        cache-primary-key
-        cache-matched-key
-    )
-    local -a State=(
-      CACHE_KEY
-      CACHE_RESULT
-    )
 
     local -a Command=(
       `gha-esc "$node"`
@@ -69,6 +64,18 @@ function restore-only() {(
     )
 
     gha-invoke-action "${Input[@]}" "${Command[@]}"
+
+#     local -a Output=(
+#         cache-hit
+#         cache-primary-key
+#         cache-matched-key
+#     )
+ 
+#     local -a State=(
+#       CACHE_KEY
+#       CACHE_RESULT
+#     )
+
 )}
 
 function save-only() {(
@@ -83,15 +90,6 @@ function save-only() {(
         INPUT_key="`gha-esc "$1"`"
         INPUT_path="`gha-esc "$2"`"
     )
-    local -a Output=(
-        cache-hit
-        cache-primary-key
-        cache-matched-key
-    )
-    local -a State=(
-      CACHE_KEY
-      CACHE_RESULT
-    )
 
     local -a Command=(
       `gha-esc "$node"`
@@ -99,4 +97,16 @@ function save-only() {(
     )
 
     gha-invoke-action "${Input[@]}" "${Command[@]}"
+
+    # local -a Output=(
+    #     cache-hit
+    #     cache-primary-key
+    #     cache-matched-key
+    # )
+
+    # local -a State=(
+    #   CACHE_KEY
+    #   CACHE_RESULT
+    # )
+
 )}
