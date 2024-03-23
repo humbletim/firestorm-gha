@@ -113,10 +113,10 @@ jobs:
               echo "### infos"
               echo "| program    | info       |"
               echo "| ---------- | ----------- |"
-              echo "| ninja  | $(ninja --version |head 1)  |"
-              echo "| bash | $(bash --version | head 1) |"
-              echo "| parallel | $(parallel --version | head 1) |"
-              echo "| hostname | $(hostname| head 1) |"
+              echo "| ninja  | $(ninja --version |head -1)  |"
+              echo "| bash | $(bash --version | head -1) |"
+              echo "| parallel | $(parallel --version | head -1) |"
+              echo "| hostname | $(hostname| head -1) |"
             } >> $GITHUB_STEP_SUMMARY
           }
           xxtest_bin || exit `_err $? "!xxtest_bin"`
