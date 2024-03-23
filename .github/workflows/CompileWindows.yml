@@ -91,8 +91,8 @@ jobs:
         ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
 
     - name: Populated bin/
-      # uses: ./fsvr-action
-      # with:
+      uses: ./fsvr-action
+      with:
       run: |
           test -d "$fsvr_dir" || exit 63
 
