@@ -47,6 +47,9 @@ jobs:
         echo '${{ github.event.inputs.fstuple }}'
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
         echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
+        . $GITHUB_ENV
+        echo "cache_id=$base-${repo//+([^[:alnum:][:blank:]])/-}" | tee -a $GITHUB_ENV
+
 
     - name: Clone
       run: |
@@ -91,10 +94,21 @@ jobs:
       uses: ./fsvr-action
       with:
         run: |
-          test -d repo/$branch/.git            || quiet_clone $repo $branch repo/$branch
-          test -d repo/p373r/.git              || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
-          test -d repo/fs-build-variables/.git || \
-            quiet_clone FirestormViewer/fs-build-variables c57be16efb2b48d9e117c7449fc105c7f9da16d0 repo/fs-build-variables
+          source $fsvr_dir/gha-bootstrap.sh
+          source $fsvr_dir/util/gha.cachette.bash
+          gha-cache-restore $cache_id-repo-a repo || (
+            set -Euo pipefail
+            test -d repo/$branch/.git             || quiet_clone $repo $branch repo/$branch
+            test -d repo/p373r/.git               || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
+            test -d repo/fs-build-variables/.git  || \
+              quiet_clone FirestormViewer/fs-build-variables c57be16efb2b48d9e117c7449fc105c7f9da16d0 repo/fs-build-variables
+
+            gha-cache-save $cache_id-repo-a repo  || exit 107
+          )
+          test -d repo/$branch/.git             || exit 108
+          test -d repo/p373r/.git               || exit 109
+          test -d repo/fs-build-variables/.git  || exit 110
+
 
     - name: GHA Bootstrapping
       uses: ./fsvr-action
@@ -107,7 +121,7 @@ jobs:
         environment: foo=bar
         args: An argument string ${{ inputs.fstuple }}
         run: |
-          echo ok
+          echo ok 1=$1 2=$2 args="$(echo "$@")"
 
     - name: Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '000'
