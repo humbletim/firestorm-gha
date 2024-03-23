@@ -26,7 +26,7 @@ function gha-kv-json() {
 # - promoting ::warning:: and ::error:: into pseudo-outputs
 function gha-stdmap() {
   local -n __Github="$1"
-  
+
   while IFS= read -r line || [[ -n $line ]]; do
     if [[ $line =~ ::(debug|info|notice):: ]]; then
       echo "[${BASH_REMATCH[1]}] $line" | tee -a ${__Github[stderr]} >&2
@@ -37,7 +37,7 @@ function gha-stdmap() {
       echo "[$type] $line" | tee -a ${__Github[stdout]} >&2
       if [[ $line =~ name=([^:]+)::(.*) ]]; then
         local name="${BASH_REMATCH[1]}" value="${BASH_REMATCH[2]}"
-        echo -e "$name<<ghadelimiter${type}\n$value\nghadelimiter${type}" >> ${__Github[GITHUB_OUTPUT]} 
+        echo -e "$name<<ghadelimiter${type}\n$value\nghadelimiter${type}" >> ${__Github[GITHUB_OUTPUT]}
       fi
     elif [[ $line =~ ::(error|warning):: ]]; then
       local type=${BASH_REMATCH[1]}
@@ -45,7 +45,7 @@ function gha-stdmap() {
       echo "[$type] $line" | tee -a ${__Github[stdout]} >&2
       if [[ $type == warning ]]; then echo "$line" >> ${__Github[warnings]} ; fi
       if [[ $type == error ]]; then echo "$line" >> ${__Github[errors]} ; fi
-      echo -e "${type}<<ghadelimiter${type}\n$line\nghadelimiter${type}" >> ${__Github[GITHUB_OUTPUT]} 
+      echo -e "${type}<<ghadelimiter${type}\n$line\nghadelimiter${type}" >> ${__Github[GITHUB_OUTPUT]}
     else
       echo "[stdout] $line"| tee -a ${__Github[stdout]} >&2
     fi
@@ -85,7 +85,7 @@ function gha-check() {
     return 0
   else
     local actual="$(echo  "${ref[@]}" | grep -Eo "INPUT_${name}=[^ ]+")"
-    echo -e "EXPECTED: \n\tINPUT_${name}=${expected}\nACTUAL:\n\t$actual" >&2 
+    echo -e "EXPECTED: \n\tINPUT_${name}=${expected}\nACTUAL:\n\t$actual" >&2
     echo "${ref[@]}" >&2
     return 70
   fi
@@ -158,7 +158,7 @@ function gha-invoke-action() {(
     wait
     # { <outputs>, __streams__: { stdout, GITHUB_ENV, GITHUB_STATE, ... } }
     (
-        gha-kv-raw inputs "$(gha-assoc-to-json inputs | jq -sc from_entries || echo null)" 
+        gha-kv-raw inputs "$(gha-assoc-to-json inputs | jq -sc from_entries || echo null)"
         gha-kv-raw outputs "$(gha-capture-outputs Github[GITHUB_OUTPUT] | jq -sc from_entries || echo null)"
         gha-kv-raw data "$((
           gha-kv-json Invocation "${Invocation[@]}"

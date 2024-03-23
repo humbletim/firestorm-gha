@@ -3,7 +3,7 @@
 # bash gha helper for uploading artifacts; depends on @actions/artifact
 # -- 2023.03.20 humbletim
 
-# usage: 
+# usage:
 #  upload_artifacts <name> "<paths>" [retention-days=1] [compression-level=0] [overwrite=false]
 
 source $(dirname $BASH_SOURCE)/gha._utils.bash

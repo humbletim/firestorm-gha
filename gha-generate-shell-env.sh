@@ -38,7 +38,7 @@ declare -x PATH="\$_xpath"
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 
 function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
-function hostname(){ echo 'windows-2022' ; }  
+function hostname(){ echo 'windows-2022' ; }
 function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
 function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
 

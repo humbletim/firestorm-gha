@@ -85,7 +85,7 @@ function gha-cache-restore() {(
 #         cache-primary-key
 #         cache-matched-key
 #     )
- 
+
 #     local -a State=(
 #       CACHE_KEY
 #       CACHE_RESULT
@@ -115,18 +115,22 @@ function gha-cache-save() {(
 
     local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
     local raw="$(jq -br '.data.stdout+"\n"+.data.stderr' <<< "$json")"
-    if [[ $raw =~ \ Failed\ to\ save:\ ([^$'\n']+) ]]; then
-      echo "Failed to save: ${BASH_REMATCH[1]}" >&2
-      json="$(jq '.outputs += { error: $error }' --arg error "${BASH_REMATCH[1]}" <<< "$json")"
-    fi
-    for x in 'Cache saved with key' 'File Size' 'Cache Size' ; do
-      if [[ $raw =~  $x:\ ([^$'\n']+) ]]; then
-        # echo "x=$x y=${BASH_REMATCH[1]}" >&2
+    local -A Map=(
+      [cache-matched-key]='Cache saved with key'
+      [error]='Failed to save'
+      [file-size]='File Size'
+      [cache-size]='Cache Size'
+    )
+    for x in "${!Map[@]}"; do
+      local y="${Map[$x]}"
+      if [[ $raw =~ $y:\ ([^$'\n']+) ]]; then
+        # echo "x=$x y=$y z=${BASH_REMATCH[1]}" >&2
         json="$(jq '.outputs += ([{ key: $key, value: $value}]|from_entries)' --arg key "$x" --arg value "${BASH_REMATCH[1]}" <<< "$json")"
       fi
     done
     jq . <<< "$json"
-    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit -1 ; fi
+    if [[ $(jq -r '.outputs["cache-matched-key"]' <<< "$json") == $1 ]]; then exit 0 ; else exit -1 ; fi
+    # if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit -1 ; fi
 
     # local -a Output=(
     #     cache-hit

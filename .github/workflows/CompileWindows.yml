@@ -41,7 +41,7 @@ jobs:
         lookup-only: true
         key: /dev/null
         path: /dev/null
-  
+
     - name: Output Inputs
       run: |
         echo '${{ github.event.inputs.fstuple }}'
@@ -153,6 +153,12 @@ jobs:
             gha-cache-save $base-bin-b bin   || return 153
             gha-cache-save $base-repo-b repo || return 154
           }
+
+          function ensure_gha_bin() {
+              literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
+              literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
+          }
+
           restore_gha_caches            || exit `_err $? "!restore_gha_caches"`
           ensure_gha_bin && xxtest_bin  || exit `_err $? "!ensure_gha_bin"`
           initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
@@ -210,13 +216,13 @@ jobs:
 
     - name: 050_generate_packages_info_text
       run: fsvr_step 050
-# 
+#
 #     - name: 060_download_packages
 #       run: fsvr_step 060
-# 
+#
 #     - name: 070_verify_downloads
 #       run: fsvr_step 070
-# 
+#
     - name: 080_untar_packages
       uses: ./fsvr-action
       with:
@@ -232,7 +238,7 @@ jobs:
               fsvr_step 080_untar_packages    || exit 80
               /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
           }
-# 
+#
 #     - name: 070_verify_downloads
 #       run: fsvr_step 070
 
@@ -244,7 +250,7 @@ jobs:
 
     - name: 090_ninja_preflight
       run: fsvr_step 090
- 
+
     - name: 0a0_ninja_build SLPlugin.exe
       run: fsvr_step 0a0 SLPlugin.exe
 
@@ -285,8 +291,8 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
-# 
-# 
+#
+#
 #     - name: Setup tmate session
 #       if: failure()
 #       uses: mxschmitt/action-tmate@v3

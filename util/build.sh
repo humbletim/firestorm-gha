@@ -47,10 +47,10 @@ index 94636371fc..16577204d7 100755
 @@ -1009,6 +1009,7 @@ class Windows_x86_64_Manifest(ViewerManifest):
                      nsis_path = possible_path
                      break
- 
+
 +        return print("[###firestorm-gha### early exit]", setattr(self, 'package_file', self.dst_path_of(tempfile)))
          self.run_command([possible_path, '/V2', self.dst_path_of(tempfile)])
- 
+
          self.fs_sign_win_installer(substitution_strings) # <FS:ND/> Sign files, step two. Sign installer.
 EOF
 ##############################################################################
@@ -169,9 +169,9 @@ function _verify_one() {( $_dbgopts;
     local name=$1 hash=$2 filename=$(basename "$3")
     local tool=md5sum
     test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum
-    echo "$hash $filename" > $fsvr_cache_dir/$filename.$tool 
-    # echo "$tool: $filename ($fsvr_cache_dir)" >&2 
-    
+    echo "$hash $filename" > $fsvr_cache_dir/$filename.$tool
+    # echo "$tool: $filename ($fsvr_cache_dir)" >&2
+
     got=($(cd $fsvr_cache_dir && $tool $filename))
     out="$(cd $fsvr_cache_dir && $tool --strict --check $filename.$tool)" || {
         rc=$?
@@ -195,7 +195,7 @@ function 070_verify_downloads() {( $_dbgopts;
     || _die "verification failed $?"
        # tool=md5sum;
        # test $(echo -n "$hash"|wc -c) == 40 && tool=sha1sum;
-       # echo $tool: $(basename $url) ; 
+       # echo $tool: $(basename $url) ;
        # check="$hash $fsvr_cache_dir/$(basename $url)" ;
        # echo "$check" | $tool --quiet -c -;
     return 0
@@ -207,7 +207,7 @@ function 070_verify_downloads() {( $_dbgopts;
 #      | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && { bzcat $fsvr_cache_dir/$(basename {}) | 7z -y -ttar -si -bb0 x 2>&1 | { grep -iE "error|warn|fatal|fail" || true ; } ; }' \
 #        || _die "untar failed $?"
 # )}
-# 
+#
 
 function 080_untar_packages() {( $_dbgopts;
     jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep -vE '^null$' \
@@ -254,7 +254,7 @@ function 0a0_ninja_build() {( $_dbgopts;
 function make_installer() {
   cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
   local nsi=$build_dir/newview/firestorm_setup_tmp.nsi
-  #s@^SetCompressor .*$@SetCompressor zlib@g; 
+  #s@^SetCompressor .*$@SetCompressor zlib@g;
   grep "openvr_api.dll" $nsi \
     || perl -i.bak  -pe 's@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
        $nsi
@@ -320,12 +320,12 @@ function 0c0_upload_artifacts() {( $_dbgopts;
   local Portable=`ls build/Firestorm*.7z |head -1`
   local PortableArchive=$branch-$(basename $Portable)
   ht-ln $Portable dist/$PortableArchive
-  
+
   ( cd dist && upload-artifact ${PortableArchive/.7z/} $PortableArchive )
 )}
 
 function _steps() {
-    declare -f | grep '^0.*()' | sed 's@^@    @g;s@()@@' | sort 
+    declare -f | grep '^0.*()' | sed 's@^@    @g;s@()@@' | sort
 }
 
 # Check if the script is being sourced
@@ -339,14 +339,14 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   fi
   test -n "$cmd" || _die "!cmd $cmd $@"
   #echo "running command: $cmd" >&2
-  
+
   $cmd "$@" || _die "command $cmd '$@' failed $?"
   if [[ ! $cmd =~ ^_ ]]; then
     for x in `_steps 2> /dev/null` ; do
      [[ $x != $cmd && $x > $cmd ]] && echo "    $x"
     done
   fi
-  exit 0  
+  exit 0
 else
   { echo "sourced functions available:" ; _steps ; } >&2
 fi
