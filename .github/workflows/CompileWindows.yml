@@ -50,7 +50,6 @@ jobs:
         . $GITHUB_ENV
         echo "cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_]@-@g')" | tee -a $GITHUB_ENV
 
-
     - name: Clone
       run: |
         mkdir -pv bin cache repo build
@@ -61,14 +60,57 @@ jobs:
         fsvr_dir=$PWD/fsvr fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
         fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
 
-    - name: Generate bin/ proxies
+    - name: 000 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '000'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
+    - name: Generate gha-bootstrap.env
+      run: |
+        fsvr_repo=${GITHUB_REPOSITORY}
+        fsvr_branch=${GITHUB_REF_NAME}
+        fsvr_base=$base
+        source fsvr/gha-bootstrap.sh
+        get_bootstrap_vars | tee gha-bootstrap.env || exit 127
+
+    - name: 001 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '001'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
+    - name: Populate bin/
       run: |
         test -d "$fsvr_dir" || exit 63
+
         . fsvr/bashland/gha.alias-exe.bash
         make-stub bin/BASH_FUNC_invoke.exe
         fsvr/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
         ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
         ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
+
+        source fsvr/gha-bootstrap.sh
+        source $fsvr_dir/util/gha.cachette.bash
+        gha-cache-restore $base-bin-b bin 2>/dev/null || (
+            set -Euo pipefail
+            literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
+            literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
+            gha-cache-save $base-bin-b bin 2>/dev/null  || exit 85
+        )
+        function xxtest_bin() {
+          test -f bin/parallel-home/will-cite || return 196
+          parallel -- --version | head -1     || return 197
+          ninja --version                     || return 198
+          [[ `hostname` =~ windows[-]?2022 ]] || return 199
+        }
+        xxtest_bin  || exit `_err $? "!xxtest_bin"`
+
+    - name: 002 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '002'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
     - name: SHELL.sh env test
       run: |
@@ -79,16 +121,7 @@ jobs:
         tee --version
         parallel --version
         hostname --version
-
-    - name: Initial Bootstrapping
-      run: |
-        declare -f tee | head -1
-        (
-          set -x
-          ( echo stdout ; echo stderr >&2 ) | tee /dev/stderr >/dev/null
-          [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
-        )
-        exit 0
+        [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
 
     - name: Expand Source Repositories
       uses: ./fsvr-action
@@ -109,70 +142,19 @@ jobs:
           test -d repo/p373r/.git               || exit 109
           test -d repo/fs-build-variables/.git  || exit 110
 
+    - name: 003 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '003'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
-    - name: GHA Bootstrapping
+    - name: fsvr-action args test
       uses: ./fsvr-action
       with:
         environment: foo=bar
         args: An argument string ${{ inputs.fstuple }}
         run: |
           echo ok 1=$1 2=$2 args="$(echo "$@")"
-
-    - name: Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '000'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
-
-    - name: GHA Bootstrapping
-      uses: ./fsvr-action
-      with:
-        env: |
-          key: value
-          other: "a value with spaces"
-          multiline: |
-            a: 5
-        run: |
-          set -aEuo pipefail
-          echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
-
-          function xxtest_bin() {
-            test -f bin/parallel-home/will-cite || return 196
-            parallel -- --version | head -1        || return 197
-            ninja --version                     || return 198
-            [[ `hostname` =~ windows[-]?2022 ]] || return 199
-          }
-
-          fsvr_repo=${GITHUB_REPOSITORY}
-          fsvr_branch=${GITHUB_REF_NAME}
-          fsvr_base=$base
-          # fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
-
-          source $fsvr_dir/gha-bootstrap.sh
-          source $fsvr_dir/util/gha.cachette.bash
-
-          function restore_caches() {
-            # gha-cache-restore $base-bin-b bin    || return 148
-            gha-cache-restore $base-repo-b repo  || return 149
-          }
-
-          function save_gha_caches() {
-            # gha-cache-save $base-bin-b bin   || return 153
-            gha-cache-save $base-repo-b repo || return 154
-          }
-
-          function ensure_gha_bin() {
-              literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
-              literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
-          }
-
-          restore_gha_caches            || exit `_err $? "!restore_gha_caches"`
-          ensure_gha_bin && xxtest_bin  || exit `_err $? "!ensure_gha_bin"`
-          # initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
-          save_gha_caches               || exit `_err $? "!save_gha_caches"`;
-
-          get_bootstrap_vars | tee gha-bootstrap.env || exit 127
-          exit 0
 
     - name: PATH/ENV preflight tests
       run: |
@@ -190,6 +172,12 @@ jobs:
         $fsvr_dir/util/_utils.sh ht-ln $root_dir/indra indra
         $fsvr_dir/util/generate_build_vars.sh Firestorm-VR-GHA `cat $fsvr_dir/$base/viewer_version.txt` build/ \
            | tee build/build_vars.env #| tee $GITHUB_ENV
+
+    - name: 004 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '004'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
     - name: Detect MSVC
       run: $fsvr_dir/util/generate_msvc_env.sh
@@ -272,6 +260,12 @@ jobs:
       uses: ./fsvr-action
       with:
         run: fsvr_step 0c0
+
+    - name: 005 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '005'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
     - name: log env on error
       if: failure()
