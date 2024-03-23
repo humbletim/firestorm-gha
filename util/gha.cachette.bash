@@ -114,7 +114,7 @@ function gha-cache-save() {(
     )
 
     local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
-    local raw="$(jq -r '.data.stdout+"\n"+.data.stderr' <<< "$json")"
+    local raw="$(jq -br '.data.stdout+"\n"+.data.stderr' <<< "$json")"
     if [[ $raw =~ \ Failed\ to\ save:\ ([^$'\n']+) ]]; then
       echo "Failed to save: ${BASH_REMATCH[1]}" >&2
       json="$(jq '.outputs += { error: $error }' --arg error "${BASH_REMATCH[1]}" <<< "$json")"
