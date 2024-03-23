@@ -88,7 +88,6 @@ jobs:
         make-stub bin/BASH_FUNC_invoke.exe
         fsvr/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
         ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
-        ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
 
     - name: Populated bin/
       uses: ./fsvr-action
@@ -102,6 +101,7 @@ jobs:
               set -Euo pipefail
               literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
               literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
+              ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
               gha-cache-save $base-bin-b bin 2>/dev/null  || exit 85
           )
           function xxtest_bin() {
@@ -109,15 +109,6 @@ jobs:
             parallel -- --version | head -1     || return 197
             ninja --version | head -1           || return 198
             [[ `hostname` =~ windows[-]?2022 ]] || return 199
-            {
-              echo "### infos"
-              echo "| program    | info       |"
-              echo "| ---------- | ----------- |"
-              echo "| ninja  | $(ninja --version |head -1)  |"
-              echo "| bash | $(bash --version | head -1) |"
-              echo "| parallel | $(parallel --version | head -1) |"
-              echo "| hostname | $(hostname| head -1) |"
-            } >> $GITHUB_STEP_SUMMARY
           }
           xxtest_bin || exit `_err $? "!xxtest_bin"`
 
@@ -151,11 +142,23 @@ jobs:
             test -d repo/fs-build-variables/.git  || \
               quiet_clone FirestormViewer/fs-build-variables c57be16efb2b48d9e117c7449fc105c7f9da16d0 repo/fs-build-variables
 
-            gha-cache-save $cache_id-repo-a repo 2>/dev/null  || exit 107
+            gha-cache-save $cache_id-repo-a repo 2>/dev/null || exit 107
           )
-          test -d repo/$branch/.git             || exit 108
-          test -d repo/p373r/.git               || exit 109
-          test -d repo/fs-build-variables/.git  || exit 110
+
+          repos="$(for id in repo/$branch repo/p373r repo/fs-build-variables ; do
+            echo "| $id | $(git -C $id describe --all --always) |"
+          done)"
+
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ### vars
+          | name    | value       |
+          | ---------- | ----------- |
+          | base  | $base |
+          | repo  | $repo |
+          | branch | $branch |
+          | hostname  | `hostname` |
+          $repos
+          EOF
 
     - name: 003 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '003'
