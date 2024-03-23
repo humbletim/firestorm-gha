@@ -14,18 +14,19 @@ inputs:
         default: ''
     working-directory:
         description: like jobs..steps..working-directory
-    env:
-        description: like jobs..steps..env
+    # env:
+    #     description: like jobs..steps..env
     environment:
         description: |
-            preferred is line-separated assignments like so:
+            NOT like jobs..steps..env (because "maps" are not supported for sub-action inputs...)
+            preferred maybe is line-separated assignments like so:
             environment: |
               key1=value
               key2=value2
               key3="value with spaces"
 
-            to NOT inherit from current process:
+            ... to NOT inherit environment vars from the current process:
             environment: '*=none'
 
-            or to inherit only specific environment vars (colon-separated):
+            ... or to inherit only specific environment vars:
             environment: '*=ACTION_CACHE_URL:HOME'

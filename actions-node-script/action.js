@@ -5,7 +5,7 @@ const child_process = require('child_process');
 
 var {
     INPUT_environment: environment,
-    INPUT_env: env,
+    // INPUT_env: env,
     INPUT_run: run,
     INPUT_shell: shell,
     INPUT_args: arguments,
@@ -35,7 +35,7 @@ if (/*INPUT_*/arguments) {
 }
 args.splice(idx, 1, '-c', run);
 
-if (env) console.debug('INPUT_env', env);
+// if (env) console.debug('INPUT_env', env);
 
 var parsedEnv = (environment||'')
     .split(/\s*\n\s*/)
