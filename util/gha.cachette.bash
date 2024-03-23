@@ -11,8 +11,6 @@ source $(dirname $BASH_SOURCE)/gha._utils.bash
 function gha-cache-exists() {(
     set -Euo pipefail
 
-    test -v ACTIONS_RUNTIME_TOKEN || exit `gha-err 14 "ACTIONS_RUNTIME_TOKEN missing"`
-
     local PATH="$PATH:/usr/bin"
     local node="${node:-/c/Program Files/nodejs/node}"
     local actions_cache_dir="${actions_cache_dir:-/d/a/_actions/actions/cache/v4}"
@@ -56,8 +54,6 @@ function gha-cache-exists() {(
 function gha-cache-restore() {(
     set -Euo pipefail
 
-    test -v ACTIONS_RUNTIME_TOKEN || exit `gha-err 57 "ACTIONS_RUNTIME_TOKEN missing"`
-
     local PATH="$PATH:/usr/bin"
     local node="${node:-/c/Program Files/nodejs/node}"
     local actions_cache_dir="${actions_cache_dir:-/d/a/_actions/actions/cache/v4}"
@@ -99,8 +95,6 @@ function gha-cache-restore() {(
 
 function gha-cache-save() {(
     set -Euo pipefail
-
-    test -v ACTIONS_RUNTIME_TOKEN || exit `gha-err 103 "ACTIONS_RUNTIME_TOKEN missing"`
 
     local PATH="$PATH:/usr/bin"
     local node="${node:-/c/Program Files/nodejs/node}"

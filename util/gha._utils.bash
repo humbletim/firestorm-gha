@@ -1,5 +1,10 @@
 #!/bin/bash
 
+test -v ACTIONS_RUNTIME_TOKEN || {
+  echo "::error::ACTIONS_RUNTIME_TOKEN environment variable missing; caching unavailable" | tee -a $GITHUB_STEP_SUMMARY /dev/stderr
+  exit 5
+}
+
 gha-err(){ echo $1 && echo "[gha-err rc=$1] $@" >&2 && exit $1 ; }
 
 gha-esc()( printf "%q" "$@" )

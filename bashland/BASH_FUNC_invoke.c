@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error: Environment variable '%s' not found.\n", func_env_name);
         return 1;
     }
-    if (argc >= 2 && argv[1] && strcmp(argv[1], "--version") == 0) {
+    if (argc >= 2 && argv[1] && strcmp(argv[1], "---version") == 0) {
       fprintf(stdout, "%s=%s\n%s\n", func_env_name, bash_function, bash_function == bash_command ? "" : bash_command); fflush(stdout); exit(0);
     }
 
