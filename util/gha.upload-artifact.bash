@@ -17,8 +17,8 @@ function upload-artifact() {(
     local script="${script:-${actions_artifact_dir}/dist/upload/index.js}"
 
     local -a Input=(
-      INPUT_name="`gha_esc "$1"`"
-      INPUT_path="`gha_esc "$2"`"
+      INPUT_name="`gha-esc "$1"`"
+      INPUT_path="`gha-esc "$2"`"
       INPUT_if-no-files-found=error # warn | error | ignore
       INPUT_retention-days=${3:-1}
       INPUT_compression-level=${4:-0}
@@ -26,8 +26,8 @@ function upload-artifact() {(
     )
 
     local -a Command=(
-      `gha_esc "$node"`
-      `gha_esc "$script"`
+      `gha-esc "$node"`
+      `gha-esc "$script"`
     )
 
     local -a Output=(

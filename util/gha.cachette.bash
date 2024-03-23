@@ -17,8 +17,8 @@ function cache-exists() {(
     local script="${script:-${actions_cache_dir}/dist/restore-only/index.js}"
 
     local -a Input=(
-        INPUT_key="`gha_esc "$1"`"
-        INPUT_path="`gha_esc "$2"`"
+        INPUT_key="`gha-esc "$1"`"
+        INPUT_path="`gha-esc "$2"`"
         INPUT_lookup-only=true
         INPUT_fail-on-cache-miss=ignore
     )
@@ -32,8 +32,8 @@ function cache-exists() {(
       CACHE_RESULT
     )
     local -a Command=(
-      `gha_esc "$node"`
-      `gha_esc "$script"`
+      `gha-esc "$node"`
+      `gha-esc "$script"`
     )
 
     gha-invoke-action "${Input[@]}" "${Command[@]}"
@@ -48,8 +48,8 @@ function restore-only() {(
     local script="${script:-${actions_cache_dir}/dist/restore-only/index.js}"
 
     local -a Input=(
-        INPUT_key="`gha_esc "$1"`"
-        INPUT_path="`gha_esc "$2"`"
+        INPUT_key="`gha-esc "$1"`"
+        INPUT_path="`gha-esc "$2"`"
         # INPUT_restore-keys=
         # INPUT_fail-on-cache-miss=error
     )
@@ -64,8 +64,8 @@ function restore-only() {(
     )
 
     local -a Command=(
-      `gha_esc "$node"`
-      `gha_esc "$script"`
+      `gha-esc "$node"`
+      `gha-esc "$script"`
     )
 
     gha-invoke-action "${Input[@]}" "${Command[@]}"
@@ -80,8 +80,8 @@ function save-only() {(
     local script="${script:-${actions_cache_dir}/dist/save-only/index.js}"
 
     local -a Input=(
-        INPUT_key="`gha_esc "$1"`"
-        INPUT_path="`gha_esc "$2"`"
+        INPUT_key="`gha-esc "$1"`"
+        INPUT_path="`gha-esc "$2"`"
     )
     local -a Output=(
         cache-hit
@@ -94,8 +94,8 @@ function save-only() {(
     )
 
     local -a Command=(
-      `gha_esc "$node"`
-      `gha_esc "$script"`
+      `gha-esc "$node"`
+      `gha-esc "$script"`
     )
 
     gha-invoke-action "${Input[@]}" "${Command[@]}"

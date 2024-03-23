@@ -1,23 +1,23 @@
 #!/bin/bash
 
-gha_esc()( printf "%q" "$@" )
-gha_err(){ echo $1 && echo "[gha_err rc=$1] $@" >&2 && exit $1 ; }
+gha-esc()( printf "%q" "$@" )
+gha-err(){ echo $1 && echo "[gha-err rc=$1] $@" >&2 && exit $1 ; }
 
-gha_capture_tag()( local TAG=$1 && shift && echo ">(${@:-sed 's@^@[$TAG] @'})" )
-gha_capture()( local ENV=$1 && shift && echo "${ENV}=>(${@:-sed 's@^@[$ENV] @'})" )
+gha-capture_tag()( local TAG=$1 && shift && echo ">(${@:-sed 's@^@[$TAG] @'})" )
+gha-capture()( local ENV=$1 && shift && echo "${ENV}=>(${@:-sed 's@^@[$ENV] @'})" )
 
-function gha_kv_json() {
+function gha-kv-json() {
   jq -ncR --arg key "$1" --arg value "$2" '{key:$key, value:$value}'
 }
 
 
-function gha_stdmap() {
+function gha-stdmap() {
   while IFS= read -r line || [[ -n $line ]]; do
     if [[ $line =~ ::(debug|warning|info|notice):: ]]; then
       echo "[${BASH_REMATCH[1]}] $line" >&2
     elif [[ $line =~ ::error:: ]]; then
       echo "[error] $line" >&2
-      gha_kv_json "error" "$line" >> "${Github[OUTPUT]:-/dev/stdout}"
+      gha-kv-json "error" "$line" >> "${Github[OUTPUT]:-/dev/stdout}"
     else
       echo "[stdout] $line" >&2
     fi
@@ -25,7 +25,7 @@ function gha_stdmap() {
 }
 
 
-function gha_capture_outputs() {
+function gha-capture-outputs() {
   # local _outputs_file="${1:-/dev/stderr}"
   local key="" value="" delim="ghadelimiterNULL"
   local -A outputs
@@ -34,7 +34,7 @@ function gha_capture_outputs() {
       if [[ $line == $delim ]]; then
         # echo "[OUTPUT] $key='$value'" >&2
         outputs[$key]="$value"
-        gha_kv_json "$key" "$value"
+        gha-kv-json "$key" "$value"
         delim="" key="" value=""
       elif [[ $line =~ ^([-A-Za-z_]+)\<\<(ghadelimiter.*) ]]; then
           key=${BASH_REMATCH[1]}
@@ -43,9 +43,9 @@ function gha_capture_outputs() {
       elif [[ -n $key && -n $line ]]; then
           value+="${line//$'\r'/}"
       else
-        echo "[_capture_outputs] unexpected line='$line'" >&2
+        echo "[gha-capture-outputs] unexpected line='$line'" >&2
       fi
-  done #>> "$_outputs_file"
+  done
 }
 
 function gha-invoke-action() {(
@@ -79,15 +79,15 @@ function gha-invoke-action() {(
     echo "env ${Eval[@]}" >&2
     echo "----------------------------------------" >&2
 
-    test -v ACTIONS_RUNTIME_TOKEN || return `gha_err 81 "ACTIONS_RUNTIME_TOKEN missing"`
+    test -v ACTIONS_RUNTIME_TOKEN || return `gha-err 81 "ACTIONS_RUNTIME_TOKEN missing"`
 
-    eval "env ${Eval[@]}" | gha_stdmap >&2
+    eval "env ${Eval[@]}" | gha-stdmap >&2
     echo "----------------------------------------" >&2
     wait
     for i in "${!Github[@]}"; do
       echo "$i [[[ $(cat "${Github[$i]}") ]]]" >&2
     done
-    cat "${Github[OUTPUT]}" | gha_capture_outputs | jq -s from_entries
+    cat "${Github[OUTPUT]}" | gha-capture-outputs | jq -s from_entries
     # jq -s from_entries "$github_output"
     echo "----------------------------------------" >&2
 )}
