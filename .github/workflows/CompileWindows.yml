@@ -159,7 +159,7 @@ jobs:
 
           restore_gha_caches            || exit `_err $? "!restore_gha_caches"`
           ensure_gha_bin && xxtest_bin  || exit `_err $? "!ensure_gha_bin"`
-          initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
+          # initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
           save_gha_caches               || exit `_err $? "!save_gha_caches"`;
 
           get_bootstrap_vars | tee gha-bootstrap.env || exit 127
