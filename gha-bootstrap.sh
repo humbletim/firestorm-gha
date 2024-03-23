@@ -1,8 +1,6 @@
 #!/bin/bash
 set -Euo pipefail
 
-echo base=$base repo=$repo branch=$branch >&2
-
 function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
 
 function _err() { local rc=$1 ; shift; echo "[gha-bootstrap rc=$rc] $@" >&2; return $rc; }
@@ -32,12 +30,8 @@ function quiet_clone() {(
     git -C "$3" describe --all --always
 )}
 
-function initialize_firestorm_checkout() {(
+function initialize_firestorm_checkout() {(    
     set -Euo pipefail
-    test -d repo/$branch/.git            || quiet_clone $repo $branch repo/$branch
-    test -d repo/p373r/.git              || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
-    test -d repo/fs-build-variables/.git || \
-      quiet_clone FirestormViewer/fs-build-variables c57be16efb2b48d9e117c7449fc105c7f9da16d0 repo/fs-build-variables
 )}
 
 function get_ninja() {(

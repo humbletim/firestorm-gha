@@ -9,8 +9,13 @@ inputs:
     shell:
         description: like jobs..steps..shell
         default: bash
+    args:
+        description: like jobs..steps..args
+        default: ''
     working-directory:
         description: like jobs..steps..working-directory
+    env:
+        description: like jobs..steps..env
     environment:
         description: |
             preferred is line-separated assignments like so:
@@ -19,8 +24,8 @@ inputs:
               key2=value2
               key3="value with spaces"
 
-            to inherit from current process:
-            environment: '*=proces.env'
+            to NOT inherit from current process:
+            environment: '*=none'
 
-            to inherit only specific environment vars:
+            or to inherit only specific environment vars (colon-separated):
             environment: '*=ACTION_CACHE_URL:HOME'

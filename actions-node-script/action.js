@@ -5,8 +5,10 @@ const child_process = require('child_process');
 
 var {
     INPUT_environment: environment,
+    INPUT_env: env,
     INPUT_run: run,
     INPUT_shell: shell,
+    INPUT_args: arguments,
     "INPUT_working-directory": working_directory,
     GITHUB_WORKSPACE: workspace,
 } = process.env;
@@ -28,7 +30,12 @@ var args = cmd
 
 var idx = args.indexOf('{0}');
 if (!~idx) throw new Error('{0} not found in shell: '+shell);
+if (/*INPUT_*/arguments) {
+  run = 'eval "set -- ' + JSON.stringify(arguments).replace(/^"/,'').replace(/"$/, '')+ '";\n'+run;
+}
 args.splice(idx, 1, '-c', run);
+
+if (env) console.debug('INPUT_env', env);
 
 var parsedEnv = (environment||'')
     .split(/\s*\n\s*/)
@@ -37,10 +44,11 @@ var parsedEnv = (environment||'')
 parsedEnv = Object.assign({}, ...parsedEnv);
 
 var forwardEnv = {};
-(parsedEnv['*']||'').split(/[\s:,;]+/)
+if (!parsedEnv['*'] || parsedEnv['*'] === 'process.env') Object.assign(forwardEnv, process.env);
+else parsedEnv['*']
+  .split(/[\s:,;]+/)
   .forEach((name) => {
-    if (name === 'process.env') Object.assign(forwardEnv, process.env);
-    else if (name in process.env) forwardEnv[name] = process.env[name];
+    if (name in process.env) forwardEnv[name] = process.env[name];
   });
 
 var options = {
@@ -50,8 +58,9 @@ var options = {
     env: { ...forwardEnv, ...parsedEnv },
 };
 
+delete options.env['*'];
 var tmp = JSON.parse(JSON.stringify(options));
-if (parsedEnv['*'] === 'process.env') tmp.env = '{ /* inherit process.env + parsed */ }'; 
+if (parsedEnv['*'] !== 'none') tmp.env = '{ /* inherit process.env + parsed */ }'; 
 if (process.env.DEBUG) console.debug('PARSED_', { exe: exe, args: JSON.stringify(args), options: tmp, forwardEnv: Object.keys(forwardEnv).length, parsedEnv: parsedEnv });
 
 const bash = child_process.spawn(exe, args, options );

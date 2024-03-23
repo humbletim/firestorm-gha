@@ -87,33 +87,27 @@ jobs:
         )
         exit 0
 
-    - name: ./fsvr-action test
+    - name: Expand Source Repositories
       uses: ./fsvr-action
       with:
-        # shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
-        environment: |
-            *=process.env
         run: |
-          declare -f tee | head -1 || echo " no tee?"
-          a=c
-          test "$(echo 'a=$a' | envsubst)" == 'a=' || exit 97
-          export a=c
-          test "$(echo 'a=$a' | envsubst)" == 'a=c' || exit 99
-          test "$(echo 'a=$a' | env envsubst)" == 'a=c' || exit 100
-          test "$(echo 'a=$a' | env a=b envsubst)" == 'a=b' || exit 101
-          set -x
-          declare -f tee | head -1
+          test -d repo/$branch/.git            || quiet_clone $repo $branch repo/$branch
+          test -d repo/p373r/.git              || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
+          test -d repo/fs-build-variables/.git || \
+            quiet_clone FirestormViewer/fs-build-variables c57be16efb2b48d9e117c7449fc105c7f9da16d0 repo/fs-build-variables
 
-    # - name: ./fsvr-action  2test
-    #   uses: ./fsvr-action
-    #   with:
-    #     environment: |
-    #       ${{ github.event.inputs.fstuple }}
-    #       *=process.env
-    #     run: |
-    #       declare -f tee | head -1 || echo " no tee?"
-    #       export a=b
-    #       echo 'a=$a' | env a=b envsubst
+    - name: GHA Bootstrapping
+      uses: ./fsvr-action
+      with:
+        env:
+          key: value
+          other: "a value with spaces"
+          multiline: |
+            a: 5
+        environment: foo=bar
+        args: An argument string ${{ inputs.fstuple }}
+        run: |
+          echo ok
 
     - name: Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '000'
@@ -124,7 +118,11 @@ jobs:
     - name: GHA Bootstrapping
       uses: ./fsvr-action
       with:
-        environment: '*=process.env'
+        env:
+          key: value
+          other: "a value with spaces"
+          multiline: |
+            a: 5
         run: |
           set -aEuo pipefail
           echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
@@ -145,12 +143,12 @@ jobs:
           source $fsvr_dir/util/gha.cachette.bash
 
           function restore_caches() {
-            gha-cache-restore $base-bin-b bin    || return 148
+            # gha-cache-restore $base-bin-b bin    || return 148
             gha-cache-restore $base-repo-b repo  || return 149
           }
 
           function save_gha_caches() {
-            gha-cache-save $base-bin-b bin   || return 153
+            # gha-cache-save $base-bin-b bin   || return 153
             gha-cache-save $base-repo-b repo || return 154
           }
 
@@ -196,7 +194,6 @@ jobs:
     - name: 038_provision_openvr
       uses: ./fsvr-action
       with:
-        environment: '*=process.env'
         run: |
           set -Euo pipefail
           tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
@@ -226,7 +223,6 @@ jobs:
     - name: 080_untar_packages
       uses: ./fsvr-action
       with:
-        environment: '*=process.env'
         run: |
           set -Euo pipefail
           export INPUT_key=$base-build-packages-c INPUT_path=build/packages
@@ -266,14 +262,12 @@ jobs:
     - name: 0c0_upload_artifacts
       uses: ./fsvr-action
       with:
-        environment: '*=process.env'
         run: fsvr_step 0c0
 
     - name: log env on error
       if: failure()
       uses: ./fsvr-action
       with:
-        environment: '*=process.env'
         run: |
           ./fsvr/util/_utils.sh upload_artifact debug "$(cat <<EOF
           SHELL.env
