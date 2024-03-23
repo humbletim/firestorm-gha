@@ -127,7 +127,7 @@ function gha-invoke-action() {(
 
     # capture GITHUB_XYZ writable streams
     for i in stdout stderr errors warnings GITHUB_OUTPUT GITHUB_ENV GITHUB_PATH GITHUB_STATE; do
-      local tmpfile=$(gha-_mktempx $i)
+      local tmpfile=$(gha-_mktemp $i)
       test -e "$tmpfile" || exit `gha-err $? "failed to create temp file..."`
       Github[$i]="$tmpfile"
       if [[ $i =~ ^GITHUB_ ]]; then Env+=("$i=$tmpfile") ; fi
