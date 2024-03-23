@@ -8,7 +8,7 @@ source $(dirname $BASH_SOURCE)/gha._utils.bash
 
 # key, path, restore-keys, upload-chunk-size, enableCrossOsArchive, fail-on-cache-miss, lookup-only
 
-function cache-exists() {(
+function gha-cache-exists() {(
     set -Euo pipefail
 
     local PATH="$PATH:/usr/bin"
@@ -20,15 +20,23 @@ function cache-exists() {(
         INPUT_key="`gha-esc "$1"`"
         INPUT_path="`gha-esc "$2"`"
         INPUT_lookup-only=true
-        INPUT_fail-on-cache-miss=ignore
+        INPUT_fail-on-cache-miss=true
+        # INPUT_upload-chunk-size=
+        # INPUT_restore-keys=
     )
+
+    gha-check Input fail-on-cache-miss '(true|false)' || return 2
+    gha-check Input lookup-only        '(true|false)' || return 2
 
     local -a Command=(
       `gha-esc "$node"`
       `gha-esc "$script"`
     )
 
-    gha-invoke-action "${Input[@]}" "${Command[@]}"
+    local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
+    echo "$json"
+    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit 38 ; fi
+    # if [[ $(jq -r '.["cache-matched-key"]' <<< "$json") == $1 ]]; then exit 0 ; else exit -1 ; fi
 
     # local -a Output=(
     #     cache-hit
@@ -43,7 +51,7 @@ function cache-exists() {(
 
 )}
 
-function restore-only() {(
+function gha-cache-restore() {(
     set -Euo pipefail
 
     local PATH="$PATH:/usr/bin"
@@ -54,16 +62,23 @@ function restore-only() {(
     local -a Input=(
         INPUT_key="`gha-esc "$1"`"
         INPUT_path="`gha-esc "$2"`"
+        INPUT_lookup-only=false
+        INPUT_fail-on-cache-miss=true
+        # INPUT_upload-chunk-size=
         # INPUT_restore-keys=
-        # INPUT_fail-on-cache-miss=error
     )
+
+    gha-check Input fail-on-cache-miss '(true|false)' || return 2
+    gha-check Input lookup-only        '(true|false)' || return 2
 
     local -a Command=(
       `gha-esc "$node"`
       `gha-esc "$script"`
     )
 
-    gha-invoke-action "${Input[@]}" "${Command[@]}"
+    local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
+    echo "$json"
+    if [[ $(jq -r '.["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit -1 ; fi
 
 #     local -a Output=(
 #         cache-hit
@@ -78,7 +93,7 @@ function restore-only() {(
 
 )}
 
-function save-only() {(
+function gha-cache-save() {(
     set -Euo pipefail
 
     local PATH="$PATH:/usr/bin"
@@ -89,6 +104,8 @@ function save-only() {(
     local -a Input=(
         INPUT_key="`gha-esc "$1"`"
         INPUT_path="`gha-esc "$2"`"
+        # INPUT_upload-chunk-size=
+        # INPUT_enableCrossOsArchive=
     )
 
     local -a Command=(

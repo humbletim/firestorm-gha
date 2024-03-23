@@ -1,39 +1,65 @@
 #!/bin/bash
 
-gha-esc()( printf "%q" "$@" )
 gha-err(){ echo $1 && echo "[gha-err rc=$1] $@" >&2 && exit $1 ; }
 
-gha-capture_tag()( local TAG=$1 && shift && echo ">(${@:-sed 's@^@[$TAG] @'})" )
-gha-capture()( local ENV=$1 && shift && echo "${ENV}=>(${@:-sed 's@^@[$ENV] @'})" )
+gha-esc()( printf "%q" "$@" )
+gha-unesc()( eval "echo $@" )
 
-function gha-kv-json() {
-  jq -ncR --arg key "$1" --arg value "$2" '{key:$key, value:$value}'
+
+# emit jq "entry" line given key and a raw json-encoded value
+function gha-kv-raw() {
+  local key="$1"
+  shift
+  jq -ncR --arg key "$key" --argjson value "$(echo "$@")" '{key:$key, value:$value}'
 }
 
 
+# emit jq "entry" line given key and string value
+function gha-kv-json() {
+  local key="$1"
+  shift
+  jq -ncR --arg key "$key" --arg value "$(echo "$@")" '{key:$key, value:$value}'
+}
+
+# loosely interpret actions-core stdout lines
+# - demoting debug/info/notice to stderr
+# - promoting ::warning:: and ::error:: into pseudo-outputs
 function gha-stdmap() {
+  local -n __Github="$1"
+  
   while IFS= read -r line || [[ -n $line ]]; do
-    if [[ $line =~ ::(debug|warning|info|notice):: ]]; then
-      echo "[${BASH_REMATCH[1]}] $line" >&2
-    elif [[ $line =~ ::error:: ]]; then
-      echo "[error] $line" >&2
-      gha-kv-json "error" "$line" >> "${Github[OUTPUT]:-/dev/stdout}"
+    if [[ $line =~ ::(debug|info|notice):: ]]; then
+      echo "[${BASH_REMATCH[1]}] $line" | tee -a ${__Github[stderr]} >&2
+    # note: ::set-output only emerges on stdout when GITHUB_OUTPUT is not specified
+    elif [[ $line =~ ::(set-output) ]]; then
+      local type=${BASH_REMATCH[1]}
+      local line="${line/::$type /}"
+      echo "[$type] $line" | tee -a ${__Github[stdout]} >&2
+      if [[ $line =~ name=([^:]+)::(.*) ]]; then
+        local name="${BASH_REMATCH[1]}" value="${BASH_REMATCH[2]}"
+        echo -e "$name<<ghadelimiter${type}\n$value\nghadelimiter${type}" >> ${__Github[GITHUB_OUTPUT]} 
+      fi
+    elif [[ $line =~ ::(error|warning):: ]]; then
+      local type=${BASH_REMATCH[1]}
+      local line="${line/::$type::/}"
+      echo "[$type] $line" | tee -a ${__Github[stdout]} >&2
+      if [[ $type == warning ]]; then echo "$line" >> ${__Github[warnings]} ; fi
+      if [[ $type == error ]]; then echo "$line" >> ${__Github[errors]} ; fi
+      echo -e "${type}<<ghadelimiter${type}\n$line\nghadelimiter${type}" >> ${__Github[GITHUB_OUTPUT]} 
     else
-      echo "[stdout] $line" >&2
+      echo "[stdout] $line"| tee -a ${__Github[stdout]} >&2
     fi
   done
 }
 
-
+# decode GITHUB_OUTPUT streamed '{key}<<{delimiter}\n{value}\n{delimiter}` values
+# emits '{ "key": "{key}", value: "{value}" }' entries on stdout
 function gha-capture-outputs() {
-  # local _outputs_file="${1:-/dev/stderr}"
+  local -n __buffer="$1"
   local key="" value="" delim="ghadelimiterNULL"
-  local -A outputs
   while IFS= read -r line || [[ -n $line ]]; do
-      # echo "[_capture_outputs] line='$line'" >&2
       if [[ $line == $delim ]]; then
-        # echo "[OUTPUT] $key='$value'" >&2
-        outputs[$key]="$value"
+        # __outputs[$key]="$value"
         gha-kv-json "$key" "$value"
         delim="" key="" value=""
       elif [[ $line =~ ^([-A-Za-z_]+)\<\<(ghadelimiter.*) ]]; then
@@ -45,7 +71,44 @@ function gha-capture-outputs() {
       else
         echo "[gha-capture-outputs] unexpected line='$line'" >&2
       fi
-  done
+  done < "$__buffer"
+}
+
+# usage:
+#  local -a Input=(...)
+#  gha-check Input overwrite '(false|true)' || return 1
+function gha-check() {
+  local -n ref="$1"
+  local name="$2"
+  local expected="$3"
+  if [[ " ${ref[@]} " =~ INPUT_${name}=${expected}\   ]]; then
+    return 0
+  else
+    local actual="$(echo  "${ref[@]}" | grep -Eo "INPUT_${name}=[^ ]+")"
+    echo -e "EXPECTED: \n\tINPUT_${name}=${expected}\nACTUAL:\n\t$actual" >&2 
+    echo "${ref[@]}" >&2
+    return 70
+  fi
+}
+
+# like above but trigges exit
+function gha-assert() {
+  gha-check "$@" || exit `gha-err 71 "{$1} $2 !=~ $3"`
+}
+
+# attempt to transform bash associative array to valid JSON structure...
+function gha-assoc-to-json() {
+  local -n __gha_assoc_map="$1"
+  echo "$(
+    declare -p $1 \
+      | perl -pe "s@^declare [-Ax]+ $1=\\(@\n@; s@\\)\$@\\n@" \
+      | perl -pe 's@\[([^\]]+)\]=@\n{ "key": "$1", "value": @g' \
+      | perl -pe "$(cat <<'EOP'
+        s@("value": )(.*)@my $a=$2; "$1".($a=~s/^\$'|'[\)\s]/\"/g,$a)."}"@ge
+EOP
+        )"
+  )" | jq -c || return `gha-err 91 "gha-assoc-to-json failed '$1' ::: $(declare -p $1)"`
+
 }
 
 function gha-invoke-action() {(
@@ -59,35 +122,49 @@ function gha-invoke-action() {(
 
     local -A Github=()
     local -a Env=()
-    for i in OUTPUT ENV PATH STATE; do
-      local tmpfile="$(mktemp -p "" --suffix=GITHUB_$i.ghadata)"
-      trap "rm -f $tmpfile >&2" EXIT
+
+    source $(dirname $BASH_SOURCE)/gha._mktemp.bash
+    # capture GITHUB_XYZ writable streams
+    for i in stdout stderr errors warnings GITHUB_OUTPUT GITHUB_ENV GITHUB_PATH GITHUB_STATE; do
+      local tmpfile="$(gha-_mktemp $i $pid)"
       Github[$i]="$tmpfile"
-      Env+=("GITHUB_$i=$tmpfile")
+      if [[ $i =~ ^GITHUB_ ]]; then Env+=("$i=$tmpfile") ; fi
     done
 
     # on Windows environment variables do not seem case-sensitive
     # actions/upload-artifact expects upper-case keys internally
-    # to make Linux testable this upper-cases all the input keys
+    # upcase INPUT_<xyz> names and also collect input values for debug output
+    local -A inputs=()
     for i in "${!Invocation[@]}"; do
-      Invocation[$i]=$(sed 's/^\(INPUT_[^=]*\)=/\U\1=/' <<< "${Invocation[$i]}")
+      local input=$(grep -Eo '^INPUT_[^=]*' <<< "${Invocation[$i]}")
+      if [[ -n "$input" ]] ; then
+        Invocation[$i]=$(sed 's/^\(INPUT_[^=]*\)=/\U\1=/' <<< "${Invocation[$i]}")
+        inputs[${input/INPUT_/}]="$(gha-unesc "$(grep -Eo '=.*' <<< "${Invocation[$i]}" | sed 's@^=@@')")"
+      fi
     done
 
     local -a Eval=("${Env[@]}" "${Invocation[@]}")
-    declare -p Github >&2
+    # declare -p Github >&2
     echo "----------------------------------------" >&2
     echo "env ${Eval[@]}" >&2
     echo "----------------------------------------" >&2
 
     test -v ACTIONS_RUNTIME_TOKEN || return `gha-err 81 "ACTIONS_RUNTIME_TOKEN missing"`
 
-    eval "env ${Eval[@]}" | gha-stdmap >&2
+    eval "env ${Eval[@]}" | gha-stdmap Github >&2
     echo "----------------------------------------" >&2
     wait
-    for i in "${!Github[@]}"; do
-      echo "$i [[[ $(cat "${Github[$i]}") ]]]" >&2
-    done
-    cat "${Github[OUTPUT]}" | gha-capture-outputs | jq -s from_entries
+    # { <outputs>, __streams__: { stdout, GITHUB_ENV, GITHUB_STATE, ... } }
+    (
+        gha-kv-raw inputs "$(gha-assoc-to-json inputs | jq -sc from_entries || echo null)" 
+        gha-kv-raw outputs "$(gha-capture-outputs Github[GITHUB_OUTPUT] | jq -sc from_entries || echo null)"
+        gha-kv-raw data "$((
+          gha-kv-json Invocation "${Invocation[@]}"
+          for i in "${!Github[@]}"; do
+             gha-kv-json $i "$(cat "${Github[$i]}")"
+          done
+        ) | jq -Ss from_entries)"
+    ) | jq -s from_entries
     # jq -s from_entries "$github_output"
     echo "----------------------------------------" >&2
 )}

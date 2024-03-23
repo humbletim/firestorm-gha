@@ -25,70 +25,70 @@ function initialize_firestorm_checkout() {
     test -d repo/p373r || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
 }
 
-function actions_cache_v4_save_only() {
-    INPUT_key=$1 INPUT_path=$2 "/c/Program Files/nodejs/node" \
-        /d/a/_actions/actions/cache/v4/dist/save-only/index.js \
-        | tr '\r' '\n' | grep -vE '^$|::debug::' | tee actions_cache_v4_save_only.$1.log
-    grep -vE '^$|::debug::' actions_cache_v4_save_only.$1.log >&2
-}
-
-function actions_cache_v4_restore_only() {
-    INPUT_key=$1 INPUT_path=$2 "/c/Program Files/nodejs/node" \
-        /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-        | tr '\r' '\n' | grep -vE '^$' | tee actions_cache_v4_restore_only.$1.log \
-        | grep -Eo 'restored from key: .*$' | grep -Eo '[^ ]+$'
-    grep -vE '^$|::debug::' actions_cache_v4_restore_only.$1.log >&2
-}
-
-function _restore_gha_cache() {
-    set -Euo pipefail
-    local id=$1
-    local cache_id=
-    if [[ -s restored_$id && `cat restored_$id` != "" ]]; then
-        echo "[gha-bootstrap] restored_$id exists; skipping" >&2
-        cache_id=`cat restored_$id`
-    else
-        echo "[gha-bootstrap] restoring restored_$id ..." >&2
-        # cache_id=$(NODE_DEBUG=1 $fsvr_dir/util/actions-cache.sh restore "$@")
-        cache_id=$(actions_cache_v4_restore_only "$@") \
-            || return `_err $? "actions-cache restore $id failed $?"`
-        if [[ $cache_id != "" ]]; then
-            echo $cache_id > restored_$id
-        fi
-    fi
-    echo $cache_id
-}
-
-restored_bin_id=
-restored_repo_id=
-
-function restore_gha_caches() {
-    set -Euo pipefail
-    for x in bin repo ; do
-        local vid=restored_${x}_id
-        local id=$(_restore_gha_cache $base-$x-b $x) \
-            || return `_err $? "actions-cache restore $x failed $?"`
-        echo "XXXXXXXXXXXXXXXXX $vid=$id" >&2
-        eval "$vid=$id"
-        echo "[gha-bootstrap] $vid=${!vid}" >&2
-    done
-}
-
-function save_gha_caches() {
-    # ls -1d node_modules/@actions/{core,github,cache,artifact} \
-    #     || return `_err $? "npm @actions setup incomplete"`
-
-    for x in bin repo ; do
-        local vid=restored_${x}_id
-        [[ -n "${!vid}" ]] || {
-            echo "[gha-bootstrap] attempting to save $x cache... ${!vid}" >&2
-            actions_cache_v4_save_only $base-$x-b $x \
-              || return `_err $? "error saving $x $vid"`
-            # $fsvr_dir/util/actions-cache.sh save $base-bin-a bin || return 1
-        }
-    done
-}
-
+# function actions_cache_v4_save_only() {
+#     INPUT_key=$1 INPUT_path=$2 "/c/Program Files/nodejs/node" \
+#         /d/a/_actions/actions/cache/v4/dist/save-only/index.js \
+#         | tr '\r' '\n' | grep -vE '^$|::debug::' | tee actions_cache_v4_save_only.$1.log
+#     grep -vE '^$|::debug::' actions_cache_v4_save_only.$1.log >&2
+# }
+# 
+# function actions_cache_v4_restore_only() {
+#     INPUT_key=$1 INPUT_path=$2 "/c/Program Files/nodejs/node" \
+#         /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
+#         | tr '\r' '\n' | grep -vE '^$' | tee actions_cache_v4_restore_only.$1.log \
+#         | grep -Eo 'restored from key: .*$' | grep -Eo '[^ ]+$'
+#     grep -vE '^$|::debug::' actions_cache_v4_restore_only.$1.log >&2
+# }
+# 
+# function _restore_gha_cache() {
+#     set -Euo pipefail
+#     local id=$1
+#     local cache_id=
+#     if [[ -s restored_$id && `cat restored_$id` != "" ]]; then
+#         echo "[gha-bootstrap] restored_$id exists; skipping" >&2
+#         cache_id=`cat restored_$id`
+#     else
+#         echo "[gha-bootstrap] restoring restored_$id ..." >&2
+#         # cache_id=$(NODE_DEBUG=1 $fsvr_dir/util/actions-cache.sh restore "$@")
+#         cache_id=$(actions_cache_v4_restore_only "$@") \
+#             || return `_err $? "actions-cache restore $id failed $?"`
+#         if [[ $cache_id != "" ]]; then
+#             echo $cache_id > restored_$id
+#         fi
+#     fi
+#     echo $cache_id
+# }
+# 
+# restored_bin_id=
+# restored_repo_id=
+# 
+# function restore_gha_caches() {
+#     set -Euo pipefail
+#     for x in bin repo ; do
+#         local vid=restored_${x}_id
+#         local id=$(_restore_gha_cache $base-$x-b $x) \
+#             || return `_err $? "actions-cache restore $x failed $?"`
+#         echo "XXXXXXXXXXXXXXXXX $vid=$id" >&2
+#         eval "$vid=$id"
+#         echo "[gha-bootstrap] $vid=${!vid}" >&2
+#     done
+# }
+# 
+# function save_gha_caches() {
+#     # ls -1d node_modules/@actions/{core,github,cache,artifact} \
+#     #     || return `_err $? "npm @actions setup incomplete"`
+# 
+#     for x in bin repo ; do
+#         local vid=restored_${x}_id
+#         [[ -n "${!vid}" ]] || {
+#             echo "[gha-bootstrap] attempting to save $x cache... ${!vid}" >&2
+#             actions_cache_v4_save_only $base-$x-b $x \
+#               || return `_err $? "error saving $x $vid"`
+#             # $fsvr_dir/util/actions-cache.sh save $base-bin-a bin || return 1
+#         }
+#     done
+# }
+# 
 function get_ninja() {(
     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
         bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f \
@@ -119,21 +119,21 @@ function get_parallel() {(
   ls -l bin/parallel
 )}
 
-function get_hostname() {(
-    # avoid entropy by hard-coding hostname used by parallel and other tools
-    local gcc=${CC:-$(cygpath -ms '/c/Program Files/LLVM/bin/clang')}
-  {
-    echo '
-      #include <stdio.h>
-      #include <io.h>
-      extern int _setmode(int, int);
-      #define _O_BINARY 0x8000
-      //#include <fnctl.h>
-      int main(int argc, char *argv[]) { _setmode(1,_O_BINARY); printf("%s\n", MESSAGE); return 0; }
-    ' | $gcc "-DMESSAGE=\"$1\"" -x c - -o bin/hostname.exe
-  } || return `_err $? "failed to provision hostname.exe $?"`
-  ls -l bin/hostname.exe
-)}
+# function get_hostname() {(
+#     # avoid entropy by hard-coding hostname used by parallel and other tools
+#     local gcc=${CC:-$(cygpath -ms '/c/Program Files/LLVM/bin/clang')}
+#   {
+#     echo '
+#       #include <stdio.h>
+#       #include <io.h>
+#       extern int _setmode(int, int);
+#       #define _O_BINARY 0x8000
+#       //#include <fnctl.h>
+#       int main(int argc, char *argv[]) { _setmode(1,_O_BINARY); printf("%s\n", MESSAGE); return 0; }
+#     ' | $gcc "-DMESSAGE=\"$1\"" -x c - -o bin/hostname.exe
+#   } || return `_err $? "failed to provision hostname.exe $?"`
+#   ls -l bin/hostname.exe
+# )}
 
 # LITERALLY determine whether an EXACT filename ACTUALLY exists
 # NOTE: `ls bin/parallel` (even `stat 'bin/parallel'`) both falsely

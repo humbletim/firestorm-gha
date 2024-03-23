@@ -6,6 +6,7 @@ require _utils.sh
 
 require gha.upload-artifact.bash
 require gha.load-level.bash
+require gha.cachette.bash
 
 # echo "root_dir=$root_dir" >&2
 _assert "root_dir" 'test -d "$root_dir"'

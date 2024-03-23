@@ -4,11 +4,11 @@
 # -- 2023.03.20 humbletim
 
 # usage: 
-#  upload_artifacts <name> "<paths>" [retention-days=1] [compression-level=0]
+#  upload_artifacts <name> "<paths>" [retention-days=1] [compression-level=0] [overwrite=false]
 
 source $(dirname $BASH_SOURCE)/gha._utils.bash
 
-function upload-artifact() {(
+function gha-upload-artifact() {(
     set -Euo pipefail
 
     local PATH="$PATH:/usr/bin"
@@ -19,28 +19,33 @@ function upload-artifact() {(
     local -a Input=(
       INPUT_name="`gha-esc "$1"`"
       INPUT_path="`gha-esc "$2"`"
-      INPUT_if-no-files-found=error # warn | error | ignore
       INPUT_retention-days=${3:-1}
       INPUT_compression-level=${4:-0}
-      INPUT_overwrite=false
+      INPUT_overwrite=${5:-false}
+      INPUT_if-no-files-found=error # warn | error | ignore
     )
+
+    local -A Check=(
+      [retention-days]='[0-9]+'
+      [compression-level]='[0-9]'
+      [overwrite]='(false|true)'
+      [if-no-files-found]='(warn|error|ignore)'
+    )
+    for i in "${!Check[@]}"; do
+      gha-assert Input "$i" "${Check[$i]}"
+    done || exit `gha-err 36 "???"`
 
     local -a Command=(
       `gha-esc "$node"`
       `gha-esc "$script"`
     )
 
+    gha-invoke-action "${Input[@]}" "${Command[@]}"
+
     # local -a Output=(
     #     artifact-id
     #     artifact-url
     # )
 
-    local -a Invocation=("${Input[@]}" "${Command[@]}")
-
-    echo "----------------------------------------" >&2
-    # declare -p Invocation 
-    echo "----------------------------------------" >&2
-    gha-invoke-action "${Invocation[@]}"
-    echo "----------------------------------------" >&2
 )}
 

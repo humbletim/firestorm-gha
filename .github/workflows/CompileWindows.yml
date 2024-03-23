@@ -142,7 +142,17 @@ jobs:
           # fsvr_dir=${fsvr_dir:-$pwd/repo/fsvr}
 
           source $fsvr_dir/gha-bootstrap.sh
+          source $fsvr_dir/util/gha.cachette.bash
 
+          function restore_caches() {
+            restore-only $base-bin-b bin/    || return 148
+            restore-only $base-repo-b repo/  || return 149
+          }
+
+          function save_gha_caches() {
+            save-only $base-bin-b bin/   || return 153
+            save-only $base-repo-b repo/ || return 154
+          }
           restore_gha_caches            || exit `_err $? "!restore_gha_caches"`
           ensure_gha_bin && xxtest_bin  || exit `_err $? "!ensure_gha_bin"`
           initialize_firestorm_checkout || exit `_err $? "!firestorm_checkout"`
