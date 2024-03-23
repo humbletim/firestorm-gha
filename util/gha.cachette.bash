@@ -12,7 +12,7 @@ function cache-exists() {(
     set -Euo pipefail
 
     local PATH="$PATH:/usr/bin"
-    local node="${node:-'/c/Program Files/nodejs/node'}"
+    local node="${node:-/c/Program Files/nodejs/node}"
     local actions_cache_dir="${actions_cache_dir:-/d/a/_actions/actions/cache/v4}"
     local script="${script:-${actions_cache_dir}/dist/restore-only/index.js}"
 
