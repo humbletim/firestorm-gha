@@ -12,7 +12,7 @@ function upload-artifact() {(
     set -Euo pipefail
 
     local PATH="$PATH:/usr/bin"
-    local node="${node:-'/c/Program Files/nodejs/node'}"
+    local node="${node:-/c/Program Files/nodejs/node}"
     local actions_artifact_dir="${actions_artifact_dir:-/d/a/_actions/actions/upload-artifact/v4}"
     local script="${script:-${actions_artifact_dir}/dist/upload/index.js}"
 
@@ -26,8 +26,8 @@ function upload-artifact() {(
     )
 
     local -a Command=(
-      `gha_esc $node`
-      `gha_esc $script`
+      `gha_esc "$node"`
+      `gha_esc "$script"`
     )
 
     local -a Output=(

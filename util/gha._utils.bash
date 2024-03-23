@@ -17,7 +17,7 @@ function gha_stdmap() {
       echo "[${BASH_REMATCH[1]}] $line" >&2
     elif [[ $line =~ ::error:: ]]; then
       echo "[error] $line" >&2
-      gha_kv_json "error" "$line" >> "$github_output"          
+      gha_kv_json "error" "$line" >> "${Github[OUTPUT]:-/dev/stdout}"
     else
       echo "[stdout] $line" >&2
     fi
@@ -26,9 +26,9 @@ function gha_stdmap() {
 
 
 function gha_capture_outputs() {
-  local _outputs_file="${1:-/dev/stderr}"
+  # local _outputs_file="${1:-/dev/stderr}"
   local key="" value="" delim="ghadelimiterNULL"
-  local -A outputs    
+  local -A outputs
   while IFS= read -r line || [[ -n $line ]]; do
       # echo "[_capture_outputs] line='$line'" >&2
       if [[ $line == $delim ]]; then
@@ -37,15 +37,15 @@ function gha_capture_outputs() {
         gha_kv_json "$key" "$value"
         delim="" key="" value=""
       elif [[ $line =~ ^([-A-Za-z_]+)\<\<(ghadelimiter.*) ]]; then
-          key=${BASH_REMATCH[1]} 
+          key=${BASH_REMATCH[1]}
           delim=${BASH_REMATCH[2]}
           value=""
       elif [[ -n $key && -n $line ]]; then
-          value+="${line}" 
+          value+="${line}"
       else
         echo "[_capture_outputs] unexpected line='$line'" >&2
       fi
-  done >> "$_outputs_file"
+  done #>> "$_outputs_file"
 }
 
 function gha-invoke-action() {(
@@ -57,15 +57,14 @@ function gha-invoke-action() {(
     local -a Invocation=("$@")
     declare -p Invocation
 
-    local github_output="$(mktemp -p "" --suffix=GITHUB_OUTPUT.ghadata)"
-    trap "rm -f $github_output >&2" EXIT
-
-    local -a Github=(
-      `gha_capture GITHUB_OUTPUT gha_capture_outputs "$github_output"`
-      `gha_capture GITHUB_ENV`
-      `gha_capture GITHUB_PATH`
-      `gha_capture GITHUB_STATE`
-    )
+    local -A Github=()
+    local -a Env=()
+    for i in OUTPUT ENV PATH STATE; do
+      local tmpfile="$(mktemp -p "" --suffix=GITHUB_$i.ghadata)"
+      trap "rm -f $tmpfile >&2" EXIT
+      Github[$i]="$tmpfile"
+      Env+=("GITHUB_$i=$tmpfile")
+    done
 
     # on Windows environment variables do not seem case-sensitive
     # actions/upload-artifact expects upper-case keys internally
@@ -74,8 +73,8 @@ function gha-invoke-action() {(
       Invocation[$i]=$(sed 's/^\(INPUT_[^=]*\)=/\U\1=/' <<< "${Invocation[$i]}")
     done
 
-    local -a Eval=("${Github[@]}" "${Invocation[@]}")
-    # declare -p Eval    
+    local -a Eval=("${Env[@]}" "${Invocation[@]}")
+    declare -p Github
     echo "----------------------------------------" >&2
     echo "env ${Eval[@]}" >&2
     echo "----------------------------------------" >&2
@@ -83,10 +82,14 @@ function gha-invoke-action() {(
     # exit 5
     test -v ACTIONS_RUNTIME_TOKEN || return `gha_err 81 "ACTIONS_RUNTIME_TOKEN missing"`
 
-    eval "env ${Eval[@]} > `gha_capture_tag stdout gha_stdmap`"
+    eval "env ${Eval[@]}" | gha_stdmap
     echo "----------------------------------------" >&2
     wait
-    jq -s from_entries "$github_output"
+    for i in "${!Github[@]}"; do
+      echo "$i [[[ $(cat "${Github[$i]}") ]]]" >&2
+    done
+    cat "${Github[OUTPUT]}" | gha_capture_outputs | jq -s from_entries
+    # jq -s from_entries "$github_output"
     echo "----------------------------------------" >&2
 )}
 

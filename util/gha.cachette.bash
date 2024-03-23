@@ -32,8 +32,8 @@ function cache-exists() {(
       CACHE_RESULT
     )
     local -a Command=(
-      `gha_esc $node`
-      `gha_esc $script`
+      `gha_esc "$node"`
+      `gha_esc "$script"`
     )
     local -a Invocation=(
       "${Input[@]}"
@@ -67,8 +67,8 @@ function restore-only() {(
     )
 
     local -a Command=(
-      `gha_esc $node`
-      `gha_esc $script`
+      `gha_esc "$node"`
+      `gha_esc "$script"`
     )
 
     gha-invoke-action "${Input[@]}" "${Command[@]}"
@@ -97,8 +97,8 @@ function save-only() {(
     )
 
     local -a Command=(
-      `gha_esc $node`
-      `gha_esc $script`
+      `gha_esc "$node"`
+      `gha_esc "$script"`
     )
 
     gha-invoke-action "${Input[@]}" "${Command[@]}"
