@@ -80,7 +80,7 @@ jobs:
       with:
         limit-access-to-actor: true
 
-    - name: Populate bin/
+    - name: Generated bin/
       run: |
         test -d "$fsvr_dir" || exit 63
 
@@ -90,21 +90,27 @@ jobs:
         ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
         ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
 
-        source fsvr/gha-bootstrap.sh
-        source $fsvr_dir/util/gha.cachette.bash
-        gha-cache-restore $base-bin-b bin 2>/dev/null || (
-            set -Euo pipefail
-            literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
-            literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
-            gha-cache-save $base-bin-b bin 2>/dev/null  || exit 85
-        )
-        function xxtest_bin() {
-          test -f bin/parallel-home/will-cite || return 196
-          parallel -- --version | head -1     || return 197
-          ninja --version                     || return 198
-          [[ `hostname` =~ windows[-]?2022 ]] || return 199
-        }
-        xxtest_bin  || exit `_err $? "!xxtest_bin"`
+    - name: Populated bin/
+      # uses: ./fsvr-action
+      # with:
+      run: |
+          test -d "$fsvr_dir" || exit 63
+
+          source fsvr/gha-bootstrap.sh
+          source $fsvr_dir/util/gha.cachette.bash
+          gha-cache-restore $base-bin-b bin 2>/dev/null || (
+              set -Euo pipefail
+              literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
+              literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
+              gha-cache-save $base-bin-b bin 2>/dev/null  || exit 85
+          )
+          function xxtest_bin() {
+            test -f bin/parallel-home/will-cite || return 196
+            parallel -- --version | head -1     || return 197
+            ninja --version                     || return 198
+            [[ `hostname` =~ windows[-]?2022 ]] || return 199
+          }
+          xxtest_bin  || exit `_err $? "!xxtest_bin"`
 
     - name: 002 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '002'
