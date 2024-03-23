@@ -41,7 +41,7 @@ function gha_capture_outputs() {
           delim=${BASH_REMATCH[2]}
           value=""
       elif [[ -n $key && -n $line ]]; then
-          value+="${line}"
+          value+="${line//$'\r'/}"
       else
         echo "[_capture_outputs] unexpected line='$line'" >&2
       fi
@@ -82,7 +82,7 @@ function gha-invoke-action() {(
     # exit 5
     test -v ACTIONS_RUNTIME_TOKEN || return `gha_err 81 "ACTIONS_RUNTIME_TOKEN missing"`
 
-    eval "env ${Eval[@]}" | gha_stdmap
+    eval "env ${Eval[@]}" | gha_stdmap >&2
     echo "----------------------------------------" >&2
     wait
     for i in "${!Github[@]}"; do
