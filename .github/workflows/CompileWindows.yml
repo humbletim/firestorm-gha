@@ -297,12 +297,17 @@ jobs:
           EOF
           )"
 
-
-    - name: Setup tmate session
-      if: failure()
+    - name: 006 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '006'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
+
+    # - name: Setup tmate session
+    #   if: failure()
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true
 #
 #
 #     - name: Setup tmate session
