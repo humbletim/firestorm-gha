@@ -45,7 +45,7 @@ function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel"
 
 function fsvr_step() { set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; }
 
-declare -xf _err tee parallel ht-ln hostname fsvr_step
+declare -xf _err tee parallel ht-ln hostname colout fsvr_step
 set -Eo pipefail
 EOF
 )"

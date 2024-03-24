@@ -128,9 +128,9 @@ jobs:
         echo base=$base repo=$repo branch=$branch
         which tee.exe
         which parallel.exe
-        tee --version
-        parallel --version
-        hostname --version
+        tee --version | head -1
+        parallel --version | head -1
+        hostname --version | head -1
         [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
 
     - name: Expand Source Repositories
@@ -193,12 +193,6 @@ jobs:
         $fsvr_dir/util/_utils.sh ht-ln $root_dir/indra indra
         $fsvr_dir/util/generate_build_vars.sh Firestorm-VR-GHA `cat $fsvr_dir/$base/viewer_version.txt` build/ \
            | tee build/build_vars.env #| tee $GITHUB_ENV
-
-    - name: 004 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '004'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
 
     - name: Detect MSVC
       run: $fsvr_dir/util/generate_msvc_env.sh
@@ -264,6 +258,12 @@ jobs:
 
     - name: 090_ninja_preflight
       run: fsvr_step 090
+
+    - name: 004 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '004'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
     - name: 0a0_ninja_build SLPlugin.exe
       run: fsvr_step 0a0 SLPlugin.exe
