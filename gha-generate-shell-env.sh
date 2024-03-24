@@ -34,7 +34,7 @@ _xpath="\$_PATH"
 [[ -v msvc_path ]] && _xpath="\$msvc_path:\$_xpath"
 [[ -n "\$_PRESHELL_PATH" ]] && _xpath="\$_xpath:\$_PRESHELL_PATH"
 declare -x PATH="\$_xpath"
-
+declare -x LANG=en_US.UTF-8
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 
 function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
