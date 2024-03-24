@@ -44,6 +44,19 @@ function get_ninja() {(
     ls -l bin/ | grep ninja
 )}
 
+function get_colout() {(
+    set -Euo pipefail
+    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
+        b44caa1754be29edcd30d31a9c65728061546f605a889e8d4ffbb2df281e8d44 \
+        https://github.com/nojhan/colout/archive/refs/tags/v1.1b.tar.gz \
+      .
+    ) || return `_err $? "failed to provision colout $?"`
+    mkdir -pv bin/colout
+    tar -C bin --force-local --strip-components=1 --exclude=colout-1.1b/colout/colout_clang.py \
+      -xvf $archive colout-1.1b/colout || return `_err $? "failed to provision colout $?"`
+    ls -l bin/ | grep colout
+)}
+
 function get_parallel() {(
     set -Euo pipefail
     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \

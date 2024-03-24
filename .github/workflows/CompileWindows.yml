@@ -99,14 +99,17 @@ jobs:
           source $fsvr_dir/util/gha.cachette.bash
           gha-cache-restore $base-bin-b bin 2> >(gha-action-stderr-filter) || (
               set -Euo pipefail
-              literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
-              literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
+              literally_exists bin/ninja.exe  || get_ninja    || return `_err $? "failed to provision ninja $?"`
+              literally_exists bin/colout.exe || get_colout   || return `_err $? "failed to provision colout $?"`
+              literally_exists bin/parallel   || get_parallel || return `_err $? "failed to provision parallel $?"`
+              literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
               literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
               gha-cache-save $base-bin-b bin 2> >(gha-action-stderr-filter) || exit 85
           )
           function xxtest_bin() {
             test -f bin/parallel-home/will-cite || return 196
             which parallel.exe
+            which colout
             parallel -- --version | head -1     || return 197
             ninja --version | head -1           || return 198
             [[ `hostname` =~ windows[-]?2022 ]] || return 199
