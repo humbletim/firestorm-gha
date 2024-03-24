@@ -91,8 +91,6 @@ function 085_prepare_msys_msvc() {( $_dbgopts;
         #   past manifest processing and workable firestorm_setup_tmp.nsi emerging
         # see: indra/newview/viewer_manifest.py:    def nsi_file_commands
         test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
-        # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
-        python -c 'import llsd' 2>/dev/null || pip install llsd # needed for viewer_manifest.py invocation
     fi
 )}
 
@@ -315,13 +313,13 @@ function 0c0_upload_artifacts() {( $_dbgopts;
   mkdir dist
   ht-ln $Installer dist/$InstallerExe
 
-  ( cd dist && upload-artifact ${InstallerExe/.exe/} $InstallerExe )
+  ( cd dist && gha-upload-artifact ${InstallerExe/.exe/} $InstallerExe )
 
   local Portable=`ls build/Firestorm*.7z |head -1`
   local PortableArchive=$branch-$(basename $Portable)
   ht-ln $Portable dist/$PortableArchive
 
-  ( cd dist && upload-artifact ${PortableArchive/.7z/} $PortableArchive )
+  ( cd dist && gha-upload-artifact ${PortableArchive/.7z/} $PortableArchive )
 )}
 
 function _steps() {

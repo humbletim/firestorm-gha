@@ -22,7 +22,7 @@ defaults:
 #   shell: c:\Program Files\Git\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 env:
-    BASH_ENV: ${{ github.workspace }}/SHELL.env
+    BASH_ENV: ${{ github.workspace }}\SHELL.env
 
 jobs:
   windows_build:
@@ -52,7 +52,7 @@ jobs:
 
     - name: Clone
       run: |
-        mkdir -pv bin cache repo build
+        mkdir -pv bin bin/pystuff cache repo build
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
 
     - name: Generate SHELL.env
@@ -100,10 +100,12 @@ jobs:
           gha-cache-restore $base-bin-b bin 2> >(gha-action-stderr-filter) || (
               set -Euo pipefail
               literally_exists bin/ninja.exe  || get_ninja    || exit `_err $? "failed to provision ninja $?"`
-              literally_exists bin/.colout    || get_colout   || exit `_err $? "failed to provision .colout $?"`
+              literally_exists bin/pystuff/Python39 || get_colout   || exit `_err $? "failed to provision .colout $?"`
               literally_exists bin/parallel   || get_parallel || exit `_err $? "failed to provision parallel $?"`
               literally_exists bin/colout.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
               literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
+              # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
+              python -m pip install --no-warn-script-location --user llsd
               gha-cache-save $base-bin-b bin 2> >(gha-action-stderr-filter) || exit 85
           )
           function xxtest_bin() {
@@ -195,7 +197,18 @@ jobs:
            | tee build/build_vars.env #| tee $GITHUB_ENV
 
     - name: Detect MSVC
-      run: $fsvr_dir/util/generate_msvc_env.sh
+      uses: ./fsvr-action
+      with:
+        run: |
+          set -Euo pipefail
+          export INPUT_key=$base-cache-msvc-a INPUT_path='build/msvc.env build/msvc_path.env'
+          /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
+            | grep -i 'cache restored' && { echo 'yup' ; ls -l build/msvc.env build/msvc.nunja.env ; } || {
+              echo 'nope'
+              $fsvr_dir/util/generate_msvc_env.sh
+              ls -l build/msvc.env build/msvc.nunja.env
+              /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
+          }
 
     - name: 010_ensure_build_directories
       run: fsvr_step 010

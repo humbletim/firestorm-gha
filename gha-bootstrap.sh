@@ -45,40 +45,40 @@ function get_ninja() {(
 )}
 
 
-
-function get_colout_babel() {(
-    set -Euo pipefail
-    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
-        ad76eab6905b626d7d4110d2032bc60c69bef225ec94c67d7229425ebe53f659 \
-        https://github.com/python-babel/babel/archive/refs/tags/v2.14.0.tar.gz \
-      .
-    ) || return `_err $? "failed to download babel $?"`
-    mkdir -pv bin/.colout/babel
-    tar -C bin/.colout --force-local --strip-components=1 \
-      -xf $archive babel-2.14.0/{babel,scripts,cldr} || return `_err $? "failed to provision babel $?"`
-    python bin/.colout/scripts/download_import_cldr.py 2>/dev/null || return `_err $? "failed to localize babel $?"`
-    ls -l bin/.colout | grep babel
-)}
-
-function get_colout_pygments() {(
-    set -Euo pipefail
-    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
-        163e0235b3739c24d7631bb7b0e5829f9ea081c10b26662354c3ba0e6e95f8ea \
-        https://github.com/pygments/pygments/archive/refs/tags/2.17.2.tar.gz \
-      .
-    ) || return `_err $? "failed to download pygments $?"`
-    mkdir -pv bin/.colout/pygments
-    tar -C bin/.colout --force-local --strip-components=1 \
-      -xf $archive pygments-2.17.2/pygments || return `_err $? "failed to provision pygments $?"`
-    ls -l bin/.colout | grep pygments
-)}
+# 
+# function get_colout_babel() {(
+#     set -Euo pipefail
+#     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
+#         ad76eab6905b626d7d4110d2032bc60c69bef225ec94c67d7229425ebe53f659 \
+#         https://github.com/python-babel/babel/archive/refs/tags/v2.14.0.tar.gz \
+#       .
+#     ) || return `_err $? "failed to download babel $?"`
+#     mkdir -pv bin/.colout/babel
+#     tar -C bin/.colout --force-local --strip-components=1 \
+#       -xf $archive babel-2.14.0/{babel,scripts,cldr} || return `_err $? "failed to provision babel $?"`
+#     python bin/.colout/scripts/download_import_cldr.py 2>/dev/null || return `_err $? "failed to localize babel $?"`
+#     ls -l bin/.colout | grep babel
+# )}
+# 
+# function get_colout_pygments() {(
+#     set -Euo pipefail
+#     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
+#         163e0235b3739c24d7631bb7b0e5829f9ea081c10b26662354c3ba0e6e95f8ea \
+#         https://github.com/pygments/pygments/archive/refs/tags/2.17.2.tar.gz \
+#       .
+#     ) || return `_err $? "failed to download pygments $?"`
+#     mkdir -pv bin/.colout/pygments
+#     tar -C bin/.colout --force-local --strip-components=1 \
+#       -xf $archive pygments-2.17.2/pygments || return `_err $? "failed to provision pygments $?"`
+#     ls -l bin/.colout | grep pygments
+# )}
 
 function get_colout() {(
     set -Euo pipefail
     mkdir bin/.colout -pv
-    PYTHONUSERBASE="$(cygpath -wa bin/.colout)" python -m pip install --no-warn-script-location --user colout
-    perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' bin/.colout/Python39/site-packages/colout/colout.py
-    diff bin/.colout/Python39/site-packages/colout/colout.py*
+    python -m pip install --no-warn-script-location --user colout
+    perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' bin/pystuff/Python39/site-packages/colout/colout.py
+    diff bin/pystuff/Python39/site-packages/colout/colout.py*
     # ./fsvr/util/_utils.sh ht-ln bin/.colout/Python39/site-packages bin/.colout/site-packages
     echo hello world | colout "hello" "red" | colout "world" "blue"
     # local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \

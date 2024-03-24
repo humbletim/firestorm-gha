@@ -35,12 +35,14 @@ _xpath="\$_PATH"
 [[ -n "\$_PRESHELL_PATH" ]] && _xpath="\$_xpath:\$_PRESHELL_PATH"
 declare -x PATH="\$_xpath"
 declare -x LANG=en_US.UTF-8
+declare -x PYTHONUSERBASE="$(cygpath -wa bin/pystuff)"
+
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 
 function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
 function hostname(){ echo 'windows-2022' ; }
 function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
-function colout() { PYTHONUSERBASE="$(cygpath -wa bin/.colout)" "`which python3`" "$PWD/bin/.colout/Python39/site-packages/colout/colout.py" "\$@" ; }
+function colout() { "`which python3`" "$PWD/bin/pystuff/Python39/site-packages/colout/colout.py" "\$@" ; }
 function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
 
 function fsvr_step() { set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; }
