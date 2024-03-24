@@ -77,6 +77,8 @@ function get_colout() {(
     set -Euo pipefail
     mkdir bin/.colout -pv
     PYTHONUSERBASE="$(cygpath -wa bin/.colout)" python -m pip install --no-warn-script-location --user colout
+    perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' bin/.colout/Python39/site-packages/colout/colout.py
+    diff bin/.colout/Python39/site-packages/colout/colout.py*
     # ./fsvr/util/_utils.sh ht-ln bin/.colout/Python39/site-packages bin/.colout/site-packages
     echo hello world | colout "hello" "red" | colout "world" "blue"
     # local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
