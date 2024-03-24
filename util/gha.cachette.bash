@@ -132,7 +132,7 @@ function gha-cache-save() {(
     local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
     local raw="$(jq -r '.data.stdout+"\n"+.data.stderr' <<< "$json" | tr -d '\r')"
     local -A Map=(
-      [cache-matched-key]='Cache saved with key'
+      [cache-saved-key]='Cache saved with key'
       [error]='Failed to save'
       [file-size]='File Size'
       [cache-size]='Cache Size'
@@ -149,10 +149,10 @@ function gha-cache-save() {(
       exit 146
     }
 
-    if [[ $(jq -r '.outputs["cache-matched-key"]' <<< "$json") == $1 ]]; then
+    if [[ $(jq -r '.outputs["cache-saved-key"]' <<< "$json") == $1 ]]; then
       json="$(jq 'del(.data)' <<< "$json")"
-      $(jq -r '.outputs["cache-hit"]' <<< "$json") == false \
-        || json="$(jq '.outputs["cache-hit"]=true' <<< "$json")"
+      # [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == false ]] \
+      #   || json="$(jq '.outputs["cache-hit"]=true' <<< "$json")"
       jq -S <<< "$json"
       exit 0
     else
