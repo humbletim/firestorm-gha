@@ -8,6 +8,10 @@ gha-esc()( printf "%q" "$@" )
 gha-unesc()( eval "echo $@" )
 
 
+function gha-action-stderr-filter() {
+  sed -u "s@^@|$FUNCNAME| @" | grep --line-buffered -E "\[(warning|error)\]" >&2
+}
+
 # emit jq "entry" line given key and a raw json-encoded value
 function gha-kv-raw() {
   local key="$1"
@@ -28,10 +32,12 @@ function gha-kv-json() {
 # - promoting ::warning:: and ::error:: into pseudo-outputs
 function gha-stdmap() {
   local -n __Github="$1"
-
+  local line=""
   while IFS= read -r line || [[ -n $line ]]; do
     if [[ $line =~ ::(debug|info|notice):: ]]; then
-      echo "[${BASH_REMATCH[1]}] $line" | tee -a ${__Github[stderr]} >&2
+      local type=${BASH_REMATCH[1]}
+      local line="${line/::$type::/}"
+      echo "[$type] $line" | tee -a ${__Github[stderr]} >&2
     # note: ::set-output only emerges on stdout when GITHUB_OUTPUT is not specified
     elif [[ $line =~ ::(set-output) ]]; then
       local type=${BASH_REMATCH[1]}
@@ -116,6 +122,11 @@ EOP
 function gha-invoke-action() {(
     set -Euo pipefail
 
+    test -v gha_invoke_action_test_json_file && {
+      echo "using $gha_invoke_action_test_json_file" >&2
+      cat "$gha_invoke_action_test_json_file"
+      exit 0
+    }
     # local script="$1"
     # shift
 

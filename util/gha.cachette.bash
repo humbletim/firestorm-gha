@@ -36,8 +36,14 @@ function gha-cache-exists() {(
     )
 
     local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
-    echo "$json"
-    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit 38 ; fi
+    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true &&
+          $(jq -r '.outputs["cache-matched-key"]' <<< "$json") == $1 ]]; then
+      jq -S 'del(.data)' <<< "$json"
+      exit 0
+    else
+      echo "$json"
+      exit 38
+    fi
     # if [[ $(jq -r '.["cache-matched-key"]' <<< "$json") == $1 ]]; then exit 0 ; else exit -1 ; fi
 
     # local -a Output=(
@@ -80,8 +86,14 @@ function gha-cache-restore() {(
     )
 
     local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
-    echo "$json"
-    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit -1 ; fi
+    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true &&
+          $(jq -r '.outputs["cache-matched-key"]' <<< "$json") == $1 ]]; then
+      jq -S 'del(.data)' <<< "$json"
+      exit 0
+    else
+      echo "$json"
+      exit 38
+    fi
 
 #     local -a Output=(
 #         cache-hit
@@ -118,7 +130,7 @@ function gha-cache-save() {(
     )
 
     local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
-    local raw="$(jq -br '.data.stdout+"\n"+.data.stderr' <<< "$json")"
+    local raw="$(jq -r '.data.stdout+"\n"+.data.stderr' <<< "$json" | tr -d '\r')"
     local -A Map=(
       [cache-matched-key]='Cache saved with key'
       [error]='Failed to save'
@@ -132,9 +144,22 @@ function gha-cache-save() {(
         json="$(jq '.outputs += ([{ key: $key, value: $value}]|from_entries)' --arg key "$x" --arg value "${BASH_REMATCH[1]}" <<< "$json")"
       fi
     done
-    jq . <<< "$json"
-    if [[ $(jq -r '.outputs["cache-matched-key"]' <<< "$json") == $1 ]]; then exit 0 ; else exit -1 ; fi
-    # if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true ]]; then exit 0 ; else exit -1 ; fi
+    [[ $(jq -r '.outputs["error"]' <<< "$json") != "null" ]] && {
+      echo "$json"
+      exit 146
+    }
+
+    if [[ $(jq -r '.outputs["cache-matched-key"]' <<< "$json") == $1 ]]; then
+      json="$(jq 'del(.data)' <<< "$json")"
+      $(jq -r '.outputs["cache-hit"]' <<< "$json") == false \
+        || json="$(jq '.outputs["cache-hit"]=true' <<< "$json")"
+      jq -S <<< "$json"
+      exit 0
+    else
+      echo "$json"
+      exit 38
+    fi
+
 
     # local -a Output=(
     #     cache-hit

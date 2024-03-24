@@ -97,12 +97,12 @@ jobs:
 
           source fsvr/gha-bootstrap.sh
           source $fsvr_dir/util/gha.cachette.bash
-          gha-cache-restore $base-bin-b bin 2>/dev/null || (
+          gha-cache-restore $base-bin-b bin 2> >(gha-action-stderr-filter) || (
               set -Euo pipefail
               literally_exists bin/ninja.exe || get_ninja    || return `_err $? "failed to provision ninja $?"`
               literally_exists bin/parallel  || get_parallel || return `_err $? "failed to provision parallel $?"`
               literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
-              gha-cache-save $base-bin-b bin 2>/dev/null  || exit 85
+              gha-cache-save $base-bin-b bin 2> >(gha-action-stderr-filter) || exit 85
           )
           function xxtest_bin() {
             test -f bin/parallel-home/will-cite || return 196
@@ -136,14 +136,14 @@ jobs:
         run: |
           source $fsvr_dir/gha-bootstrap.sh
           source $fsvr_dir/util/gha.cachette.bash
-          gha-cache-restore $cache_id-repo-a repo 2>/dev/null || (
+          gha-cache-restore $cache_id-repo-a repo 2> >(gha-action-stderr-filter) || (
             set -Euo pipefail
             test -d repo/$branch/.git             || quiet_clone $repo $branch repo/$branch
             test -d repo/p373r/.git               || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
             test -d repo/fs-build-variables/.git  || \
               quiet_clone FirestormViewer/fs-build-variables c57be16efb2b48d9e117c7449fc105c7f9da16d0 repo/fs-build-variables
 
-            gha-cache-save $cache_id-repo-a repo 2>/dev/null || exit 107
+            gha-cache-save $cache_id-repo-a repo 2> >(gha-action-stderr-filter) || exit 107
           )
 
           repos="$(for id in repo/$branch repo/p373r repo/fs-build-variables ; do
@@ -151,7 +151,6 @@ jobs:
           done)"
 
           cat <<EOF >> $GITHUB_STEP_SUMMARY
-          ### vars
           | name    | value       |
           | ---------- | ----------- |
           | base  | $base |
