@@ -40,7 +40,7 @@ function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$
 function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
 function hostname(){ echo 'windows-2022' ; }
 function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
-function colout() { PYTHONPATH="$(pwd -W)/bin/.colout" "`which python3`" -c 'import signal;setattr(signal,"SIGPIPE",signal.SIGFPE);import sys;sys.argv[0]="colout.py";__import__("colout").main()' "\$@" ; }
+function colout() { PYTHONPATH="$(pwd -W)/bin/.colout/Python39/site-packages" "`which python3`" -c 'import signal;setattr(signal,"SIGPIPE",signal.SIGFPE);import sys;sys.argv[0]="colout.py";__import__("colout").main()' "\$@" ; }
 function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
 
 function fsvr_step() { set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; }
