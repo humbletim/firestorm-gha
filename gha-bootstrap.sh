@@ -55,7 +55,8 @@ function get_colout_babel() {(
     ) || return `_err $? "failed to download babel $?"`
     mkdir -pv bin/.colout/babel
     tar -C bin/.colout --force-local --strip-components=1 \
-      -xf $archive babel-2.14.0/babel || return `_err $? "failed to provision babel $?"`
+      -xf $archive babel-2.14.0/{babel,scripts,cldr} || return `_err $? "failed to provision babel $?"`
+    python bin/.colout/scripts/download_import_cldr.py 2>/dev/null || return `_err $? "failed to localize babel $?"`
     ls -l bin/.colout | grep babel
 )}
 

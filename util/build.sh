@@ -233,7 +233,7 @@ EOF
 
     echo $msvc_path
     which cl.exe > /dev/null || return 241
-    local out="$(ninja -C "$build_dir" -n 2>&1)" || _die_exit_code=$? _die "ninja -n failed\n$out"
+    local out="$(ninja -C "$build_dir" -n 2>&1 | colout -t ninja)" || _die_exit_code=$? _die "ninja -n failed\n$out"
     echo "$out" | head -3
     echo "..."
     echo "$out" | tail -3
@@ -247,7 +247,7 @@ function 0a0_ninja_build() {( $_dbgopts;
     . $BASH_ENV
     which cl.exe > /dev/null || return 256
     echo "[$FUNCNAME] ninja -C $build_dir ${@:-llpackage}" >&2
-    ninja -C "$build_dir" "${@:-llpackage}" || _die_exit_code=$? _die "ninja failed"
+    ninja -C "$build_dir" "${@:-llpackage}" | colout -t ninja || _die_exit_code=$? _die "ninja failed"
 )}
 
 
