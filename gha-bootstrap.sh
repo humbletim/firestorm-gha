@@ -75,8 +75,11 @@ function get_colout_pygments() {(
 
 function get_colout() {(
     set -Euo pipefail
-    PYTHONUSERBASE=$(pwd -W)/bin/.colout python -m pip install --user colout
-    #           
+    PYTHONUSERBASE="$(cygpath -wa bin/.colout)" python -m pip install --user colout
+    ./fsvr/util/_utils.sh ht-ln bin/.colout/Python39/site-packages/colout bin/.colout/colout
+    ./fsvr/util/_utils.sh ht-ln bin/.colout/Python39/site-packages/pygments bin/.colout/colout/pygments
+    ./fsvr/util/_utils.sh ht-ln bin/.colout/Python39/site-packages/babel bin/.colout/colout/babel
+    echo hello world | colout "hello" "red" | colout "world" "blue"
     # local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
     #     b44caa1754be29edcd30d31a9c65728061546f605a889e8d4ffbb2df281e8d44 \
     #     https://github.com/nojhan/colout/archive/refs/tags/v1.1b.tar.gz \
