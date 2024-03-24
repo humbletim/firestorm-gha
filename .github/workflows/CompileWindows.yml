@@ -99,9 +99,9 @@ jobs:
           source $fsvr_dir/util/gha.cachette.bash
           gha-cache-restore $base-bin-b bin 2> >(gha-action-stderr-filter) || (
               set -Euo pipefail
-              literally_exists bin/ninja.exe  || get_ninja    || return `_err $? "failed to provision ninja $?"`
-              literally_exists bin/.colout    || get_colout   || return `_err $? "failed to provision .colout $?"`
-              literally_exists bin/parallel   || get_parallel || return `_err $? "failed to provision parallel $?"`
+              literally_exists bin/ninja.exe  || get_ninja    || exit `_err $? "failed to provision ninja $?"`
+              literally_exists bin/.colout    || get_colout   || exit `_err $? "failed to provision .colout $?"`
+              literally_exists bin/parallel   || get_parallel || exit `_err $? "failed to provision parallel $?"`
               literally_exists bin/colout.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
               literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
               gha-cache-save $base-bin-b bin 2> >(gha-action-stderr-filter) || exit 85
