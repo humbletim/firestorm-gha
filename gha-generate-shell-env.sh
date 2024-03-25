@@ -7,8 +7,6 @@ PATH="$PATH:/usr/bin"
 fsvr_dir="${fsvr_dir:-$PWD/fsvr}"
 
 if [[ $OSTYPE == msys ]] ; then
-  function _cygpath() { cygpath -ua "$1"; }
-
   _workspace=$(cygpath -ua "${workspace:-${GITHUB_WORKSPACE:-.}}" | sed 's@/$@@')
   _userprofile=$(cygpath -ua "$USERPROFILE")
   _programfiles=$(cygpath -ua "$PROGRAMFILES") # | /usr/bin/sed -e 's@[cC]:/@/c/@')
@@ -16,8 +14,11 @@ if [[ $OSTYPE == msys ]] ; then
 
   _PATH="$_workspace/bin:$_userprofile/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:$_programfiles/Git/mingw64/bin:/c/hostedtoolcache/windows/Python/3.9.13/x64/Scripts:/c/hostedtoolcache/windows/Python/3.9.13/x64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:$_programfiles/CMake/bin:/c/Windows/system32:/usr/bin:/bin:/c/msys64/usr/bin"
 
+  _PYTHONUSERBASE="$(cygpath -wa bin/pystuff)"
+
 else
   _PATH="$PWD/bin:$PATH"
+  _PYTHONUSERBASE="$(readlink -f bin/pystuff)"
 fi
 
 ######################################################################
@@ -35,7 +36,7 @@ _xpath="\$_PATH"
 [[ -n "\$_PRESHELL_PATH" ]] && _xpath="\$_xpath:\$_PRESHELL_PATH"
 declare -x PATH="\$_xpath"
 declare -x LANG=en_US.UTF-8
-declare -x PYTHONUSERBASE="$(cygpath -wa bin/pystuff)"
+declare -x PYTHONUSERBASE="$_PYTHONUSERBASE"
 
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 
@@ -44,10 +45,21 @@ function hostname(){ echo 'windows-2022' ; }
 function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
 function colout() { "`which python3`" "$PWD/bin/pystuff/Python39/site-packages/colout/colout.py" "\$@" ; }
 function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
+function jq() { "`which jq`" $(
+  # grr... detect if jq supports -b (binary)
+  # otherwise... fall back to tr -d '\r' workaround
+  # TODO: jq.exe also croaks if jq 'filter\r' contains LFs...
+  jq -ben 1 2>/dev/null > /dev/null
+  if [[ $? == 0 ]] ; then
+    echo '-b "$@"'
+  else
+    echo '"$@" | tr -d "\r"'
+  fi
+) ; }
 
 function fsvr_step() { set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; }
 
-declare -xf _err tee parallel ht-ln hostname colout fsvr_step
+declare -xf _err tee parallel ht-ln hostname colout jq fsvr_step
 set -Eo pipefail
 EOF
 )"

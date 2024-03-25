@@ -158,7 +158,7 @@ function _parallel() {( $_dbgopts;
 
 function 060_download_packages() {( $_dbgopts;
     _assert fsvr_cache_dir 'test -d "$fsvr_cache_dir"'
-    jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep http \
+    jq -r '.[]|.url' $build_dir/packages-info.json | grep http \
       | _parallel "$FUNCNAME" -j4 'set -e ; echo {} >&2 ; wget -nv -N -P "$fsvr_cache_dir" -N {} ; test -s $fsvr_cache_dir/$(basename {}); exit 0'
 )}
 
@@ -187,7 +187,7 @@ function 070_verify_downloads() {( $_dbgopts;
     cd $fsvr_cache_dir/
     test -f $build_dir/$FUNCNAME.txt && rm -v $build_dir/$FUNCNAME.txt
     # echo "`jq -r '.[]|"_verify_one "+.name+" "+.hash+" "+(.url//"null")+""' $build_dir/packages-info.json | grep -v null`"
-    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | tr -d '\r' | grep -v url=null \
+    jq -r '.[]|"name="+.name+" hash="+.hash+" url="+(.url//"null")' $build_dir/packages-info.json | grep -v url=null \
      | sed -e 's@ url=[^ ]\+/@ url=@' | \
      self=$fsvr_dir/util/build.sh _parallel "$FUNCNAME" -j4 '{} ; $self _verify_one $name $hash $(basename $url)' \
     || _die "verification failed $?"
@@ -201,14 +201,14 @@ function 070_verify_downloads() {( $_dbgopts;
 
 # function 080_untar_packages() {(
 #     $_dbgopts
-#     jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep -vE '^null$' \
+#     jq -r '.[]|.url' $build_dir/packages-info.json | grep -vE '^null$' \
 #      | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && { bzcat $fsvr_cache_dir/$(basename {}) | 7z -y -ttar -si -bb0 x 2>&1 | { grep -iE "error|warn|fatal|fail" || true ; } ; }' \
 #        || _die "untar failed $?"
 # )}
 #
 
 function 080_untar_packages() {( $_dbgopts;
-    jq -r '.[]|.url' $build_dir/packages-info.json | tr -d '\r' | grep -vE '^null$' \
+    jq -r '.[]|.url' $build_dir/packages-info.json | grep -vE '^null$' \
      | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && tar --force-local -xf $fsvr_cache_dir/$(basename {})' \
        || _die "untar failed $?"
 )}

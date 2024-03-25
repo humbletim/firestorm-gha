@@ -111,6 +111,7 @@ function gha-cache-restore() {(
     local -A TextMap=(
       [outputs:error]='Cache not found for input keys: '
       [found:resource-url]='Resource Url: '
+      [found:cache-restored-key]='Cache restored from key: '
       [found:file-size]='File Size: '
       [found:cache-size]='Cache Size: '
       [found:resolved-keys]='Resolved Keys:..debug. '
