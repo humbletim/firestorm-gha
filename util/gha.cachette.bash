@@ -6,8 +6,6 @@
 
 source $(dirname $BASH_SOURCE)/gha._utils.bash
 
-# key, path, restore-keys, upload-chunk-size, enableCrossOsArchive, fail-on-cache-miss, lookup-only
-
 function gha-cache-exists() {(
     set -Euo pipefail
     gha-have-runtime || { echo "gha runtime unavailable" && exit 13 ; }
@@ -22,7 +20,7 @@ function gha-cache-exists() {(
         INPUT_key="`gha-esc "$1"`"
         INPUT_path="`gha-esc "$2"`"
         INPUT_lookup-only=true
-        INPUT_fail-on-cache-miss=true
+        INPUT_fail-on-cache-miss=false
         # INPUT_upload-chunk-size=
         # INPUT_restore-keys=
     )
@@ -35,15 +33,37 @@ function gha-cache-exists() {(
       `gha-esc "$script"`
     )
 
-    local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
-    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true &&
-          $(jq -r '.outputs["cache-matched-key"]' <<< "$json") == $1 ]]; then
-      jq -S 'del(.data)' <<< "$json"
+    local -A Raw
+    gha-invoke-action Input Command Raw
+
+    local -A TextMap=(
+      [outputs:error]='Cache not found for input keys: '
+      [found:resource-url]='Resource Url: '
+      [found:file-size]='File Size: '
+      [found:cache-size]='Cache Size: '
+      [found:resolved-keys]='Resolved Keys:..debug. '
+    )
+
+    local -A Found
+    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-} ${Raw[data:stderr]:-}"
+    gha-merge-arrays Raw Found
+
+    if [[ -n ${Raw[outputs:error]+_} ]] ; then
+      gha-assoc-to-json Raw #rc inputs outputs found
+      echo "[$FUNCNAME] ERROR: : ${Raw[outputs:error]}"
+      exit 178
+    fi
+
+    if [[ ${Raw[outputs:cache-matched-key]+_} == $1 ]] ; then
+      echo "[$FUNCNAME] OK!"
+      gha-assoc-to-json Raw rc outputs found
       exit 0
     else
-      echo "$json"
-      exit 38
+      gha-assoc-to-json Raw #rc inputs outputs found
+      echo "[$FUNCNAME] ERROR: cache-matched-key not found..."
+      exit 160
     fi
+
     # if [[ $(jq -r '.["cache-matched-key"]' <<< "$json") == $1 ]]; then exit 0 ; else exit -1 ; fi
 
     # local -a Output=(
@@ -85,14 +105,35 @@ function gha-cache-restore() {(
       `gha-esc "$script"`
     )
 
-    local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
-    if [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == true &&
-          $(jq -r '.outputs["cache-matched-key"]' <<< "$json") == $1 ]]; then
-      jq -S 'del(.data)' <<< "$json"
+    local -A Raw
+    gha-invoke-action Input Command Raw
+
+    local -A TextMap=(
+      [outputs:error]='Cache not found for input keys: '
+      [found:resource-url]='Resource Url: '
+      [found:file-size]='File Size: '
+      [found:cache-size]='Cache Size: '
+      [found:resolved-keys]='Resolved Keys:..debug. '
+    )
+
+    local -A Found
+    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-} ${Raw[data:stderr]:-}"
+    gha-merge-arrays Raw Found
+
+    if [[ -n ${Raw[outputs:error]+_} ]] ; then
+      gha-assoc-to-json Raw #rc inputs outputs found
+      echo "[$FUNCNAME] ERROR: : ${Raw[outputs:error]}"
+      exit 178
+    fi
+
+    if [[ ${Raw[outputs:cache-matched-key]+_} == $1 ]] ; then
+      echo "[$FUNCNAME] OK!"
+      gha-assoc-to-json Raw rc outputs found
       exit 0
     else
-      echo "$json"
-      exit 38
+      gha-assoc-to-json Raw #rc inputs outputs found
+      echo "[$FUNCNAME] ERROR: cache-matched-key not found..."
+      exit 160
     fi
 
 #     local -a Output=(
@@ -107,6 +148,7 @@ function gha-cache-restore() {(
 #     )
 
 )}
+
 
 function gha-cache-save() {(
     set -Euo pipefail
@@ -129,37 +171,35 @@ function gha-cache-save() {(
       `gha-esc "$script"`
     )
 
-    local json="$(gha-invoke-action "${Input[@]}" "${Command[@]}")"
-    local raw="$(jq -r '.data.stdout+"\n"+.data.stderr' <<< "$json" | tr -d '\r')"
-    local -A Map=(
-      [cache-saved-key]='Cache saved with key'
-      [error]='Failed to save'
-      [file-size]='File Size'
-      [cache-size]='Cache Size'
-    )
-    for x in "${!Map[@]}"; do
-      local y="${Map[$x]}"
-      if [[ $raw =~ $y:\ ([^$'\n']+) ]]; then
-        # echo "x=$x y=$y z=${BASH_REMATCH[1]}" >&2
-        json="$(jq '.outputs += ([{ key: $key, value: $value}]|from_entries)' --arg key "$x" --arg value "${BASH_REMATCH[1]}" <<< "$json")"
-      fi
-    done
-    [[ $(jq -r '.outputs["error"]' <<< "$json") != "null" ]] && {
-      echo "$json"
-      exit 146
-    }
+    local -A Raw
+    gha-invoke-action Input Command Raw
 
-    if [[ $(jq -r '.outputs["cache-saved-key"]' <<< "$json") == $1 ]]; then
-      json="$(jq 'del(.data)' <<< "$json")"
-      # [[ $(jq -r '.outputs["cache-hit"]' <<< "$json") == false ]] \
-      #   || json="$(jq '.outputs["cache-hit"]=true' <<< "$json")"
-      jq -S <<< "$json"
-      exit 0
-    else
-      echo "$json"
-      exit 38
+    local -A TextMap=(
+      [outputs:cache-saved-key]='Cache saved with key: '
+      [outputs:error]='Failed to save: '
+      [found:resource-url]='Resource Url: '
+      [found:file-size]='File Size: '
+      [found:cache-size]='Cache Size: '
+    )
+
+    local -A Found
+    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-} ${Raw[data:stderr]:-}"
+    gha-merge-arrays Raw Found
+
+    if [[ -n ${Raw[outputs:error]+_} ]] ; then
+      echo "[$FUNCNAME] ERROR: : ${Raw[outputs:error]}"
+      exit 178
     fi
 
+    if [[ ${Raw[outputs:cache-saved-key]+_} == $1 ]] ; then
+      echo "[$FUNCNAME] OK!"
+      gha-assoc-to-json Raw rc outputs found
+      exit 0
+    else
+      gha-assoc-to-json Raw #rc inputs outputs found
+      echo "[$FUNCNAME] ERROR: cache-saved-key not found..."
+      exit 160
+    fi
 
     # local -a Output=(
     #     cache-hit

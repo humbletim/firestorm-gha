@@ -41,7 +41,24 @@ function gha-upload-artifact() {(
       `gha-esc "$script"`
     )
 
-    gha-invoke-action "${Input[@]}" "${Command[@]}"
+    local -A Raw
+    gha-invoke-action Input Command Raw
+
+    if [[ -n ${Raw[outputs:error]+_} ]] ; then
+      gha-assoc-to-json Raw #rc inputs outputs found
+      echo "[$FUNCNAME] ERROR: : ${Raw[outputs:error]}"
+      exit 178
+    fi
+
+    if [[ -n ${Raw[outputs:artifact-id]+_} ]] ; then
+      echo "[$FUNCNAME] OK!"
+      gha-assoc-to-json Raw rc outputs found
+      exit 0
+    else
+      gha-assoc-to-json Raw #rc inputs outputs found
+      echo "[$FUNCNAME] ERROR: artifact-id not found..."
+      exit 160
+    fi
 
     # local -a Output=(
     #     artifact-id
