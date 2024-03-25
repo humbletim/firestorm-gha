@@ -13,8 +13,7 @@ on:
             { "base":"7.1.2", "repo":"Sgeo/phoenix-firestorm-alpha", "branch": "VR_Sgeo_2024" }
             { "base":"7.1.4", "repo":"FirestormViewer/phoenix-firestorm", "branch": "7.1.4_Mar14_preview" }
 
-run-name: ${{ fromJSON(inputs.fstuple).branch }} @ ${{ fromJSON(inputs.fstuple).base }}
-
+run-name: ${{ github.ref_name }} ${{ fromJSON(inputs.fstuple).branch }} @ ${{ fromJSON(inputs.fstuple).base }}
 
 defaults:
   run:
@@ -49,7 +48,7 @@ jobs:
         echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
         . $GITHUB_ENV
         echo "cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
-        echo "build_id=$(echo "${GITHUB_REF}-$base" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
+        echo "build_id=$(echo "${GITHUB_REF_NAME}-$base" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
 
     - name: Clone
       run: |
