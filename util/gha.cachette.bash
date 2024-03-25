@@ -48,13 +48,13 @@ function gha-cache-exists() {(
     gha-match-text-entries TextMap Found "${Raw[data:stdout]:-}" "${Raw[data:stderr]:-}"
     gha-merge-arrays Raw Found
 
-    if [[ -n ${Raw[outputs:error]+_} ]] ; then
+    if [[ -n ${Raw[outputs:error]:-} ]] ; then
       gha-assoc-to-json Raw #rc inputs outputs found
       echo "[$FUNCNAME] ERROR: : ${Raw[outputs:error]}"
       exit 178
     fi
 
-    if [[ ${Raw[outputs:cache-matched-key]+_} == $1 ]] ; then
+    if [[ ${Raw[outputs:cache-matched-key]:-} == $1 ]] ; then
       echo "[$FUNCNAME] OK!"
       gha-assoc-to-json Raw rc outputs found
       exit 0
@@ -121,13 +121,13 @@ function gha-cache-restore() {(
     gha-match-text-entries TextMap Found "${Raw[data:stdout]:-}" "${Raw[data:stderr]:-}"
     gha-merge-arrays Raw Found
 
-    if [[ -n ${Raw[outputs:error]+_} ]] ; then
+    if [[ -n ${Raw[outputs:error]:-} ]] ; then
       gha-assoc-to-json Raw #rc inputs outputs found
       echo "[$FUNCNAME] ERROR: : ${Raw[outputs:error]}"
       exit 178
     fi
 
-    if [[ ${Raw[outputs:cache-matched-key]+_} == $1 ]] ; then
+    if [[ ${Raw[outputs:cache-matched-key]:-} == $1 ]] ; then
       echo "[$FUNCNAME] OK!"
       gha-assoc-to-json Raw rc outputs found
       exit 0
@@ -187,12 +187,12 @@ function gha-cache-save() {(
     gha-match-text-entries TextMap Found "${Raw[data:stdout]:-}" "${Raw[data:stderr]:-}"
     gha-merge-arrays Raw Found
 
-    if [[ -n ${Raw[outputs:error]+_} ]] ; then
+    if [[ -n ${Raw[outputs:error]:-} ]] ; then
       echo "[$FUNCNAME] ERROR: : ${Raw[outputs:error]}"
       exit 178
     fi
 
-    if [[ ${Raw[outputs:cache-saved-key]+_} == $1 ]] ; then
+    if [[ ${Raw[outputs:cache-saved-key]:-} == $1 ]] ; then
       echo "[$FUNCNAME] OK!"
       gha-assoc-to-json Raw rc outputs found
       exit 0
