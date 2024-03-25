@@ -304,9 +304,9 @@ function gha-invoke-action() {
       { eval "echo tostderr test >&2 ; env ${Eval[@]}" 1> >(gha-stdmap stdout Github) 2> >(gha-stdmap stderr Github) ; } \
         2>&1 | gha-action-stderr-filter
       local rc=$?
-      if [[ $rc -ne 0 ]] ; then
-        echo -e "error<<ghadelimiterx\nexit code: $rc\nghadelimiterx" >> ${Github[GITHUB_OUTPUT]}
-      fi
+      # if [[ $rc -ne 0 ]] ; then
+      #   echo -e "error<<ghadelimiterx\nexit code: $rc\nghadelimiterx" >> ${Github[GITHUB_OUTPUT]}
+      # fi
       local jsoninputs="$(gha-assoc-to-flatjson inputs || echo null)";
       local jsonoutputs="$(gha-capture-outputs Github[GITHUB_OUTPUT] | jq -sc from_entries || echo null)"
       local jsondata="$((
