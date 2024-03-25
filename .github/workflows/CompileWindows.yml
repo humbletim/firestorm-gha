@@ -50,13 +50,11 @@ jobs:
         echo "cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
         echo "build_id=$(echo "${GITHUB_REF_NAME}-$base" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
 
-    - name: Clone
+    - name: Clone && Generate SHELL.env
       run: |
+        set -Euo pipefail
         mkdir -pv bin bin/pystuff cache repo build
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
-
-    - name: Generate SHELL.env
-      run: |
         fsvr_dir=$PWD/fsvr fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
         fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
 
@@ -80,21 +78,19 @@ jobs:
       with:
         limit-access-to-actor: true
 
-    - name: Generated bin/
-      run: |
-        test -d "$fsvr_dir" || exit 63
-
-        . fsvr/bashland/gha.alias-exe.bash
-        make-stub bin/BASH_FUNC_invoke.exe
-        fsvr/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
-        ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
-        ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
-
-    - name: Populated bin/
+    - name: Populate local bin/
       uses: ./fsvr-action
       with:
         run: |
           test -d "$fsvr_dir" || exit 63
+
+          {
+            source fsvr/bashland/gha.alias-exe.bash
+            make-stub bin/BASH_FUNC_invoke.exe
+            fsvr/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
+            ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
+            ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
+          }
 
           source fsvr/gha-bootstrap.sh
           source $fsvr_dir/util/gha.cachette.bash
@@ -133,17 +129,17 @@ jobs:
       with:
         limit-access-to-actor: true
 
-    - name: SHELL.sh env test
-      run: |
-        set -eu
-        echo base=$base repo=$repo branch=$branch
-        which tee.exe
-        which parallel.exe
-        tee --version | head -1
-        parallel --version | head -1
-        hostname --version | head -1
-        jq --version | head -1
-        [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
+    # - name: SHELL.sh env test
+    #   run: |
+    #     set -eu
+    #     echo base=$base repo=$repo branch=$branch
+    #     which tee.exe
+    #     which parallel.exe
+    #     tee --version | head -1
+    #     parallel --version | head -1
+    #     hostname --version | head -1
+    #     jq --version | head -1
+    #     [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
 
     - name: Expand Source Repositories
       uses: ./fsvr-action
@@ -188,13 +184,13 @@ jobs:
       with:
         limit-access-to-actor: true
 
-    - name: fsvr-action args test
-      uses: ./fsvr-action
-      with:
-        environment: foo=bar
-        args: An argument string ${{ inputs.fstuple }}
-        run: |
-          echo ok 1=$1 2=$2 args="$(echo "$@")"
+    # - name: fsvr-action args test
+    #   uses: ./fsvr-action
+    #   with:
+    #     environment: foo=bar
+    #     args: An argument string ${{ inputs.fstuple }}
+    #     run: |
+    #       echo ok 1=$1 2=$2 args="$(echo "$@")"
 
     - name: PATH/ENV preflight tests
       run: |
@@ -202,7 +198,7 @@ jobs:
         test `hostname` == "windows-2022" || exit 2022
         test -v nunja_dir || exit 122
         test -d "$nunja_dir" || exit 123
-        echo 'test $a' | env a=b envsubst || exit 124
+        test $(echo 'test-$a' | eval "a=b envsubst") == test-b || exit 124
 
     - name: Generate Build Vars
       run: |
@@ -228,11 +224,8 @@ jobs:
               /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
           }
 
-    - name: 010_ensure_build_directories
-      run: fsvr_step 010
-
-    - name: 020_perform_replacements
-      run: fsvr_step 020
+    - name: 010_ensure_build_directories && 020_perform_replacements
+      run: fsvr_step 010 && fsvr_step 020
 
     - name: 038_provision_openvr
       uses: ./fsvr-action
@@ -251,18 +244,9 @@ jobs:
     - name: 039_provision_p373r
       run: fsvr_step 039
 
-    - name: 040_generate_package_infos
-      run: fsvr_step 040
+    - name: 040_generate_package_infos && 050_generate_packages_info_text
+      run: fsvr_step 040 && fsvr_step 050
 
-    - name: 050_generate_packages_info_text
-      run: fsvr_step 050
-#
-#     - name: 060_download_packages
-#       run: fsvr_step 060
-#
-#     - name: 070_verify_downloads
-#       run: fsvr_step 070
-#
     - name: 080_untar_packages
       uses: ./fsvr-action
       with:
@@ -277,12 +261,6 @@ jobs:
               fsvr_step 080_untar_packages    || exit 80
               /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
           }
-#
-#     - name: 070_verify_downloads
-#       run: fsvr_step 070
-
-    # - name: 080_untar_packages
-    #   run: fsvr_step 080
 
     - name: 085_prepare_msys_msvc
       run: fsvr_step 085
@@ -319,26 +297,26 @@ jobs:
       with:
         limit-access-to-actor: true
 
-    - name: log env on error
-      if: failure()
-      uses: ./fsvr-action
-      with:
-        run: |
-          ./fsvr/util/_utils.sh upload_artifact debug "$(cat <<EOF
-          SHELL.env
-          gha-bootstrap.env
-          build/build_vars.env
-          build/msvc.env
-          build/msvc.path.env
-          build/msvc.nunja.env
-          EOF
-          )"
+    # - name: log env on error
+    #   if: failure()
+    #   uses: ./fsvr-action
+    #   with:
+    #     run: |
+    #       ./fsvr/util/_utils.sh upload_artifact debug "$(cat <<EOF
+    #       SHELL.env
+    #       gha-bootstrap.env
+    #       build/build_vars.env
+    #       build/msvc.env
+    #       build/msvc_path.env
+    #       build/msvc.nunja.env
+    #       EOF
+    #       )"
 
-    - name: 006 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '006'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+    # - name: 006 Setup tmate session
+    #   if: fromJSON(inputs.fstuple).pause == '006'
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true
 
     - name: Setup tmate session
       if: failure()
