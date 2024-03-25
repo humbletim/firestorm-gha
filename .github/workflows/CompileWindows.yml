@@ -219,12 +219,13 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          export INPUT_key=$base-cache-msvc-a INPUT_path="$(echo 'build/msvc.env build/msvc_path.env' | tr ' ' '\n')"
+          declare -a msvcs=(build/msvc.env build/msvc.nunja.env build/msvc_path.env)
+          export INPUT_key=$base-cache-msvc-a INPUT_path="$(echo "${msvcs[@]}" | tr ' ' '\n')"
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-            | grep -i 'cache restored' && { echo 'yup' ; ls -l build/msvc.env build/msvc.nunja.env ; } || {
+            | grep -i 'cache restored' && { echo 'yup' ; ls -l "${msvcs[@]}" ; } || {
               echo 'nope'
               $fsvr_dir/util/generate_msvc_env.sh
-              ls -l build/msvc.env build/msvc.nunja.env
+              ls -l ${msvcs[@]}
               /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
           }
 
