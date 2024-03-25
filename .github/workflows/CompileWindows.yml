@@ -48,7 +48,8 @@ jobs:
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
         echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
         . $GITHUB_ENV
-        echo "cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_]@-@g')" | tee -a $GITHUB_ENV
+        echo "cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
+        echo "build_id=$(echo "${GITHUB_REF}-$base" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
 
     - name: Clone
       run: |
@@ -166,16 +167,18 @@ jobs:
           done)"
 
           tools="$(for id in jq ninja parallel bash ; do
-            echo "| $id | $($id --version | head 1 || true) |"
+            echo "| $id | $($id --version | head -1 || true) |"
           done)"
 
           cat <<EOF >> $GITHUB_STEP_SUMMARY
-          | name    | value       |
-          | ---------- | ----------- |
-          | base  | $base |
-          | repo  | $repo |
-          | branch | $branch |
-          | hostname  | `hostname` |
+          | name    | value         |
+          | --------- | ----------- |
+          | build_id  | $build_id   |
+          | cache_id  | $cache_id   |
+          | base      | $base       |
+          | repo      | $repo       |
+          | branch    | $branch     |
+          | hostname  | `hostname`  |
           $repos
           $tools
           EOF

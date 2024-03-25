@@ -12,6 +12,7 @@ require gha.cachette.bash
 _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
 _assert "version_xyzw" test -n "$version_xyzw"
+_assert "build_id" test -n "$build_id"
 
 function 010_ensure_build_directories() {( $_dbgopts;
     local directories=(
@@ -309,14 +310,14 @@ function 0b0_bundle() {( $_dbgopts;
 function 0c0_upload_artifacts() {( $_dbgopts;
   local Installer=`ls build/Phoenix*.exe |head -1`
   local InstallerName=$(basename $Installer)
-  local InstallerExe=$branch-${InstallerName}
+  local InstallerExe=$build_id-$branch-${InstallerName}
   mkdir dist
   ht-ln $Installer dist/$InstallerExe
 
   ( cd dist && gha-upload-artifact ${InstallerExe/.exe/} $InstallerExe )
 
   local Portable=`ls build/Firestorm*.7z |head -1`
-  local PortableArchive=$branch-$(basename $Portable)
+  local PortableArchive=$build_id-$branch-$(basename $Portable)
   ht-ln $Portable dist/$PortableArchive
 
   ( cd dist && gha-upload-artifact ${PortableArchive/.7z/} $PortableArchive )
