@@ -214,7 +214,15 @@ function gha-match-text-entries() {
   local -n _textmap=$1
   local -n _found=$2
   shift 2
-  local raw="$@$'\n'"
+  declare -a array=("$@")
+  local raw="$(
+    for x in "${!array[@]}" ; do
+      echo ""
+      echo "${array[$x]}";
+      echo ""
+    done
+    echo ""
+  )"
   for x in "${!_textmap[@]}"; do
     local y="${_textmap[$x]}"
     if [[ $raw =~ $y([^$'\n']+)$'\n' ]]; then

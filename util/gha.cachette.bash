@@ -45,7 +45,7 @@ function gha-cache-exists() {(
     )
 
     local -A Found
-    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-} ${Raw[data:stderr]:-}"
+    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-}" "${Raw[data:stderr]:-}"
     gha-merge-arrays Raw Found
 
     if [[ -n ${Raw[outputs:error]+_} ]] ; then
@@ -118,7 +118,7 @@ function gha-cache-restore() {(
     )
 
     local -A Found
-    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-} ${Raw[data:stderr]:-}"
+    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-}" "${Raw[data:stderr]:-}"
     gha-merge-arrays Raw Found
 
     if [[ -n ${Raw[outputs:error]+_} ]] ; then
@@ -184,7 +184,7 @@ function gha-cache-save() {(
     )
 
     local -A Found
-    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-} ${Raw[data:stderr]:-}"
+    gha-match-text-entries TextMap Found "${Raw[data:stdout]:-}" "${Raw[data:stderr]:-}"
     gha-merge-arrays Raw Found
 
     if [[ -n ${Raw[outputs:error]+_} ]] ; then
