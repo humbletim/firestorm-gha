@@ -311,11 +311,20 @@ function gha-invoke-action() {
     echo "-----$rc-----------------------------------" >&2
     wait
 
-    local json="$(jq -n '{ $inputs, $outputs, $data, $rc }' \
+    local json
+    json="$(jq -n '{ $inputs, $outputs, $data, $rc }' \
       --argjson inputs "$jsoninputs" \
       --argjson outputs "$jsonoutputs" \
       --argjson data "$jsondata" \
       --argjson rc "$rc" )"
+    if [[ $? -ne 0 ]]; then
+      if jq -e . <<< "$jsoninputs" >/dev/null; then echo "jsoninputs OK" ; else "jsoninputs bad '$jsoninputs'" ; fi
+      if jq -e . <<< "$jsonoutputs" >/dev/null; then echo "jsonoutputs OK" ; else "jsonoutputs bad '$jsonoutputs'" ; fi
+      if jq -e . <<< "$jsondata" >/dev/null; then echo "jsondata OK" ; else "jsondata bad '$jsondata'" ; fi
+      jq -e . <<< "$rc" >/dev/null && echo "rc OK"
+      exit 12345
+    fi
+
     if [[ -n $haveRaw ]] ; then
       gha-json-to-assoc _Raw "" "$json"
     else
