@@ -88,6 +88,7 @@ jobs:
         make-stub bin/BASH_FUNC_invoke.exe
         fsvr/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
         ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
+        ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
 
     - name: Populated bin/
       uses: ./fsvr-action
@@ -97,26 +98,34 @@ jobs:
 
           source fsvr/gha-bootstrap.sh
           source $fsvr_dir/util/gha.cachette.bash
-          gha-cache-restore $base-bin-b bin || (
-              set -Euo pipefail
-              literally_exists bin/ninja.exe  || get_ninja    || exit `_err $? "failed to provision ninja $?"`
-              literally_exists bin/pystuff/Python39 || get_colout   || exit `_err $? "failed to provision .colout $?"`
-              literally_exists bin/parallel   || get_parallel || exit `_err $? "failed to provision parallel $?"`
-              literally_exists bin/colout.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
-              literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
-              # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
-              python -m pip install --no-warn-script-location --user llsd
-              gha-cache-save $base-bin-b bin || exit 85
-          )
+
           function xxtest_bin() {
             test -f bin/parallel-home/will-cite || return 196
-            which parallel.exe
-            which colout
             parallel -- --version | head -1     || return 197
             ninja --version | head -1           || return 198
             [[ `hostname` =~ windows[-]?2022 ]] || return 199
+            jq --version | head -1              || return 200
+            which parallel.exe
+            which colout
+            which jq
           }
-          xxtest_bin || exit `_err $? "!xxtest_bin"`
+
+          gha-cache-restore $base-bin-b bin || (
+            set -Euo pipefail
+            literally_exists bin/ninja.exe        || get_ninja    || exit `_err $? "failed to provision ninja $?"`
+            literally_exists bin/pystuff/Python39 || get_colout   || exit `_err $? "failed to provision .colout $?"`
+            literally_exists bin/parallel         || get_parallel || exit `_err $? "failed to provision parallel $?"`
+
+            literally_exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
+            literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
+
+            # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
+            python -m pip install --no-warn-script-location --user llsd
+
+            xxtest_bin || exit `_err $? "!xxtest_bin"`
+
+            gha-cache-save $base-bin-b bin || exit 85
+          )
 
     - name: 002 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '002'
@@ -133,6 +142,7 @@ jobs:
         tee --version | head -1
         parallel --version | head -1
         hostname --version | head -1
+        jq --version | head -1
         [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
 
     - name: Expand Source Repositories
@@ -148,11 +158,15 @@ jobs:
             test -d repo/fs-build-variables/.git  || \
               quiet_clone FirestormViewer/fs-build-variables c57be16efb2b48d9e117c7449fc105c7f9da16d0 repo/fs-build-variables
 
-            gha-cache-save $cache_id-repo-a repo || exit 107
+            gha-cache-save $cache_id-repo-a repo  || exit 107
           )
 
           repos="$(for id in repo/$branch repo/p373r repo/fs-build-variables ; do
-            echo "| $id | $(git -C $id describe --all --always) |"
+            echo "| ./$id | $(git -C $id describe --all --always) |"
+          done)"
+
+          tools="$(for id in jq ninja parallel bash ; do
+            echo "| $id | $($id --version | head 1 || true) |"
           done)"
 
           cat <<EOF >> $GITHUB_STEP_SUMMARY
@@ -163,6 +177,7 @@ jobs:
           | branch | $branch |
           | hostname  | `hostname` |
           $repos
+          $tools
           EOF
 
     - name: 003 Setup tmate session
