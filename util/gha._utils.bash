@@ -130,7 +130,7 @@ function _gha-json-to-assoc() {
     local paths="$2"
     local json="$3"
     local JSON
-    JSON="$(echo -n "$json" | jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]")"
+    JSON="$(echo -n "$json" | jq -r "to_entries|map(\"\(.key)=\"+(.value|tojson))|.[]")"
     test $? -eq 0 || { echo "error --- $?" ; echo "json=$json" ; exit 99;  }
 
     local kv
@@ -142,7 +142,7 @@ function _gha-json-to-assoc() {
         if [[ $value =~ ^\{.*\}$  || $value =~ ^\[.*\]$ ]]; then
             _gha-json-to-assoc $1 "$key" "$value"
         else
-            value="$(perl -pe 's@~__u(....)__~@chr(hex("0x$1"))@ge' <<< "$value")"
+            value="$(jq -n -r '$v' --argjson v "$value" | perl -pe 's@~__u([0-9a-f]{4})__~@chr(hex("0x$1"))@ge')"
             _assoc[$key]="$value"
         fi
     done <<< "$JSON"

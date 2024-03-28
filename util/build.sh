@@ -8,7 +8,6 @@ require gha.load-level.bash
 require gha.upload-artifact.bash
 require gha.cachette.bash
 
-# echo "root_dir=$root_dir" >&2
 _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
 _assert "version_xyzw" test -n "$version_xyzw"
@@ -49,7 +48,7 @@ index 94636371fc..16577204d7 100755
                      nsis_path = possible_path
                      break
 
-+        return print("[###firestorm-gha### early exit]", setattr(self, 'package_file', self.dst_path_of(tempfile)))
++        return print("[###tpv-gha### early exit]", setattr(self, 'package_file', self.dst_path_of(tempfile)))
          self.run_command([possible_path, '/V2', self.dst_path_of(tempfile)])
 
          self.fs_sign_win_installer(substitution_strings) # <FS:ND/> Sign files, step two. Sign installer.
@@ -59,29 +58,32 @@ EOF
 
 function 020_perform_replacements() {( $_dbgopts;
     echo $version_xyzw | tee $build_dir/newview/viewer_version.txt >&2
-    ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
 
     ht-ln $fsvr_dir/newview/cmake_pch.hxx $build_dir/newview/
     ht-ln $fsvr_dir/newview/cmake_pch.cxx $build_dir/newview/
 
-    cat $source_dir/newview/fsversionvalues.h.in | sed -E 's~@([A-Z_]+)@~$\1~g' \
-      | eval "${fsversionvalues[@]} C:/PROGRA~1/Git/mingw64/bin/envsubst.exe" > $build_dir/newview/fsversionvalues.h || return `_err $? "envsubst fsversionvalues.h.in"`
+    if [[ -f $source_dir/newview/fsversionvalues.h.in ]] ; then
+      ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
+      cat $source_dir/newview/fsversionvalues.h.in | sed -E 's~@([A-Z_]+)@~$\1~g' \
+        | eval "${fsversionvalues[@]} C:/PROGRA~1/Git/mingw64/bin/envsubst.exe" > $build_dir/newview/fsversionvalues.h || return `_err $? "envsubst fsversionvalues.h.in"`
+      grep '###tpv-gha###' $root_dir/indra/newview/viewer_manifest.py || (
+        set -ex
+        cd $root_dir && echo "$viewer_manifest_patch" | patch -p1
+      )
+      # TODO: see if there is a way to opt-out via configuration from flickr/discord integration
+      ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
+      ht-ln $source_dir/newview/fsdiscordkey.h.in $build_dir/newview/fsdiscordkey.h
+    else
+      ht-ln $source_dir/newview/icons/test/secondlife.ico $build_dir/newview/
+    fi
 
     cat $source_dir/newview/res/viewerRes.rc \
       | eval "${fsversionvalues[@]} C:/PROGRA~1/Git/mingw64/bin/envsubst.exe" > $build_dir/newview/viewerRes.rc || return `_err $? "envsubst viewerRes.rc"`
-
     grep ProductVersion $source_dir/newview/res/viewerRes.rc $build_dir/newview/viewerRes.rc >&2
-    # TODO: see if there is a way to opt-out via configuration from flickr/discord integration
-    ht-ln $source_dir/newview/exoflickrkeys.h.in $build_dir/newview/exoflickrkeys.h
-    ht-ln $source_dir/newview/fsdiscordkey.h.in $build_dir/newview/fsdiscordkey.h
 
     # workaround a windows64 ninja viewer_manifest.py path quirkinesses
     ht-ln $build_dir/sharedlibs $build_dir/sharedlibs/Release
 
-    grep '###firestorm-gha###' $root_dir/indra/newview/viewer_manifest.py || (
-      set -ex
-      cd $root_dir && echo "$viewer_manifest_patch" | patch -p1
-    )
 )}
 
 function 085_prepare_msys_msvc() {( $_dbgopts;
@@ -171,11 +173,12 @@ function _verify_one() {( $_dbgopts;
     echo "$hash $filename" > $fsvr_cache_dir/$filename.$tool
     # echo "$tool: $filename ($fsvr_cache_dir)" >&2
 
+    local got=
     got=($(cd $fsvr_cache_dir && $tool $filename))
     out="$(cd $fsvr_cache_dir && $tool --strict --check $filename.$tool)" || {
         rc=$?
         echo "$out"
-        echo "checksum failed: $filename expected: $hash got: $got" >&2 ;
+        echo "checksum failed: $filename expected: $hash got: ${got:-}" >&2 ;
         return $rc
     }
     _relativize "$out"
@@ -185,6 +188,7 @@ function _verify_one() {( $_dbgopts;
 function 070_verify_downloads() {( $_dbgopts;
     echo packages_dir=$packages_dir >&2
     echo fsvr_cache_dir=$fsvr_cache_dir >&2
+    echo root_dir=$root_dir >&2
     cd $fsvr_cache_dir/
     test -f $build_dir/$FUNCNAME.txt && rm -v $build_dir/$FUNCNAME.txt
     # echo "`jq -r '.[]|"_verify_one "+.name+" "+.hash+" "+(.url//"null")+""' $build_dir/packages-info.json | grep -v null`"

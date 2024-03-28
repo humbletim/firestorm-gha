@@ -37,14 +37,15 @@ _xpath="\$_PATH"
 declare -x PATH="\$_xpath"
 declare -x LANG=en_US.UTF-8
 declare -x PYTHONUSERBASE="$_PYTHONUSERBASE"
+declare -x PYTHONWARNINGS="ignore::SyntaxWarning,\${PYTHONWARNINGS:-}"
 
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 
 function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
 function hostname(){ echo 'windows-2022' ; }
 function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
-function colout() { "`which python3`" "$PWD/bin/pystuff/Python39/site-packages/colout/colout.py" "\$@" ; }
-function parallel() { PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
+function colout() { "`which python3`" "`PYTHONUSERBASE=$_PYTHONUSERBASE python3 -msite --user-site`/colout/colout.py" "\$@" ; }
+function parallel() { PARALLEL_SHELL="$BASH" PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
 function jq() { "`which jq`" $(
   # grr... detect if jq supports -b (binary)
   # otherwise... fall back to tr -d '\r' workaround

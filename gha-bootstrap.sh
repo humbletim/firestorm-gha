@@ -30,7 +30,7 @@ function quiet_clone() {(
     git -C "$3" describe --all --always
 )}
 
-function initialize_firestorm_checkout() {(    
+function initialize_firestorm_checkout() {(
     set -Euo pipefail
 )}
 
@@ -45,7 +45,7 @@ function get_ninja() {(
 )}
 
 
-# 
+#
 # function get_colout_babel() {(
 #     set -Euo pipefail
 #     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
@@ -59,7 +59,7 @@ function get_ninja() {(
 #     python bin/.colout/scripts/download_import_cldr.py 2>/dev/null || return `_err $? "failed to localize babel $?"`
 #     ls -l bin/.colout | grep babel
 # )}
-# 
+#
 # function get_colout_pygments() {(
 #     set -Euo pipefail
 #     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
@@ -77,8 +77,9 @@ function get_colout() {(
     set -Euo pipefail
     mkdir bin/.colout -pv
     python -m pip install --no-warn-script-location --user colout
-    perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' bin/pystuff/Python39/site-packages/colout/colout.py
-    diff bin/pystuff/Python39/site-packages/colout/colout.py*
+    local pysite="$(python -msite --user-site)"
+    perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' $pysite/colout/colout.py
+    diff $pysite/colout/colout.py*
     # ./fsvr/util/_utils.sh ht-ln bin/.colout/Python39/site-packages bin/.colout/site-packages
     echo hello world | colout "hello" "red" | colout "world" "blue"
     # local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
@@ -130,6 +131,7 @@ function get_bootstrap_vars() {(
 
   echo _home=`readlink -f "${USERPROFILE:-$HOME}"`
   echo _bash=$BASH
+  echo build_id=${build_id:-$fsvr_branch-$base}
   echo firestorm=$repo@$base#$branch
   echo fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
   echo fsvr_dir=$fsvr_dir

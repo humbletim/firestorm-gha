@@ -1,7 +1,6 @@
 name: CompileWindows
 
 on:
-  # pull_request:
   workflow_dispatch:
       inputs:
         fstuple:
@@ -108,8 +107,10 @@ jobs:
 
           gha-cache-restore $base-bin-b bin || (
             set -Euo pipefail
+            pysite="$(cygpath -m "$(python3 -msite --user-site)")"
+
             literally_exists bin/ninja.exe        || get_ninja    || exit `_err $? "failed to provision ninja $?"`
-            literally_exists bin/pystuff/Python39 || get_colout   || exit `_err $? "failed to provision .colout $?"`
+            literally_exists $pysite/colout       || get_colout   || exit `_err $? "failed to provision .colout $?"`
             literally_exists bin/parallel         || get_parallel || exit `_err $? "failed to provision parallel $?"`
 
             literally_exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
