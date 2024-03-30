@@ -75,6 +75,7 @@ function 020_perform_replacements() {( $_dbgopts;
       ht-ln $source_dir/newview/fsdiscordkey.h.in $build_dir/newview/fsdiscordkey.h
     else
       ht-ln $source_dir/newview/icons/test/secondlife.ico $build_dir/newview/
+      ht-ln $source_dir/newview/icons/test/secondlife.ico $build_dir/newview/ll_icon.ico
     fi
 
     cat $source_dir/newview/res/viewerRes.rc \
