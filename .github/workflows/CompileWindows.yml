@@ -271,8 +271,8 @@ jobs:
     - name: 0a0_ninja_build SLPlugin.exe
       run: fsvr_step 0a0 SLPlugin.exe
 
-    - name: 0a0_ninja_build firestorm-bin.exe
-      run: fsvr_step 0a0 firestorm-bin.exe
+    # - name: 0a0_ninja_build firestorm-bin.exe
+    #   run: fsvr_step 0a0 firestorm-bin.exe
 
     - name: 0a0_ninja_build llpackage
       run: fsvr_step 0a0 llpackage
