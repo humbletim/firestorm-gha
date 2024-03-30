@@ -5,12 +5,7 @@ on:
       inputs:
         fstuple:
           type: string
-          default: '{ "base":"6.6.17", "repo":"FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }'
-          options: |
-            { "base":"6.6.17", "repo":"FirestormViewer/phoenix-firestorm", "branch": "Firestorm_6.6.17" }
-            { "base":"7.1.2", "repo":"FirestormViewer/phoenix-firestorm-alpha", "branch": "master" }
-            { "base":"7.1.2", "repo":"Sgeo/phoenix-firestorm-alpha", "branch": "VR_Sgeo_2024" }
-            { "base":"7.1.4", "repo":"FirestormViewer/phoenix-firestorm", "branch": "7.1.4_Mar14_preview" }
+          required: true
 
 run-name: ${{ github.ref_name }} | ${{ fromJSON(inputs.fstuple).branch }} @ ${{ fromJSON(inputs.fstuple).base }}
 
@@ -152,13 +147,11 @@ jobs:
             set -Euo pipefail
             test -d repo/$branch/.git             || quiet_clone $repo $branch repo/$branch
             test -d repo/p373r/.git               || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
-            test -d repo/fs-build-variables/.git  || \
-              quiet_clone FirestormViewer/fs-build-variables c57be16efb2b48d9e117c7449fc105c7f9da16d0 repo/fs-build-variables
 
             gha-cache-save $cache_id-repo-a repo  || exit 107
           )
 
-          repos="$(for id in repo/$branch repo/p373r repo/fs-build-variables ; do
+          repos="$(for id in repo/$branch repo/p373r ; do
             echo "| ./$id | $(git -C $id describe --all --always) |"
           done)"
 
@@ -233,7 +226,7 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
+          # tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
           export INPUT_key=$base-cache-openvr-d INPUT_path=cache/openvr-**
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && { echo 'yup' ; ls -l $fsvr_cache_dir ; } || {

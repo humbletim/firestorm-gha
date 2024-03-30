@@ -1,8 +1,4 @@
-# auto-divested constants
+# generated
 include $nunja_dir/cl.petroglyph.constants.nunja
-
-# CMakeFiles/rules.ninja
 include $nunja_dir/cl.petroglyph.rules.nunja
-
-# etched build.ninja
 include $nunja_dir/cl.petroglyph.nunja

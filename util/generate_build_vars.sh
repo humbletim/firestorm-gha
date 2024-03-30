@@ -5,7 +5,7 @@ _usage="./util/generate_build_vars.sh <viewer channel> <viewer version x.y.z.w> 
 
 viewer_channel=$1 viewer_version=$2 build_dir=$3
 
-require_here=`readlink -f $(dirname $0)`
+require_here=`readlink -f $(dirname $BASH_SOURCE)`
 function require() { source $require_here/$@ ; }
 require _utils.sh
 
@@ -13,6 +13,8 @@ _assert "usage: $_usage"        [[ $# -eq 3 ]]
 _assert "invalid channel name" '[[ $viewer_channel =~ ^[-_a-zA-Z0-9.]+$ ]]'
 _assert "invalid version"      '[[ $viewer_version =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]'
 _assert "invalid build_dir"    'test -d $build_dir'
+
+_assert "invalid fsvr_dir"    'test -v fsvr_dir'
 
 test -v source_dir
 test -v fsvr_dir
