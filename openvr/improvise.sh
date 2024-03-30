@@ -3,8 +3,8 @@ set -Euo pipefail
 
 test -d "$fsvr_cache_dir" || { echo "env fsvr_cache_dir not found" >&2 ; exit 15 ; }
 
-export tag=v1.6.10
-export commit=8eaf723
+export tag=v2.5.1
+export commit=ae46a8d
 tarball=$fsvr_cache_dir/openvr-$tag.$commit.tar.bz2
 
 function verify_from_packages_json() {
@@ -66,7 +66,7 @@ tar --force-local -C stage -cjvf $tarball ${FILES[@]} || exit 62
 
 hash=($(md5sum $tarball))
 url="file:///$tarball"
-qualified="$(jq '.openvr.url = $url | .openvr.hash = $hash' --arg url "$url" --arg hash "$hash" meta/packages-info.json)"
+qualified="$(jq '.openvr.url = $url | .openvr.hash = $hash | .openvr.version = $version' --arg url "$url" --arg hash "$hash" --arg version "$tag.$commit" meta/packages-info.json)"
 
 test ! -s $tarball.json || echo "$qualified" | diff $tarball.json - || true
 
