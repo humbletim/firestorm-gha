@@ -20,7 +20,7 @@ function 010_ensure_build_directories() {( $_dbgopts;
       copy_win_scripts
       sharedlibs
       llcommon
-      newview/CMakeFiles/firestorm-bin.dir
+      newview/CMakeFiles/${viewer_id}-bin.dir
     )
 
     for x in "${directories[@]}"; do
@@ -76,6 +76,9 @@ function 020_perform_replacements() {( $_dbgopts;
     else
       ht-ln $source_dir/newview/icons/test/secondlife.ico $build_dir/newview/
       ht-ln $source_dir/newview/icons/test/secondlife.ico $build_dir/newview/ll_icon.ico
+      mkdir -v $packages_dir/js $packages_dir/fonts
+      ht-ln $packages_dir/js $source_dir/newview/skins/default/html/common/equirectangular/js
+      ht-ln $packages_dir/fonts $source_dir/newview/fonts 
     fi
 
     cat $source_dir/newview/res/viewerRes.rc \
@@ -257,14 +260,14 @@ function 0a0_ninja_build() {( $_dbgopts;
 
 function make_installer() {
   cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
-  local nsi=$build_dir/newview/firestorm_setup_tmp.nsi
+  local nsi=$build_dir/newview/${viewer_id}_setup_tmp.nsi
   #s@^SetCompressor .*$@SetCompressor zlib@g;
   grep "openvr_api.dll" $nsi \
     || perl -i.bak  -pe 's@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
        $nsi
 
   export XZ_DEFAULTS=-T0
-  PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $build_dir/newview/firestorm_setup_tmp.nsi
+  PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $nsi
 
   local InstallerName=$(basename $build_dir/newview/Phoenix*${viewer_version//./-}*.exe)
   local InstallerExe=${InstallerName/.exe/-$version_shas.exe}
@@ -273,22 +276,22 @@ function make_installer() {
 }
 
 function make_7z() {( set -Euo pipefail;
-  local nsi=$build_dir/newview/firestorm_setup_tmp.nsi
+  local nsi=$build_dir/newview/${viewer_id}_setup_tmp.nsi
   grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
 
   echo "-----------------------------------"
   cat $fsvr_dir/util/load_with_settings_and_cache_here.bat;
   echo "-----------------------------------"
-  echo APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst
+  echo APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst
   echo "-----------------------------------"
 
   cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
-    | APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst
+    | APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst
   echo "-----------------------------------"
 
 
   cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
-   | APPLICATION_EXE="$(basename `ls $build_dir/newview/Firestorm*.exe`)" envsubst \
+   | APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst \
    | tee $build_dir/newview/load_with_settings_and_cache_here.bat
 
   ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
@@ -321,7 +324,7 @@ function 0c0_upload_artifacts() {( $_dbgopts;
 
   ( cd dist && gha-upload-artifact ${InstallerExe/.exe/} $InstallerExe )
 
-  local Portable=`ls build/Firestorm*.7z |head -1`
+  local Portable=`ls build/${viewer_name}*.7z |head -1`
   local PortableArchive=$build_id-$branch-$(basename $Portable)
   ht-ln $Portable dist/$PortableArchive
 

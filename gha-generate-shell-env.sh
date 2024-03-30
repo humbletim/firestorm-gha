@@ -58,7 +58,7 @@ function jq() { "`which jq`" $(
   fi
 ) ; }
 
-function fsvr_step() { set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; }
+function fsvr_step() {( set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; )}
 
 declare -xf _err tee parallel ht-ln hostname colout jq fsvr_step
 set -Eo pipefail

@@ -129,6 +129,12 @@ function get_bootstrap_vars() {(
       fsvr_dir=${fsvr_dir:-.}
   fi
 
+  case "$base" in
+    sl-*) echo viewer_id=secondlife ; echo viewer_name=SecondLife ;;
+    fs-*) echo viewer_id=firestorm  ; echo viewer_name=Firestorm  ;;
+       *) echo viewer_id=unknown    ; echo viewer_name=Unknown    ;;
+  esac
+
   echo _home=`readlink -f "${USERPROFILE:-$HOME}"`
   echo _bash=$BASH
   echo build_id=${build_id:-$fsvr_branch-$base}
