@@ -2,7 +2,7 @@
 <llsd>
 <map>
     <key>build_id</key>
-    <string>8eaf723</string>
+    <string>$commit</string>
     <key>configuration</key>
     <string>default</string>
     <key>manifest</key>
@@ -25,7 +25,7 @@
       <key>name</key>
       <string>openvr</string>
       <key>version</key>
-      <string>v1.6.10.8eaf723</string>
+      <string>$tag.$commit</string>
     </map>
     <key>platform</key>
     <string>windows64</string>

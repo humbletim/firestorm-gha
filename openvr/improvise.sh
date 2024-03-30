@@ -3,7 +3,9 @@ set -Euo pipefail
 
 test -d "$fsvr_cache_dir" || { echo "env fsvr_cache_dir not found" >&2 ; exit 15 ; }
 
-tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
+export tag=v1.6.10
+export commit=8eaf723
+tarball=$fsvr_cache_dir/openvr-$tag.$commit.tar.bz2
 
 function verify_from_packages_json() {
   local tarball=$1 json=${2:-$1.json}
@@ -31,21 +33,24 @@ cd "$(dirname $0)"
 
 mkdir -pv stage
 
-cp -avu autobuild-package.xml stage/
+envsubst < autobuild-package.xml > stage/autobuild-package.xml
+touch --reference=autobuild-package.xml stage/autobuild-package.xml
+ls -l stage
+
 (
-  set -xEou pipefail
+  set -Eou pipefail
   cd stage
   mkdir -pv lib/release include LICENSES
 
   # openvr repo is hundreds of megabytes... we just need headers, win64 .lib and win64 .dll
-  ovr=https://rawcdn.githack.com/ValveSoftware/openvr/v1.6.10
+  ovr=https://rawcdn.githack.com/ValveSoftware/openvr/$tag
   function _wget() { echo "fetching $@" >&2 ; wget -nv -nc "$@" ; }
   _wget -O LICENSES/openvr.txt $ovr/LICENSE
   _wget -O include/openvr.h $ovr/headers/openvr.h
   _wget -P lib/release/ $ovr/bin/win64/openvr_api.dll $ovr/lib/win64/openvr_api.lib
 )
 
-find stage/ -ls
+#find stage/ -ls
 
 FILES=(
  autobuild-package.xml
@@ -54,10 +59,10 @@ FILES=(
  lib/release/openvr_api.{dll,lib}
 )
 
-for x in ${FILES[@]} ; do test -s stage/$x || { echo "'$x' invalid" >&2 ; exit 38 ; } ; done
+for x in ${FILES[@]} ; do test -s stage/$x || { echo "'$x' invalid" >&2 ; exit 38 ; } ; done || exit 61
 
-set -x
-tar --force-local -C stage -cjvf $tarball ${FILES[@]}
+#set -x
+tar --force-local -C stage -cjvf $tarball ${FILES[@]} || exit 62
 
 hash=($(md5sum $tarball))
 url="file:///$tarball"
