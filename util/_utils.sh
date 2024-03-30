@@ -7,6 +7,7 @@ _fsvr_utils_dir=$(readlink -f $(dirname "$BASH_SOURCE"))
 source $_fsvr_utils_dir/gha.reduce-paths.bash
 source $_fsvr_utils_dir/gha.wget-sha256.bash
 source $_fsvr_utils_dir/gha.ht-ln.bash
+source $_fsvr_utils_dir/gha.cygpath.bash
 
 _dbgopts='set -Euo pipefail'
 
@@ -81,7 +82,6 @@ function _setenv_ma() {
   test -e "$value" || [[ "$value" == \$* ]] || { echo "ERROR: _setenv_extant $@ value=$value does not exist" >&2 ; exit 1; }
   _setenv "$name=$value"
 }
-
 
 function _realpath() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
 function _relative_path() { realpath --relative-to "$2" "$1" ; }

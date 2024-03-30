@@ -153,9 +153,9 @@
     "url": "https://github.com/secondlife/llca/releases/download/v202310121525.0-d22bd98/llca-202310121530.0-common-d22bd98.tar.zst",
     "version": "202310121530.0"
   },
- "llphysicsextensions_stub": {
+  "llphysicsextensions_stub": {
     "copyright": "Copyright (c) 2010, Linden Research, Inc.",
-    "hash": "3bc9b7eef5f04acfb58a6c8df6d6a86891fb7321",
+    "hash": "546c9e9554a6204bb0c3f0c79b7a34cb",
     "name": "llphysicsextensions_stub",
     "url": "http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/1430/3176/llphysicsextensions_stub-1.0.501415-windows64-501415.tar.bz2",
     "version": "1.0.501415"
@@ -230,19 +230,19 @@
     "url": "https://github.com/secondlife/3p-openssl/releases/download/v1.1.1q.de53f55/openssl-1.1.1q.de53f55-windows64-de53f55.tar.zst",
     "version": "1.1.1q.de53f55"
   },
-  "slvoice": {
-    "copyright": "2010 Vivox, including audio coding using Polycom¨ Siren14TM (ITU-T Rec. G.722.1 Annex C)",
-    "hash": "c39735851fd05c194d0be09b8f9e8cb7",
-    "name": "slvoice",
-    "url": "https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/98682/871552/slvoice-4.10.0000.32327.5fc3fe7c.571099-windows64-571099.tar.bz2",
-    "version": "4.10.0000.32327.5fc3fe7c.571099"
-  },
   "pcre": {
     "copyright": "Copyright (c) 1997-2014 University of Cambridge; Copyright(c) 2009-2014 Zoltan Herczeg; Copyright (c) 2007-2012, Google Inc.",
     "hash": "166564afb60a7536a038fae80e2fc9a41d6dbccb",
     "name": "pcre",
     "url": "https://github.com/secondlife/3p-pcre/releases/download/v8.35.979fd86/pcre-8.35.979fd86-windows64-979fd86.tar.zst",
     "version": "8.35.979fd86"
+  },
+  "slvoice": {
+    "copyright": "2010 Vivox, including audio coding using Polycom¨ Siren14TM (ITU-T Rec. G.722.1 Annex C)",
+    "hash": "c358d697979d2fd3db27673219408853d95888bc",
+    "name": "slvoice",
+    "url": "https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/98682/871552/slvoice-4.10.0000.32327.5fc3fe7c.571099-windows64-571099.tar.bz2",
+    "version": "4.10.0000.32327.5fc3fe7c.571099"
   },
   "threejs": {
     "copyright": "Copyright © 2010-2021 three.js authors",
