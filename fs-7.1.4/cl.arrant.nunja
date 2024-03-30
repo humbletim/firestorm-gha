@@ -1,6 +1,3 @@
-# toolchains and paths
-include $nunja_dir/cl.platform.nunja
-
 # auto-divested constants
 include $nunja_dir/cl.petroglyph.constants.nunja
 
