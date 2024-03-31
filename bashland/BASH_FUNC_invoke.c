@@ -116,6 +116,8 @@ int main(int argc, char *argv[]) {
     // Execute Bash using execv
     int e = execv(bash_path, new_argv);
 
+    while(wait(NULL) > 0);
+
     // Handle execv failure (this should generally not happen)
     fprintf(stderr, "execv failed %d\n", e);fflush(stderr);
     fprintf(stderr, "bash_path=%s\n", bash_path);fflush(stderr);
