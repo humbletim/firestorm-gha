@@ -22,7 +22,7 @@ else
   _PYTHONUSERBASE="$(readlink -f bin/pystuff)"
 fi
 
-pysite="$(python3 -msite --user-site)"
+pysite="$(PYTHONUSERBASE="$_PYTHONUSERBASE" python3 -msite --user-site)"
 
 ######################################################################
 echo "$(cat<<EOF

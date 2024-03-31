@@ -53,13 +53,12 @@ function get_ninja() {(
 
 function get_colout() {(
     set -Euo pipefail
-    mkdir bin/.colout -pv
     python -m pip install --no-warn-script-location --user colout
     local pysite="$(python -msite --user-site)"
     if grep SIGPIPE $pysite/colout/colout.py ; then
       # workaround SIGPIPE on Win32 missing with some colout versions
       perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' $pysite/colout/colout.py
-      diff $pysite/colout/colout.py*
+      diff $pysite/colout/colout.py $pysite/colout/colout.py.bak
     fi
     echo hello world | colout "hello" "red" | colout "world" "blue"
 )}

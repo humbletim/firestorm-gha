@@ -104,7 +104,7 @@ jobs:
             pysite="$(cygpath -m "$(python3 -msite --user-site)")"
 
             literally-exists bin/ninja.exe    || get_ninja    || exit `_err $? "failed to provision ninja $?"`
-            literally-exists $pysite/colout   || get_colout   || exit `_err $? "failed to provision .colout $?"`
+            literally-exists $pysite/colout   || get_colout   || exit `_err $? "failed to provision colout $?"`
             literally-exists bin/parallel     || get_parallel || exit `_err $? "failed to provision parallel $?"`
             literally-exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
             literally-exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
