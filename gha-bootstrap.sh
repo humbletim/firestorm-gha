@@ -84,3 +84,15 @@ function get_parallel() {(
   } || return `_err $? "failed to provision parallel $?"`
   ls -l bin/ | grep parallel
 )}
+
+# yaml2json < fsvr/.github/workflows/CompileWindows.yml | jq '.jobs[].steps[]| "#"+.name+"\n"+.if+"\n"+(.run // .with.run)' -r
+function get_yaml2json() {(
+    set -Euo pipefail
+    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
+        a73fb27e36e30062c48dc0979c96afbbe25163e0899f6f259b654d56fda5cc26 \
+        https://github.com/bronze1man/yaml2json/releases/download/v1.3/yaml2json_windows_amd64.exe\
+      .
+    ) && cp -avu $archive bin/yaml2json.exe || return `_err $? "failed to provision yaml2json.exe $?"`
+    ls -l bin/ | grep yaml2json
+)}
+

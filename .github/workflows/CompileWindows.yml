@@ -78,7 +78,7 @@ jobs:
 
           {
             source fsvr/bashland/gha.alias-exe.bash
-            make-stub bin/BASH_FUNC_invoke.exe
+            BASH=$(cygpath -was $BASH) make-stub bin/BASH_FUNC_invoke.exe
             fsvr/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
             ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
             ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
