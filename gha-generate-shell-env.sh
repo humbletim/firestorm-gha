@@ -32,8 +32,8 @@ _PRESHELL_PATH="$_PRESHELL_PATH"
 _PATH="$_PATH"
 
 set -a
-[[ -f $PWD/env.d/gha-bootstrap.env ]] source $PWD/env.d/gha-bootstrap.env
-[[ -f $PWD/env.d/build_vars.env ]] source $PWD/env.d/build_vars.env
+[[ -f $PWD/env.d/gha-bootstrap.env ]] && source $PWD/env.d/gha-bootstrap.env
+[[ -f $PWD/env.d/build_vars.env    ]] && source $PWD/env.d/build_vars.env
 set +a
 
 _xpath="\$_PATH"
