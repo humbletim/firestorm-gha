@@ -226,7 +226,8 @@ function 090_ninja_preflight() {( $_dbgopts;
     _assert nunja_dir 'test -d "$nunja_dir"'
 
 cat << EOF > $build_dir/build.ninja
-include build_vars.env
+include ../env.d/build_vars.env
+include ../env.d/gha-bootstrap.env
 include msvc.nunja.env
 nunja_dir=$nunja_dir
 include \$nunja_dir/cl.arrant.nunja
@@ -310,20 +311,27 @@ function files2json(){
   echo { \"$(< $build_dir/installer.txt sed 's/,/":"/g' | paste -s -d, - | sed 's/,/", "/g')\" } |tr '\\' '/' > files.json
 }
 
-function 0b0_bundle() {( $_dbgopts;
+function 0b0_bundle_installer() {( $_dbgopts;
   make_installer
-  make_7z
 )}
 
-function 0c0_upload_artifacts() {( $_dbgopts;
-  local Installer=`ls build/Phoenix*.exe |head -1`
+
+function 0b1_upload_installer() {( $_dbgopts;
+  local Installer=`ls build/*Setup*.exe |head -1`
   local InstallerName=$(basename $Installer)
   local InstallerExe=$build_id-$branch-${InstallerName}
   mkdir dist
   ht-ln $Installer dist/$InstallerExe
 
   ( cd dist && gha-upload-artifact ${InstallerExe/.exe/} $InstallerExe )
+)}
 
+
+function 0b2_bundle_7z() {( $_dbgopts;
+  make_7z
+)}
+
+function 0b3_upload_7z() {( $_dbgopts;
   local Portable=`ls build/${viewer_name}*.7z |head -1`
   local PortableArchive=$build_id-$branch-$(basename $Portable)
   ht-ln $Portable dist/$PortableArchive

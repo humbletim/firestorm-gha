@@ -1,0 +1,296 @@
+{
+  "apr_suite": {
+    "copyright": "Copyright © 2012 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.",
+    "hash": "8233de9a11f323a03d569db1043ba5198176457b",
+    "name": "apr_suite",
+    "url": "https://github.com/secondlife/3p-apr_suite/releases/download/v1.7.2-e935465/apr_suite-1.7.2-e935465-windows64-e935465.tar.zst",
+    "version": "1.7.2-e935465"
+  },
+  "boost": {
+    "copyright": "(see individual source files)",
+    "hash": "26214a33c568929ffeeb3463ce183f2888ce4fe4",
+    "name": "boost",
+    "url": "https://github.com/secondlife/3p-boost/releases/download/v1.81-90bb2df/boost-1.81-windows64-90bb2df.tar.zst",
+    "version": "1.81"
+  },
+  "colladadom": {
+    "copyright": "Copyright 2006 Sony Computer Entertainment Inc.",
+    "hash": "b32294a2f31f5b4ca49928e66832aad1bb4a88ac",
+    "name": "colladadom",
+    "url": "https://github.com/secondlife/3p-colladadom/releases/download/v2.3.d1ef72a/colladadom-2.3.d1ef72a-windows64-d1ef72a.tar.zst",
+    "version": "2.3.d1ef72a"
+  },
+  "cubemaptoequirectangular": {
+    "copyright": "Copyright (c) 2017 Jaume Sanchez Elias, http://www.clicktorelease.com",
+    "hash": "6c51855bcf3a8628289881fdaea08c25cf7b1b90",
+    "name": "cubemaptoequirectangular",
+    "url": "https://github.com/secondlife/3p-cubemap_to_eqr_js/releases/download/v1.1.0-d7afe27/cubemaptoequirectangular-1.1.0-windows64-d7afe27.tar.zst",
+    "version": "1.1.0"
+  },
+  "curl": {
+    "copyright": "Copyright (c) 1996 - 2014, Daniel Stenberg, (daniel@haxx.se).",
+    "hash": "07423f41d1320ea405f493869f6460cf8c45def5",
+    "name": "curl",
+    "url": "https://github.com/secondlife/3p-curl/releases/download/v7.54.1-5a4a82d/curl-7.54.1-5a4a82d-windows64-5a4a82d.tar.zst",
+    "version": "7.54.1-5a4a82d"
+  },
+  "dictionaries": {
+    "copyright": "Copyright 2014 Apache OpenOffice software",
+    "hash": "f6835c4d7745cd1cadfbce47b40331d08affb532",
+    "name": "dictionaries",
+    "url": "https://github.com/secondlife/3p-dictionaries/releases/download/v1.0.1-dev2.gf887629-f887629/dictionaries-common-None.tar.zst",
+    "version": "None"
+  },
+  "dullahan": {
+    "copyright": "Copyright (c) 2017, Linden Research, Inc.",
+    "hash": "a00eae7f5dc430ae48389ab723ced39739b0a144",
+    "name": "dullahan",
+    "url": "https://github.com/secondlife/dullahan/releases/download/v118.0.5993.54/dullahan-1.14.0.202310131404_118.4.1_g3dd6078_chromium-118.0.5993.54-windows64-6b02a60.tar.zst",
+    "version": "1.14.0.202310131404_118.4.1_g3dd6078_chromium-118.0.5993.54"
+  },
+  "expat": {
+    "copyright": "Copyright (c) 1998, 1999, 2000 Thai Open Source Software Center Ltd and Clark Cooper - Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006 Expat maintainers.",
+    "hash": "47c01a89bc32c5740efe51be43e459ffd9b7cd34",
+    "name": "expat",
+    "url": "https://github.com/secondlife/3p-expat/releases/download/v2.1.1.1f36d02/expat-2.1.1.1f36d02-windows64-1f36d02.tar.zst",
+    "version": "2.1.1.1f36d02"
+  },
+  "freetype": {
+    "copyright": "Copyright 2006, 2007, 2008, 2009, 2010 by David Turner, Robert Wilhelm, and Werner Lemberg.",
+    "hash": "d175b39257b691a957724e655c6cffe0b5a7b104",
+    "name": "freetype",
+    "url": "https://github.com/secondlife/3p-freetype/releases/download/v2.4.4.4f739fa/freetype-2.4.4.4f739fa-windows64-4f739fa.tar.zst",
+    "version": "2.4.4.4f739fa"
+  },
+  "glext": {
+    "copyright": "Copyright (c) 2007-2010 The Khronos Group Inc.",
+    "hash": "7cc58b3acb230a7e65ea5f0ff800be393eb4aa1b",
+    "name": "glext",
+    "url": "https://github.com/secondlife/3p-glext/releases/download/v69/glext-68-common-685b36e.tar.zst",
+    "version": "68"
+  },
+  "glh_linear": {
+    "copyright": "Copyright (c) 2000 Cass Everitt",
+    "hash": "6604c1cca515d287e697997a8d5593d1cae172a9",
+    "name": "glh_linear",
+    "url": "https://github.com/secondlife/3p-glh_linear/releases/download/v1.0.1-dev2.g3253ed7-3253ed7/glh_linear-common-None.tar.zst",
+    "version": "None"
+  },
+  "googlemock": {
+    "copyright": "Copyright 2008, Google Inc.",
+    "hash": "df51dff9a820fc96c18c2bc00b64467e541633a5",
+    "name": "googlemock",
+    "url": "https://github.com/secondlife/3p-googlemock/releases/download/v1.7.0.77bba00/googlemock-1.7.0.77bba00-windows64-77bba00.tar.zst",
+    "version": "1.7.0.77bba00"
+  },
+  "jpegencoderbasic": {
+    "copyright": "Andreas Ritter, www.bytestrom.eu, 11/2009",
+    "hash": "8ec22e9fc8734ba3d1826f4b88171a6017cc8676",
+    "name": "jpegencoderbasic",
+    "url": "https://github.com/secondlife/3p-jpeg_encoder_js/releases/download/v1.0-9165e47/jpegencoderbasic-1.0-windows64-9165e47.tar.zst",
+    "version": "1.0"
+  },
+  "jpeglib": {
+    "copyright": "Copyright (C) 1991-2011, Thomas G. Lane, Guido Vollbeding.",
+    "hash": "d50fcac69eeb9404638da07db96ee3e1191ecf93",
+    "name": "jpeglib",
+    "url": "https://github.com/secondlife/3p-jpeglib/releases/download/v8c.7846234/jpeglib-8c.7846234-windows64-7846234.tar.zst",
+    "version": "8c.7846234"
+  },
+  "jsoncpp": {
+    "copyright": "Copyright (c) 2007-2010 Baptiste Lepilleur",
+    "hash": "500e455b210d6bc4985185cef2472987ed3034bf",
+    "name": "jsoncpp",
+    "url": "https://github.com/secondlife/3p-jsoncpp/releases/download/v0.5.0.bc46e62/jsoncpp-0.5.0.bc46e62-windows64-bc46e62.tar.zst",
+    "version": "0.5.0.bc46e62"
+  },
+  "libhunspell": {
+    "copyright": "See hunspell.txt",
+    "hash": "c1be4a79b20435030b2e0e01b582c61b462c8376",
+    "name": "libhunspell",
+    "url": "https://github.com/secondlife/3p-libhunspell/releases/download/v1.3.2.650fb94/libhunspell-1.3.2.650fb94-windows64-650fb94.tar.zst",
+    "version": "1.3.2.650fb94"
+  },
+  "libndofdev": {
+    "copyright": "Copyright (c) 2007, 3Dconnexion, Inc. - All rights reserved.",
+    "hash": "ae9d554e8839f42230b8ed6c850445d54654a38f",
+    "name": "libndofdev",
+    "url": "https://github.com/secondlife/3p-libndofdev/releases/download/v0.1.8e9edc7/libndofdev-0.1.8e9edc7-windows64-8e9edc7.tar.zst",
+    "version": "0.1.8e9edc7"
+  },
+  "libpng": {
+    "copyright": "Copyright (c) 2004, 2006-2013 Glenn Randers-Pehrson",
+    "hash": "b91c116a1fda2377954355e56517634db0137699",
+    "name": "libpng",
+    "url": "https://github.com/secondlife/3p-libpng/releases/download/v1.6.38-ca06e99/libpng-1.6.38-ca06e99-windows64-ca06e99.tar.zst",
+    "version": "1.6.38-ca06e99"
+  },
+  "libxml2": {
+    "copyright": "Copyright (C) 1998-2012 Daniel Veillard.  All Rights Reserved.",
+    "hash": "7e506d26f8cb6f205146e41d74095e7e27087e84",
+    "name": "libxml2",
+    "url": "https://github.com/secondlife/3p-libxml2/releases/download/v2.9.4.7476681/libxml2-2.9.4.7476681-windows64-7476681.tar.zst",
+    "version": "2.9.4.7476681"
+  },
+  "llca": {
+    "copyright": "Copyright (c) 2016, Linden Research, Inc.; data provided by the Mozilla NSS Project.\n      ",
+    "hash": "e50ea94bbaa4ff41bf53b84b7192df1a694c5337",
+    "name": "llca",
+    "url": "https://github.com/secondlife/llca/releases/download/v202310121525.0-d22bd98/llca-202310121530.0-common-d22bd98.tar.zst",
+    "version": "202310121530.0"
+  },
+  "llphysicsextensions_stub": {
+    "copyright": "Copyright (c) 2010, Linden Research, Inc.",
+    "hash": "2e5f1f7046a49d8b0bc295aa878116bc",
+    "name": "llphysicsextensions_stub",
+    "url": "http://automated-builds-secondlife-com.s3.amazonaws.com/ct2/60043/564063/llphysicsextensions_stub-1.0.542456-windows-542456.tar.bz2",
+    "version": "1.0.542456"
+  },
+  "meshoptimizer": {
+    "copyright": "Copyright (c) 2016-2021 Arseny Kapoulkine",
+    "hash": "13c0a33d9c49cc07b354527c7ef992d33f854c59",
+    "name": "meshoptimizer",
+    "url": "https://github.com/secondlife/3p-meshoptimizer/releases/download/v160-032f20a/meshoptimizer-160-windows64-032f20a.tar.zst",
+    "version": "160"
+  },
+  "mikktspace": {
+    "copyright": "Copyright (C) 2011 by Morten S. Mikkelsen",
+    "hash": "02e9e5b6fe6788f4d2babb83ec544843",
+    "name": "mikktspace",
+    "url": "https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/104406/914909/mikktspace-1-windows64-574859.tar.bz2",
+    "version": "1"
+  },
+  "minizip-ng": {
+    "copyright": "This project uses the zlib license. Copyright (C) 1995-2013 Jean-loup Gailly and Mark Adler",
+    "hash": "5dc469172ba4c6015d5b771e516bc88a65d769eb",
+    "name": "minizip-ng",
+    "url": "https://github.com/secondlife/3p-minizip-ng/releases/download/v3.0.2.3e9876e/minizip_ng-3.0.2.3e9876e-windows64-3e9876e.tar.zst",
+    "version": "3.0.2.3e9876e"
+  },
+  "nghttp2": {
+    "copyright": "Copyright (c) 2012, 2014, 2015, 2016 Tatsuhiro Tsujikawa\nCopyright (c) 2012, 2014, 2015, 2016 nghttp2 contributors",
+    "hash": "05aad7759519719a54a6100fddd35b69e57f2386",
+    "name": "nghttp2",
+    "url": "https://github.com/secondlife/3p-nghttp2/releases/download/v1.40.0.b1526c6/nghttp2-1.40.0.b1526c6-windows64-b1526c6.tar.zst",
+    "version": "1.40.0.b1526c6"
+  },
+  "nvapi": {
+    "copyright": "Copyright © 2012 NVIDIA Corporation.  All rights reserved.",
+    "hash": "1ebe715fc1096198e343c41d50654c11509cdbba",
+    "name": "nvapi",
+    "url": "https://github.com/secondlife/3p-nvapi/releases/download/v352.aac0e19/nvapi-352.aac0e19-windows64-aac0e19.tar.zst",
+    "version": "352.aac0e19"
+  },
+  "ogg_vorbis": {
+    "copyright": "Copyright (c) 2002, Xiph.org Foundation",
+    "hash": "2e73a0a5659c9a09eba2f94619aa5c23c7cc3937",
+    "name": "ogg_vorbis",
+    "url": "https://github.com/secondlife/3p-ogg_vorbis/releases/download/v1.3.3-1.3.6.e4101b6/ogg_vorbis-1.3.3-1.3.6.e4101b6-windows64-e4101b6.tar.zst",
+    "version": "1.3.3-1.3.6.e4101b6"
+  },
+  "openal": {
+    "copyright": "Copyright (C) 1999-2007 by authors.",
+    "hash": "6ae3b5310eb1988741bc55416681ca9d64f76f85",
+    "name": "openal",
+    "url": "https://github.com/secondlife/3p-openal-soft/releases/download/v1.23.1-18e315c/openal-1.23.1-windows64-18e315c.tar.zst",
+    "version": "1.23.1"
+  },
+  "openjpeg": {
+    "copyright": "Copyright (c) 2002-2007, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium; Copyright (c) 2002-2007, Professor Benoit Macq; Copyright (c) 2001-2003, David Janssens; Copyright (c) 2002-2003, Yannick Verschueren; Copyright (c) 2003-2007, Francois-Olivier Devaux and Antonin Descampe; Copyright (c) 2005, Herve Drolon, FreeImage Team; Copyright (c) 2006-2007, Parvatha Elangovan; Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>; Copyright (c) 2010-2011, Kaori Hagihara; Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France; Copyright (c) 2012, CS Systemes d'Information, France;",
+    "hash": "07cff9eafaecfbe6f44e2a05b3465cae",
+    "name": "openjpeg",
+    "url": "https://pkg.alchemyviewer.org/repository/autobuild-external/tmpanext/openjpeg-1.5.1.200900057-windows64-200900057.tar.bz2",
+    "version": "1.5.1.200900057"
+  },
+  "openssl": {
+    "copyright": "Copyright (c) 1998-2011 The OpenSSL Project.  All rights reserved; Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)",
+    "hash": "8bd3dea6d81de5e469b241a1b79e61efce6ecc05",
+    "name": "openssl",
+    "url": "https://github.com/secondlife/3p-openssl/releases/download/v1.1.1q.de53f55/openssl-1.1.1q.de53f55-windows64-de53f55.tar.zst",
+    "version": "1.1.1q.de53f55"
+  },
+  "pcre": {
+    "copyright": "Copyright (c) 1997-2014 University of Cambridge; Copyright(c) 2009-2014 Zoltan Herczeg; Copyright (c) 2007-2012, Google Inc.",
+    "hash": "166564afb60a7536a038fae80e2fc9a41d6dbccb",
+    "name": "pcre",
+    "url": "https://github.com/secondlife/3p-pcre/releases/download/v8.35.979fd86/pcre-8.35.979fd86-windows64-979fd86.tar.zst",
+    "version": "8.35.979fd86"
+  },
+  "slvoice": {
+    "copyright": "2010 Vivox, including audio coding using Polycom¨ Siren14TM (ITU-T Rec. G.722.1 Annex C)",
+    "hash": "c39735851fd05c194d0be09b8f9e8cb7",
+    "name": "slvoice",
+    "url": "https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/98682/871552/slvoice-4.10.0000.32327.5fc3fe7c.571099-windows64-571099.tar.bz2",
+    "version": "4.10.0000.32327.5fc3fe7c.571099"
+  },
+  "threejs": {
+    "copyright": "Copyright © 2010-2021 three.js authors",
+    "hash": "4141710fccbd1ea2b3b53d00e189bdfa2ee9d441",
+    "name": "threejs",
+    "url": "https://github.com/secondlife/3p-three_js/releases/download/v0.132.2-b8f6746/threejs-0.132.2-windows64-b8f6746.tar.zst",
+    "version": "0.132.2"
+  },
+  "tinygltf": {
+    "copyright": "// Copyright (c) 2015 - Present Syoyo Fujita, Aurélien Chatelain and many contributors.",
+    "hash": "4dad1c0948141e1667c01a3ee755e4dc",
+    "name": "tinygltf",
+    "url": "https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/105849/926137/tinygltf-v2.5.0-common-575729.tar.bz2",
+    "version": "v2.5.0"
+  },
+  "tut": {
+    "copyright": "Copyright 2002-2006 Vladimir Dyuzhev, Copyright 2007 Denis Kononenko, Copyright 2008-2009 Michał Rzechonek",
+    "hash": "9f0bf4545f08df5381e0f39ccce3a57c6ec4b0f4",
+    "name": "tut",
+    "url": "https://github.com/secondlife/3p-tut/releases/download/v2008.11.30-409bce5/tut-2008.11.30-common-409bce5.tar.zst",
+    "version": "2008.11.30"
+  },
+  "uriparser": {
+    "copyright": "Copyright (C) 2007, Weijia Song <songweijia@gmail.com>, Sebastian Pipping <webmaster@hartwork.org>",
+    "hash": "e8b20edfc624f1d09bc83480932a9c844d47fc13",
+    "name": "uriparser",
+    "url": "https://github.com/secondlife/3p-uriparser/releases/download/v0.9.4-8fff38a/uriparser-0.9.4-windows64-8fff38a.tar.zst",
+    "version": "0.9.4"
+  },
+  "viewer-manager": {
+    "copyright": "Copyright (c) 2000-2012, Linden Research, Inc.",
+    "hash": "7426c5a1d7eb231b476625637a1f2daba0a6bc55",
+    "name": "viewer-manager",
+    "url": "https://github.com/secondlife/viewer-manager/releases/download/v3.0-08bf5ee/viewer_manager-3.0-08bf5ee-windows64-08bf5ee.tar.zst",
+    "version": "3.0-08bf5ee"
+  },
+  "vlc-bin": {
+    "copyright": "Copyright (C) 1998-2016 VLC authors and VideoLAN",
+    "hash": "d56002da7435bab166c88d59eeaf69fd87cd897d",
+    "name": "vlc-bin",
+    "url": "https://github.com/secondlife/3p-vlc-bin/releases/download/v3.0.16.c219a5d/vlc_bin-3.0.16.c219a5d-windows64-c219a5d.tar.zst",
+    "version": "3.0.16.c219a5d"
+  },
+  "vulkan_gltf": {
+    "copyright": "Copyright (c) 2018 Sascha Willems",
+    "hash": "79b6a11622c2f83cfc2b7cd1fafb867b",
+    "name": "vulkan_gltf",
+    "url": "https://automated-builds-secondlife-com.s3.amazonaws.com/ct2/101319/891521/vulkan_gltf-1-windows64-572743.tar.bz2",
+    "version": "1"
+  },
+  "xmlrpc-epi": {
+    "copyright": "Copyright: (C) 2000 Epinions, Inc.",
+    "hash": "e53fd38c14b8c47c7c84dead8a1b211bb8be170c",
+    "name": "xmlrpc-epi",
+    "url": "https://github.com/secondlife/3p-xmlrpc-epi/releases/download/v0.54.1.8a05acf/xmlrpc_epi-0.54.1.8a05acf-windows64-8a05acf.tar.zst",
+    "version": "0.54.1.8a05acf"
+  },
+  "xxhash": {
+    "copyright": "Copyright (c) 2012-2021 Yann Collet",
+    "hash": "4522d075ea4703ef4b527c3039864ef735ea7953",
+    "name": "xxhash",
+    "url": "https://github.com/secondlife/3p-xxhash/releases/download/v0.8.1.7501c90/xxhash-0.8.1.7501c90-windows64-7501c90.tar.zst",
+    "version": "0.8.1.7501c90"
+  },
+  "zlib-ng": {
+    "copyright": "Copyright (C) 1995-2013 Jean-loup Gailly and Mark Adler",
+    "hash": "ccfca9451063e2d0e95baa73b1ad2054d3e38907",
+    "name": "zlib-ng",
+    "url": "https://github.com/secondlife/3p-zlib-ng/releases/download/v1.2.11.zlib-ng.32fd361/zlib_ng-1.2.11.zlib-ng.32fd361-windows64-32fd361.tar.zst",
+    "version": "1.2.11.zlib-ng.32fd361"
+  }
+}

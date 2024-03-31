@@ -1,39 +1,6 @@
 #!/bin/bash
 set -Euo pipefail
 
-function is_gha() { [[ -v GITHUB_ACTIONS ]] ; }
-
-function _err() { local rc=$1 ; shift; echo "[gha-bootstrap rc=$rc] $@" >&2; return $rc; }
-
-# LITERALLY determine whether an EXACT filename ACTUALLY exists
-# NOTE: `ls bin/parallel` (even `stat 'bin/parallel'`) both falsely
-# match when there exists a `bin/parallel.exe`; as of yet no known
-# way to prevent such false existential positives; hence the long route here...
-function literally_exists() {
-  local dir="$(dirname "$1")"
-  local name="$(basename "$1")"
-  command -p ls -1a "$dir" | command -p grep -Fx "$name" >/dev/null && true || false
-}
-
-function quiet_clone() {(
-    set -Euo pipefail
-    echo "[gha-bootstrap] quiet_clone $1 $2 $3" >&2
-    if [[ $2 =~ [a-f0-9]{40} ]]; then
-      # "branch" refers to a fully-qualified git hash; clone + reset rather than --branch
-      git clone --quiet https://github.com/$1 $3 2>&1 | grep -vE '^(remote:|Receive|Resolve)' \
-       && git -C "$3" reset --hard "$2"
-    else
-      git clone --quiet --filter=tree:0 --single-branch \
-          https://github.com/$1 --branch $2 $3 2>&1 | grep -vE '^(remote:|Receive|Resolve)' || true
-    fi
-    test -d $3/.git || return 1
-    git -C "$3" describe --all --always
-)}
-
-function initialize_firestorm_checkout() {(
-    set -Euo pipefail
-)}
-
 function get_ninja() {(
     set -Euo pipefail
     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
@@ -44,55 +11,17 @@ function get_ninja() {(
     ls -l bin/ | grep ninja
 )}
 
-
-#
-# function get_colout_babel() {(
-#     set -Euo pipefail
-#     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
-#         ad76eab6905b626d7d4110d2032bc60c69bef225ec94c67d7229425ebe53f659 \
-#         https://github.com/python-babel/babel/archive/refs/tags/v2.14.0.tar.gz \
-#       .
-#     ) || return `_err $? "failed to download babel $?"`
-#     mkdir -pv bin/.colout/babel
-#     tar -C bin/.colout --force-local --strip-components=1 \
-#       -xf $archive babel-2.14.0/{babel,scripts,cldr} || return `_err $? "failed to provision babel $?"`
-#     python bin/.colout/scripts/download_import_cldr.py 2>/dev/null || return `_err $? "failed to localize babel $?"`
-#     ls -l bin/.colout | grep babel
-# )}
-#
-# function get_colout_pygments() {(
-#     set -Euo pipefail
-#     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
-#         163e0235b3739c24d7631bb7b0e5829f9ea081c10b26662354c3ba0e6e95f8ea \
-#         https://github.com/pygments/pygments/archive/refs/tags/2.17.2.tar.gz \
-#       .
-#     ) || return `_err $? "failed to download pygments $?"`
-#     mkdir -pv bin/.colout/pygments
-#     tar -C bin/.colout --force-local --strip-components=1 \
-#       -xf $archive pygments-2.17.2/pygments || return `_err $? "failed to provision pygments $?"`
-#     ls -l bin/.colout | grep pygments
-# )}
-
 function get_colout() {(
     set -Euo pipefail
     mkdir bin/.colout -pv
     python -m pip install --no-warn-script-location --user colout
     local pysite="$(python -msite --user-site)"
-    perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' $pysite/colout/colout.py
-    diff $pysite/colout/colout.py*
-    # ./fsvr/util/_utils.sh ht-ln bin/.colout/Python39/site-packages bin/.colout/site-packages
+    if grep SIGPIPE $pysite/colout/colout.py ; then
+      # workaround SIGPIPE on Win32 missing with some colout versions
+      perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' $pysite/colout/colout.py
+      diff $pysite/colout/colout.py*
+    fi
     echo hello world | colout "hello" "red" | colout "world" "blue"
-    # local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
-    #     b44caa1754be29edcd30d31a9c65728061546f605a889e8d4ffbb2df281e8d44 \
-    #     https://github.com/nojhan/colout/archive/refs/tags/v1.1b.tar.gz \
-    #   .
-    # ) || return `_err $? "failed to download colout $?"`
-    # mkdir -pv bin/.colout
-    # tar -C bin/.colout --force-local --strip-components=2 --exclude=colout-1.1b/colout/colout_clang.py \
-    #   -xf $archive colout-1.1b/colout || return `_err $? "failed to provision colout $?"`
-    # ls -la bin/ | grep .colout
-    # get_colout_pygments
-    # get_colout_babel
 )}
 
 function get_parallel() {(
@@ -119,8 +48,11 @@ function get_parallel() {(
 
 function get_bootstrap_vars() {(
   [[ -x /usr/bin/readlink ]] && pwd=`/usr/bin/readlink -f "$PWD"` || pwd=$PWD
-  if is_gha ; then
+  if [[ -v GITHUB_ACTIONS ]] ; then
       echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
+      fsvr_repo=${GITHUB_REPOSITORY}
+      fsvr_branch=${GITHUB_REF_NAME}
+      fsvr_base=$base
   else
       echo "[gha-bootstrap] local dev testing mode" >&2
       fsvr_repo=${fsvr_repo:-local}
@@ -129,19 +61,26 @@ function get_bootstrap_vars() {(
       fsvr_dir=${fsvr_dir:-.}
   fi
 
-  case "$base" in
-    sl-*) echo viewer_id=secondlife ; echo viewer_name=SecondLife ;;
-    fs-*) echo viewer_id=firestorm  ; echo viewer_name=Firestorm  ;;
-       *) echo viewer_id=unknown    ; echo viewer_name=Unknown    ;;
-  esac
-
+  echo _viewer=$repo@$base#$branch
+  echo _fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
   echo _home=`readlink -f "${USERPROFILE:-$HOME}"`
   echo _bash=$BASH
-  echo build_id=${build_id:-$fsvr_branch-$base}
-  echo firestorm=$repo@$base#$branch
-  echo fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
+
+  case "$base" in
+    sl-*) echo viewer_id=secondlife   ; echo viewer_name=SecondLife     ;;
+    fs-*) echo viewer_id=firestorm    ; echo viewer_name=Firestorm      ;;
+    bd-*) echo viewer_id=blackdragon  ; echo viewer_name=BlackDragon    ;;
+       *) echo viewer_id=unknown      ; echo viewer_name=Unknown        ;;
+  esac
+
+  function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
+  echo cache_id=$(echo "$base-$repo" | to-id)
+  echo build_id=$(echo "${build_id:-$fsvr_branch-$base}" | to-id)
+
   echo fsvr_dir=$fsvr_dir
   echo nunja_dir=`$fsvr_dir/util/_utils.sh _realpath $fsvr_dir/$base`
   echo p373r_dir=$pwd/repo/p373r
+  echo viewer_dir=$pwd/repo/viewer
   echo fsvr_cache_dir=$pwd/cache
+
 )}

@@ -5,6 +5,7 @@ _PRESHELL_PATH="${_PRESHELL_PATH:-}"
 PATH="$PATH:/usr/bin"
 
 fsvr_dir="${fsvr_dir:-$PWD/fsvr}"
+_hostname="windows-2022"
 
 if [[ $OSTYPE == msys ]] ; then
   _workspace=$(cygpath -ua "${workspace:-${GITHUB_WORKSPACE:-.}}" | sed 's@/$@@')
@@ -21,6 +22,8 @@ else
   _PYTHONUSERBASE="$(readlink -f bin/pystuff)"
 fi
 
+pysite="$(python3 -msite --user-site)"
+
 ######################################################################
 echo "$(cat<<EOF
 export fsvr_dir="$fsvr_dir"
@@ -28,13 +31,15 @@ export fsvr_dir="$fsvr_dir"
 _PRESHELL_PATH="$_PRESHELL_PATH"
 _PATH="$_PATH"
 
-test ! -f $PWD/gha-bootstrap.env    || source $PWD/gha-bootstrap.env
-test ! -f $PWD/build/build_vars.env || source $PWD/build/build_vars.env
+set -a
+for x in $PWD/env.d/*.env ; do source $x ; done
+set +a
 
 _xpath="\$_PATH"
 [[ -v msvc_path ]] && _xpath="\$msvc_path:\$_xpath"
 [[ -n "\$_PRESHELL_PATH" ]] && _xpath="\$_xpath:\$_PRESHELL_PATH"
 declare -x PATH="\$_xpath"
+
 declare -x LANG=en_US.UTF-8
 declare -x PYTHONUSERBASE="$_PYTHONUSERBASE"
 declare -x PYTHONWARNINGS="ignore::SyntaxWarning,\${PYTHONWARNINGS:-}"
@@ -42,9 +47,9 @@ declare -x PYTHONWARNINGS="ignore::SyntaxWarning,\${PYTHONWARNINGS:-}"
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 
 function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
-function hostname(){ echo 'windows-2022' ; }
+function hostname(){ echo '$_hostname' ; }
 function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
-function colout() { "`which python3`" "`PYTHONUSERBASE=$_PYTHONUSERBASE python3 -msite --user-site`/colout/colout.py" "\$@" ; }
+function colout() { "`which python3`" "$pysite/colout/colout.py" "\$@" ; }
 function parallel() { PARALLEL_SHELL="$BASH" PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
 function jq() { "`which jq`" $(
   # grr... detect if jq supports -b (binary)

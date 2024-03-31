@@ -40,14 +40,11 @@ jobs:
         echo '${{ github.event.inputs.fstuple }}'
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
         echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
-        . $GITHUB_ENV
-        echo "cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
-        echo "build_id=$(echo "${GITHUB_REF_NAME}-$base" | sed 's@[^-a-zA-Z0-9_.]@-@g')" | tee -a $GITHUB_ENV
 
     - name: Clone && Generate SHELL.env
       run: |
         set -Euo pipefail
-        mkdir -pv bin bin/pystuff cache repo build
+        mkdir -pv env.d bin bin/pystuff cache repo build
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
         fsvr_dir=$PWD/fsvr fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
         fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
@@ -60,11 +57,8 @@ jobs:
 
     - name: Generate gha-bootstrap.env
       run: |
-        fsvr_repo=${GITHUB_REPOSITORY}
-        fsvr_branch=${GITHUB_REF_NAME}
-        fsvr_base=$base
         source fsvr/gha-bootstrap.sh
-        get_bootstrap_vars | tee gha-bootstrap.env || exit 127
+        get_bootstrap_vars | tee env.d/gha-bootstrap.env || exit 127
 
     - name: 001 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '001'
@@ -86,7 +80,6 @@ jobs:
             ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
           }
 
-          source fsvr/gha-bootstrap.sh
           source $fsvr_dir/util/gha.cachette.bash
 
           function xxtest_bin() {
@@ -102,14 +95,15 @@ jobs:
 
           gha-cache-restore $base-bin-b bin || (
             set -Euo pipefail
+            source fsvr/gha-bootstrap.sh
+            source $fsvr_dir/util/gha.literally-exists.bash
             pysite="$(cygpath -m "$(python3 -msite --user-site)")"
 
-            literally_exists bin/ninja.exe        || get_ninja    || exit `_err $? "failed to provision ninja $?"`
-            literally_exists $pysite/colout       || get_colout   || exit `_err $? "failed to provision .colout $?"`
-            literally_exists bin/parallel         || get_parallel || exit `_err $? "failed to provision parallel $?"`
-
-            literally_exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
-            literally_exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
+            literally-exists bin/ninja.exe    || get_ninja    || exit `_err $? "failed to provision ninja $?"`
+            literally-exists $pysite/colout   || get_colout   || exit `_err $? "failed to provision .colout $?"`
+            literally-exists bin/parallel     || get_parallel || exit `_err $? "failed to provision parallel $?"`
+            literally-exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
+            literally-exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
 
             # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
             python -m pip install --no-warn-script-location --user llsd
@@ -125,33 +119,22 @@ jobs:
       with:
         limit-access-to-actor: true
 
-    # - name: SHELL.sh env test
-    #   run: |
-    #     set -eu
-    #     echo base=$base repo=$repo branch=$branch
-    #     which tee.exe
-    #     which parallel.exe
-    #     tee --version | head -1
-    #     parallel --version | head -1
-    #     hostname --version | head -1
-    #     jq --version | head -1
-    #     [[ "$((( echo stdout ; echo stderr >&2 ) | tee /dev/stderr) 2>&1)" =~ stderr.*stdout.*stdout ]] || exit 83
-
     - name: Expand Source Repositories
       uses: ./fsvr-action
       with:
         run: |
-          source $fsvr_dir/gha-bootstrap.sh
           source $fsvr_dir/util/gha.cachette.bash
+          source $fsvr_dir/util/gha.quiet-clone.bash
+
           gha-cache-restore $cache_id-repo-a repo || (
             set -Euo pipefail
-            test -d repo/$branch/.git             || quiet_clone $repo $branch repo/$branch
-            test -d repo/p373r/.git               || quiet_clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
+            test -e repo/viewer/.git              || quiet-clone $repo $branch repo/viewer
+            test -e repo/p373r/.git               || quiet-clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
 
             gha-cache-save $cache_id-repo-a repo  || exit 107
           )
 
-          repos="$(for id in repo/$branch repo/p373r ; do
+          repos="$(for id in repo/viewer repo/p373r ; do
             echo "| ./$id | $(git -C $id describe --all --always) |"
           done)"
 
@@ -160,14 +143,16 @@ jobs:
           done)"
 
           cat <<EOF >> $GITHUB_STEP_SUMMARY
-          | name    | value         |
-          | --------- | ----------- |
-          | build_id  | $build_id   |
-          | cache_id  | $cache_id   |
-          | base      | $base       |
-          | repo      | $repo       |
-          | branch    | $branch     |
-          | hostname  | `hostname`  |
+          | name        | value        |
+          | ---------   | -----------  |
+          | viewer_id   | $viewer_id   |
+          | viewer_name | $viewer_name |
+          | base        | $base        |
+          | repo        | $repo        |
+          | branch      | $branch      |
+          | build_id    | $build_id    |
+          | cache_id    | $cache_id    |
+          | hostname    | `hostname`   |
           $repos
           $tools
           EOF
@@ -198,10 +183,11 @@ jobs:
       run: |
         set -euo pipefail
         echo fsvr_dir=$fsvr_dir
-        export root_dir=repo/$branch
+        export root_dir=repo/viewer
+        # some legacy viewer packaging logic blindly reaches from build* to ../indra
         $fsvr_dir/util/_utils.sh ht-ln $root_dir/indra indra
         $fsvr_dir/util/generate_build_vars.sh ${viewer_name}-VR-GHA `cat $fsvr_dir/$base/viewer_version.txt` build/ \
-           | tee build/build_vars.env #| tee $GITHUB_ENV
+           | tee env.d/build_vars.env #| tee $GITHUB_ENV
 
     - name: Detect MSVC
       uses: ./fsvr-action
@@ -277,13 +263,19 @@ jobs:
     - name: 0a0_ninja_build llpackage
       run: fsvr_step 0a0 llpackage
 
-    - name: 0b0_bundle
+    - name: 0b0 installer
       run: fsvr_step 0b0
-
-    - name: 0c0_upload_artifacts
+    - name: 0b1 upload installer
       uses: ./fsvr-action
       with:
-        run: fsvr_step 0c0
+        run: fsvr_step 0b1
+
+    - name: 0b2 7z
+      run: fsvr_step 0b2
+    - name: 0b3 upload 7z
+      uses: ./fsvr-action
+      with:
+        run: fsvr_step 0b3
 
     - name: 005 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '005'
@@ -298,8 +290,8 @@ jobs:
     #     run: |
     #       ./fsvr/util/_utils.sh upload_artifact debug "$(cat <<EOF
     #       SHELL.env
-    #       gha-bootstrap.env
-    #       build/build_vars.env
+    #       env.d/gha-bootstrap.env
+    #       env.d/build_vars.env
     #       build/msvc.env
     #       build/msvc_path.env
     #       build/msvc.nunja.env
