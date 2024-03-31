@@ -7,7 +7,7 @@ on:
           type: string
           required: true
 
-run-name: ${{ github.ref_name }} | ${{ fromJSON(inputs.fstuple).branch }} @ ${{ fromJSON(inputs.fstuple).base }}
+run-name: ${{ github.ref_name }} | ${{ fromJSON(inputs.fstuple).base }} @ ${{ fromJSON(inputs.fstuple).ref }}
 
 defaults:
   run:

@@ -32,7 +32,7 @@ _PRESHELL_PATH="$_PRESHELL_PATH"
 _PATH="$_PATH"
 
 set -a
-for x in $PWD/env.d/*.env ; do source $x ; done
+for x in $PWD/env.d/*.env ; do source \$x ; done
 set +a
 
 _xpath="\$_PATH"

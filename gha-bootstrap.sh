@@ -8,6 +8,7 @@ function get_bootstrap_vars() {(
       fsvr_repo=${GITHUB_REPOSITORY}
       fsvr_branch=${GITHUB_REF_NAME}
       fsvr_base=$base
+      fsvr_dir=${fsvr_dir:-$PWD/fsvr}
   else
       echo "[gha-bootstrap] local dev testing mode" >&2
       fsvr_repo=${fsvr_repo:-local}
