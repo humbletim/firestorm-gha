@@ -117,6 +117,9 @@ int main(int argc, char *argv[]) {
     execv(bash_path, new_argv);
 
     // Handle execv failure (this should generally not happen)
+    fprintf(stderr, "execv failed %d\n", errno);fflush(stderr);
+    fprintf(stderr, "bash_path=%s\n", bash_path);fflush(stderr);
+    for (int i = 0; i < argc + 4; i++) fprintf(stderr, "new_argv[%d]=%s\n", i, new_argv[i]); fflush(stderr);
     perror("execv failed");
     return 127; // A conventional error code to indicate execv failure
 }
