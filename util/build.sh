@@ -158,7 +158,7 @@ function _parallel() {( $_dbgopts;
     local funcname=$1
     shift
     test -f $build_dir/$funcname.txt && rm -v $build_dir/$funcname.txt
-    declare -f parallel >/dev/null || return `_err $? "parallel() not defined"`;
+    # declare -f parallel >/dev/null || return `_err $? "parallel() not defined"`;
     parallel --joblog $build_dir/$funcname.txt --halt-on-error 2 "$@" \
       || { rc=$? ; _relativize "see $build_dir/$funcname.txt" >&2 ; return $rc ; }
 )}
