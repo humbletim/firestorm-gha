@@ -1,11 +1,12 @@
 #!/bin/bash
 
-function make-stub() {
+function make-stub() {(
   CC=${CC:-'/c/mingw64/bin/gcc'}
-  #'-DDEBUG_COMMAND_STRING' 
-  "${CC}" "-DBASH=\"$BASH\"" \
+  set -x
+  # [[ $OSTYPE == msys ]] && BASH=$(cygpath -mas $BASH)
+  "${CC}" "-DBASH=\"$(printf "%q" "$BASH")\"" \
     fsvr/bashland/BASH_FUNC_invoke.c -o "${1:-bin/BASH_FUNC_invoke.exe}"
-}
+)}
 
 function alias-exe() {
   local name=$1

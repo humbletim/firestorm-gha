@@ -32,7 +32,8 @@ _PRESHELL_PATH="$_PRESHELL_PATH"
 _PATH="$_PATH"
 
 set -a
-for x in $PWD/env.d/*.env ; do source \$x ; done
+[[ -f $PWD/env.d/gha-bootstrap.env ]] source $PWD/env.d/gha-bootstrap.env
+[[ -f $PWD/env.d/build_vars.env ]] source $PWD/env.d/build_vars.env
 set +a
 
 _xpath="\$_PATH"
@@ -50,7 +51,7 @@ function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
 function hostname(){ echo '$_hostname' ; }
 function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
 function colout() { "`which python3`" "$pysite/colout/colout.py" "\$@" ; }
-function parallel() { PARALLEL_SHELL="$BASH" PARALLEL_HOME="$PWD/bin/parallel-home" "$PWD/bin/parallel" "\$@" ; }
+function parallel() { PARALLEL_SHELL="$BASH" PARALLEL_HOME="$PWD/bin/parallel-home" "`which perl`" "$PWD/bin/parallel" "\$@" ; }
 function jq() { "`which jq`" $(
   # grr... detect if jq supports -b (binary)
   # otherwise... fall back to tr -d '\r' workaround
