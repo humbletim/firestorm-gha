@@ -130,12 +130,15 @@ jobs:
           source $fsvr_dir/util/gha.cachette.bash
           source $fsvr_dir/util/gha.quiet-clone.bash
 
-          gha-cache-restore $cache_id-repo-a repo || (
+          gha-cache-restore $cache_id-repo-viewer repo/viewer || (
             set -Euo pipefail
-            test -e repo/viewer/.git              || quiet-clone ${hub:-github.com} $repo $ref repo/viewer
-            test -e repo/p373r/.git               || quiet-clone github.com ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
-
-            gha-cache-save $cache_id-repo-a repo  || exit 107
+            test -e repo/viewer/.git || quiet-clone ${hub:-github.com} $repo $ref repo/viewer
+            gha-cache-save $cache_id-repo-viewer repo/viewer  || exit 107
+          )
+          gha-cache-restore $cache_id-repo-p373r repo/p373r || (
+            set -Euo pipefail
+            test -e repo/p373r/.git   || quiet-clone github.com ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
+            gha-cache-save $cache_id-repo-p373r repo/p373r  || exit 143
           )
 
           repos="$(for id in repo/viewer repo/p373r ; do
