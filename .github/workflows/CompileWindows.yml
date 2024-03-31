@@ -40,6 +40,10 @@ jobs:
         echo '${{ github.event.inputs.fstuple }}'
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
         echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
+        . $GITHUB_ENV
+        test -v base   || exit 44
+        test -v repo   || exit 45
+        test -v ref    || exit 46
 
     - name: Clone && Generate SHELL.env
       run: |
@@ -128,8 +132,8 @@ jobs:
 
           gha-cache-restore $cache_id-repo-a repo || (
             set -Euo pipefail
-            test -e repo/viewer/.git              || quiet-clone $repo $branch repo/viewer
-            test -e repo/p373r/.git               || quiet-clone ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
+            test -e repo/viewer/.git              || quiet-clone ${hub:-github.com} $repo $ref repo/viewer
+            test -e repo/p373r/.git               || quiet-clone github.com ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
 
             gha-cache-save $cache_id-repo-a repo  || exit 107
           )
@@ -148,8 +152,9 @@ jobs:
           | viewer_id   | $viewer_id   |
           | viewer_name | $viewer_name |
           | base        | $base        |
+          | hub         | $hub         |
           | repo        | $repo        |
-          | branch      | $branch      |
+          | ref         | $ref         |
           | build_id    | $build_id    |
           | cache_id    | $cache_id    |
           | hostname    | `hostname`   |

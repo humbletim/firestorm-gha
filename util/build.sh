@@ -319,7 +319,7 @@ function 0b0_bundle_installer() {( $_dbgopts;
 function 0b1_upload_installer() {( $_dbgopts;
   local Installer=`ls build/*Setup*.exe |head -1`
   local InstallerName=$(basename $Installer)
-  local InstallerExe=$build_id-$branch-${InstallerName}
+  local InstallerExe=$build_id-$ref-${InstallerName}
   mkdir dist
   ht-ln $Installer dist/$InstallerExe
 
@@ -333,7 +333,7 @@ function 0b2_bundle_7z() {( $_dbgopts;
 
 function 0b3_upload_7z() {( $_dbgopts;
   local Portable=`ls build/${viewer_name}*.7z |head -1`
-  local PortableArchive=$build_id-$branch-$(basename $Portable)
+  local PortableArchive=$build_id-$ref-$(basename $Portable)
   ht-ln $Portable dist/$PortableArchive
 
   ( cd dist && gha-upload-artifact ${PortableArchive/.7z/} $PortableArchive )

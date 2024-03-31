@@ -1,6 +1,45 @@
 #!/bin/bash
 set -Euo pipefail
 
+function get_bootstrap_vars() {(
+  [[ -x /usr/bin/readlink ]] && pwd=`/usr/bin/readlink -f "$PWD"` || pwd=$PWD
+  if [[ -v GITHUB_ACTIONS ]] ; then
+      echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
+      fsvr_repo=${GITHUB_REPOSITORY}
+      fsvr_branch=${GITHUB_REF_NAME}
+      fsvr_base=$base
+  else
+      echo "[gha-bootstrap] local dev testing mode" >&2
+      fsvr_repo=${fsvr_repo:-local}
+      fsvr_branch=${fsvr_branch:-`git branch --show-current`}
+      fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
+      fsvr_dir=${fsvr_dir:-.}
+  fi
+
+  echo _viewer=$repo@$base#$ref
+  echo _fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
+  echo _home=`readlink -f "${USERPROFILE:-$HOME}"`
+  echo _bash=$BASH
+
+  case "$base" in
+    sl-*) echo viewer_id=secondlife   ; echo viewer_name=SecondLife     ;;
+    fs-*) echo viewer_id=firestorm    ; echo viewer_name=Firestorm      ;;
+    bd-*) echo viewer_id=blackdragon  ; echo viewer_name=BlackDragon    ;;
+       *) echo viewer_id=unknown      ; echo viewer_name=Unknown        ;;
+  esac
+
+  function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
+  echo cache_id=$(echo "$base-$repo" | to-id)
+  echo build_id=$(echo "${build_id:-$fsvr_branch-$base}" | to-id)
+
+  echo fsvr_dir=$fsvr_dir
+  echo nunja_dir=`$fsvr_dir/util/_utils.sh _realpath $fsvr_dir/$base`
+  echo p373r_dir=$pwd/repo/p373r
+  echo viewer_dir=$pwd/repo/viewer
+  echo fsvr_cache_dir=$pwd/cache
+
+)}
+
 function get_ninja() {(
     set -Euo pipefail
     local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
@@ -44,43 +83,4 @@ function get_parallel() {(
       " > bin/parallel-home/will-cite
   } || return `_err $? "failed to provision parallel $?"`
   ls -l bin/ | grep parallel
-)}
-
-function get_bootstrap_vars() {(
-  [[ -x /usr/bin/readlink ]] && pwd=`/usr/bin/readlink -f "$PWD"` || pwd=$PWD
-  if [[ -v GITHUB_ACTIONS ]] ; then
-      echo "[gha-bootstrap] GITHUB_ACTIONS=$GITHUB_ACTIONS" >&2
-      fsvr_repo=${GITHUB_REPOSITORY}
-      fsvr_branch=${GITHUB_REF_NAME}
-      fsvr_base=$base
-  else
-      echo "[gha-bootstrap] local dev testing mode" >&2
-      fsvr_repo=${fsvr_repo:-local}
-      fsvr_branch=${fsvr_branch:-`git branch --show-current`}
-      fsvr_base=${fsvr_base:-`echo $fsvr_branch | grep -Eo '[0-9]+[.][0-9]+[.][0-9]+'`}
-      fsvr_dir=${fsvr_dir:-.}
-  fi
-
-  echo _viewer=$repo@$base#$branch
-  echo _fsvr=$fsvr_repo@$fsvr_branch#$fsvr_base
-  echo _home=`readlink -f "${USERPROFILE:-$HOME}"`
-  echo _bash=$BASH
-
-  case "$base" in
-    sl-*) echo viewer_id=secondlife   ; echo viewer_name=SecondLife     ;;
-    fs-*) echo viewer_id=firestorm    ; echo viewer_name=Firestorm      ;;
-    bd-*) echo viewer_id=blackdragon  ; echo viewer_name=BlackDragon    ;;
-       *) echo viewer_id=unknown      ; echo viewer_name=Unknown        ;;
-  esac
-
-  function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
-  echo cache_id=$(echo "$base-$repo" | to-id)
-  echo build_id=$(echo "${build_id:-$fsvr_branch-$base}" | to-id)
-
-  echo fsvr_dir=$fsvr_dir
-  echo nunja_dir=`$fsvr_dir/util/_utils.sh _realpath $fsvr_dir/$base`
-  echo p373r_dir=$pwd/repo/p373r
-  echo viewer_dir=$pwd/repo/viewer
-  echo fsvr_cache_dir=$pwd/cache
-
 )}
