@@ -130,8 +130,23 @@ function 038_provision_openvr() {( $_dbgopts;
 function 039_provision_p373r() {( $_dbgopts;
     _assert p373r_dir test -v p373r_dir
     _assert p373r_dir 'test -d "$p373r_dir"'
-    # apply p373r patch and make llviewerVR.* available to llviewerdisplay.cpp
-    bash $p373r_dir/apply.sh || _die "p373r/apply failed"
+    (
+      cd $source_dir
+      grep P373R newview/llviewerdisplay.cpp >/dev/null || (
+        applied=
+        if patch --directory=newview --dry-run --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-6.6.8-baseline-diff.patch > /dev/null ; then
+          patch --directory=newview --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-6.6.8-baseline-diff.patch
+          applied=0001-P373R-6.6.8-baseline-diff.patch
+        fi
+        if patch --directory=.. --dry-run --ignore-whitespace --verbose --merge -p1 < $p373r_dir/20240331.diff.U.patch > /dev/null ; then
+          patch --directory=.. --ignore-whitespace --verbose --merge -p1 < $p373r_dir/20240331.diff.U.patch
+          applied=20240331.diff.U.patch
+        fi
+        test -n "$applied" || exit 145
+        echo "APPLIED: $applied" >&2
+      )
+    )
+    # bash $p373r_dir/apply.sh || _die "p373r/apply failed"
 
     # note: -I$build_dir/newview is already part of stock build opts
     ht-ln $p373r_dir/llviewerVR.h $build_dir/newview/
