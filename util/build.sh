@@ -273,14 +273,36 @@ function 0a0_ninja_build() {( $_dbgopts;
     ninja -C "$build_dir" "${@:-llpackage}" | colout -t ninja || _die_exit_code=$? _die "ninja failed"
 )}
 
+function 0a1_ninja_postbuild() {( $_dbgopts;
+    local nsi=$build_dir/newview/${viewer_id}_setup_tmp.nsi
+    (
+      test -f "$nsi" || \
+      test -f $(dirname "$nsi")/secondlife_setup_tmp.nsi && \
+        ht-ln $(dirname "$nsi")/secondlife_setup_tmp.nsi "$nsi"
+    )
+    cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
+    grep "openvr_api.dll" $nsi \
+      || perl -i.bak  -pe 's@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
+       $nsi
+    cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
+     | APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst \
+     | tee $build_dir/newview/load_with_settings_and_cache_here.bat
+
+   grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
+
+  ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
+  test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
+    || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
+  echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
+  tail -2 $build_dir/installer.txt
+
+  ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
+)}
+
 
 function make_installer() {
-  cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
   local nsi=$build_dir/newview/${viewer_id}_setup_tmp.nsi
   #s@^SetCompressor .*$@SetCompressor zlib@g;
-  grep "openvr_api.dll" $nsi \
-    || perl -i.bak  -pe 's@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
-       $nsi
 
   export XZ_DEFAULTS=-T0
   PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $nsi
@@ -293,31 +315,6 @@ function make_installer() {
 
 function make_7z() {( set -Euo pipefail;
   local nsi=$build_dir/newview/${viewer_id}_setup_tmp.nsi
-  grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
-
-  echo "-----------------------------------"
-  cat $fsvr_dir/util/load_with_settings_and_cache_here.bat;
-  echo "-----------------------------------"
-  echo APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst
-  echo "-----------------------------------"
-
-  cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
-    | APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst
-  echo "-----------------------------------"
-
-
-  cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
-   | APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst \
-   | tee $build_dir/newview/load_with_settings_and_cache_here.bat
-
-  ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
-
-  test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
-    || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
-  echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
-  tail -2 $build_dir/installer.txt
-
-  ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
   bash -c 'echo $PATH ; which 7z ; cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
   # echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
 )}
