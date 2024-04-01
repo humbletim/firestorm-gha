@@ -20,7 +20,7 @@ function make-echo-exe() {(
      #define _O_BINARY 0x8000
      //#include <fnctl.h>
      int main(int argc, char *argv[]) { _setmode(1,_O_BINARY); printf("%s\n", MESSAGE); return 0; }
-   ' | "${CC}" "-DMESSAGE=\"$(printf "%s" "$message")\"" -x c - -o "$output"
+   ' | "${CC}" "-DMESSAGE=\"$(printf "%s" "$message")\"" -x c - -o "$output" || return $?
   ls -l "$output"
 )}
 
