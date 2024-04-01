@@ -288,7 +288,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
      | APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst \
      | tee $build_dir/newview/load_with_settings_and_cache_here.bat
 
-   grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
+   grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@@g;s@^@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
 
   ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
   test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
@@ -305,11 +305,14 @@ function make_installer() {
   #s@^SetCompressor .*$@SetCompressor zlib@g;
 
   export XZ_DEFAULTS=-T0
-  PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $nsi
+  (
+    cd $build_dir/newview
+    PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $nsi
+  )
 
-  local InstallerName=$(basename $build_dir/newview/Phoenix*${viewer_version//./-}*.exe)
+  local InstallerName=$(basename $build_dir/newview/*Setup*.exe)
   local InstallerExe=${InstallerName/.exe/-$version_shas.exe}
-  mv -v $build_dir/newview/Phoenix*${viewer_version//./-}*.exe $build_dir/$InstallerExe
+  mv -v $build_dir/newview/*Setup*.exe $build_dir/$InstallerExe
   # echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
 }
 
