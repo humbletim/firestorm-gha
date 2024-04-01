@@ -285,23 +285,29 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
       test -f $(dirname "$nsi")/secondlife_setup_tmp.nsi && \
         ht-ln $(dirname "$nsi")/secondlife_setup_tmp.nsi "$nsi"
     )
-    cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
-    grep "openvr_api.dll" $nsi \
-      || perl -i.bak  -pe 's@^(.*?)\b(growl.dll)@$1$2\n$1openvr_api.dll@g' \
-       $nsi
-    cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
-     | APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst \
-     | tee $build_dir/newview/load_with_settings_and_cache_here.bat
+    (
+      local APPLICATION_EXE=${viewer_name}Viewer.exe
+      if [[ $viewer_id == blackdragon ]] ; then
+        APPLICATION_EXE=SecondLifeViewer.exe
+      fi
+      cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
+       | APPLICATION_EXE=$APPLICATION_EXE envsubst \
+       | tee $build_dir/newview/load_with_settings_and_cache_here.bat
+      ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
+      test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
+        || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
+    )
+    (
+      cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
+      grep "openvr_api.dll" $nsi \
+        || perl -i.bak  -pe 's@^(.*?)\b(OpenAL32.dll)@$1$2\n$1openvr_api.dll@g' \
+         $nsi
+    )
+    grep -E ^File "$nsi" | sed -e "s@^File @$viewer_channel-$version_full/@g" > $build_dir/installer.txt
+    echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
+    tail -2 $build_dir/installer.txt
 
-   grep -E ^File "$nsi" | sed -e "s@^File @$viewer_channel-$version_full/@g" > $build_dir/installer.txt
-
-  ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
-  test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
-    || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
-  echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
-  tail -2 $build_dir/installer.txt
-
-  ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
+    ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
 )}
 
 
