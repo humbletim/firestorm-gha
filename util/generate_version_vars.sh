@@ -12,3 +12,4 @@ _setenv version_patch=`  _ver_split $viewer_version 3`
 _setenv version_release=`_ver_split $viewer_version 4`
 _setenv version_xyz=$version_major.$version_minor.$version_patch
 _setenv version_xyzw=$version_xyz.$version_release
+_setenv slos_version=$viewer_version
