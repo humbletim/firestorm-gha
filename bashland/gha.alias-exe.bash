@@ -1,7 +1,8 @@
 #!/bin/bash
 
 function make-stub() {(
-  CC=${CC:-'/c/mingw64/bin/gcc'}
+  CC=${CC:-'/c/Program Files/LLVM/bin/clang'} 
+  # CC=${CC:-'/c/mingw64/bin/gcc'}
   set -x
   # [[ $OSTYPE == msys ]] && BASH=$(cygpath -mas $BASH)
   "${CC}" "-DBASH=\"$(printf "%q" "$BASH")\"" \
@@ -10,8 +11,8 @@ function make-stub() {(
 
 function make-echo-exe() {(
   local output="$1" message="$2"
-  CC=${CC:-'/c/mingw64/bin/gcc'}
-  # CC=${CC:-'/c/Program Files/LLVM/bin/clang'} 
+  # CC=${CC:-'/c/mingw64/bin/gcc'}
+  CC=${CC:-'/c/Program Files/LLVM/bin/clang'} 
   set -x
   echo '
      #include <stdio.h>
