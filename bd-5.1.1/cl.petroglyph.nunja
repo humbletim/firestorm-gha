@@ -9116,7 +9116,7 @@ build newview\CMakeFiles\blackdragon-bin.dir\llviewercontrollistener.cpp.obj: CX
 
 build newview\CMakeFiles\blackdragon-bin.dir\llviewerdisplay.cpp.obj: CXX_COMPILER__blackdragon-bin_unscanned_Release $source_dir\newview\llviewerdisplay.cpp | newview\cmake_pch.hxx newview\cmake_pch.cxx.pch || cmake_object_order_depends_target_blackdragon-bin
   DEFINES = $DEFINES_1
-  FLAGS = $WX /bigobj  "-DmScreen=mRT->screen" -Inewview  $PCH -I. 
+  FLAGS = $WX /bigobj  "-DmScreen=mRT->screen" -Inewview  "-Dunder_water=(viewer_cam->cameraUnderWater())"  $PCH -I. 
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\blackdragon-bin.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\blackdragon-bin.dir
