@@ -64,7 +64,8 @@ function 020_perform_replacements() {( $_dbgopts;
 
     if [[ $viewer_id == blackdragon ]] ; then
       source $fsvr_dir/bashland/gha.alias-exe.bash
-      make-echo-exe $build_dir/newview/BDVersionChecker.exe "TODO: newview/BDVersionChecker.exe"
+      make-echo-exe "$build_dir/newview/BDVersionChecker.exe" "TODO: newview/BDVersionChecker.exe" || exit 67
+      test -x "$build_dir/newview/BDVersionChecker.exe" || exit 68
     fi
 
     if [[ -f $source_dir/newview/fsversionvalues.h.in ]] ; then

@@ -271,6 +271,9 @@ jobs:
     - name: 0a0_ninja_build llpackage
       run: fsvr_step 0a0 llpackage
 
+    - name: 0a1 postbuild
+      run: fsvr_step 0a1
+
     - name: 0b0 installer
       run: fsvr_step 0b0
     - name: 0b1 upload installer
