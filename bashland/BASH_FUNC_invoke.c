@@ -50,7 +50,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+// #include <unistd.h>
+int execv(const char *pathname, char *const argv[]);
 
 char *esc_dquotes(const char *arg);
 
