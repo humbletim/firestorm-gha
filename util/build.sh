@@ -361,6 +361,7 @@ function 0b2_bundle_7z() {( $_dbgopts;
 function 0b3_upload_7z() {( $_dbgopts;
   local Portable=`ls build/${viewer_name}*.7z |head -1`
   local PortableArchive=$build_id-$ref-$(basename $Portable)
+  mkdir dist
   ht-ln $Portable dist/$PortableArchive
 
   ( cd dist && gha-upload-artifact ${PortableArchive/.7z/} $PortableArchive )
