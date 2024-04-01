@@ -44,6 +44,7 @@ declare -x PATH="\$_xpath"
 declare -x LANG=en_US.UTF-8
 declare -x PYTHONUSERBASE="$_PYTHONUSERBASE"
 declare -x PYTHONWARNINGS="ignore::SyntaxWarning,\${PYTHONWARNINGS:-}"
+declare -x PYTHONOPTIMIZE=nonemptystring
 
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 

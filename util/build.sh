@@ -62,6 +62,11 @@ function 020_perform_replacements() {( $_dbgopts;
     ht-ln $fsvr_dir/newview/cmake_pch.hxx $build_dir/newview/
     ht-ln $fsvr_dir/newview/cmake_pch.cxx $build_dir/newview/
 
+    if [[ $viewer_id == blackdragon ]] ; then
+      source $fsvr_dir/bashland/gha.alias-exe.bash
+      make-echo-exe $build_dir/newview/BDVersionChecker.exe "TODO: newview/BDVersionChecker.exe"
+    fi
+
     if [[ -f $source_dir/newview/fsversionvalues.h.in ]] ; then
       ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
       cat $source_dir/newview/fsversionvalues.h.in | sed -E 's~@([A-Z_]+)@~$\1~g' \
@@ -288,7 +293,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
      | APPLICATION_EXE="$(basename `ls $build_dir/newview/${viewer_name}*.exe`)" envsubst \
      | tee $build_dir/newview/load_with_settings_and_cache_here.bat
 
-   grep -E ^File "$nsi" | sed -e "s@.*newview[/\\\\]@@g;s@^@$viewer_channel-$version_full/@g" > $build_dir/installer.txt
+   grep -E ^File "$nsi" | sed -e "s@^File @$viewer_channel-$version_full/@g" > $build_dir/installer.txt
 
   ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
   test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
