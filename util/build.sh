@@ -239,7 +239,7 @@ function 070_verify_downloads() {( $_dbgopts;
 
 function 080_untar_packages() {( $_dbgopts;
     jq -r '.[]|.url' $build_dir/packages-info.json | grep -vE '^null$' \
-     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && tar --force-local -xf $fsvr_cache_dir/$(basename {})' \
+     | _parallel "$FUNCNAME" -j8 'basename {} && cd $packages_dir && tar --exclude=autobuild-package.xml --force-local -xf $fsvr_cache_dir/$(basename {})' \
        || _die "untar failed $?"
 )}
 
