@@ -305,7 +305,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
          $nsi
       grep "openvr_api.dll" -C2 $nsi
     )
-    grep -E ^File "$nsi" | sed -e "s@^File @$viewer_channel-$version_full/@g" | sort -u > $build_dir/installer.txt
+    grep -E ^File "$nsi" | sed -e "s@File [^ ]\+[/\\]newview[/\\]@File @g;s@^File @$viewer_channel-$version_full/@g" | sort -u > $build_dir/installer.txt
     echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
     tail -2 $build_dir/installer.txt
 
