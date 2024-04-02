@@ -3,8 +3,9 @@ set -Euo pipefail
 
 test -d "$fsvr_cache_dir" || { echo "env fsvr_cache_dir not found" >&2 ; exit 15 ; }
 
-export tag=v2.5.1
-export commit=ae46a8d
+# export tag=v2.5.1 commit=ae46a8d
+export tag=v1.6.10 commit=8eaf723
+
 tarball=$fsvr_cache_dir/openvr-$tag.$commit.tar.bz2
 
 function verify_from_packages_json() {
