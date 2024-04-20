@@ -5,7 +5,7 @@ function make-stub() {(
   # CC=${CC:-'/c/mingw64/bin/gcc'}
   set -x
   # [[ $OSTYPE == msys ]] && BASH=$(cygpath -mas $BASH)
-  "${CC}" "-DBASH=\"$(printf "%q" "$BASH")\"" \
+  "${CC}" -w "-DBASH=\"$(printf "%q" "$BASH")\"" \
     fsvr/bashland/BASH_FUNC_invoke.c -o "${1:-bin/BASH_FUNC_invoke.exe}"
 )}
 
@@ -21,7 +21,7 @@ function make-echo-exe() {(
      #define _O_BINARY 0x8000
      //#include <fnctl.h>
      int main(int argc, char *argv[]) { _setmode(1,_O_BINARY); printf("%s\n", MESSAGE); return 0; }
-   ' | "${CC}" "-DMESSAGE=\"$(printf "%s" "$message")\"" -x c - -o "$output" || return $?
+   ' | "${CC}" -w "-DMESSAGE=\"$(printf "%s" "$message")\"" -x c - -o "$output" || return $?
   ls -l "$output"
 )}
 
