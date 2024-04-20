@@ -144,7 +144,7 @@ function 039_provision_p373r() {( $_dbgopts;
     (
       cd $source_dir
       grep P373R newview/llviewerdisplay.cpp >/dev/null || (
-        applied=
+        applied=`cat $p373r_dir/applied 2>/dev/null`
         if patch --directory=newview --dry-run --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-6.6.8-baseline-diff.patch > /dev/null ; then
           patch --directory=newview --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-6.6.8-baseline-diff.patch
           applied=0001-P373R-6.6.8-baseline-diff.patch
@@ -296,6 +296,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
       if [[ $viewer_id == blackdragon ]] ; then
         APPLICATION_EXE=SecondLifeViewer.exe
       fi
+      APPLICATION_EXE=$(cd $build_dir ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe 2>/dev/null | head 1)
       cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
        | APPLICATION_EXE=$APPLICATION_EXE envsubst \
        | tee $build_dir/newview/load_with_settings_and_cache_here.bat

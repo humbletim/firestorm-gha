@@ -139,8 +139,9 @@ jobs:
             )
           }
 
-          if [[ -x $nunja_dir/checkout.sh ]]; then
-            . $nunja_dir/checkout.sh $hub $repo $ref
+          if [[ -x $nunja_dir/000.bash ]] ; then
+            echo "[sourcing] $nunja_dir/000.bash" >&2
+            . $nunja_dir/000.bash $hub $repo $ref
           else
             maybe-clone viewer ${hub:-github.com} $repo $ref
             maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
