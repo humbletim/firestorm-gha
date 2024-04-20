@@ -130,18 +130,23 @@ jobs:
           source $fsvr_dir/util/gha.cachette.bash
           source $fsvr_dir/util/gha.quiet-clone.bash
 
-          gha-cache-restore $cache_id-repo-viewer repo/viewer || (
-            set -Euo pipefail
-            test -e repo/viewer/.git || quiet-clone ${hub:-github.com} $repo $ref repo/viewer
-            gha-cache-save $cache_id-repo-viewer repo/viewer  || exit 107
-          )
-          gha-cache-restore $cache_id-repo-p373r repo/p373r || (
-            set -Euo pipefail
-            test -e repo/p373r/.git   || quiet-clone github.com ${GITHUB_REPOSITORY} P373R_6.6.8 repo/p373r
-            gha-cache-save $cache_id-repo-p373r repo/p373r  || exit 143
-          )
+          function maybe-clone() {
+            local name=$1 hub=$2 repo=$3 ref=$4
+            gha-cache-restore $cache_id-repo-$name repo/$name || (
+              set -Euo pipefail
+              test -e repo/$name/.git || quiet-clone $hub $repo $ref repo/$name
+              gha-cache-save $cache_id-repo-$name repo/$name  || exit 107
+            )
+          }
 
-          repos="$(for id in repo/viewer repo/p373r ; do
+          if [[ -x $nunja_dir/checkout.sh ]]; then
+            . $nunja_dir/checkout.sh $hub $repo $ref
+          else
+            maybe-clone viewer ${hub:-github.com} $repo $ref
+            maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
+          fi
+
+          repos="$(for id in `ls -1d repo/*` ; do
             echo "| ./$id | $(git -C $id describe --all --always) |"
           done)"
 

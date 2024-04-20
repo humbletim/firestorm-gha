@@ -26,6 +26,11 @@ function 010_ensure_build_directories() {( $_dbgopts;
     for x in "${directories[@]}"; do
       test -d $build_dir/$x && echo "[exists] $x" >&2 || mkdir -pv $build_dir/$x
     done
+
+    if [[ -x $nunja_dir/010.bash ]] ; then
+      echo "[sourcing] $nunja_dir/010.bash" >&2
+      . $nunja_dir/010.bash
+    fi
 )}
 
 fsversionvalues=(
@@ -84,7 +89,7 @@ function 020_perform_replacements() {( $_dbgopts;
       ht-ln $source_dir/newview/icons/test/secondlife.ico $build_dir/newview/ll_icon.ico
       mkdir -v $packages_dir/js $packages_dir/fonts
       ht-ln $packages_dir/js $source_dir/newview/skins/default/html/common/equirectangular/js
-      ht-ln $packages_dir/fonts $source_dir/newview/fonts 
+      ht-ln $packages_dir/fonts $source_dir/newview/fonts
     fi
 
     cat $source_dir/newview/res/viewerRes.rc \

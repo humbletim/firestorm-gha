@@ -26,6 +26,8 @@ function get_bootstrap_vars() {(
     sl-*) echo viewer_id=secondlife   ; echo viewer_name=SecondLife     ;;
     fs-*) echo viewer_id=firestorm    ; echo viewer_name=Firestorm      ;;
     bd-*) echo viewer_id=blackdragon  ; echo viewer_name=BlackDragon    ;;
+    al-*) echo viewer_id=alchemy      ; echo viewer_name=Alchemy        ;;
+  sgeo-*) echo viewer_id=sgeo         ; echo viewer_name=Sgeo           ;;
        *) echo viewer_id=unknown      ; echo viewer_name=Unknown        ;;
   esac
 
