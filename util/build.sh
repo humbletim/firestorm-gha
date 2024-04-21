@@ -141,6 +141,7 @@ function 038_provision_openvr() {( $_dbgopts;
 function 039_provision_p373r() {( $_dbgopts;
     _assert p373r_dir test -v p373r_dir
     _assert p373r_dir 'test -d "$p373r_dir"'
+    cat $p373r_dir/applied >&2 && return 0
     (
       cd $source_dir
       grep P373R newview/llviewerdisplay.cpp >/dev/null || (
