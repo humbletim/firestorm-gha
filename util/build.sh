@@ -287,7 +287,7 @@ function 0a0_ninja_build() {( $_dbgopts;
 )}
 
 function 0a1_ninja_postbuild() {( $_dbgopts;
-    local nsi=$build_dir/newview/${viewer_id}_setup_tmp.nsi
+    local nsi=$build_dir/newview/${viewer_exe}_setup_tmp.nsi
     (
       test -f "$nsi" || \
       test -f $(dirname "$nsi")/secondlife_setup_tmp.nsi && \
@@ -322,7 +322,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
 
 
 function make_installer() {
-  local nsi=$build_dir/newview/${viewer_id}_setup_tmp.nsi
+  local nsi=$build_dir/newview/${viewer_exe}_setup_tmp.nsi
   #s@^SetCompressor .*$@SetCompressor zlib@g;
 
   export XZ_DEFAULTS=-T0
@@ -338,7 +338,7 @@ function make_installer() {
 }
 
 function make_7z() {( set -Euo pipefail;
-  local nsi=$build_dir/newview/${viewer_id}_setup_tmp.nsi
+  local nsi=$build_dir/newview/${viewer_exe}_setup_tmp.nsi
   bash -c 'echo $PATH ; which 7z ; cd $build_dir && 7z -bt -t7z a "$build_dir/$viewer_channel-$version_full.7z" "@$build_dir/installer.txt"'
   # echo portable_archive=$build_dir/$viewer_channel-$version_full.7z | tee -a $GITHUB_OUTPUT
 )}
