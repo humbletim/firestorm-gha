@@ -23,13 +23,18 @@ function get_bootstrap_vars() {(
   echo _bash=$BASH
 
   case "$base" in
-    sl-*) echo viewer_id=secondlife   ; echo viewer_name=SecondLife     ;;
-    fs-*) echo viewer_id=firestorm    ; echo viewer_name=Firestorm      ;;
-    bd-*) echo viewer_id=blackdragon  ; echo viewer_name=BlackDragon    ;;
-    al-*) echo viewer_id=alchemy      ; echo viewer_name=Alchemy        ;;
-  sgeo-*) echo viewer_id=sgeo         ; echo viewer_name=Sgeo           ;;
-       *) echo viewer_id=unknown      ; echo viewer_name=Unknown        ;;
+    sl-*) viewer_name=SecondLife     ;;
+    fs-*) viewer_name=Firestorm      ;;
+    bd-*) viewer_name=BlackDragon    ;;
+    al-*) viewer_name=Alchemy        ;;
+  sgeo-*) viewer_name=Sgeo viewer_exe=firestorm ;;
+       *) viewer_name=Unknown        ;;
   esac
+  viewer_id=${viewer_id:-$(echo "$viewer_name" | tr '[:upper:]' '[:lower:]' | sed -e 's@[^-_A-Za-z0-9]@_@g')}
+
+  echo viewer_id=$viewer_id
+  echo viewer_name=$viewer_name
+  echo viewer_exe=${viewer_exe:-$viewer_id}
 
   function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
   echo cache_id=$(echo "$base-$repo" | to-id)

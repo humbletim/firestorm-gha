@@ -20,7 +20,7 @@ function 010_ensure_build_directories() {( $_dbgopts;
       copy_win_scripts
       sharedlibs
       llcommon
-      newview/CMakeFiles/${viewer_id}-bin.dir
+      newview/CMakeFiles/${viewer_exe}-bin.dir
     )
 
     for x in "${directories[@]}"; do

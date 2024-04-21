@@ -263,7 +263,7 @@ jobs:
       run: fsvr_step 0a0 SLPlugin.exe
 
     - name: 0a0_ninja_build application-bin.exe
-      run: fsvr_step 0a0 ${viewer_id}-bin.exe
+      run: fsvr_step 0a0 ${viewer_exe}-bin.exe
 
     - name: 0a0_ninja_build llpackage
       run: fsvr_step 0a0 llpackage
