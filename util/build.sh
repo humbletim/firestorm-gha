@@ -172,7 +172,8 @@ function 040_generate_package_infos() {( $_dbgopts;
 
     merge_packages_info $nunja_dir/packages-info.json || return `_err $? nunja-packages-info`
     merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json || return `_err $? openvr-packages-info`
-    merge_packages_info $p373r_dir/meta/packages-info.json || return `_err $? p373r-packages-info`
+    test ! -s $p373r_dir/meta/packages-info.json || \
+      merge_packages_info $p373r_dir/meta/packages-info.json || return `_err $? p373r-packages-info`
 )}
 
 function 050_generate_packages_info_text() {( $_dbgopts;
