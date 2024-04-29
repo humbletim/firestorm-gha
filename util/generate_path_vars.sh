@@ -4,7 +4,7 @@ source $(dirname $BASH_SOURCE)/_utils.sh
 
 test -d "$1" || _die "usage: \$ [env workspace=...] generate_path_vars.sh [build_dir]"
 
-root_dir=${workspace:-${root_dir:-${GITHUB_WORKSPACE}}}
+root_dir=${root_dir:-${workspace:-${GITHUB_WORKSPACE}}}
 build_dir=$1
 test -d "$root_dir" || _die "env workspace or GITHUB_WORKSPACE expected as base"
 test -d "$build_dir" || _die "build_dir=$build_dir does not exist"
