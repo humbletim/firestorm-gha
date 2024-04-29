@@ -150,39 +150,11 @@ jobs:
 
           if [[ -x $nunja_dir/000.bash ]] ; then
             echo "[sourcing] $nunja_dir/000.bash" >&2
-            . $nunja_dir/000.bash $hub $repo $ref
+            . $nunja_dir/000.bash $hub $repo "$ref"
           else
-            maybe-clone viewer ${hub:-github.com} $repo $ref
+            maybe-clone viewer ${hub:-github.com} $repo "$ref"
             maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
           fi
-
-    - name: Generate Report
-      uses: ./fsvr-action
-      with:
-        run: |
-          repos="$(for id in `ls -1d repo/*` ; do
-            echo "| ./$id | $(git -C $id describe --all --always) |"
-          done)"
-
-          tools="$(for id in jq ninja parallel bash ; do
-            echo "| $id | $($id --version | head -n 1 || true) |"
-          done)"
-          test -v GITHUB_STEP_SUMMARY || GITHUB_STEP_SUMMARY=/dev/stdout
-          cat <<EOF >> $GITHUB_STEP_SUMMARY
-          | name        | value        |
-          | ---------   | -----------  |
-          | viewer_id   | $viewer_id   |
-          | viewer_name | $viewer_name |
-          | base        | $base        |
-          | hub         | $hub         |
-          | repo        | $repo        |
-          | ref         | $ref         |
-          | build_id    | $build_id    |
-          | cache_id    | $cache_id    |
-          | hostname    | `hostname`   |
-          $repos
-          $tools
-          EOF
 
     - name: ~003 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '003'
@@ -217,6 +189,35 @@ jobs:
         viewer_version=`cat $nunja_dir/viewer_version.txt`
         $fsvr_dir/util/generate_build_vars.sh ${viewer_name}-VR-GHA ${viewer_version} build/ \
            | tee env.d/build_vars.env
+
+    - name: Generate Report
+      uses: ./fsvr-action
+      with:
+        run: |
+          repos="$(for id in `ls -1d repo/*` ; do
+            echo "| ./$id | $(git -C $id describe --all --always) |"
+          done)"
+
+          tools="$(for id in jq ninja parallel bash ; do
+            echo "| $id | $($id --version | head -n 1 || true) |"
+          done)"
+          test -v GITHUB_STEP_SUMMARY || GITHUB_STEP_SUMMARY=/dev/stdout
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          | name           | value           |
+          | ---------      | -----------     |
+          | viewer_id      | $viewer_id      |
+          | viewer_name    | $viewer_name    |
+          | viewer_channel | $viewer_channel |
+          | base           | $base           |
+          | hub            | $hub            |
+          | repo           | $repo           |
+          | ref            | $ref            |
+          | build_id       | $build_id       |
+          | cache_id       | $cache_id       |
+          | hostname       | `hostname`      |
+          $repos
+          $tools
+          EOF
 
     - name: Detect MSVC
       uses: ./fsvr-action
