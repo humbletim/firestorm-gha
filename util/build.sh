@@ -46,17 +46,25 @@ fsversionvalues=(
 ##############################################################################
 viewer_manifest_patch=$(cat <<'EOF'
 diff --git a/indra/newview/viewer_manifest.py b/indra/newview/viewer_manifest.py
-index 94636371fc..16577204d7 100755
+index 824754c410..738775ba7a 100755
 --- a/indra/newview/viewer_manifest.py
 +++ b/indra/newview/viewer_manifest.py
-@@ -1009,6 +1009,7 @@ class Windows_x86_64_Manifest(ViewerManifest):
+@@ -1026,6 +1026,7 @@ class Windows_x86_64_Manifest(ViewerManifest):
                      nsis_path = possible_path
                      break
-
+ 
 +        return print("[###tpv-gha### early exit]", setattr(self, 'package_file', self.dst_path_of(tempfile)))
          self.run_command([possible_path, '/V2', self.dst_path_of(tempfile)])
-
+ 
          self.fs_sign_win_installer(substitution_strings) # <FS:ND/> Sign files, step two. Sign installer.
+@@ -2179,6 +2180,7 @@ class LinuxManifest(ViewerManifest):
+         # name in the tarfile
+         realname = self.get_dst_prefix()
+         tempname = self.build_path_of(installer_name)
++        return print("[###tpv-gha### early exit]")
+         self.run_command(["mv", realname, tempname])
+         try:
+             # only create tarball if it's a release build.
 EOF
 ##############################################################################
 )
@@ -76,7 +84,7 @@ function 020_perform_replacements() {( $_dbgopts;
     if [[ -f $source_dir/newview/fsversionvalues.h.in ]] ; then
       ht-ln $source_dir/newview/icons/development-os/firestorm_icon.ico $build_dir/newview/
       cat $source_dir/newview/fsversionvalues.h.in | sed -E 's~@([A-Z_]+)@~$\1~g' \
-        | eval "${fsversionvalues[@]} C:/PROGRA~1/Git/mingw64/bin/envsubst.exe" > $build_dir/newview/fsversionvalues.h || return `_err $? "envsubst fsversionvalues.h.in"`
+        | eval "${fsversionvalues[@]} envsubst" > $build_dir/newview/fsversionvalues.h || return `_err $? "envsubst fsversionvalues.h.in"`
       grep '###tpv-gha###' $root_dir/indra/newview/viewer_manifest.py || (
         set -ex
         cd $root_dir && echo "$viewer_manifest_patch" | patch -p1
@@ -93,7 +101,7 @@ function 020_perform_replacements() {( $_dbgopts;
     fi
 
     cat $source_dir/newview/res/viewerRes.rc \
-      | eval "${fsversionvalues[@]} C:/PROGRA~1/Git/mingw64/bin/envsubst.exe" > $build_dir/newview/viewerRes.rc || return `_err $? "envsubst viewerRes.rc"`
+      | eval "${fsversionvalues[@]} envsubst" > $build_dir/newview/viewerRes.rc || return `_err $? "envsubst viewerRes.rc"`
     grep ProductVersion $source_dir/newview/res/viewerRes.rc $build_dir/newview/viewerRes.rc >&2
 
     # workaround a windows64 ninja viewer_manifest.py path quirkinesses
@@ -171,7 +179,8 @@ function 040_generate_package_infos() {( $_dbgopts;
     cat $fsvr_dir/meta/packages-info.json | envsubst | merge_packages_info || return `_err $? meta-packages-info`
 
     merge_packages_info $nunja_dir/packages-info.json || return `_err $? nunja-packages-info`
-    merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json || return `_err $? openvr-packages-info`
+    test ! -s $fsvr_cache_dir/openvr-*.tar.*.json || \
+      merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json || return `_err $? openvr-packages-info`
     test ! -s $p373r_dir/meta/packages-info.json || \
       merge_packages_info $p373r_dir/meta/packages-info.json || return `_err $? p373r-packages-info`
 )}
@@ -258,7 +267,7 @@ include ../env.d/build_vars.env
 include ../env.d/gha-bootstrap.env
 include msvc.nunja.env
 nunja_dir=$nunja_dir
-include \$nunja_dir/cl.arrant.nunja
+include \$nunja_dir/blueprint.arrant.nunja
 EOF
 
     _assert msvc.env 'test -f $build_dir/msvc.env'
@@ -268,7 +277,7 @@ EOF
     . $BASH_ENV
 
     echo $msvc_path
-    which cl.exe > /dev/null || return 241
+    [[ "$OSTYPE" != "msys" ]] || which cl.exe > /dev/null || return 241
     local out="$(ninja -C "$build_dir" -n 2>&1 | colout -t ninja)" || _die_exit_code=$? _die "ninja -n failed\n$out"
     echo "$out" | head -3
     echo "..."
@@ -281,7 +290,7 @@ function 0a0_ninja_build() {( $_dbgopts;
     . $build_dir/msvc.env
     . $build_dir/msvc_path.env
     . $BASH_ENV
-    which cl.exe > /dev/null || return 256
+    [[ "$OSTYPE" != "msys" ]] || which cl.exe > /dev/null || return 241
     echo "[$FUNCNAME] ninja -C $build_dir ${@:-llpackage}" >&2
     ninja -C "$build_dir" "${@:-llpackage}" | colout -t ninja || _die_exit_code=$? _die "ninja failed"
 )}
@@ -298,15 +307,17 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
       if [[ $viewer_id == blackdragon ]] ; then
         APPLICATION_EXE=SecondLifeViewer.exe
       fi
-      APPLICATION_EXE=$(cd $build_dir ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe 2>/dev/null | head 1)
+      APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe 2>/dev/null | head -n 1)
+      _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
       cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
        | APPLICATION_EXE=$APPLICATION_EXE envsubst \
-       | tee $build_dir/newview/load_with_settings_and_cache_here.bat
+       | tee $build_dir/newview/load_with_settings_and_cache_here.bat \
+       | grep call
       ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
       test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
         || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
     )
-    (
+    test ! -f $packages_dir/lib/release/openvr_api.dll || (
       cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
       grep "openvr_api.dll" $nsi \
         || perl -i.bak  -pe 's@^(.*?)\b(OpenAL32.dll)@$1$2\n$1openvr_api.dll@gi' \

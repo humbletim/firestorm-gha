@@ -51,7 +51,13 @@ function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$
 function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
 function hostname(){ echo '$_hostname' ; }
 function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
-function colout() { "`which python3`" "$pysite/colout/colout.py" "\$@" ; }
+function colout() { $(
+  if which colout 2>/dev/null > /dev/null ; then
+    echo \"`which colout`\"
+  else
+    echo \"`which python3`\" \"$pysite/colout/colout.py\"
+  fi
+) "\$@" ; }
 function parallel() { PARALLEL_SHELL="$BASH" PARALLEL_HOME="$PWD/bin/parallel-home" "`which perl`" "$PWD/bin/parallel" "\$@" ; }
 function jq() { "`which jq`" $(
   # grr... detect if jq supports -b (binary)
@@ -65,7 +71,7 @@ function jq() { "`which jq`" $(
   fi
 ) ; }
 
-function fsvr_step() {( set -Euo pipefail; $PWD/fsvr/util/build.sh "\$@" ; )}
+function fsvr_step() {( set -Euo pipefail; $fsvr_dir/util/build.sh "\$@" ; )}
 
 declare -xf _err tee parallel ht-ln hostname colout jq fsvr_step
 # set -Eo pipefail

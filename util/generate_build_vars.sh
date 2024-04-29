@@ -16,15 +16,21 @@ _assert "invalid build_dir"    'test -d $build_dir'
 
 _assert "invalid fsvr_dir"    'test -v fsvr_dir'
 
-test -v source_dir
-test -v fsvr_dir
+# _assert source_dir test -v source_dir
+_assert fsvr_dir test -v fsvr_dir
 
 _setenv viewer_channel=$viewer_channel
+if [[ "$OSTYPE" == "msys" ]]; then
+    _setenv viewer_os=windows
+else
+    _setenv viewer_os=linux
+fi
+
 require generate_version_vars.sh $viewer_version
 require generate_path_vars.sh $build_dir
 require generate_git_vars.sh \
-  version_git_sha=$source_dir/.. \
-  version_fsvr_sha=$fsvr_dir
+    version_git_sha=$source_dir/.. \
+    version_fsvr_sha=$fsvr_dir
 
 # version_fsvr_tag=`git tag --contains "$version_fsvr_sha" -n 1`
 # test -n "$version_fsvr_tag" ||

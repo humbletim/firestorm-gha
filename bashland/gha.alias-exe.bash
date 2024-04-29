@@ -4,9 +4,10 @@ function make-stub() {(
   CC=${CC:-'/c/Program Files/LLVM/bin/clang'} 
   # CC=${CC:-'/c/mingw64/bin/gcc'}
   set -x
+  local here=$(dirname "$BASH_SOURCE")
   # [[ $OSTYPE == msys ]] && BASH=$(cygpath -mas $BASH)
   "${CC}" -w "-DBASH=\"$(printf "%q" "$BASH")\"" \
-    fsvr/bashland/BASH_FUNC_invoke.c -o "${1:-bin/BASH_FUNC_invoke.exe}"
+    $here/BASH_FUNC_invoke.c -o "${1:-bin/BASH_FUNC_invoke.exe}"
 )}
 
 function make-echo-exe() {(

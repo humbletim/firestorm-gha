@@ -41,10 +41,10 @@ function get_bootstrap_vars() {(
   echo build_id=$(echo "${build_id:-$fsvr_branch-$base}" | to-id)
 
   echo fsvr_dir=$fsvr_dir
-  echo nunja_dir=`$fsvr_dir/util/_utils.sh _realpath $fsvr_dir/$base`
+  echo nunja_dir=`$fsvr_dir/util/_utils.sh _realpath ${nunja_dir:-$fsvr_dir/$base}`
   echo p373r_dir=$pwd/repo/p373r
-  echo viewer_dir=$pwd/repo/viewer
-  echo fsvr_cache_dir=$pwd/cache
+  # echo viewer_dir=$pwd/repo/viewer
+  echo fsvr_cache_dir=${fsvr_cache_dir:-$pwd/cache}
 
 )}
 
@@ -60,7 +60,7 @@ function get_ninja() {(
 
 function get_colout() {(
     set -Euo pipefail
-    python -m pip install --no-warn-script-location --user colout
+    python -m pip install --break-system-packages --no-warn-script-location --user colout
     local pysite="$(python -msite --user-site)"
     if grep SIGPIPE $pysite/colout/colout.py ; then
       # workaround SIGPIPE on Win32 missing with some colout versions
@@ -102,4 +102,20 @@ function get_yaml2json() {(
     ) && cp -avu $archive bin/yaml2json.exe || return `_err $? "failed to provision yaml2json.exe $?"`
     ls -l bin/ | grep yaml2json
 )}
+
+function gha_steps() {
+  local fsvr_dir=$(dirname $BASH_SOURCE)
+  bin/yaml2json < $fsvr_dir/.github/workflows/CompileWindows.yml | jq -r '.jobs[].steps|to_entries[]|select(.value.name and ((.value.name//"")|startswith("~")|not))|.value.name+" # "+(.key|tostring)'
+}
+
+function gha_step() {
+  local fsvr_dir=$(dirname $BASH_SOURCE)
+  if [[ "$1" =~ ^[0-9a-f][0-9a-f][0-9a-f]$ ]]; then
+    bin/yaml2json < $fsvr_dir/.github/workflows/CompileWindows.yml | jq -r --arg prefix "$1" '.jobs[].steps[]|select((.name//"")|startswith($prefix))|"# "+.name+"\n"+(.with.run//.run)'
+  elif [[ "$1" =~ ^[0-9]+$ ]]; then
+    bin/yaml2json < $fsvr_dir/.github/workflows/CompileWindows.yml | jq -r --argjson name "$1" '.jobs[].steps[$name]|"# "+.name+"\n"+(.with.run//.run)'
+  else
+    bin/yaml2json < $fsvr_dir/.github/workflows/CompileWindows.yml | jq -r --arg name "$1" '.jobs[].steps[]|select(.name==$name)|"# "+.name+"\n"+(.with.run//.run)'
+  fi
+}
 

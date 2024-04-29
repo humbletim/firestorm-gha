@@ -7,5 +7,5 @@
 function literally-exists() {
   local dir="$(dirname "$1")"
   local name="$(basename "$1")"
-  command -p ls -1a "$dir" | command -p grep -Fx "$name" >/dev/null && true || false
+  command -p ls -1a "$dir" 2>/dev/null | command -p grep -Fx "$name" >/dev/null && true || false
 }

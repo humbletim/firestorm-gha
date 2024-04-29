@@ -45,15 +45,21 @@ jobs:
         test -v repo   || exit 45
         test -v ref    || exit 46
 
-    - name: Clone && Generate SHELL.env
+    - name: ~Clone
+      run: |
+        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
+        source fsvr/util/gha.ht-ln.sh
+        ht-ln fsvr/actions-node-script ./fsvr-action
+
+    - name: Generate SHELL.env
       run: |
         set -Euo pipefail
         mkdir -pv env.d bin bin/pystuff cache repo build
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
-        fsvr_dir=$PWD/fsvr fsvr/gha-generate-shell-env.sh | tee -a SHELL.env
-        fsvr/util/_utils.sh ht-ln fsvr/actions-node-script ./fsvr-action
+        export fsvr_dir=${fsvr_dir:-$PWD/fsvr}
+        export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
+        $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
 
-    - name: 000 Setup tmate session
+    - name: ~000 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '000'
       uses: mxschmitt/action-tmate@v3
       with:
@@ -61,34 +67,33 @@ jobs:
 
     - name: Generate gha-bootstrap.env
       run: |
-        source fsvr/gha-bootstrap.sh
+        source $fsvr_dir/gha-bootstrap.sh
         get_bootstrap_vars | tee env.d/gha-bootstrap.env || exit 127
 
-    - name: 001 Setup tmate session
+    - name: ~001 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '001'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
 
-    - name: Populate local bin/
+    - name: Populate local bin
       uses: ./fsvr-action
       with:
         run: |
+          set -Euo pipefail
           test -d "$fsvr_dir" || exit 63
 
           {
-            source fsvr/bashland/gha.alias-exe.bash
+            source $fsvr_dir/bashland/gha.alias-exe.bash
             BASH=$(cygpath -was $BASH) make-stub bin/BASH_FUNC_invoke.exe
-            fsvr/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
+            $fsvr_dir/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
             ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
             ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
-          }
-
-          source $fsvr_dir/util/gha.cachette.bash
+          } || exit 86
 
           function xxtest_bin() {
             test -f bin/parallel-home/will-cite || return 196
-            parallel -- --version | head -1     || return 197
+            parallel --version | head -1        || return 197
             ninja --version | head -1           || return 198
             [[ `hostname` =~ windows[-]?2022 ]] || return 199
             jq --version | head -1              || return 200
@@ -97,9 +102,9 @@ jobs:
             which jq
           }
 
-          gha-cache-restore $base-bin-b bin || (
+          function xxprovision_tools() {(
             set -Euo pipefail
-            source fsvr/gha-bootstrap.sh
+            source $fsvr_dir/gha-bootstrap.sh
             source $fsvr_dir/util/gha.literally-exists.bash
             pysite="$(cygpath -m "$(python3 -msite --user-site)")"
 
@@ -111,13 +116,17 @@ jobs:
 
             # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
             python -m pip install --no-warn-script-location --user llsd
+          )}
 
+          source $fsvr_dir/util/gha.cachette.bash
+
+          test -v GITHUB_ACTIONS && gha-cache-restore $cache_id-bin-b bin || (
+            xxprovision_tools || exit `_err $? "!xxprovision_tools"` 
             xxtest_bin || exit `_err $? "!xxtest_bin"`
-
-            gha-cache-save $base-bin-b bin || exit 85
+            test ! -v GITHUB_ACTIONS || gha-cache-save $cache_id-bin-b bin || exit 85
           )
 
-    - name: 002 Setup tmate session
+    - name: ~002 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '002'
       uses: mxschmitt/action-tmate@v3
       with:
@@ -138,14 +147,18 @@ jobs:
             maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
           fi
 
+    - name: Generate Report
+      uses: ./fsvr-action
+      with:
+        run: |
           repos="$(for id in `ls -1d repo/*` ; do
             echo "| ./$id | $(git -C $id describe --all --always) |"
           done)"
 
           tools="$(for id in jq ninja parallel bash ; do
-            echo "| $id | $($id --version | head -1 || true) |"
+            echo "| $id | $($id --version | head -n 1 || true) |"
           done)"
-
+          test -v GITHUB_STEP_SUMMARY || GITHUB_STEP_SUMMARY=/dev/stdout
           cat <<EOF >> $GITHUB_STEP_SUMMARY
           | name        | value        |
           | ---------   | -----------  |
@@ -162,7 +175,7 @@ jobs:
           $tools
           EOF
 
-    - name: 003 Setup tmate session
+    - name: ~003 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '003'
       uses: mxschmitt/action-tmate@v3
       with:
@@ -189,10 +202,12 @@ jobs:
         set -euo pipefail
         echo fsvr_dir=$fsvr_dir
         export root_dir=repo/viewer
+        export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
         # some legacy viewer packaging logic blindly reaches from build* to ../indra
-        $fsvr_dir/util/_utils.sh ht-ln $root_dir/indra indra
-        $fsvr_dir/util/generate_build_vars.sh ${viewer_name}-VR-GHA `cat $fsvr_dir/$base/viewer_version.txt` build/ \
-           | tee env.d/build_vars.env #| tee $GITHUB_ENV
+        test -d $root_dir/indra && ht-ln $root_dir/indra indra
+        viewer_version=`cat $nunja_dir/viewer_version.txt`
+        $fsvr_dir/util/generate_build_vars.sh ${viewer_name}-VR-GHA ${viewer_version} build/ \
+           | tee env.d/build_vars.env
 
     - name: Detect MSVC
       uses: ./fsvr-action
@@ -200,14 +215,23 @@ jobs:
         run: |
           set -Euo pipefail
           declare -a msvcs=(build/msvc.env build/msvc.nunja.env build/msvc_path.env)
-          export INPUT_key=$base-cache-msvc-a INPUT_path="$(echo "${msvcs[@]}" | tr ' ' '\n')"
-          /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-            | grep -i 'cache restored' && { echo 'yup' ; ls -l "${msvcs[@]}" ; } || {
-              echo 'nope'
-              $fsvr_dir/util/generate_msvc_env.sh
-              ls -l ${msvcs[@]}
-              /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
+          export INPUT_key=$cache_id-msvc-a INPUT_path="$(echo "${msvcs[@]}" | tr ' ' '\n')"
+
+          function xxgenerate_msvc() {
+            $fsvr_dir/util/generate_msvc_env.sh
+            ls -l ${msvcs[@]}
           }
+
+          if [[ -v GITHUB_ACTIONS ]] ; then
+            /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
+              | grep -i 'cache restored' && { echo 'yup' ; ls -l "${msvcs[@]}" ; } || {
+                echo 'nope'
+                xxgenerate_msvc
+                /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
+            }
+          else
+            xxgenerate_msvc
+          fi
 
     - name: 010_ensure_build_directories && 020_perform_replacements
       run: fsvr_step 010 && fsvr_step 020
@@ -217,8 +241,12 @@ jobs:
       with:
         run: |
           set -Euo pipefail
+          if [[ ! -v GITHUB_ACTIONS ]]; then
+            fsvr_step 038_provision_openvr || exit 242
+            exit 0
+          fi
           # tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
-          export INPUT_key=$base-cache-openvr-d INPUT_path=cache/openvr-**
+          export INPUT_key=$cache_id-openvr-d INPUT_path=cache/openvr-**
           /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
             | grep -i 'cache restored' && { echo 'yup' ; ls -l $fsvr_cache_dir ; } || {
               echo 'nope'
@@ -237,15 +265,22 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          export INPUT_key=$base-build-packages-c INPUT_path=build/packages
-          /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-            | grep -i 'cache restored' && echo 'yup' || {
-              echo 'nope'
-              fsvr_step 060_download_packages || exit 60
-              fsvr_step 070_verify_downloads  || exit 70
-              fsvr_step 080_untar_packages    || exit 80
-              /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
+          function xxpopulate_packages() {
+            fsvr_step 060_download_packages || exit 60
+            fsvr_step 070_verify_downloads  || exit 70
+            fsvr_step 080_untar_packages    || exit 80
           }
+          if [[ -v GITHUB_ACTIONS ]]; then
+            export INPUT_key=$cache_id-build-packages-c INPUT_path=build/packages
+            /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
+              | grep -i 'cache restored' && echo 'yup' || {
+                echo 'nope'
+                xxpopulate_packages || exit $?
+                /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
+            }
+          else
+            xxpopulate_packages || exit $?
+          fi
 
     - name: 085_prepare_msys_msvc
       run: fsvr_step 085
@@ -253,7 +288,7 @@ jobs:
     - name: 090_ninja_preflight
       run: fsvr_step 090
 
-    - name: 004 Setup tmate session
+    - name: ~004 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '004'
       uses: mxschmitt/action-tmate@v3
       with:
@@ -285,7 +320,7 @@ jobs:
       with:
         run: fsvr_step 0b3
 
-    - name: 005 Setup tmate session
+    - name: ~005 Setup tmate session
       if: fromJSON(inputs.fstuple).pause == '005'
       uses: mxschmitt/action-tmate@v3
       with:
@@ -312,8 +347,8 @@ jobs:
     #   with:
     #     limit-access-to-actor: true
 
-    - name: Setup tmate session
-      if: failure()
+    - name: ~Setup tmate session
+      if: failure() && fromJSON(inputs.fstuple).pause != 'never'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
