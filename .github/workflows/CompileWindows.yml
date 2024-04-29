@@ -89,6 +89,7 @@ jobs:
             $fsvr_dir/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
             ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
             ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
+            ht-ln bin/BASH_FUNC_invoke.exe bin/envsubst.exe
           } || exit 86
 
           function xxtest_bin() {
