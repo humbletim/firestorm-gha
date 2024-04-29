@@ -90,9 +90,9 @@ jobs:
             BASH=$(cygpath -was $BASH) make-stub bin/BASH_FUNC_invoke.exe || return 90
           }
 
-          test -v GITHUB_ACTIONS && gha-cache-restore $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || (
+          test -v GITHUB_ACTIONS && gha-cache-restore-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || (
             generate_BASH_FUNC_invoke
-            test ! -v GITHUB_ACTIONS || gha-cache-save $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || exit 89
+            test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || exit 89
           )
 
           {
@@ -129,10 +129,10 @@ jobs:
             python -m pip install --no-warn-script-location --user llsd
           )}
 
-          test -v GITHUB_ACTIONS && gha-cache-restore $cache_id-bin-b bin || (
+          test -v GITHUB_ACTIONS && gha-cache-restore-fast $cache_id-bin-b bin || (
             xxprovision_tools || exit `_err $? "!xxprovision_tools"` 
             xxtest_bin || exit `_err $? "!xxtest_bin"`
-            test ! -v GITHUB_ACTIONS || gha-cache-save $cache_id-bin-b bin || exit 85
+            test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-bin-b bin || exit 85
           )
 
     - name: ~002 Setup tmate session
