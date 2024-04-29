@@ -19,10 +19,10 @@ function quiet-clone() {(
 
 function maybe-clone() {
   local name=$1 hub=$2 repo=$3 ref=$4
-  gha-cache-restore $cache_id-repo-$name repo/$name || (
+  gha-cache-restore-fast $cache_id-repo-$name repo/$name || (
     set -Euo pipefail
     test -e repo/$name/.git || quiet-clone $hub $repo $ref repo/$name
-     gha-cache-save $cache_id-repo-$name repo/$name  || exit 107
+     gha-cache-save-fast $cache_id-repo-$name repo/$name  || exit 107
   )
 }
 
