@@ -48,6 +48,7 @@ jobs:
     - name: ~Clone
       run: |
         git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
+        echo "https://github.com/${GITHUB_REPOSITORY}/tree/$(git -C fsvr rev-parse --short HEAD)" > fsvr/.gha_source
         source fsvr/util/gha.ht-ln.bash
         ht-ln fsvr/actions-node-script ./fsvr-action
 
@@ -203,7 +204,7 @@ jobs:
             echo "| $id | $($id --version | head -n 1 || true) |"
           done)"
           test -v GITHUB_STEP_SUMMARY || GITHUB_STEP_SUMMARY=/dev/stdout
-          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          cat <<EOF | tee $GITHUB_STEP_SUMMARY
           | name           | value           |
           | ---------      | -----------     |
           | viewer_id      | $viewer_id      |
