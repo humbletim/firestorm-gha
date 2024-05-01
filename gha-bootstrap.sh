@@ -1,5 +1,5 @@
 #!/bin/bash
-set -Euo pipefail
+#set -Euo pipefail
 
 function get_bootstrap_vars() {(
   [[ -x /usr/bin/readlink ]] && pwd=`/usr/bin/readlink -f "$PWD"` || pwd=$PWD
@@ -118,4 +118,3 @@ function gha_step() {
     bin/yaml2json < $fsvr_dir/.github/workflows/CompileWindows.yml | jq -r --arg name "$1" '.jobs[].steps[]|select(.name==$name)|"# "+.name+"\n"+(.with.run//.run)'
   fi
 }
-

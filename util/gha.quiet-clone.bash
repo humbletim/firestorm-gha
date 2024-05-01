@@ -14,6 +14,7 @@ function quiet-clone() {(
           https://$hub/$repo --branch "$ref" $folder 2>&1 | grep -vE '^(remote:|Receive|Resolve)' || true
     fi
     test -e $folder/.git || return 1
+    echo "https://$hub/$repo/tree/$(git -C $folder rev-parse --short HEAD)" > $folder/.gha_source
     git -C $folder describe --all --always
 )}
 
@@ -22,7 +23,7 @@ function maybe-clone() {
   gha-cache-restore-fast $cache_id-repo-$name repo/$name || (
     set -Euo pipefail
     test -e repo/$name/.git || quiet-clone $hub $repo "$ref" repo/$name
-     gha-cache-save-fast $cache_id-repo-$name repo/$name  || exit 107
+    gha-cache-save-fast $cache_id-repo-$name repo/$name  || exit 107
   )
 }
 

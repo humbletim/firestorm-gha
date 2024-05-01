@@ -1,4 +1,4 @@
 # generated
-include $nunja_dir/cl.petroglyph.constants.nunja
-include $nunja_dir/cl.petroglyph.rules.nunja
-include $nunja_dir/cl.petroglyph.nunja
+include $nunja_dir/blueprint.petroglyph.constants.nunja
+include $nunja_dir/blueprint.petroglyph.rules.nunja
+include $nunja_dir/blueprint.petroglyph.nunja
