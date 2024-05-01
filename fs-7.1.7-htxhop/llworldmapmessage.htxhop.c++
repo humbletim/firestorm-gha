@@ -6,8 +6,8 @@
 //     - this is to avoid triggering OpenSim code paths that modify results
 //       and make it impossible to discern Partial vs. Exact matching
 //     - sendNamedRegionRequest(name) (no callback expectation) are unaffected
-// - gently wired into:
-//   - llnavigationbar.cpp
+// - meant to be gently wired into llworldmapmessage.cpp using
+//   compile flags (/FI or -include) or a near-top #include <thisfile.c++>
 
 #include <string>
 #include <regex>
