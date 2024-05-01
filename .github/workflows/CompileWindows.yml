@@ -195,7 +195,7 @@ jobs:
       with:
         run: |
           repos="$(for id in `ls -1d repo/* fsvr` ; do
-            url="$(test -s $id/.gha_source && echo "[$id]($(cat $id/.gha_source))" || git -C $folder rev-parse --short HEAD)"
+            url="$(test -s $id/.gha_source && echo "[$id]($(cat $id/.gha_source))" || git -C $id rev-parse --short HEAD)"
             echo "| ./$id | $(git -C $id describe --all --always) *$(git -C $id rev-parse --short HEAD)* $url |"
           done)"
 
