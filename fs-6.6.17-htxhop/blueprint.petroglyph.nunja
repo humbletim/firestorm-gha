@@ -9633,7 +9633,7 @@ build newview\CMakeFiles\firestorm-bin.dir\llviewercontrollistener.cpp.obj: CXX_
 
 build newview\CMakeFiles\firestorm-bin.dir\llviewerdisplay.cpp.obj: CXX_COMPILER__firestorm-bin_unscanned_Release $source_dir\newview\llviewerdisplay.cpp | newview\cmake_pch.hxx newview\cmake_pch.cxx.pch || cmake_object_order_depends_target_firestorm-bin
   DEFINES = $DEFINES_1
-  FLAGS = $WX $LCFX  "-DmScreen=mRT->screen"  -Inewview  $PCH -I. 
+  FLAGS = $WX $LCFX  -Inewview  $PCH -I. 
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin.dir
