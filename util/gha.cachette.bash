@@ -227,6 +227,6 @@ function gha-cache-restore-fast() {(
 function gha-cache-save-fast() {(
   set -Euo pipefail
   export INPUT_key="$1" INPUT_path="$2"
-  /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js || return $?
+  /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js || return $?
   echo 'cache saved'
 )}
