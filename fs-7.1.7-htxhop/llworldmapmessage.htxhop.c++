@@ -159,7 +159,7 @@ void _htxhop_sendExactNamedRegionRequest(_RegionNameQuery&& query) {
 		auto region_name = query.mSLURLRegionName;
 		query.mSLURLRegionHandle = -1;
 
-		fprintf(stderr, "[xxHTxx] sendExactNamedRegionRequest raw.region_name='%s' query.name='%s'\n", region_name.c_str(), region_name.substr(1).c_str()); fflush(stderr);
+		fprintf(stderr, "[xxHTxx] sendExactNamedRegionRequest query.name='%s'\n", region_name.c_str()); fflush(stderr);
 		LLMessageSystem* msg = gMessageSystem;
 		msg->newMessageFast(_PREHASH_MapNameRequest);
 		msg->nextBlockFast(_PREHASH_AgentData);
@@ -169,7 +169,7 @@ void _htxhop_sendExactNamedRegionRequest(_RegionNameQuery&& query) {
 		msg->addU32Fast(_PREHASH_EstateID, 0); // Filled in on sim
 		msg->addBOOLFast(_PREHASH_Godlike, FALSE); // Filled in on sim
 		msg->nextBlockFast(_PREHASH_NameData);
-		msg->addStringFast(_PREHASH_Name, region_name.substr(1));
+		msg->addStringFast(_PREHASH_Name, region_name);
 		gAgent.sendReliableMessage();
 }
 
