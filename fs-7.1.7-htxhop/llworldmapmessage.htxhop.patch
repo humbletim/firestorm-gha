@@ -1,0 +1,25 @@
+diff --git a/indra/newview/llworldmapmessage.cpp b/indra/newview/llworldmapmessage.cpp
+index ace4f61667..891c5be18c 100644
+--- a/indra/newview/llworldmapmessage.cpp
++++ b/indra/newview/llworldmapmessage.cpp
+@@ -106,6 +106,10 @@ void LLWorldMapMessage::sendNamedRegionRequest(std::string region_name,
+ 	mSLURLCallback = callback;
+ 	mSLURLTeleport = teleport;
+ 
++#ifdef OPENSIM
++ 	return htxhop_sendExactNamedRegionRequest(this);
++#endif
++
+ 	sendNamedRegionRequest(region_name);
+ }
+ 
+@@ -164,6 +168,9 @@ void LLWorldMapMessage::processMapBlockReply(LLMessageSystem* msg, void**)
+ 	// There's only one flag that we ever use here
+ 	if (agent_flags != LAYER_FLAG)
+ 	{
++#ifdef OPENSIM
++ 		if (htxhop_processExactNamedRegionResponse(getInstance(), msg, agent_flags)) return;
++#endif
+ 		LL_WARNS() << "Invalid map image type returned! layer = " << agent_flags << LL_ENDL;
+ 		return;
+ 	}
