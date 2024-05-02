@@ -18,7 +18,7 @@ index ace4f61667..891c5be18c 100644
  	if (agent_flags != LAYER_FLAG)
  	{
 +#ifdef OPENSIM
-+ 		if (htxhop_processExactNamedRegionResponse(getInstance(), msg, agent_flags)) return;
++ 		if (htxhop_processExactNamedRegionResponse(msg, agent_flags)) return;
 +#endif
  		LL_WARNS() << "Invalid map image type returned! layer = " << agent_flags << LL_ENDL;
  		return;

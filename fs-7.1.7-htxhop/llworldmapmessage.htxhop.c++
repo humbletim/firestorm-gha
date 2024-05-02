@@ -5,7 +5,7 @@
 //   - MapNameRequest's are sent flagless (0x0000, not using LAYER_FLAG)
 //     - this is to avoid triggering OpenSim code paths that modify results
 //       and make it impossible to discern Partial vs. Exact matching
-//     - sendNamedRegionRequest(name) (no callback expectation) are unaffected
+//     - affects LLWorldMapMessage->sendNamedRegionRequest(name, callback, ...) 
 // - meant to be gently wired into llworldmapmessage.cpp using
 //   compile flags (/FI or -include) or a near-top #include <thisfile.c++>
 
@@ -27,8 +27,10 @@ namespace {
 			std::regex{ R"(([^/:=]+)$)" },   // TODO: figure out where the spec lives for hop "grid:port:region" embedding...
 		};
 		std::smatch match_results;
+		std::string ls{s};
+		LLStringUtil::toLower(ls);
 		for (auto const& pattern : patterns) {
-			if (std::regex_search(s, match_results, pattern)) {
+			if (std::regex_search(ls, match_results, pattern)) {
 				return match_results[1].str();
 			}
 		}
@@ -81,96 +83,95 @@ namespace {
 		}
 	};
 
-	// FIXME: capture references to LLWorldMapMessage name search privates
-	// (for now this strategy avoids having to change core header files...)
-	#define _RegionNameQuery_from(self) { \
-		self->mSLURLRegionName, \
-		self->mSLURLRegionHandle, \
-		self->mSLURL, \
-		self->mSLURLCallback, \
-		self->mSLURLTeleport \
+	
+	// like LLWorldMapMessage::sendNamedRegionRequest without flags=LAYER_FLAG
+	void _htxhop_sendFlaglessMapNameRequest(std::string const& query_region_name) {
+			LLMessageSystem* msg = gMessageSystem;
+			msg->newMessageFast(_PREHASH_MapNameRequest);
+			msg->nextBlockFast(_PREHASH_AgentData);
+			msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
+			msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
+			msg->addU32Fast(_PREHASH_Flags, 0x00000000); // no flags
+			msg->addU32Fast(_PREHASH_EstateID, 0); // Filled in on sim
+			msg->addBOOLFast(_PREHASH_Godlike, FALSE); // Filled in on sim
+			msg->nextBlockFast(_PREHASH_NameData);
+			msg->addStringFast(_PREHASH_Name, query_region_name);
+			gAgent.sendReliableMessage();
 	}
-	struct _RegionNameQuery {
-		// NOTE: these members are all *references*
+
+	// map extracted region names => pending query entries 
+	struct _AdoptedRegionNameQuery {
+		std::string query_region_name{};
+		std::string arbitrary_slurl{}; 
+		LLWorldMapMessage::url_callback_t arbitrary_callback{};
+		bool arbitrary_teleport{ false };
+		std::string _extracted_region_name{};
+	};
+	static std::map<std::string,_AdoptedRegionNameQuery> _region_name_queries{};
+
+	// PASSIVE INTEGRATION: here we capture references to LLWorldMapMessage
+	// ephemeral (jury-rigged) name search privates...
+	// + this strategy avoids changing upstream core header files
+	// + and macro reduces necessary core change footprint even further 
+	struct _LLWorldMapMessageCapturedPrivates {
+		// note: all *references*
 		std::string& mSLURLRegionName;
-		U64& mSLURLRegionHandle;
 		std::string& mSLURL; 
 		LLWorldMapMessage::url_callback_t& mSLURLCallback;
 		bool& mSLURLTeleport;
-		
-		inline bool matches(_MapBlock const& _block) {
-			std::string search_name = extract_region(mSLURLRegionName);
-			std::string block_name = extract_region(_block.name);
-			bool equals = !search_name.empty() && LLStringUtil::compareInsensitive(search_name, block_name) == 0;
-			if (!search_name.empty()) fprintf(stderr, "[xxHTxx] _RegionNameQuery.matches(%s, %s) == %d\n", search_name.c_str(), block_name.c_str(), equals);fflush(stderr);
-			return equals;
-		}
+	};
+	#define htxhop_sendExactNamedRegionRequest(self) \
+	 	_htxhop_sendExactNamedRegionRequest({ \
+			self->mSLURLRegionName, \
+			self->mSLURL, \
+			self->mSLURLCallback, \
+			self->mSLURLTeleport \
+		})
 
-		inline bool resolve(_MapBlock const& _block) {
-			auto callback = mSLURLCallback;
-			auto region_name = mSLURLRegionName;
-			auto handle = mSLURLRegionHandle;
-			auto slurl = mSLURL;
-			auto teleport = mSLURLTeleport;
+	void _htxhop_sendExactNamedRegionRequest(_LLWorldMapMessageCapturedPrivates&& query) {
+			auto const& key = extract_region(query.mSLURLRegionName);
+			// first adopt into our explicitly pending queue
+			_region_name_queries[key] = { query.mSLURLRegionName, query.mSLURL, query.mSLURLCallback, query.mSLURLTeleport, key };
+			// then reset to prevent any original implicit handling
 			{
-				mSLURLCallback = NULL;
-				mSLURLRegionName.clear();
-				mSLURLRegionHandle = 0;
-				mSLURL.clear();
-				mSLURLTeleport = false;
+				query.mSLURLCallback = NULL;
+				query.mSLURLRegionName.clear();
+				query.mSLURL.clear();
+				query.mSLURLTeleport = false;
 			}
-			if (callback) {
-				fprintf(stderr, "[xxHTxx] [handle=%llu] _RegionNameQuery.callback(%llu, %s, %s, %d)\n", 
-					handle, _block.region_handle(), slurl.c_str(), _block.image_id.asString().c_str(), teleport);fflush(stderr);
-				callback(_block.region_handle(), slurl, _block.image_id, teleport);
-				return true;
-			}
-			return false;
-		}
-	}; // _RegionNameQuery
 
-// macro to reduce core integration footprint 
-#define htxhop_processExactNamedRegionResponse(self, ...) \
- 	_htxhop_processExactNamedRegionResponse(_RegionNameQuery_from(self), __VA_ARGS__)
-
-// see also: LLWorldMapMessage::processMapBlockReply
-bool _htxhop_processExactNamedRegionResponse(_RegionNameQuery&& query, LLMessageSystem* msg, U32 agent_flags) {
-	// NOTE: we assume only agent_flags have been read from msg so far
-	S32 num_blocks = msg->getNumberOfBlocksFast(_PREHASH_Data);
-	fprintf(stderr, "[xxHTxx] LLWorldMapMessage_processExactNamedRegionResponse "
-		"agent_flags=%04x query.name=%s query.handle=%llu query.callback=%s query.slurl=%s query.teleport=%s\n",
-		agent_flags, query.mSLURLRegionName.c_str(), query.mSLURLRegionHandle, query.mSLURLCallback ? "(function)" : "(nil)", query.mSLURL.c_str(), query.mSLURLTeleport  ? "true" : "false"
-	);fflush(stderr);
-	bool resolved = false;
-	for (S32 block=0; block < num_blocks; block++) {
-		_MapBlock _block{msg, block};
-		fprintf(stderr, "[xxHTxx]  [%02d] LLWorldMapMessage_processExactNamedRegionResponse block.handle=%llu block.name=%s\n", block, _block.region_handle(), _block.name.c_str());fflush(stderr);
-		if (query.matches(_block)) resolved = query.resolve(_block) || resolved;
+			auto const& adopted = _region_name_queries[key];
+			fprintf(stderr, "[xxHTxx] <<< Named Region '%s' (%s)\n", adopted.query_region_name.c_str(), adopted._extracted_region_name.c_str());fflush(stderr);
+			// and finally send our own flagless MapNameRequest
+			_htxhop_sendFlaglessMapNameRequest(adopted.query_region_name);
 	}
-	return resolved;
-}
 
-// macro to reduce core integration footprint 
-#define htxhop_sendExactNamedRegionRequest(self, ...) \
- 	_htxhop_sendExactNamedRegionRequest(_RegionNameQuery_from(self), __VA_ARGS__)
+	int _htxhop_query_process_block(_MapBlock const& _block) {
+		if (_block.name.empty()) return 0;
+		auto idx = _region_name_queries.find(extract_region(_block.name));
+		if (idx != _region_name_queries.end()) {
+			auto const& q = idx->second;
+			fprintf(stderr, "[xxHTxx] >>> Named Region '%s' (%s) ==> '%s' %llu %s\n", q.query_region_name.c_str(), q._extracted_region_name.c_str(), _block.name.c_str(), _block.region_handle(), q.arbitrary_callback ? ".callback()" : "(orphaned request)");fflush(stderr);
+			if (q.arbitrary_callback) q.arbitrary_callback(_block.region_handle(), q.arbitrary_slurl, _block.image_id, q.arbitrary_teleport);
+			_region_name_queries.erase(idx);
+			return 1;
+		}
+		if (_block.region_handle()) fprintf(stderr, "[xxHTxx] ... skip '%s' (%s) %llu\n", _block.name.c_str(), extract_region(_block.name).c_str(), _block.region_handle());fflush(stderr);
+		return 0;
+	}
 
-// see also: LLWorldMapMessage::sendNamedRegionRequest
-void _htxhop_sendExactNamedRegionRequest(_RegionNameQuery&& query) {
-		auto region_name = query.mSLURLRegionName;
-		query.mSLURLRegionHandle = -1;
-
-		fprintf(stderr, "[xxHTxx] sendExactNamedRegionRequest query.name='%s'\n", region_name.c_str()); fflush(stderr);
-		LLMessageSystem* msg = gMessageSystem;
-		msg->newMessageFast(_PREHASH_MapNameRequest);
-		msg->nextBlockFast(_PREHASH_AgentData);
-		msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
-		msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-		msg->addU32Fast(_PREHASH_Flags, 0x00000000); // no flags
-		msg->addU32Fast(_PREHASH_EstateID, 0); // Filled in on sim
-		msg->addBOOLFast(_PREHASH_Godlike, FALSE); // Filled in on sim
-		msg->nextBlockFast(_PREHASH_NameData);
-		msg->addStringFast(_PREHASH_Name, region_name);
-		gAgent.sendReliableMessage();
-}
+	bool htxhop_processExactNamedRegionResponse(LLMessageSystem* msg, U32 agent_flags) {
+		// NOTE: we assume only agent_flags have been read from msg so far
+		S32 num_blocks = msg->getNumberOfBlocksFast(_PREHASH_Data);
+		fprintf(stderr, "[xxHTxx] ... #blocks=%d #_region_name_queries=%lu agent_flags=%04x\n", num_blocks, _region_name_queries.size(), agent_flags);fflush(stderr);
+		int resolved = 0;
+		for (int block = 0; block < num_blocks; block++) {
+			_MapBlock b{msg, block};
+			fprintf(stderr, "[xxHTxx] %03d Named Region '%s' (%s)\n", b.block, b.name.c_str(), extract_region(b.name).c_str());fflush(stderr);
+			resolved += _htxhop_query_process_block(b);
+		}
+		// for (auto const& kv : _region_name_queries) fprintf(stderr, "[xxHTxx] ... pending _region_name_queries[%s]=%p\n", kv.first.c_str(), &kv.second.arbitrary_callback);fflush(stderr);
+		return resolved ? true : false;
+	}
 
 } // ns
