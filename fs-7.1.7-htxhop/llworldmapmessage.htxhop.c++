@@ -83,7 +83,6 @@ namespace {
 		}
 	};
 
-	
 	// like LLWorldMapMessage::sendNamedRegionRequest without flags=LAYER_FLAG
 	void _htxhop_sendFlaglessMapNameRequest(std::string const& query_region_name) {
 			LLMessageSystem* msg = gMessageSystem;
@@ -109,8 +108,8 @@ namespace {
 	};
 	static std::map<std::string,_AdoptedRegionNameQuery> _region_name_queries{};
 
-	// PASSIVE INTEGRATION: here we capture references to LLWorldMapMessage
-	// ephemeral (jury-rigged) name search privates...
+	// PASSIVE INTEGRATION: here we capture references to LLWorldMapMessage's
+	// ephemeral (jury-rigged) name search privates.
 	// + this strategy avoids changing upstream core header files
 	// + and macro reduces necessary core change footprint even further 
 	struct _LLWorldMapMessageCapturedPrivates {
@@ -141,7 +140,7 @@ namespace {
 			}
 
 			auto const& adopted = _region_name_queries[key];
-			fprintf(stderr, "[xxHTxx] <<< Named Region '%s' (%s)\n", adopted.query_region_name.c_str(), adopted._extracted_region_name.c_str());fflush(stderr);
+			LL_WARNS() << llformat("[xxHTxx] <<< Named Region '%s' (%s)\n", adopted.query_region_name.c_str(), adopted._extracted_region_name.c_str()) << LL_ENDL;
 			// and finally send our own flagless MapNameRequest
 			_htxhop_sendFlaglessMapNameRequest(adopted.query_region_name);
 	}
@@ -151,26 +150,26 @@ namespace {
 		auto idx = _region_name_queries.find(extract_region(_block.name));
 		if (idx != _region_name_queries.end()) {
 			auto const& q = idx->second;
-			fprintf(stderr, "[xxHTxx] >>> Named Region '%s' (%s) ==> '%s' %llu %s\n", q.query_region_name.c_str(), q._extracted_region_name.c_str(), _block.name.c_str(), _block.region_handle(), q.arbitrary_callback ? ".callback()" : "(orphaned request)");fflush(stderr);
+			LL_WARNS() << llformat("[xxHTxx] >>> Named Region '%s' (%s) ==> '%s' %llu %s\n", q.query_region_name.c_str(), q._extracted_region_name.c_str(), _block.name.c_str(), _block.region_handle(), q.arbitrary_callback ? ".callback()" : "(orphaned request)") << LL_ENDL;
 			if (q.arbitrary_callback) q.arbitrary_callback(_block.region_handle(), q.arbitrary_slurl, _block.image_id, q.arbitrary_teleport);
 			_region_name_queries.erase(idx);
 			return 1;
 		}
-		if (_block.region_handle()) fprintf(stderr, "[xxHTxx] ... skip '%s' (%s) %llu\n", _block.name.c_str(), extract_region(_block.name).c_str(), _block.region_handle());fflush(stderr);
+		if (_block.region_handle()) LL_WARNS() << llformat("[xxHTxx] ... skip '%s' (%s) %llu\n", _block.name.c_str(), extract_region(_block.name).c_str(), _block.region_handle()) << LL_ENDL;
 		return 0;
 	}
 
 	bool htxhop_processExactNamedRegionResponse(LLMessageSystem* msg, U32 agent_flags) {
 		// NOTE: we assume only agent_flags have been read from msg so far
 		S32 num_blocks = msg->getNumberOfBlocksFast(_PREHASH_Data);
-		fprintf(stderr, "[xxHTxx] ... #blocks=%d #_region_name_queries=%lu agent_flags=%04x\n", num_blocks, _region_name_queries.size(), agent_flags);fflush(stderr);
+		LL_WARNS() << llformat("[xxHTxx] ... #blocks=%d #_region_name_queries=%lu agent_flags=%04x\n", num_blocks, _region_name_queries.size(), agent_flags) << LL_ENDL;
 		int resolved = 0;
 		for (int block = 0; block < num_blocks; block++) {
 			_MapBlock b{msg, block};
-			fprintf(stderr, "[xxHTxx] %03d Named Region '%s' (%s)\n", b.block, b.name.c_str(), extract_region(b.name).c_str());fflush(stderr);
+			LL_WARNS() << llformat("[xxHTxx] %03d Named Region '%s' (%s) %llu\n", b.block, b.name.c_str(), extract_region(b.name).c_str(), b.region_handle()) << LL_ENDL;
 			resolved += _htxhop_query_process_block(b);
 		}
-		// for (auto const& kv : _region_name_queries) fprintf(stderr, "[xxHTxx] ... pending _region_name_queries[%s]=%p\n", kv.first.c_str(), &kv.second.arbitrary_callback);fflush(stderr);
+		// for (auto const& kv : _region_name_queries) LL_WARNS() << llformat("[xxHTxx] ... pending _region_name_queries[%s]=%p\n", kv.first.c_str(), &kv.second.arbitrary_callback) << LL_ENDL;
 		return resolved ? true : false;
 	}
 

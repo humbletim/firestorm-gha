@@ -1,7 +1,12 @@
 {
-  "firestorm_gha": {
+  "_firestorm_gha": {
     "copyright": "https://github.com/humbletim/firestorm-gha",
-    "name": "firestorm_gha",
-    "version": "$version_fsvr_tag"
+    "name": "_firestorm_gha",
+    "version": "$version_fsvr_tag # $version_fsvr_sha"
+  },
+  "_repo_viewer": {
+    "copyright": "$viewer_source_url",
+    "name": "_repo_viewer",
+    "version": "$version_full"
   }
 }
