@@ -42,7 +42,7 @@ namespace {
 				return match_results[1].str();
 			}
 		}
-		return s;
+		return {};
 	} 
 	// int main() {
 	// 	for (const auto& s : {
@@ -141,6 +141,7 @@ namespace {
 				return false;
 			}
 			auto const& key = extract_region(query.mSLURLRegionName);
+			if (key.empty()) return false;
 			// first adopt into our explicitly pending queue
 			_region_name_queries[key] = { query.mSLURLRegionName, query.mSLURL, query.mSLURLCallback, query.mSLURLTeleport, key };
 			// then reset to prevent any original implicit handling
@@ -171,16 +172,24 @@ namespace {
 			blocks.emplace_back(msg, b);
 		}
 		for (auto const& _block : blocks) {
-			htxhop_log("#%02d block.name='%s' block.region_handle=%llu", _block.index, _block.name.c_str(), _block.region_handle());
+			htxhop_log("#%02d key='%s' block.name='%s' block.region_handle=%llu", _block.index, extract_region(_block.name).c_str(), _block.name.c_str(), _block.region_handle());
+		}
+
+		// handle special case of a "redirect" response (region handle available on first result)
+		auto redirect = blocks.size() == 2 && !blocks[1].region_handle() && blocks[0].region_handle() && extract_region(blocks[0].name).empty();
+		if (redirect && _region_name_queries.size() == 1) {
+			htxhop_log("applying first block as redirect; region_handle: %llu", blocks[0].region_handle());
+			blocks[0].name = _region_name_queries.begin()->second.query_region_name;
 		}
 		for (auto const& _block : blocks) {
-			if (_block.name.empty()) continue;
-			auto idx = _region_name_queries.find(extract_region(_block.name));
+			auto key = extract_region(_block.name);
+			if (key.empty()) continue;
+			auto idx = _region_name_queries.find(key);
 			if (idx != _region_name_queries.end()) {
 				auto pending = idx->second;
 				htxhop_log("[xxHTxx] Recv Region Name '%s' (key: %s) block.name='%s' block.region_handle=%llu)", pending.query_region_name.c_str(), pending._extracted_region_name.c_str(), _block.name.c_str(), _block.region_handle());
-				pending.arbitrary_callback(_block.region_handle(), pending.arbitrary_slurl, _block.image_id, pending.arbitrary_teleport);
 				_region_name_queries.erase(idx);
+				pending.arbitrary_callback(_block.region_handle(), pending.arbitrary_slurl, _block.image_id, pending.arbitrary_teleport);
 				return true;
 			}
 		}
