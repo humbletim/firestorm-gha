@@ -19,6 +19,14 @@
 #include "llworldmap.h" // grid_to_region_handle
 #include "llagent.h"
 
+#include "llnotificationsutil.h"
+#define htxhop_log(format, ...) { \
+	fprintf(stderr, format "\n", __VA_ARGS__);fflush(stderr); \
+	LLNotificationsUtil::add("ChatSystemMessageTip", LLSD().with("MESSAGE", llformat(format, __VA_ARGS__))); \
+}
+
+#include "llviewercontrol.h"
+
 namespace {
 	// decipher various hop Region Name embeddings
 	inline std::string extract_region(std::string const& s) {
@@ -49,7 +57,7 @@ namespace {
 
 	// helper to encapsulate Region Map Block responses
 	struct _MapBlock {
-		S32 block{};
+		S32 index{};
 		U16 x_regions{}, y_regions{}, x_size{ REGION_WIDTH_UNITS }, y_size{ REGION_WIDTH_UNITS };
 		std::string name{};
 		U8 accesscode{};
@@ -60,7 +68,7 @@ namespace {
 		inline U32 y_world() const { return (U32)(y_regions) * REGION_WIDTH_UNITS; }
 		inline U64 region_handle() const { return grid_to_region_handle(x_regions, y_regions); }
 
-		_MapBlock(LLMessageSystem* msg, S32 block) : block(block) {
+		_MapBlock(LLMessageSystem* msg, S32 block) : index(block) {
 			// FIXME: this duplicates LLWorldMapMessage::processMapBlockReply...
 			msg->getU16Fast(_PREHASH_Data, _PREHASH_X, x_regions, block);
 			msg->getU16Fast(_PREHASH_Data, _PREHASH_Y, y_regions, block);
@@ -84,13 +92,13 @@ namespace {
 	};
 
 	// like LLWorldMapMessage::sendNamedRegionRequest without flags=LAYER_FLAG
-	void _htxhop_sendFlaglessMapNameRequest(std::string const& query_region_name) {
+	void _htxhop_sendMapNameRequest(std::string const& query_region_name, U32 flags = 0x00000000) {
 			LLMessageSystem* msg = gMessageSystem;
 			msg->newMessageFast(_PREHASH_MapNameRequest);
 			msg->nextBlockFast(_PREHASH_AgentData);
 			msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
 			msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-			msg->addU32Fast(_PREHASH_Flags, 0x00000000); // no flags
+			msg->addU32Fast(_PREHASH_Flags, flags);
 			msg->addU32Fast(_PREHASH_EstateID, 0); // Filled in on sim
 			msg->addBOOLFast(_PREHASH_Godlike, FALSE); // Filled in on sim
 			msg->nextBlockFast(_PREHASH_NameData);
@@ -127,7 +135,11 @@ namespace {
 			self->mSLURLTeleport \
 		})
 
-	void _htxhop_sendExactNamedRegionRequest(_LLWorldMapMessageCapturedPrivates&& query) {
+	static LLCachedControl<S32> htxhop_flags(gSavedSettings, "htxhop_flags", 0, "default: 0\nLAYER_FLAG: 2\n");
+	bool _htxhop_sendExactNamedRegionRequest(_LLWorldMapMessageCapturedPrivates&& query) {
+			if (+htxhop_flags == 2) {
+				return false;
+			}
 			auto const& key = extract_region(query.mSLURLRegionName);
 			// first adopt into our explicitly pending queue
 			_region_name_queries[key] = { query.mSLURLRegionName, query.mSLURL, query.mSLURLCallback, query.mSLURLTeleport, key };
@@ -140,37 +152,39 @@ namespace {
 			}
 
 			auto const& adopted = _region_name_queries[key];
-			LL_WARNS() << llformat("[xxHTxx] <<< Named Region '%s' (%s)\n", adopted.query_region_name.c_str(), adopted._extracted_region_name.c_str()) << LL_ENDL;
+			htxhop_log("[xxHTxx] Send Region Name '%s' (key: %s)", adopted.query_region_name.c_str(), adopted._extracted_region_name.c_str());
 			// and finally send our own flagless MapNameRequest
-			_htxhop_sendFlaglessMapNameRequest(adopted.query_region_name);
-	}
-
-	int _htxhop_query_process_block(_MapBlock const& _block) {
-		if (_block.name.empty()) return 0;
-		auto idx = _region_name_queries.find(extract_region(_block.name));
-		if (idx != _region_name_queries.end()) {
-			auto const& q = idx->second;
-			LL_WARNS() << llformat("[xxHTxx] >>> Named Region '%s' (%s) ==> '%s' %llu %s\n", q.query_region_name.c_str(), q._extracted_region_name.c_str(), _block.name.c_str(), _block.region_handle(), q.arbitrary_callback ? ".callback()" : "(orphaned request)") << LL_ENDL;
-			if (q.arbitrary_callback) q.arbitrary_callback(_block.region_handle(), q.arbitrary_slurl, _block.image_id, q.arbitrary_teleport);
-			_region_name_queries.erase(idx);
-			return 1;
-		}
-		if (_block.region_handle()) LL_WARNS() << llformat("[xxHTxx] ... skip '%s' (%s) %llu\n", _block.name.c_str(), extract_region(_block.name).c_str(), _block.region_handle()) << LL_ENDL;
-		return 0;
+			_htxhop_sendMapNameRequest(adopted.query_region_name, +htxhop_flags);
+			return true;
 	}
 
 	bool htxhop_processExactNamedRegionResponse(LLMessageSystem* msg, U32 agent_flags) {
+		if (+htxhop_flags == 2) {
+			return false;
+		}
 		// NOTE: we assume only agent_flags have been read from msg so far
 		S32 num_blocks = msg->getNumberOfBlocksFast(_PREHASH_Data);
-		LL_WARNS() << llformat("[xxHTxx] ... #blocks=%d #_region_name_queries=%lu agent_flags=%04x\n", num_blocks, _region_name_queries.size(), agent_flags) << LL_ENDL;
-		int resolved = 0;
-		for (int block = 0; block < num_blocks; block++) {
-			_MapBlock b{msg, block};
-			LL_WARNS() << llformat("[xxHTxx] %03d Named Region '%s' (%s) %llu\n", b.block, b.name.c_str(), extract_region(b.name).c_str(), b.region_handle()) << LL_ENDL;
-			resolved += _htxhop_query_process_block(b);
+
+		std::vector<_MapBlock> blocks;
+		blocks.reserve(num_blocks);
+		for (int b = 0; b < num_blocks; b++) {
+			blocks.emplace_back(msg, b);
 		}
-		// for (auto const& kv : _region_name_queries) LL_WARNS() << llformat("[xxHTxx] ... pending _region_name_queries[%s]=%p\n", kv.first.c_str(), &kv.second.arbitrary_callback) << LL_ENDL;
-		return resolved ? true : false;
+		for (auto const& _block : blocks) {
+			htxhop_log("#%02d block.name='%s' block.region_handle=%llu", _block.index, _block.name.c_str(), _block.region_handle());
+		}
+		for (auto const& _block : blocks) {
+			if (_block.name.empty()) continue;
+			auto idx = _region_name_queries.find(extract_region(_block.name));
+			if (idx != _region_name_queries.end()) {
+				auto pending = idx->second;
+				htxhop_log("[xxHTxx] Recv Region Name '%s' (key: %s) block.name='%s' block.region_handle=%llu)", pending.query_region_name.c_str(), pending._extracted_region_name.c_str(), _block.name.c_str(), _block.region_handle());
+				pending.arbitrary_callback(_block.region_handle(), pending.arbitrary_slurl, _block.image_id, pending.arbitrary_teleport);
+				_region_name_queries.erase(idx);
+				return true;
+			}
+		}
+		return false;
 	}
 
 } // ns

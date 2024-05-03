@@ -7,7 +7,7 @@ index ace4f61667..891c5be18c 100644
  	mSLURLTeleport = teleport;
  
 +#ifdef OPENSIM
-+ 	return htxhop_sendExactNamedRegionRequest(this);
++ 	if (htxhop_sendExactNamedRegionRequest(this)) return;
 +#endif
 +
  	sendNamedRegionRequest(region_name);
