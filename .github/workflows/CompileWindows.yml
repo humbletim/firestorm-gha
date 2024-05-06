@@ -33,16 +33,8 @@ jobs:
         source $gha_fsvr_dir/util/gha.ht-ln.bash
         ht-ln $gha_fsvr_dir $fsvr_dir
         ht-ln $fsvr_dir/actions-node-script ./fsvr-action
+        export PATH="$PATH:/c/ProgramData/Chocolatey/bin"
         echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
-
-    - name: preflight tests
-      run: |
-        set -Euo pipefail
-        echo "PATH='$PATH'"
-        which envsubst
-        which python3
-        which python
-        which jq
 
     - name: Generate SHELL.env
       run: |
@@ -59,10 +51,8 @@ jobs:
         set -Euo pipefail
         echo cache_id=$cache_id
         echo "PATH='$PATH'"
-        which envsubst
-        which python3
-        which python
-        which jq
+        jq --version
+        python3 --version
 
     - name: Populate local bin
       uses: ./fsvr-action
