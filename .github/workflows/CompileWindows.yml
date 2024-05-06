@@ -32,8 +32,8 @@ jobs:
           export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
           $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
           source $fsvr_dir/utils/gha.ht-ln.bash
-          ht-ln /d/a/_actions/actions/humbletim/firestorm-gha ../fsvr
-      - uses: ../fsvr/actions-node-script
+          ht-ln /d/a/_actions/actions/humbletim/firestorm-gha ./fsvr
+      - uses: ./fsvr/actions-node-script
         with:
           run: |
             echo hi $fsvr_dir
