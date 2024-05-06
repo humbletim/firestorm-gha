@@ -25,21 +25,44 @@ jobs:
       if: false
     - uses: actions/cache@v4
       if: false
-    - name: generate SHELL
+    - name: link action
       run: |
         set -Euo pipefail
-        echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
-        . $GITHUB_ENV
         export gha_fsvr_dir=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja
-        source $gha_fsvr_dir/util/gha.ht-ln.bash
         export fsvr_dir=$PWD/fsvr
+        source $gha_fsvr_dir/util/gha.ht-ln.bash
         ht-ln $gha_fsvr_dir $fsvr_dir
         ht-ln $fsvr_dir/actions-node-script ./fsvr-action
+        echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
+
+    - name: preflight tests
+      run: |
+        set -Euo pipefail
+        echo "PATH='$PATH'"
+        which envsubst
+        which python3
+        which python
+        which jq
+
+    - name: Generate SHELL.env
+      run: |
+        set -Euo pipefail
+        mkdir -pv env.d bin bin/pystuff cache repo build
+        export fsvr_dir=${fsvr_dir:-$PWD/fsvr}
         export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
-        mkdir -pv env.d
+        $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
         function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
         echo cache_id=$(echo "$base-$repo" | to-id) | tee -a env.d/gha-bootstrap.env
-        $fsvr_dir/gha-generate-shell-env.sh || exit 42 | tee -a SHELL.env
+
+    - name: postflight tests
+      run: |
+        set -Euo pipefail
+        echo cache_id=$cache_id
+        echo "PATH='$PATH'"
+        which envsubst
+        which python3
+        which python
+        which jq
 
     - name: Populate local bin
       uses: ./fsvr-action
