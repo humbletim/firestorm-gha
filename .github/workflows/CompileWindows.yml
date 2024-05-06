@@ -28,16 +28,18 @@ jobs:
     - name: generate SHELL
       run: |
         set -Euo pipefail
+        echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
+        . $GITHUB_ENV
         export gha_fsvr_dir=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja
         source $gha_fsvr_dir/util/gha.ht-ln.bash
         export fsvr_dir=$PWD/fsvr
         ht-ln $gha_fsvr_dir $fsvr_dir
-        ht-ln $gha_fsvr_dir/actions-node-script ./fsvr-action
+        ht-ln $fsvr_dir/actions-node-script ./fsvr-action
         export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
-        $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
-        function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
         mkdir -pv env.d
+        function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
         echo cache_id=$(echo "$base-$repo" | to-id) | tee -a env.d/gha-bootstrap.env
+        $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
 
     - name: Populate local bin
       uses: ./fsvr-action
@@ -45,7 +47,8 @@ jobs:
         run: |
           set -Euo pipefail
           echo cache_id=$cache_id
-          test -d "$fsvr_dir" || exit 63
+          test -d "$fsvr_dir" || exit 50
+          test -n "$cache_id" || exit 51
 
           source $fsvr_dir/util/gha.cachette.bash
 
