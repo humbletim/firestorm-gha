@@ -28,11 +28,12 @@ jobs:
       - name: generate SHELL
         run: |
           set -Euo pipefail
-          export fsvr_dir=/d/a/_actions/actions/humbletim/firestorm-gha
+          export gha_fsvr_dir=/d/a/_actions/actions/humbletim/firestorm-gha/tpv-gha-nunja
+          source $gha_fsvr_dir/utils/gha.ht-ln.bash
+          export fsvr_dir=$PWD/fsvr
+          ht-ln $gha_fsvr_dir $fsvr_dir
           export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
           $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
-          source $fsvr_dir/utils/gha.ht-ln.bash
-          ht-ln /d/a/_actions/actions/humbletim/firestorm-gha ./fsvr
       - uses: ./fsvr/actions-node-script
         with:
           run: |
