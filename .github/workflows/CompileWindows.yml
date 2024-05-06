@@ -39,7 +39,7 @@ jobs:
         mkdir -pv env.d
         function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
         echo cache_id=$(echo "$base-$repo" | to-id) | tee -a env.d/gha-bootstrap.env
-        $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
+        $fsvr_dir/gha-generate-shell-env.sh || exit 42 | tee -a SHELL.env
 
     - name: Populate local bin
       uses: ./fsvr-action
@@ -101,6 +101,8 @@ jobs:
             xxtest_bin || exit `_err $? "!xxtest_bin"`
             test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-bin-b bin || exit 85
           )
+          xxtest_bin || exit `_err $? "!xxtest_bin"`
+          python3 --version || exit 105
 
     - name: ~000 Setup tmate session
       uses: mxschmitt/action-tmate@v3
