@@ -24,7 +24,7 @@ jobs:
       output1: ${{ steps.step1.outputs.test }}
       output2: ${{ steps.step2.outputs.test }}
     steps:
-      - uses: .
+      - uses: humbletim/firestorm-gha@tpv-gha-nunja
         if: false
       - uses: actions/upload-artifact@v4
         if: false
