@@ -28,7 +28,7 @@ jobs:
         if: false
       - uses: actions/upload-artifact@v4
         if: false
-      - uses: actions/cache/cache@v4
+      - uses: actions/cache@v4
         if: false
       - id: step1
         run: echo "test=hello" >> "$GITHUB_OUTPUT"
