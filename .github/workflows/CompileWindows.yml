@@ -21,28 +21,89 @@ jobs:
   generate-bin:
     runs-on: windows-2022
     steps:
-      - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
-        if: false
-      - uses: actions/cache@v4
-        if: false
-      - name: generate SHELL
+    - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
+      if: false
+    - uses: actions/cache@v4
+      if: false
+    - name: generate SHELL
+      run: |
+        set -Euo pipefail
+        export gha_fsvr_dir=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja
+        source $gha_fsvr_dir/util/gha.ht-ln.bash
+        export fsvr_dir=$PWD/fsvr
+        ht-ln $gha_fsvr_dir $fsvr_dir
+        ht-ln $gha_fsvr_dir/actions-node-script ./fsvr-action
+        export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
+        $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
+        function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
+        mkdir -pv env.d
+        echo cache_id=$(echo "$base-$repo" | to-id) | tee -a env.d/gha-bootstrap.env
+
+    - name: Populate local bin
+      uses: ./fsvr-action
+      with:
         run: |
           set -Euo pipefail
-          export gha_fsvr_dir=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja
-          source $gha_fsvr_dir/util/gha.ht-ln.bash
-          export fsvr_dir=$PWD/fsvr
-          ht-ln $gha_fsvr_dir $fsvr_dir
-          export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
-          $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
-      - uses: ./fsvr/actions-node-script
-        with:
-          run: |
-            echo hi $fsvr_dir
-      - name: ~000 Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure() && fromJSON(inputs.fstuple).pause != 'never'
-        with:
-          limit-access-to-actor: true
+          echo cache_id=$cache_id
+          test -d "$fsvr_dir" || exit 63
+
+          source $fsvr_dir/util/gha.cachette.bash
+
+          function generate_BASH_FUNC_invoke() {
+            source $fsvr_dir/bashland/gha.alias-exe.bash
+            BASH=$(cygpath -was $BASH) make-stub bin/BASH_FUNC_invoke.exe || return 90
+          }
+
+          test -v GITHUB_ACTIONS && gha-cache-restore-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || (
+            generate_BASH_FUNC_invoke
+            test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || exit 89
+          )
+
+          {
+            $fsvr_dir/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
+            ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
+            ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
+            ht-ln bin/BASH_FUNC_invoke.exe bin/envsubst.exe
+          } || exit 86
+
+          function xxtest_bin() {
+            test -f bin/parallel-home/will-cite || return 196
+            parallel --version | head -1        || return 197
+            ninja --version | head -1           || return 198
+            [[ `hostname` =~ windows[-]?2022 ]] || return 199
+            jq --version | head -1              || return 200
+            which parallel.exe
+            which colout
+            which jq
+          }
+
+          function xxprovision_tools() {(
+            set -Euo pipefail
+            source $fsvr_dir/gha-bootstrap.sh
+            source $fsvr_dir/util/gha.literally-exists.bash
+            pysite="$(cygpath -m "$(python3 -msite --user-site)")"
+
+            literally-exists bin/ninja.exe    || get_ninja    || exit `_err $? "failed to provision ninja $?"`
+            literally-exists $pysite/colout   || get_colout   || exit `_err $? "failed to provision colout $?"`
+            literally-exists bin/parallel     || get_parallel || exit `_err $? "failed to provision parallel $?"`
+            literally-exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
+            literally-exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
+
+            # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
+            python -m pip install --no-warn-script-location --user llsd
+          )}
+
+          test -v GITHUB_ACTIONS && gha-cache-restore-fast $cache_id-bin-b bin || (
+            xxprovision_tools || exit `_err $? "!xxprovision_tools"` 
+            xxtest_bin || exit `_err $? "!xxtest_bin"`
+            test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-bin-b bin || exit 85
+          )
+
+    - name: ~000 Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      if: failure() && fromJSON(inputs.fstuple).pause != 'never'
+      with:
+        limit-access-to-actor: true
             
   windows-build:
     needs: generate-bin
