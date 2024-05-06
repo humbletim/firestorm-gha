@@ -18,50 +18,37 @@ env:
     BASH_ENV: ${{ github.workspace }}\SHELL.env
 
 jobs:
-  populate-dependencies:
+  generate-bin:
     runs-on: windows-2022
-    outputs:
-      output1: ${{ steps.step1.outputs.test }}
-      output2: ${{ steps.step2.outputs.test }}
     steps:
       - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
         if: false
-      - uses: actions/upload-artifact@v4
-        if: false
       - uses: actions/cache@v4
         if: false
-      - id: step1
-        run: echo "test=hello" >> "$GITHUB_OUTPUT"
+      - name: generate SHELL
+        run: |
+          set -Euo pipefail
+          export fsvr_dir=/d/a/_actions/actions/humbletim/firestorm-gha
+          export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
+          $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
+      - uses: /d/a/_actions/actions/humbletim/firestorm-gha/actions-node-script
+        with:
+          run: |
+            echo hi $fsvr_dir
       - name: ~000 Setup tmate session
         uses: mxschmitt/action-tmate@v3
         with:
           limit-access-to-actor: true
-      - id: step2
-        run: echo "test=world" >> "$GITHUB_OUTPUT"
+            
   windows-build:
-    needs: populate-dependencies
+    needs: generate-bin
     runs-on: windows-2022
     steps:
     # no-ops that pre-populate upload-artifact, restore-only and save-only in /d/a/_actions/actions
     - uses: actions/upload-artifact@v4
       if: false
-      with:
-        name: my-artifact
-        path: /invalid/path
-        if-no-files-found: ignore
-    - uses: actions/upload-artifact@v4
+    - uses: actions/cache@v4
       if: false
-      with:
-        name: my-artifact
-        path: /invalid/path
-        if-no-files-found: ignore
-    - uses: actions/cache/restore@v4
-      if: false
-    # - uses: actions/cache@v4
-      with:
-        lookup-only: true
-        key: /dev/null
-        path: /dev/null
 
     - name: Output Inputs
       run: |
@@ -72,6 +59,7 @@ jobs:
         test -v base   || exit 44
         test -v repo   || exit 45
         test -v ref    || exit 46
+        exit 55
 
     - name: ~Clone
       run: |
