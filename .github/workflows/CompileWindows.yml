@@ -40,6 +40,7 @@ jobs:
             echo hi $fsvr_dir
       - name: ~000 Setup tmate session
         uses: mxschmitt/action-tmate@v3
+        if: failure() && fromJSON(inputs.fstuple).pause != 'never'
         with:
           limit-access-to-actor: true
             
