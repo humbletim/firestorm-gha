@@ -18,17 +18,38 @@ env:
     BASH_ENV: ${{ github.workspace }}\SHELL.env
 
 jobs:
-  windows_build:
+  populate-dependencies:
+    runs-on: windows-2022
+    outputs:
+      output1: ${{ steps.step1.outputs.test }}
+      output2: ${{ steps.step2.outputs.test }}
+    steps:
+      - id: step1
+        run: echo "test=hello" >> "$GITHUB_OUTPUT"
+      - id: step2
+        run: echo "test=world" >> "$GITHUB_OUTPUT"
+  windows-build:
+    needs: populate-dependencies
     runs-on: windows-2022
     steps:
 
     # no-ops that pre-populate upload-artifact, restore-only and save-only in /d/a/_actions/actions
+    - uses: ./fsvr/actions-node-script
+      if: false
     - uses: actions/upload-artifact@v4
+      if: false
+      with:
+        name: my-artifact
+        path: /invalid/path
+        if-no-files-found: ignore
+    - uses: actions/upload-artifact@v4
+      if: false
       with:
         name: my-artifact
         path: /invalid/path
         if-no-files-found: ignore
     - uses: actions/cache/restore@v4
+      if: false
     # - uses: actions/cache@v4
       with:
         lookup-only: true
