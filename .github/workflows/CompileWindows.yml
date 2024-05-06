@@ -24,18 +24,25 @@ jobs:
       output1: ${{ steps.step1.outputs.test }}
       output2: ${{ steps.step2.outputs.test }}
     steps:
+      - uses: ${{ github.workflow_ref }}
+        if: false
+      - uses: actions/upload-artifact@v4
+        if: false
+      - uses: actions/cache/cache@v4
+        if: false
       - id: step1
         run: echo "test=hello" >> "$GITHUB_OUTPUT"
+      - name: ~000 Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
       - id: step2
         run: echo "test=world" >> "$GITHUB_OUTPUT"
   windows-build:
     needs: populate-dependencies
     runs-on: windows-2022
     steps:
-
     # no-ops that pre-populate upload-artifact, restore-only and save-only in /d/a/_actions/actions
-    - uses: ./fsvr/actions-node-script
-      if: false
     - uses: actions/upload-artifact@v4
       if: false
       with:
