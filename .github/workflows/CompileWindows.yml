@@ -282,11 +282,11 @@ jobs:
       run: |
         set -euo pipefail
         echo fsvr_dir=$fsvr_dir
-        export root_dir=repo/viewer
+        export root_dir=${root_dir:-repo/viewer}
         export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
         # some legacy viewer packaging logic blindly reaches from build* to ../indra
         test -d $root_dir/indra && ht-ln $root_dir/indra indra
-        viewer_version=`cat $nunja_dir/viewer_version.txt`
+        viewer_version=`cat $nunja_dir/viewer_version.txt | tr -d '\r'`
         $fsvr_dir/util/generate_build_vars.sh ${viewer_name}-VR-GHA ${viewer_version} build/ \
            | tee env.d/build_vars.env
 

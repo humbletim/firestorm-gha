@@ -6,7 +6,7 @@ test -d "$1" || _die "usage: \$ [env workspace=...] generate_path_vars.sh [build
 
 root_dir=${root_dir:-${workspace:-${GITHUB_WORKSPACE}}}
 build_dir=$1
-test -d "$root_dir" || _die "env workspace or GITHUB_WORKSPACE expected as base"
+test -d "$root_dir" || _die "(root_dir='$root_dir') env workspace or GITHUB_WORKSPACE expected as base"
 test -d "$build_dir" || _die "build_dir=$build_dir does not exist"
 
 _setenv_extant root_dir=`_realpath $root_dir`

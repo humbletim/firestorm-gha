@@ -279,7 +279,7 @@ EOF
     echo $msvc_path
     [[ "$OSTYPE" != "msys" ]] || which cl.exe > /dev/null || return 241
     local out="$(ninja -C "$build_dir" -n 2>&1 && echo ninja_preflight_OK | colout -t ninja)"
-    echo "$out" | grep ninja_preflight_OK || _die "ninja -n failed\n$out"
+    echo "$out" | grep ninja_preflight_OK || { echo "$out" ; _die "ninja -n failed" ; }
     echo "$out" | head -3
     echo "..."
     echo "$out" | tail -3
