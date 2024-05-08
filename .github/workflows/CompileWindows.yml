@@ -142,7 +142,6 @@ jobs:
         test -v base   || exit 44
         test -v repo   || exit 45
         test -v ref    || exit 46
-        exit 55
 
     - name: ~Clone
       run: |
