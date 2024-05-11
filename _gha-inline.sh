@@ -10,9 +10,10 @@ ht-ln $fsvr_dir/actions-node-script ./fsvr-action
 
 export PATH="$PATH:/c/ProgramData/Chocolatey/bin"
 jq '.inputs.fstuple|fromjson' $GITHUB_EVENT_PATH \
-  | jq -r 'to_entries[]|[.key,.value]|join("=")' \
+  | jq -r 'to_entries[]|select(.value!="")|[.key,.value]|join("=")' \
   | tee -a $GITHUB_ENV
 
+source $GITHUB_ENV
 export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
 function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
 
