@@ -48,61 +48,6 @@ function get_bootstrap_vars() {(
 
 )}
 
-function get_ninja() {(
-    set -Euo pipefail
-    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
-        bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f \
-        https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip \
-      .
-    ) && unzip -d bin $archive || return `_err $? "failed to provision ninja $?"`
-    ls -l bin/ | grep ninja
-)}
-
-function get_colout() {(
-    set -Euo pipefail
-    python -m pip install --break-system-packages --no-warn-script-location --user colout
-    local pysite="$(python -msite --user-site)"
-    if grep SIGPIPE $pysite/colout/colout.py ; then
-      # workaround SIGPIPE on Win32 missing with some colout versions
-      perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' $pysite/colout/colout.py
-      diff $pysite/colout/colout.py $pysite/colout/colout.py.bak
-    fi
-    echo hello world | colout "hello" "red" | colout "world" "blue"
-)}
-
-function get_parallel() {(
-    set -Euo pipefail
-    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
-      3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 \
-      https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst \
-      .
-    ) && tar -C bin --strip-components=2 -vxf $archive usr/bin/parallel && {
-      mkdir -pv bin/parallel-home/tmp/sshlogin/`hostname`/
-      echo 65535 > bin/parallel-home/tmp/sshlogin/`hostname`/linelen
-      mkdir -pv bin/parallel-home/tmp/sshlogin/`/usr/bin/hostname`/
-      echo 65535 > bin/parallel-home/tmp/sshlogin/`/usr/bin/hostname`/linelen
-      test ! -v HOSTNAME || mkdir -pv bin/parallel-home/tmp/sshlogin/$HOSTNAME/
-      test ! -v HOSTNAME || echo 65535 > bin/parallel-home/tmp/sshlogin/$HOSTNAME/linelen
-      # hereby recognize contributions of GNU Parallel, developed by O. Tange.
-      echo "
-        Tange, O. (2022, November 22). GNU Parallel 20221122 ('Херсо́н').
-        Zenodo. https://doi.org/10.5281/zenodo.7347980
-      " > bin/parallel-home/will-cite
-  } || return `_err $? "failed to provision parallel $?"`
-  ls -l bin/ | grep parallel
-)}
-
-# yaml2json < fsvr/.github/workflows/CompileWindows.yml | jq '.jobs[].steps[]| "#"+.name+"\n"+.if+"\n"+(.run // .with.run)' -r
-function get_yaml2json() {(
-    set -Euo pipefail
-    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
-        a73fb27e36e30062c48dc0979c96afbbe25163e0899f6f259b654d56fda5cc26 \
-        https://github.com/bronze1man/yaml2json/releases/download/v1.3/yaml2json_windows_amd64.exe\
-      .
-    ) && cp -avu $archive bin/yaml2json.exe || return `_err $? "failed to provision yaml2json.exe $?"`
-    ls -l bin/ | grep yaml2json
-)}
-
 function gha_steps() {
   local fsvr_dir=$(dirname $BASH_SOURCE)
   bin/yaml2json < $fsvr_dir/.github/workflows/CompileWindows.yml | jq -r '.jobs[].steps|to_entries[]|select(.value.name and ((.value.name//"")|startswith("~")|not))|.value.name+" # "+(.key|tostring)'

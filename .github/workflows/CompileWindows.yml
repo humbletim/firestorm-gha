@@ -25,26 +25,8 @@ jobs:
       if: false
     - uses: actions/cache@v4
       if: false
-    - name: link action
-      run: |
-        set -Euo pipefail
-        export gha_fsvr_dir=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja
-        export fsvr_dir=$PWD/fsvr
-        source $gha_fsvr_dir/util/gha.ht-ln.bash
-        ht-ln $gha_fsvr_dir $fsvr_dir
-        ht-ln $fsvr_dir/actions-node-script ./fsvr-action
-        export PATH="$PATH:/c/ProgramData/Chocolatey/bin"
-        echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
-
-    - name: Generate SHELL.env
-      run: |
-        set -Euo pipefail
-        mkdir -pv env.d bin bin/pystuff cache repo build
-        export fsvr_dir=${fsvr_dir:-$PWD/fsvr}
-        export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
-        $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
-        function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
-        echo cache_id=$(echo "$base-$repo" | to-id) | tee -a env.d/gha-bootstrap.env
+    - name: SHELL.env
+      run: source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
 
     - name: postflight tests
       run: |
@@ -57,65 +39,7 @@ jobs:
     - name: Populate local bin
       uses: ./fsvr-action
       with:
-        run: |
-          set -Euo pipefail
-          echo cache_id=$cache_id
-          test -d "$fsvr_dir" || exit 50
-          test -n "$cache_id" || exit 51
-
-          source $fsvr_dir/util/gha.cachette.bash
-
-          function generate_BASH_FUNC_invoke() {
-            source $fsvr_dir/bashland/gha.alias-exe.bash
-            BASH=$(cygpath -was $BASH) make-stub bin/BASH_FUNC_invoke.exe || return 90
-          }
-
-          test -v GITHUB_ACTIONS && gha-cache-restore-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || (
-            generate_BASH_FUNC_invoke
-            test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || exit 89
-          )
-
-          {
-            $fsvr_dir/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
-            ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
-            ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
-            ht-ln bin/BASH_FUNC_invoke.exe bin/envsubst.exe
-          } || exit 86
-
-          function xxtest_bin() {
-            test -f bin/parallel-home/will-cite || return 196
-            parallel --version | head -1        || return 197
-            ninja --version | head -1           || return 198
-            [[ `hostname` =~ windows[-]?2022 ]] || return 199
-            jq --version | head -1              || return 200
-            which parallel.exe
-            which colout
-            which jq
-          }
-
-          function xxprovision_tools() {(
-            set -Euo pipefail
-            source $fsvr_dir/gha-bootstrap.sh
-            source $fsvr_dir/util/gha.literally-exists.bash
-            pysite="$(cygpath -m "$(python3 -msite --user-site)")"
-
-            literally-exists bin/ninja.exe    || get_ninja    || exit `_err $? "failed to provision ninja $?"`
-            literally-exists $pysite/colout   || get_colout   || exit `_err $? "failed to provision colout $?"`
-            literally-exists bin/parallel     || get_parallel || exit `_err $? "failed to provision parallel $?"`
-            literally-exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
-            literally-exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
-
-            # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
-            python -m pip install --no-warn-script-location --user llsd
-          )}
-
-          test -v GITHUB_ACTIONS && gha-cache-restore-fast $cache_id-bin-b bin || (
-            xxprovision_tools || exit `_err $? "!xxprovision_tools"` 
-            xxtest_bin || exit `_err $? "!xxtest_bin"`
-            test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-bin-b bin || exit 85
-          )
-          xxtest_bin || exit `_err $? "!xxtest_bin"`
-          python3 --version || exit 105
+        run: . $fsvr_dir/gha-populate-bin.sh && gha-populate-bin-windows
 
     - name: ~000 Setup tmate session
       uses: mxschmitt/action-tmate@v3
@@ -124,10 +48,12 @@ jobs:
         limit-access-to-actor: true
             
   windows-build:
+    if: false
     needs: generate-bin
     runs-on: windows-2022
     steps:
-    # no-ops that pre-populate upload-artifact, restore-only and save-only in /d/a/_actions/actions
+    - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
+      if: false
     - uses: actions/upload-artifact@v4
       if: false
     - uses: actions/cache@v4
@@ -137,108 +63,21 @@ jobs:
       run: |
         echo '${{ github.event.inputs.fstuple }}'
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
-        echo '${{ inputs.fstuple }}' | jq -r 'to_entries[]|[.key,.value]|join("=")' | tee -a $GITHUB_ENV
-        . $GITHUB_ENV
-        test -v base   || exit 44
-        test -v repo   || exit 45
-        test -v ref    || exit 46
 
     - name: ~Clone
       run: |
-        git clone --quiet --filter=tree:0 --single-branch --branch ${GITHUB_REF_NAME} https://github.com/${GITHUB_REPOSITORY} fsvr
+        source /d/a/_actions/${GITHUB_REPOSITORY}/${GITHUB_REF_NAME}/_gha-inline.sh fsvr
         echo "https://github.com/${GITHUB_REPOSITORY}/tree/$(git -C fsvr rev-parse --short HEAD)" > fsvr/.gha_source
-        source fsvr/util/gha.ht-ln.bash
-        ht-ln fsvr/actions-node-script ./fsvr-action
-
-    - name: Generate SHELL.env
-      run: |
-        set -Euo pipefail
-        mkdir -pv env.d bin bin/pystuff cache repo build
-        export fsvr_dir=${fsvr_dir:-$PWD/fsvr}
-        export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
-        $fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
-
-    - name: ~000 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '000'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
 
     - name: Generate gha-bootstrap.env
       run: |
         source $fsvr_dir/gha-bootstrap.sh
         get_bootstrap_vars | tee env.d/gha-bootstrap.env || exit 127
 
-    - name: ~001 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '001'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
-
     - name: Populate local bin
       uses: ./fsvr-action
       with:
-        run: |
-          set -Euo pipefail
-          test -d "$fsvr_dir" || exit 63
-
-          source $fsvr_dir/util/gha.cachette.bash
-
-          function generate_BASH_FUNC_invoke() {
-            source $fsvr_dir/bashland/gha.alias-exe.bash
-            BASH=$(cygpath -was $BASH) make-stub bin/BASH_FUNC_invoke.exe || return 90
-          }
-
-          test -v GITHUB_ACTIONS && gha-cache-restore-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || (
-            generate_BASH_FUNC_invoke
-            test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || exit 89
-          )
-
-          {
-            $fsvr_dir/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
-            ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
-            ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
-            ht-ln bin/BASH_FUNC_invoke.exe bin/envsubst.exe
-          } || exit 86
-
-          function xxtest_bin() {
-            test -f bin/parallel-home/will-cite || return 196
-            parallel --version | head -1        || return 197
-            ninja --version | head -1           || return 198
-            [[ `hostname` =~ windows[-]?2022 ]] || return 199
-            jq --version | head -1              || return 200
-            which parallel.exe
-            which colout
-            which jq
-          }
-
-          function xxprovision_tools() {(
-            set -Euo pipefail
-            source $fsvr_dir/gha-bootstrap.sh
-            source $fsvr_dir/util/gha.literally-exists.bash
-            pysite="$(cygpath -m "$(python3 -msite --user-site)")"
-
-            literally-exists bin/ninja.exe    || get_ninja    || exit `_err $? "failed to provision ninja $?"`
-            literally-exists $pysite/colout   || get_colout   || exit `_err $? "failed to provision colout $?"`
-            literally-exists bin/parallel     || get_parallel || exit `_err $? "failed to provision parallel $?"`
-            literally-exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
-            literally-exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
-
-            # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
-            python -m pip install --no-warn-script-location --user llsd
-          )}
-
-          test -v GITHUB_ACTIONS && gha-cache-restore-fast $cache_id-bin-b bin || (
-            xxprovision_tools || exit `_err $? "!xxprovision_tools"` 
-            xxtest_bin || exit `_err $? "!xxtest_bin"`
-            test ! -v GITHUB_ACTIONS || gha-cache-save-fast $cache_id-bin-b bin || exit 85
-          )
-
-    - name: ~002 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '002'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+        run: . $fsvr_dir/gha-populate-bin.sh && gha-populate-bin-windows
 
     - name: Expand Source Repositories
       uses: ./fsvr-action
@@ -246,20 +85,8 @@ jobs:
         run: |
           source $fsvr_dir/util/gha.cachette.bash
           source $fsvr_dir/util/gha.quiet-clone.bash
-
-          if [[ -x $nunja_dir/000.bash ]] ; then
-            echo "[sourcing] $nunja_dir/000.bash" >&2
-            . $nunja_dir/000.bash $hub $repo "$ref"
-          else
-            maybe-clone viewer ${hub:-github.com} $repo "$ref"
-            maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
-          fi
-
-    - name: ~003 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '003'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+          echo "[sourcing] $nunja_dir/000.bash" >&2
+          . $nunja_dir/000.bash $hub $repo "$ref"
 
     # - name: fsvr-action args test
     #   uses: ./fsvr-action
@@ -282,11 +109,10 @@ jobs:
         set -euo pipefail
         echo fsvr_dir=$fsvr_dir
         export root_dir=${root_dir:-repo/viewer}
-        export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
-        # some legacy viewer packaging logic blindly reaches from build* to ../indra
+        # some legacy viewer packaging logic reaches from build* to ../indra
         test -d $root_dir/indra && ht-ln $root_dir/indra indra
         viewer_version=`cat $nunja_dir/viewer_version.txt | tr -d '\r'`
-        $fsvr_dir/util/generate_build_vars.sh ${viewer_name}-VR-GHA ${viewer_version} build/ \
+        $fsvr_dir/util/generate_build_vars.sh ${viewer_channel:-${viewer_name}-VR-GHA} ${viewer_version} build/ \
            | tee env.d/build_vars.env
 
     - name: Generate Report
@@ -307,6 +133,7 @@ jobs:
           | ---------      | -----------     |
           | viewer_id      | $viewer_id      |
           | viewer_name    | $viewer_name    |
+          | viewer_exe     | $viewer_exe     |
           | viewer_channel | $viewer_channel |
           | base           | $base           |
           | hub            | $hub            |
@@ -317,6 +144,7 @@ jobs:
           | hostname       | `hostname`      |
           $repos
           $tools
+          | ---------      | -----------     |
           EOF
 
     - name: Detect MSVC
@@ -324,24 +152,14 @@ jobs:
       with:
         run: |
           set -Euo pipefail
+          source $fsvr_dir/util/gha.cachette.bash
           declare -a msvcs=(build/msvc.env build/msvc.nunja.env build/msvc_path.env)
-          export INPUT_key=$cache_id-msvc-a INPUT_path="$(echo "${msvcs[@]}" | tr ' ' '\n')"
 
-          function xxgenerate_msvc() {
+          gha-cache-restore-fast "$cache_id-msvc-a" "$(echo "${msvcs[@]}" | tr ' ' '\n')" || (
             $fsvr_dir/util/generate_msvc_env.sh
             ls -l ${msvcs[@]}
-          }
-
-          if [[ -v GITHUB_ACTIONS ]] ; then
-            /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-              | grep -i 'cache restored' && { echo 'yup' ; ls -l "${msvcs[@]}" ; } || {
-                echo 'nope'
-                xxgenerate_msvc
-                /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
-            }
-          else
-            xxgenerate_msvc
-          fi
+            gha-cache-save-fast "$cache_id-msvc-a" "$(echo "${msvcs[@]}" | tr ' ' '\n')" || exit 179 
+          )
 
     - name: 010_ensure_build_directories && 020_perform_replacements
       run: fsvr_step 010 && fsvr_step 020
@@ -351,18 +169,10 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          if [[ ! -v GITHUB_ACTIONS ]]; then
-            fsvr_step 038_provision_openvr || exit 242
-            exit 0
-          fi
-          # tarball=$fsvr_cache_dir/openvr-v1.6.10.8eaf723.tar.bz2
-          export INPUT_key=$cache_id-openvr-d INPUT_path=cache/openvr-**
-          /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-            | grep -i 'cache restored' && { echo 'yup' ; ls -l $fsvr_cache_dir ; } || {
-              echo 'nope'
-              fsvr_step 038_provision_openvr || exit 38
-              /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
-          }
+          gha-cache-restore-fast $cache_id-openvr-d cache/openvr-** || (
+            fsvr_step 038_provision_openvr || exit 38
+            gha-cache-save-fast $cache_id-openvr-d cache/openvr-** || exit 196
+          )
 
     - name: 039_provision_p373r
       run: fsvr_step 039
@@ -375,22 +185,12 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          function xxpopulate_packages() {
+          gha-cache-easy-fast $cache_id-build-packages-c build/packages || (
             fsvr_step 060_download_packages || exit 60
             fsvr_step 070_verify_downloads  || exit 70
             fsvr_step 080_untar_packages    || exit 80
-          }
-          if [[ -v GITHUB_ACTIONS ]]; then
-            export INPUT_key=$cache_id-build-packages-c INPUT_path=build/packages
-            /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/restore-only/index.js \
-              | grep -i 'cache restored' && echo 'yup' || {
-                echo 'nope'
-                xxpopulate_packages || exit $?
-                /c/Program\ Files/nodejs/node /d/a/_actions/actions/cache/v4/dist/save-only/index.js
-            }
-          else
-            xxpopulate_packages || exit $?
-          fi
+            gha-cache-restore-fast $cache_id-build-packages-c build/packages || exit 220
+          )
 
     - name: 085_prepare_msys_msvc
       run: fsvr_step 085
