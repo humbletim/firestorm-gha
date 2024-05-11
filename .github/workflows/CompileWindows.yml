@@ -48,7 +48,7 @@ jobs:
         limit-access-to-actor: true
             
   windows-build:
-    if: false
+    if: true
     needs: generate-bin
     runs-on: windows-2022
     steps:
