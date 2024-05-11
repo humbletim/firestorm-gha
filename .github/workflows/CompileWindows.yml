@@ -186,6 +186,7 @@ jobs:
       with:
         run: |
           set -Euo pipefail
+          source $fsvr_dir/util/gha.cachette.bash
           gha-cache-restore-fast $cache_id-build-packages-c build/packages || (
             source $fsvr_dir/util/reconstitute-dependencies.bash
             manifest=$build_dir/packages-info.json
