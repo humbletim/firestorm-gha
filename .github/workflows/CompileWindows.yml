@@ -186,11 +186,14 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          source $fsvr_dir/util/gha.cachette.bash
           gha-cache-restore-fast $cache_id-build-packages-c build/packages || (
-            fsvr_step 060_download_packages || exit 60
-            fsvr_step 070_verify_downloads  || exit 70
-            fsvr_step 080_untar_packages    || exit 80
+            source $fsvr_dir/util/reconstitute-dependencies.bash
+            manifest=$build_dir/packages-info.json
+
+            download_packages $manifest $fsvr_cache_dir               || exit 60
+            verify_downloads  $manifest $fsvr_cache_dir               || exit 70
+            untar_packages    $manifest $fsvr_cache_dir $packages_dir || exit 80
+
             gha-cache-save-fast $cache_id-build-packages-c build/packages || exit 220
           )
 
@@ -232,12 +235,6 @@ jobs:
       with:
         run: fsvr_step 0b3
 
-    - name: ~005 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '005'
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
-
     # - name: log env on error
     #   if: failure()
     #   uses: ./fsvr-action
@@ -253,23 +250,8 @@ jobs:
     #       EOF
     #       )"
 
-    # - name: 006 Setup tmate session
-    #   if: fromJSON(inputs.fstuple).pause == '006'
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
-
     - name: ~Setup tmate session
       if: failure() && fromJSON(inputs.fstuple).pause != 'never'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
-#
-#
-#     - name: Setup tmate session
-#       if: failure()
-#       uses: mxschmitt/action-tmate@v3
-#       env:
-#          PATH: /c/msys64/usr/bin:${{ env.PATH}}
-#       with:
-#         limit-access-to-actor: true
