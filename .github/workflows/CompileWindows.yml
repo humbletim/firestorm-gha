@@ -66,8 +66,8 @@ jobs:
 
     - name: ~Clone
       run: |
-        source /d/a/_actions/${GITHUB_REPOSITORY}/${GITHUB_REF_NAME}/_gha-inline.sh fsvr
-        echo "https://github.com/${GITHUB_REPOSITORY}/tree/$(git -C fsvr rev-parse --short HEAD)" > fsvr/.gha_source
+        source /d/a/_actions/${GITHUB_REPOSITORY}/${GITHUB_REF_NAME}/_gha-inline.sh
+        echo "https://github.com/${GITHUB_REPOSITORY}/tree/$(git -C $fsvr_dir rev-parse --short HEAD)" > $fsvr_dir/.gha_source
 
     - name: Generate gha-bootstrap.env
       run: |
@@ -169,6 +169,7 @@ jobs:
       with:
         run: |
           set -Euo pipefail
+          source $fsvr_dir/util/gha.cachette.bash
           gha-cache-restore-fast $cache_id-openvr-d cache/openvr-** || (
             fsvr_step 038_provision_openvr || exit 38
             gha-cache-save-fast $cache_id-openvr-d cache/openvr-** || exit 196
