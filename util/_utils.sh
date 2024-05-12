@@ -27,7 +27,7 @@ function _assert() {
 function _relativize() {
     test ! -v DEBUG || { echo "$@" ; return 0; }
     local rel="$@"
-    for x in build_dir source_dir root_dir fsvr_dir fsvr_cache_dir nunja_dir p373r_dir openvr_dir ; do
+    for x in build_dir source_dir root_dir gha_fsvr_dir fsvr_dir fsvr_cache_dir nunja_dir p373r_dir openvr_dir ; do
       test ! -v $x || rel=${rel//${!x}/\{${x}\}}
     done
     echo $rel
@@ -85,11 +85,6 @@ function _setenv_ma() {
 
 function _realpath() { cygpath -ma "$1" 2>/dev/null || readlink -f "$1"; }
 function _relative_path() { realpath --relative-to "$2" "$1" ; }
-function _ver_split() { echo "$1" | cut -d "." -f $2 ; }
-function _git_sha() {
-  test -e $1/.git || { echo "ERROR: !\$1=$1/.git" >&2 ; return 1; }
-  git -C "$1" describe --always --first-parent --abbrev=7
-}
 
 
 # usage: __utils_main__ ${BASH_SOURCE[0]} ${0}

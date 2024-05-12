@@ -76,7 +76,7 @@ function 020_perform_replacements() {( $_dbgopts;
     ht-ln $fsvr_dir/newview/cmake_pch.cxx $build_dir/newview/
 
     if [[ $viewer_id == blackdragon ]] ; then
-      source $fsvr_dir/bashland/gha.alias-exe.bash
+      source $gha_fsvr_dir/bashland/gha.alias-exe.bash
       make-echo-exe "$build_dir/newview/BDVersionChecker.exe" "TODO: newview/BDVersionChecker.exe" || exit 67
       test -x "$build_dir/newview/BDVersionChecker.exe" || exit 68
     fi
@@ -109,17 +109,6 @@ function 020_perform_replacements() {( $_dbgopts;
 
 )}
 
-function 085_prepare_msys_msvc() {( $_dbgopts;
-    [[ "$OSTYPE" == "msys" ]] || { echo "skipping msys (found OSTYPE='$OSTYPE')" >&2 ; return 0; }
-
-    if [[ -v GITHUB_ACTIONS ]] ; then
-        # TODO: masking the NSIS folder usefully disrupts viewer_manifest.py
-        #   past manifest processing and workable firestorm_setup_tmp.nsi emerging
-        # see: indra/newview/viewer_manifest.py:    def nsi_file_commands
-        test -d C:/PROGRA~2/NSIS && mv -v C:/PROGRA~2/NSIS C:/PROGRA~2/NSIS.old
-    fi
-)}
-
 function merge_packages_info() {( $_dbgopts;
     local packages_info=${1:-}
     test -z "$packages_info" && packages_info=- \
@@ -129,21 +118,6 @@ function merge_packages_info() {( $_dbgopts;
     test -n "$json" || _die "problem merging packages infos $packages_info $build_dir/packages-info.json"
     echo "$json" > $build_dir/packages-info.json
     _relativize "merged $packages_info" >&2
-)}
-
-function 038_provision_openvr() {( $_dbgopts;
-    # _assert openvr_dir test -v openvr_dir
-    # _assert openvr_dir 'test -d "$openvr_dir"'
-    if ls -l $fsvr_cache_dir/openvr-*.tar.* $fsvr_cache_dir/openvr-*.tar.*.json; then
-      echo "using cached openvr" >&2
-    else
-      bash $fsvr_dir/openvr/improvise.sh || _die "openvr/improvise failed"
-      # bash $openvr_dir/install.sh || _die "openvr/install failed"
-    fi
-    # echo "openvr_tarball_json=\"`cat $fsvr_cache_dir/openvr-*.tar.*.json`\"" | tee -a $GITHUB_OUTPUT
-    # mkdir -pv $openvr_dir/meta
-    # ht-ln $fsvr_cache_dir/openvr-*.tar.*.json $openvr_dir/meta/packages-info.json
-    #cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
 )}
 
 function 039_provision_p373r() {( $_dbgopts;
@@ -166,7 +140,6 @@ function 039_provision_p373r() {( $_dbgopts;
         echo "APPLIED: $applied" >&2
       )
     )
-    # bash $p373r_dir/apply.sh || _die "p373r/apply failed"
 
     # note: -I$build_dir/newview is already part of stock build opts
     ht-ln $p373r_dir/llviewerVR.h $build_dir/newview/
@@ -243,9 +216,9 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
       APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe 2>/dev/null | head -n 1)
       _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
       cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
-       | APPLICATION_EXE=$APPLICATION_EXE envsubst \
-       | tee $build_dir/newview/load_with_settings_and_cache_here.bat \
-       | grep call
+        | APPLICATION_EXE=$APPLICATION_EXE envsubst \
+        | tee $build_dir/newview/load_with_settings_and_cache_here.bat \
+        | grep call
       ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
       test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
         || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
@@ -272,7 +245,7 @@ function make_installer() {
   export XZ_DEFAULTS=-T0
   (
     cd $build_dir/newview
-    PATH=/c/Program\ Files\ \(x86\)/NSIS.old makensis.exe -V3 $nsi
+    PATH=/c/Program\ Files\ \(x86\)/NSIS makensis.exe -V3 $nsi
   )
 
   local InstallerName=$(basename $build_dir/newview/*Setup*.exe)

@@ -4,7 +4,8 @@ set -Euo pipefail
 _PRESHELL_PATH="${_PRESHELL_PATH:-}"
 PATH="$PATH:/usr/bin"
 
-fsvr_dir="${fsvr_dir:-$PWD/fsvr}"
+#fsvr_dir="${fsvr_dir:-$PWD/fsvr}"
+gha_fsvr_dir="$(dirname "${BASH_SOURCE}")"
 _hostname="windows-2022"
 
 if [[ $OSTYPE == msys ]] ; then
@@ -27,7 +28,7 @@ pysite="$(PYTHONUSERBASE="$_PYTHONUSERBASE" python3 -msite --user-site)"
 
 ######################################################################
 echo "$(cat<<EOF
-export fsvr_dir="$fsvr_dir"
+export gha_fsvr_dir="$gha_fsvr_dir"
 
 _PRESHELL_PATH="$_PRESHELL_PATH"
 _PATH="$_PATH"
@@ -49,9 +50,9 @@ declare -x PYTHONOPTIMIZE=nonemptystring
 
 function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$rc; }
 
-function ht-ln() { '$fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
+function ht-ln() { '$gha_fsvr_dir/util/_utils.sh' ht-ln "\$@" ; }
 function hostname(){ echo '$_hostname' ; }
-function tee() { TEE="`which tee`" "`which python3`" "$fsvr_dir/util/tee.py" "\$@" ; }
+function tee() { TEE="`which tee`" "`which python3`" "$gha_fsvr_dir/util/tee.py" "\$@" ; }
 function colout() { $(
   if which colout 2>/dev/null > /dev/null ; then
     echo \"`which colout`\"
@@ -73,7 +74,7 @@ function jq() { "`which jq`" $(
 ) ; }
 function envsubst() { "`which envsubst`" "\$@" ; }
 
-function fsvr_step() {( set -Euo pipefail; $fsvr_dir/util/build.sh "\$@" ; )}
+function fsvr_step() {( set -Euo pipefail; $gha_fsvr_dir/util/build.sh "\$@" ; )}
 
 declare -xf _err tee parallel ht-ln hostname colout jq envsubst fsvr_step
 # set -Eo pipefail

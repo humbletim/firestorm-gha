@@ -7,7 +7,7 @@ function _parallel() {( set -Euo pipefail;
     test -f $build_dir/$funcname.txt && rm -v $build_dir/$funcname.txt
     # declare -f parallel >/dev/null || return `_err $? "parallel() not defined"`;
     parallel --joblog $build_dir/$funcname.txt --halt-on-error 2 "$@" \
-      || { rc=$? ; _relativize "see $build_dir/$funcname.txt" >&2 ; return $rc ; }
+      || { rc=$? ; echo "see $build_dir/$funcname.txt" >&2 ; return $rc ; }
 )}
 
 function _verify_one() {( set -Euo pipefail;

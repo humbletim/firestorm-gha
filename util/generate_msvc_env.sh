@@ -1,10 +1,10 @@
 #!/bin/bash
 
-test -s build/msvc.env || $fsvr_dir/util/generate_msvc_env.bat > build/msvc.env
+test -s build/msvc.env || $gha_fsvr_dir/util/generate_msvc_env.bat > build/msvc.env
 . build/msvc.env
 
 msvc_path="$(
-  $fsvr_dir/util/_utils.sh reduce-paths "$msvc_env_PATH" \
+  $gha_fsvr_dir/util/_utils.sh reduce-paths "$msvc_env_PATH" \
     "/mingw64/bin:/usr/bin:/bin:/c/msys64/home/runneradmin/bin:$HOME/bin"
 )"
 

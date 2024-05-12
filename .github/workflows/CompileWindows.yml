@@ -18,38 +18,38 @@ env:
     BASH_ENV: ${{ github.workspace }}\SHELL.env
 
 jobs:
-  generate-bin:
-    runs-on: windows-2022
-    steps:
-    - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
-      if: false
-    - uses: actions/cache@v4
-      if: false
-    - name: SHELL.env
-      run: source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
-
-    - name: postflight tests
-      run: |
-        set -Euo pipefail
-        echo cache_id=$cache_id
-        echo "PATH='$PATH'"
-        jq --version
-        python3 --version
-
-    - name: Populate local bin
-      uses: ./fsvr-action
-      with:
-        run: . $fsvr_dir/gha-populate-bin.sh && gha-populate-bin-windows
-
-    - name: ~000 Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      if: failure() && fromJSON(inputs.fstuple).pause != 'never'
-      with:
-        limit-access-to-actor: true
+  # generate-bin:
+  #   runs-on: windows-2022
+  #   steps:
+  #   - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
+  #     if: false
+  #   - uses: actions/cache@v4
+  #     if: false
+  #   - name: SHELL.env
+  #     run: source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
+  # 
+  #   - name: postflight tests
+  #     run: |
+  #       set -Euo pipefail
+  #       echo cache_id=$cache_id
+  #       echo "PATH='$PATH'"
+  #       jq --version
+  #       python3 --version
+  # 
+  #   - name: Populate local bin
+  #     uses: ./fsvr-action
+  #     with:
+  #       run: . $gha_fsvr_dir/gha-populate-bin.sh && gha-populate-bin-windows
+  # 
+  #   - name: ~000 Setup tmate session
+  #     uses: mxschmitt/action-tmate@v3
+  #     if: failure() && fromJSON(inputs.fstuple).pause != 'never'
+  #     with:
+  #       limit-access-to-actor: true
             
   windows-build:
-    if: true
-    needs: generate-bin
+    # if: true
+    # needs: generate-bin
     runs-on: windows-2022
     steps:
     - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
@@ -66,35 +66,29 @@ jobs:
 
     - name: ~Clone
       run: |
-        source /d/a/_actions/${GITHUB_REPOSITORY}/${GITHUB_REF_NAME}/_gha-inline.sh
-        echo "https://github.com/${GITHUB_REPOSITORY}/tree/$(git -C $fsvr_dir rev-parse --short HEAD)" > $fsvr_dir/.gha_source
+        source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
+        source $gha_fsvr_dir/util/gha.quiet-clone.bash
+        quiet-clone github.com ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
+        echo fsvr_dir=$PWD/fsvr | tee $GITHUB_ENV
 
     - name: Generate gha-bootstrap.env
       run: |
-        source $fsvr_dir/gha-bootstrap.sh
+        source $gha_fsvr_dir/gha-bootstrap.sh
         get_bootstrap_vars | tee env.d/gha-bootstrap.env || exit 127
 
     - name: Populate local bin
       uses: ./fsvr-action
       with:
-        run: . $fsvr_dir/gha-populate-bin.sh && gha-populate-bin-windows
+        run: . $gha_fsvr_dir/gha-populate-bin.sh && gha-populate-bin-windows
 
     - name: Expand Source Repositories
       uses: ./fsvr-action
       with:
         run: |
-          source $fsvr_dir/util/gha.cachette.bash
-          source $fsvr_dir/util/gha.quiet-clone.bash
+          source $gha_fsvr_dir/util/gha.cachette.bash
+          source $gha_fsvr_dir/util/gha.quiet-clone.bash
           echo "[sourcing] $nunja_dir/000.bash" >&2
           . $nunja_dir/000.bash $hub $repo "$ref"
-
-    # - name: fsvr-action args test
-    #   uses: ./fsvr-action
-    #   with:
-    #     environment: foo=bar
-    #     args: An argument string ${{ inputs.fstuple }}
-    #     run: |
-    #       echo ok 1=$1 2=$2 args="$(echo "$@")"
 
     - name: PATH/ENV preflight tests
       run: |
@@ -106,13 +100,14 @@ jobs:
 
     - name: Generate Build Vars
       run: |
-        set -euo pipefail
+        set -Euo pipefail
         echo fsvr_dir=$fsvr_dir
+        echo gha_fsvr_dir=$gha_fsvr_dir
         export root_dir=${root_dir:-repo/viewer}
         # some legacy viewer packaging logic reaches from build* to ../indra
         test -d $root_dir/indra && ht-ln $root_dir/indra indra
         viewer_version=`cat $nunja_dir/viewer_version.txt | tr -d '\r'`
-        $fsvr_dir/util/generate_build_vars.sh ${viewer_channel:-${viewer_name}-VR-GHA} ${viewer_version} build/ \
+        $gha_fsvr_dir/util/generate_build_vars.sh ${viewer_channel:-${viewer_name}-VR-GHA} ${viewer_version} build/ \
            | tee env.d/build_vars.env
 
     - name: Generate Report
@@ -124,16 +119,16 @@ jobs:
             echo "| ./$id | $(git -C $id describe --all --always) *$(git -C $id rev-parse --short HEAD)* $url |"
           done)"
 
-          tools="$(for id in jq ninja parallel bash ; do
-            echo "| $id | $($id --version | head -n 1 || true) |"
-          done)"
+          # tools="$(for id in jq ninja parallel bash ; do
+          #   echo "| $id | $($id --version | head -n 1 || true) |"
+          # done)"
           test -v GITHUB_STEP_SUMMARY || GITHUB_STEP_SUMMARY=/dev/stdout
           cat <<EOF | tee $GITHUB_STEP_SUMMARY
           | name           | value           |
           | ---------      | -----------     |
           | viewer_id      | $viewer_id      |
           | viewer_name    | $viewer_name    |
-          | viewer_exe     | $viewer_exe     |
+          | viewer_bin     | $viewer_bin     |
           | viewer_channel | $viewer_channel |
           | base           | $base           |
           | hub            | $hub            |
@@ -143,7 +138,7 @@ jobs:
           | cache_id       | $cache_id       |
           | hostname       | `hostname`      |
           $repos
-          $tools
+          # $tools
           | ---------      | -----------     |
           EOF
 
@@ -152,11 +147,11 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          source $fsvr_dir/util/gha.cachette.bash
+          source $gha_fsvr_dir/util/gha.cachette.bash
           declare -a msvcs=(build/msvc.env build/msvc.nunja.env build/msvc_path.env)
 
           gha-cache-restore-fast "$cache_id-msvc-a" "$(echo "${msvcs[@]}" | tr ' ' '\n')" || (
-            $fsvr_dir/util/generate_msvc_env.sh
+            $gha_fsvr_dir/util/generate_msvc_env.sh
             ls -l ${msvcs[@]}
             gha-cache-save-fast "$cache_id-msvc-a" "$(echo "${msvcs[@]}" | tr ' ' '\n')" || exit 179 
           )
@@ -169,10 +164,11 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          source $fsvr_dir/util/gha.cachette.bash
-          gha-cache-restore-fast $cache_id-openvr-d cache/openvr-** || (
-            fsvr_step 038_provision_openvr || exit 38
-            gha-cache-save-fast $cache_id-openvr-d cache/openvr-** || exit 196
+          source $gha_fsvr_dir/util/gha.cachette.bash
+          gha-cache-restore-fast $cache_id-openvr-d "cache/openvr-**" || (
+            source $gha_fsvr_dir/openvr/improvise.bash
+            provision_openvr "$fsvr_cache_dir" || _die "openvr/improvise failed"
+            gha-cache-save-fast $cache_id-openvr-d "cache/openvr-**" || exit 196
           )
 
     - name: 039_provision_p373r
@@ -186,9 +182,9 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          source $fsvr_dir/util/gha.cachette.bash
+          source $gha_fsvr_dir/util/gha.cachette.bash
           gha-cache-restore-fast $cache_id-build-packages-c build/packages || (
-            source $fsvr_dir/util/reconstitute-dependencies.bash
+            source $gha_fsvr_dir/util/reconstitute-dependencies.bash
             manifest=$build_dir/packages-info.json
 
             download_packages $manifest $fsvr_cache_dir               || exit 60
@@ -197,9 +193,6 @@ jobs:
 
             gha-cache-save-fast $cache_id-build-packages-c build/packages || exit 220
           )
-
-    - name: 085_prepare_msys_msvc
-      run: fsvr_step 085
 
     - name: 090_ninja_preflight
       run: fsvr_step 090
@@ -214,7 +207,7 @@ jobs:
       run: fsvr_step 0a0 SLPlugin.exe
 
     - name: 0a0_ninja_build application-bin.exe
-      run: fsvr_step 0a0 ${viewer_exe}-bin.exe
+      run: fsvr_step 0a0 ${viewer_bin}-bin.exe
 
     - name: 0a0_ninja_build llpackage
       run: fsvr_step 0a0 llpackage
