@@ -122,7 +122,7 @@ function merge_packages_info() {( $_dbgopts;
 
 function 039_provision_p373r() {( $_dbgopts;
     test -d repo/p373r || return 0
-    export p373r_dir=repo/p373r
+    export p373r_dir=$(pwd -W)/repo/p373r
     _assert p373r_dir test -v p373r_dir
     _assert p373r_dir 'test -d "$p373r_dir"'
     cat $p373r_dir/applied >&2 && return 0
