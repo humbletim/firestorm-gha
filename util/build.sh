@@ -121,6 +121,7 @@ function merge_packages_info() {( $_dbgopts;
 )}
 
 function 039_provision_p373r() {( $_dbgopts;
+    test -d repo/p373r || return 0
     _assert p373r_dir test -v p373r_dir
     _assert p373r_dir 'test -d "$p373r_dir"'
     cat $p373r_dir/applied >&2 && return 0
@@ -154,8 +155,8 @@ function 040_generate_package_infos() {( $_dbgopts;
     merge_packages_info $nunja_dir/packages-info.json || return `_err $? nunja-packages-info`
     test ! -s $fsvr_cache_dir/openvr-*.tar.*.json || \
       merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json || return `_err $? openvr-packages-info`
-    test ! -s $p373r_dir/meta/packages-info.json || \
-      merge_packages_info $p373r_dir/meta/packages-info.json || return `_err $? p373r-packages-info`
+    test ! -s repo/p373r/meta/packages-info.json || \
+      merge_packages_info repo/p373r/meta/packages-info.json || return `_err $? p373r-packages-info`
 )}
 
 function 050_generate_packages_info_text() {( $_dbgopts;
