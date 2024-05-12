@@ -1,5 +1,7 @@
 #!/bin/bash
 
+openvr_dir=$(dirname "${BASH_SOURCE}")
+
 function verify_openvr_from_packages_json() {
   local tarball=$1 json=${2:-$1.json}
   jq --arg tarball "$tarball" -r '.openvr.hash + "\t" + $tarball' $json \
@@ -16,7 +18,7 @@ function provision_openvr() {(
 
   tarball=$cache_dir/openvr-$tag.$commit.tar.bz2
 
-  cd "$(dirname $0)"
+  cd "$openvr_dir"
   mkdir -pv stage
   envsubst < autobuild-package.xml > stage/autobuild-package.xml
   touch --reference=autobuild-package.xml stage/autobuild-package.xml
