@@ -9,7 +9,7 @@ _assert "invalid channel name" '[[ $viewer_channel =~ ^[-_a-zA-Z0-9.]+$ ]]'
 _assert "invalid version"      '[[ $viewer_version =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]'
 _assert "invalid build_dir"    'test -d $build_dir'
 
-viewer_channel=$viewer_channel
+_setenv viewer_channel=$viewer_channel
 
 function _ver_split() { echo "$1" | cut -d "." -f $2 ; }
 _setenv viewer_version=$viewer_version
