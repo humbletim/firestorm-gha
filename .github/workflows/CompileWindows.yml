@@ -70,7 +70,7 @@ jobs:
         source $BASH_ENV
         source $gha_fsvr_dir/util/gha.quiet-clone.bash
         quiet-clone github.com ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
-        echo fsvr_dir=$PWD/fsvr | tee $GITHUB_ENV
+        echo fsvr_dir=$PWD/fsvr | tee -a $GITHUB_ENV
 
     - name: Generate gha-bootstrap.env
       run: |
