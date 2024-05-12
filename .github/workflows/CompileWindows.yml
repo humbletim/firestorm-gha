@@ -167,7 +167,7 @@ jobs:
           set -Euo pipefail
           source $gha_fsvr_dir/util/gha.cachette.bash
           gha-cache-restore-fast $cache_id-openvr-d "cache/openvr-**" || (
-            source $gha_fsvr_dir/openvr/improvise.bash
+            source $fsvr_dir/openvr/improvise.bash
             provision_openvr "$fsvr_cache_dir" || _die "openvr/improvise failed"
             gha-cache-save-fast $cache_id-openvr-d "cache/openvr-**" || exit 196
           )
