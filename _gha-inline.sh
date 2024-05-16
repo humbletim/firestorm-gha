@@ -1,8 +1,8 @@
 #!/bin/bash
 set -Euo pipefail
-test -v GITHUB_ACTIONS || { echo "GITHUB_ACTIONS expected" >&2 ; exit 3 ; } 
+test -v GITHUB_ACTIONS || { echo "GITHUB_ACTIONS expected" >&2 ; exit 3 ; }
 # /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja
-export gha_fsvr_dir=$(dirname "${BASH_SOURCE}") 
+export gha_fsvr_dir=$(readlink -f $(dirname "${BASH_SOURCE}"))
 source $gha_fsvr_dir/util/gha.ht-ln.bash
 ht-ln $gha_fsvr_dir/actions-node-script ./fsvr-action
 
@@ -17,6 +17,6 @@ function to-id() { cat | sed 's@[^-a-zA-Z0-9_.]@-@g' ; }
 
 mkdir -pv env.d bin bin/pystuff cache repo build
 
-echo cache_id=$(echo "$base-$repo" | to-id) | tee -a env.d/gha-bootstrap.env
+echo cache_id=$(echo "$base-$repo" | to-id) | tee -a env.d/local.env
 
 $gha_fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env

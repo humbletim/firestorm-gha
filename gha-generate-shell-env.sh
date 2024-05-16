@@ -34,6 +34,7 @@ _PRESHELL_PATH="$_PRESHELL_PATH"
 _PATH="$_PATH"
 
 set -a
+[[ -f $PWD/env.d/local.env ]] && source $PWD/env.d/local.env
 [[ -f $PWD/env.d/gha-bootstrap.env ]] && source $PWD/env.d/gha-bootstrap.env
 [[ -f $PWD/env.d/build_vars.env    ]] && source $PWD/env.d/build_vars.env
 set +a
