@@ -209,13 +209,13 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
       test -f "$nsi" || \
       test -f $(dirname "$nsi")/secondlife_setup_tmp.nsi && \
         ht-ln $(dirname "$nsi")/secondlife_setup_tmp.nsi "$nsi"
-    )
+    ) || exit $?
     (
-      local APPLICATION_EXE=${viewer_name}Viewer.exe
+      local APPLICATION_EXE=${viewer_name}.exe
       if [[ $viewer_id == blackdragon ]] ; then
         APPLICATION_EXE=SecondLifeViewer.exe
       fi
-      APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe 2>/dev/null | head -n 1)
+      APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *{viewer_channel}.exe 2>/dev/null | head -n 1)
       _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
       cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
         | APPLICATION_EXE=$APPLICATION_EXE envsubst \
@@ -224,7 +224,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
       ls -lrtha $build_dir/newview/load_with_settings_and_cache_here.bat
       test -s $build_dir/newview/load_with_settings_and_cache_here.bat \
         || return `_err $? "err configuring load_with_settings_and_cache_here.bat"`
-    )
+    ) || exit $?
     test ! -f $packages_dir/lib/release/openvr_api.dll || (
       cp -avu $packages_dir/lib/release/openvr_api.dll $build_dir/newview/
       grep "openvr_api.dll" $nsi \
