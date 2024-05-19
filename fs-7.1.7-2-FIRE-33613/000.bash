@@ -8,6 +8,9 @@ gha-cache-restore-fast $cache_id-repo-0001 repo/viewer || (
     quiet-clone ${hub:-github.com} $repo $ref repo/viewer
 
     pushd repo/viewer
+      # FIRE-31368 prototype hop url fixes
+      curl https://patch-diff.githubusercontent.com/raw/FirestormViewer/phoenix-firestorm/pull/25.patch | patch -p1 || exit $?
+      # FIRE-33613: underwater camera workarounds
       curl https://patch-diff.githubusercontent.com/raw/FirestormViewer/phoenix-firestorm/pull/27.patch | patch -p1 || exit $?
       git diff
     popd
