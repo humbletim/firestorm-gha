@@ -23,8 +23,8 @@ function get_bootstrap_vars() {(
     fs-*) viewer_name=Firestorm      ;;
     bd-*) viewer_name=BlackDragon    ;;
     al-*) viewer_name=Alchemy        ;;
-  sgeo-*) viewer_name=Sgeo viewer_exe=firestorm ;;
-  test-*) viewer_name=Test viewer_exe=firestorm ;;
+  sgeo-*) viewer_name=Sgeo viewer_bin=firestorm ;;
+  test-*) viewer_name=Test viewer_bin=firestorm ;;
        *) viewer_name=Unknown        ;;
   esac
   viewer_id=${viewer_id:-$(echo "$viewer_name" | tr '[:upper:]' '[:lower:]' | sed -e 's@[^-_A-Za-z0-9]@_@g')}
