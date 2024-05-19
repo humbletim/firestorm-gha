@@ -8,7 +8,7 @@ gha-cache-restore-fast $cache_id-repo-0001 repo/viewer || (
     quiet-clone ${hub:-github.com} $repo $ref repo/viewer
 
     pushd repo/viewer
-      curl https://patch-diff.githubusercontent.com/raw/metaverse-crossroads/phoenix-firestorm/pull/2.patch | patch -p1 || exit $?
+      curl https://patch-diff.githubusercontent.com/raw/FirestormViewer/phoenix-firestorm/pull/27.patch | patch -p1 || exit $?
       git diff
     popd
 
