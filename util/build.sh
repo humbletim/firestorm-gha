@@ -205,8 +205,7 @@ function 0a0_ninja_build() {( $_dbgopts;
 
 function 0a1_ninja_postbuild() {( $_dbgopts;
     local nsi=$build_dir/newview/${viewer_bin}_setup_tmp.nsi
-    (
-      test -f "$nsi" || \
+    test -f "$nsi" || (
       test -f $(dirname "$nsi")/secondlife_setup_tmp.nsi && \
         ht-ln $(dirname "$nsi")/secondlife_setup_tmp.nsi "$nsi"
     ) || exit $?
