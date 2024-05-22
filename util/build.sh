@@ -312,7 +312,7 @@ function 0b3_upload_7z() {( $_dbgopts;
 
 function 0b4_bundle_zip() {( $_dbgopts;
   mkdir ziptest
-  tar -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
+  tar -C $build_dir -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
 )}
 
 function 0b5_upload_zip() {( $_dbgopts;
