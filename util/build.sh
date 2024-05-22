@@ -326,9 +326,10 @@ function 0b5_upload_zip() {( $_dbgopts;
   mkdir dist || true
   ht-ln $Portable dist/$PortableArchive
 
+  grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
   cd dist
-  echo zipUploadStream=$PortableArchive gha-upload-artifact ${PortableArchive/.zip/} $build_dir/installer.txt >&2
-  zipUploadStream=$PortableArchive gha-upload-artifact ${PortableArchive/.zip/} $build_dir/installer.txt
+  echo zipUploadStream=$PortableArchive gha-upload-artifact-fast ${PortableArchive/.zip/} $build_dir/installer.txt >&2
+  zipUploadStream=$PortableArchive gha-upload-artifact-fast ${PortableArchive/.zip/} $build_dir/installer.txt
 )}
 
 function _steps() {

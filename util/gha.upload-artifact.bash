@@ -93,7 +93,7 @@ index 8bf1b35..8f2ff97 100644
  exports.ZipUploadStream = ZipUploadStream;
  function createZipUploadStream(uploadSpecification, compressionLevel = exports.DEFAULT_COMPRESSION_LEVEL) {
      return __awaiter(this, void 0, void 0, function* () {
-+if (process.env.zipUploadStream) return require('fs').createReadStream(process.env.zipUploadStream);
++/*gha-patch-upload-artifact*/if (process.env.zipUploadStream) return require('fs').createReadStream(process.env.zipUploadStream);
 +
          core.debug(`Creating Artifact archive with compressionLevel: ${compressionLevel}`);
          const zlibOptions = {
