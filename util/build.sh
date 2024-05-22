@@ -304,22 +304,31 @@ function 0b3_upload_7z() {( $_dbgopts;
   local Portable=`ls build/${viewer_name}*.7z |head -1`
   local refid=$(echo "$ref" | sed -e 's@[^-_A-Za-z0-9]@_@g')
   local PortableArchive=$build_id-$refid-$(basename $Portable)
-  mkdir dist
+  mkdir dist || true
   ht-ln $Portable dist/$PortableArchive
 
   ( cd dist && gha-upload-artifact ${PortableArchive/.7z/} $PortableArchive )
 )}
 
 function 0b4_bundle_zip() {( $_dbgopts;
-  mkdir ziptest
-  tar -C $build_dir -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
+  # mkdir ziptest
+  # tar -C $build_dir -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
+  bash -c 'echo $PATH ; which 7z ; cd $build_dir && 7z -mmt4 -mx9 -bt -tzip a "$build_dir/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"'
 )}
 
 function 0b5_upload_zip() {( $_dbgopts;
+  # local refid=$(echo "$ref" | sed -e 's@[^-_A-Za-z0-9]@_@g')
+  # local PortableZip=$build_id-$refid-$viewer_channel-$version_full
+  # ( cd ziptest && gha-upload-artifact ${PortableZip} . 1 9 )
+  local Portable="$build_dir/$viewer_channel-$version_full.zip"
   local refid=$(echo "$ref" | sed -e 's@[^-_A-Za-z0-9]@_@g')
-  local PortableZip=$build_id-$refid-$viewer_channel-$version_full
+  local PortableArchive=$build_id-$refid-$(basename $Portable)
+  mkdir dist || true
+  ht-ln $Portable dist/$PortableArchive
 
-  ( cd ziptest && gha-upload-artifact ${PortableZip} .)
+  cd dist
+  zipUploadStream=$PortableArchive gha-upload-artifact ${PortableArchive/.zip/} $build_dir/installer.txt
+
 )}
 
 function _steps() {

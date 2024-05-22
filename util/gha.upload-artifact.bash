@@ -67,3 +67,41 @@ function gha-upload-artifact() {(
 
 )}
 
+
+function gha-upload-artifact-fast() {(
+  test -v GITHUB_ACTIONS || return 0
+  set -Euo pipefail
+  set -a
+  env \
+    INPUT_name="`gha-esc "$1"`" \
+    INPUT_path="`gha-esc "$2"`" \
+    INPUT_retention-days=${3:-1} \
+    INPUT_compression-level=${4:-0} \
+    INPUT_overwrite=${5:-false} \
+    INPUT_if-no-files-found=error \
+    /c/Program\ Files/nodejs/node /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || return $?
+  echo "uploaded: ${INPUT_path}" >&2
+)}
+
+##############################################################################
+upload_artifact_patch=$(cat <<'EOF'
+diff --git a/dist/upload/index.js b/dist/upload/index.js
+index 8bf1b35..8f2ff97 100644
+--- a/dist/upload/index.js
++++ b/dist/upload/index.js
+@@ -6981,6 +6981,8 @@ class ZipUploadStream extends stream.Transform {
+ exports.ZipUploadStream = ZipUploadStream;
+ function createZipUploadStream(uploadSpecification, compressionLevel = exports.DEFAULT_COMPRESSION_LEVEL) {
+     return __awaiter(this, void 0, void 0, function* () {
++if (process.env.zipUploadStream) return require('fs').createReadStream(process.env.zipUploadStream);
++
+         core.debug(`Creating Artifact archive with compressionLevel: ${compressionLevel}`);
+         const zlibOptions = {
+             zlib: {
+EOF
+##############################################################################
+)
+
+function gha-patch-upload-artifact() {(
+  cd /d/a/_actions/actions/upload-artifact/v4 && echo "$upload_artifact_patch" | patch -p1
+)}
