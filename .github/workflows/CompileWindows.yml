@@ -223,12 +223,12 @@ jobs:
     #   with:
     #     run: fsvr_step 0b1
 
-    - name: 0b2 7z
-      run: fsvr_step 0b2
-    - name: 0b3 upload 7z
-      uses: ./fsvr-action
-      with:
-        run: fsvr_step 0b3
+    # - name: 0b2 7z
+    #   run: fsvr_step 0b2
+    # - name: 0b3 upload 7z
+    #   uses: ./fsvr-action
+    #   with:
+    #     run: fsvr_step 0b3
 
     - name: 0b4 Zip
       run: fsvr_step 0b4
