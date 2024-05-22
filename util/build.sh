@@ -327,8 +327,8 @@ function 0b5_upload_zip() {( $_dbgopts;
   ht-ln $Portable dist/$PortableArchive
 
   cd dist
+  echo zipUploadStream=$PortableArchive gha-upload-artifact ${PortableArchive/.zip/} $build_dir/installer.txt >&2
   zipUploadStream=$PortableArchive gha-upload-artifact ${PortableArchive/.zip/} $build_dir/installer.txt
-
 )}
 
 function _steps() {
