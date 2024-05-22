@@ -197,6 +197,7 @@ function 0a-1_ninja_fauxbuild() {( $_dbgopts;
     touch llplugin/slplugin/slplugin.exe
     touch media_plugins/libvlc/media_plugin_libvlc.dll
     touch media_plugins/cef/media_plugin_cef.dll
+    touch newview/${viewer_bin}-bin.exe
     cat <<EOF>> msvc.nunja.env
 cl_exe=true.exe
 lib_exe=true.exe
@@ -311,8 +312,7 @@ function 0b3_upload_7z() {( $_dbgopts;
 
 function 0b4_bundle_zip() {( $_dbgopts;
   mkdir ziptest
-  cd ziptest
-  7z x "$build_dir/$viewer_channel-$version_full.7z"
+  tar -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
 )}
 
 function 0b5_upload_zip() {( $_dbgopts;
