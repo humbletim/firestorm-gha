@@ -192,6 +192,19 @@ EOF
     echo "$out" | tail -3
 )}
 
+function 0a-1_ninja_fauxbuild() {( $_dbgopts;
+    cd $build_dir
+    touch llplugin/slplugin/slplugin.exe
+    touch media_plugins/libvlc/media_plugin_libvlc.dll
+    touch media_plugins/cef/media_plugin_cef.dll
+    cat <<EOF>> msvc.nunja.env
+cl_exe=true.exe
+lib_exe=true.exe
+link_exe=true.exe
+EOF
+
+)}
+
 function 0a0_ninja_build() {( $_dbgopts;
     _assert msvc.env 'test -f $build_dir/msvc.env'
     set -a
