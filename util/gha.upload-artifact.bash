@@ -71,10 +71,9 @@ function gha-upload-artifact() {(
 function gha-upload-artifact-fast() {(
   test -v GITHUB_ACTIONS || return 0
   set -Euo pipefail
-  set -a
+  export INPUT_name="`gha-esc "$1"`"
+  export INPUT_path="`gha-esc "$2"`"
   env \
-    INPUT_name="`gha-esc "$1"`" \
-    INPUT_path="`gha-esc "$2"`" \
     INPUT_retention-days=${3:-1} \
     INPUT_compression-level=${4:-0} \
     INPUT_overwrite=${5:-false} \

@@ -217,6 +217,15 @@ function 0a0_ninja_build() {( $_dbgopts;
     ninja -C "$build_dir" "${@:-llpackage}" | colout -t ninja || _die_exit_code=$? _die "ninja failed"
 )}
 
+function _get_APPLICATION_EXE() {(
+    local APPLICATION_EXE=${viewer_name}.exe
+    if [[ $viewer_id == blackdragon ]] ; then
+      APPLICATION_EXE=SecondLifeViewer.exe
+    fi
+    APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *${viewer_channel}.exe 2>/dev/null | head -n 1)
+    echo "$APPLICATION_EXE"
+)}
+
 function 0a1_ninja_postbuild() {( $_dbgopts;
     local nsi=$build_dir/newview/${viewer_bin}_setup_tmp.nsi
     test -f "$nsi" || (
@@ -224,11 +233,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
         ht-ln $(dirname "$nsi")/secondlife_setup_tmp.nsi "$nsi"
     ) || exit $?
     (
-      local APPLICATION_EXE=${viewer_name}.exe
-      if [[ $viewer_id == blackdragon ]] ; then
-        APPLICATION_EXE=SecondLifeViewer.exe
-      fi
-      APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *${viewer_channel}.exe 2>/dev/null | head -n 1)
+      APPLICATION_EXE=$(_get_APPLICATION_EXE)
       _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
       cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
         | APPLICATION_EXE=$APPLICATION_EXE envsubst \
@@ -313,7 +318,10 @@ function 0b3_upload_7z() {( $_dbgopts;
 function 0b4_bundle_zip() {( $_dbgopts;
   # mkdir ziptest
   # tar -C $build_dir -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
-  bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir && 7z -mmt8 -mx9 -bd -bt -tzip a "$build_dir/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"'
+  bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir && 7z -mx5 -bd -bt -tzip a "$build_dir/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"'
+  APPLICATION_EXE=$(_get_APPLICATION_EXE)
+  _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
+  bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir/newview && 7z -mx5 -bd -bt -tzip a "$build_dir/${APPLICATION_EXE/.exe/.zip}" "$build_dir/newview/$APPLICATION_EXE"'
 )}
 
 function 0b5_upload_zip() {( $_dbgopts;
@@ -325,11 +333,15 @@ function 0b5_upload_zip() {( $_dbgopts;
   local PortableArchive=$build_id-$refid-$(basename $Portable)
   mkdir dist || true
   ht-ln $Portable dist/$PortableArchive
+  APPLICATION_EXE=$(_get_APPLICATION_EXE)
+  ht-ln $build_dir/${APPLICATION_EXE/.exe/.zip} dist/${APPLICATION_EXE/.exe/.zip}
 
   grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
   cd dist
   echo zipUploadStream=$PortableArchive gha-upload-artifact-fast ${PortableArchive/.zip/} $build_dir/installer.txt >&2
   zipUploadStream=$PortableArchive gha-upload-artifact-fast ${PortableArchive/.zip/} $build_dir/installer.txt
+  echo zipUploadStream=${APPLICATION_EXE/.exe/.zip} gha-upload-artifact-fast ${APPLICATION_EXE/.exe} $build_dir/installer.txt >&2
+  zipUploadStream=${APPLICATION_EXE/.exe/.zip} gha-upload-artifact-fast ${APPLICATION_EXE/.exe} $build_dir/installer.txt >&2
 )}
 
 function _steps() {
