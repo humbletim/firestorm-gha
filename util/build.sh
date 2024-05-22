@@ -313,7 +313,7 @@ function 0b3_upload_7z() {( $_dbgopts;
 function 0b4_bundle_zip() {( $_dbgopts;
   # mkdir ziptest
   # tar -C $build_dir -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
-  bash -c 'echo $PATH ; which 7z ; cd $build_dir && 7z -mmt4 -mx9 -bt -tzip a "$build_dir/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"'
+  bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir && 7z -mmt8 -mx9 -bd -bt -tzip a "$build_dir/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"'
 )}
 
 function 0b5_upload_zip() {( $_dbgopts;
