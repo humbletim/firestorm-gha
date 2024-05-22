@@ -214,7 +214,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
       if [[ $viewer_id == blackdragon ]] ; then
         APPLICATION_EXE=SecondLifeViewer.exe
       fi
-      APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *{viewer_channel}.exe 2>/dev/null | head -n 1)
+      APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *${viewer_channel}.exe 2>/dev/null | head -n 1)
       _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
       cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
         | APPLICATION_EXE=$APPLICATION_EXE envsubst \
@@ -294,6 +294,19 @@ function 0b3_upload_7z() {( $_dbgopts;
   ht-ln $Portable dist/$PortableArchive
 
   ( cd dist && gha-upload-artifact ${PortableArchive/.7z/} $PortableArchive )
+)}
+
+function 0b4_bundle_zip() {( $_dbgopts;
+  mkdir ziptest
+  cd ziptest
+  7z x "$build_dir/$viewer_channel-$version_full.7z"
+)}
+
+function 0b5_upload_zip() {( $_dbgopts;
+  local refid=$(echo "$ref" | sed -e 's@[^-_A-Za-z0-9]@_@g')
+  local PortableZip=$build_id-$refid-$viewer_channel-$version_full
+
+  ( cd ziptest && gha-upload-artifact ${PortableZip} .)
 )}
 
 function _steps() {
