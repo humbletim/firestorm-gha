@@ -339,8 +339,8 @@ function 0b5_upload_zip() {( $_dbgopts;
   grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
   cd dist
 
-  echo zipUploadStream=${APPLICATION_EXE/.exe/.zip} gha-upload-artifact-fast ${APPLICATION_EXE/.exe} $build_dir/installer.txt >&2
-  zipUploadStream=${APPLICATION_EXE/.exe/.zip} gha-upload-artifact-fast $build_id-$refid-${APPLICATION_EXE/.exe/-exe} $build_dir/installer.txt >&2
+  # echo zipUploadStream=${APPLICATION_EXE/.exe/.zip} gha-upload-artifact-fast ${APPLICATION_EXE/.exe} $build_dir/installer.txt >&2
+  # zipUploadStream=${APPLICATION_EXE/.exe/.zip} gha-upload-artifact-fast $build_id-$refid-${APPLICATION_EXE/.exe/-exe} $build_dir/installer.txt >&2
 
   echo zipUploadStream=$PortableArchive gha-upload-artifact-fast ${PortableArchive/.zip/} $build_dir/installer.txt >&2
   zipUploadStream=$PortableArchive gha-upload-artifact-fast ${PortableArchive/.zip/} $build_dir/installer.txt

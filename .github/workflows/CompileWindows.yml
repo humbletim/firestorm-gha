@@ -216,12 +216,12 @@ jobs:
     - name: 0a1 postbuild
       run: fsvr_step 0a1
 
-    # - name: 0b0 installer
-    #   run: fsvr_step 0b0
-    # - name: 0b1 upload installer
-    #   uses: ./fsvr-action
-    #   with:
-    #     run: fsvr_step 0b1
+    - name: 0b0 installer
+      run: fsvr_step 0b0
+    - name: 0b1 upload installer
+      uses: ./fsvr-action
+      with:
+        run: fsvr_step 0b1
 
     # - name: 0b2 7z
     #   run: fsvr_step 0b2
