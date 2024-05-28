@@ -1,1 +1,4 @@
-../fs-7.1.8-20240521/blueprint.arrant.nunja
+# generated
+include $nunja_dir/blueprint.petroglyph.constants.nunja
+include $nunja_dir/blueprint.petroglyph.rules.nunja
+include $nunja_dir/blueprint.petroglyph.nunja
