@@ -48,7 +48,7 @@ jobs:
 
     - name: Generate gha-bootstrap.env
       run: |
-        source $gha_fsvr_dir/gha-bootstrap.bash
+        source $gha_fsvr_dir/fsvr-gha-bootstrap.bash
         get_bootstrap_vars | tee env.d/gha-bootstrap.env || exit 127
 
     - name: Populate local bin
