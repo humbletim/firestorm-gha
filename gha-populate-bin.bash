@@ -2,6 +2,7 @@
 #set -Euo pipefail
 
 function get_ninja-windows() {(
+    echo "get_ninja-windows..." >&2
     set -Euo pipefail
     local archive=$( wget-sha256 \
         bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f \
@@ -12,6 +13,7 @@ function get_ninja-windows() {(
 )}
 
 function get_colout() {(
+    echo "get_colout..." >&2
     set -Euo pipefail
     python -m pip install --break-system-packages --no-warn-script-location --user colout
     local pysite="$(python -msite --user-site)"
@@ -24,6 +26,7 @@ function get_colout() {(
 )}
 
 function get_parallel() {(
+    echo "get_parallel..." >&2
     set -Euo pipefail
     local archive=$( wget-sha256 \
       3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 \
@@ -47,6 +50,7 @@ function get_parallel() {(
 
 # yaml2json < fsvr/.github/workflows/CompileWindows.yml | jq '.jobs[].steps[]| "#"+.name+"\n"+.if+"\n"+(.run // .with.run)' -r
 function get_yaml2json-windows() {(
+    echo "get_yaml2json-windows..." >&2
     set -Euo pipefail
     local archive=$( wget-sha256 \
         a73fb27e36e30062c48dc0979c96afbbe25163e0899f6f259b654d56fda5cc26 \
@@ -57,6 +61,7 @@ function get_yaml2json-windows() {(
 )}
 
 function gha-populate-bin-windows() {(
+  echo "gha-populate-bin-windows..." >&2
   set -Euo pipefail
   echo cache_id=$cache_id
   test -d "$fsvr_dir"    || exit 50
@@ -68,6 +73,7 @@ function gha-populate-bin-windows() {(
 
   export BASH
   function generate_BASH_FUNC_invoke() {
+    echo "generate_BASH_FUNC_invoke..." >&2
     source $gha_fsvr_dir/bashland/BASH_FUNC/gha.alias-exe.bash
     BASH=$(cygpath -was "$BASH") make-stub bin/BASH_FUNC_invoke.exe || return 90
   }
@@ -88,6 +94,7 @@ function gha-populate-bin-windows() {(
   } || exit 86
 
   function xxtest_bin() {
+    echo "xxtest_bin..." >&2
     test -f bin/parallel-home/will-cite || return 196
     parallel --version | head -1        || return 197
     ninja --version | head -1           || return 198
@@ -99,7 +106,10 @@ function gha-populate-bin-windows() {(
   }
 
   function xxprovision_tools() {(
+    echo "xxprovision_tools..." >&2
     set -Euo pipefail
+    wget --version | head -1 || exit 80
+    python3 --version | head -1 || exit 81
     source $ghash/gha.wget-sha256.bash
     source $ghash/gha.literally-exists.bash
     pysite="$(cygpath -m "$(python3 -msite --user-site)")"
@@ -119,5 +129,9 @@ function gha-populate-bin-windows() {(
     xxtest_bin || exit `_err $? "!xxtest_bin"`
     gha-cache-save-fast $cache_id-bin-b bin || exit 85
   )
+
+  wget --version | head -1 || exit 80
+  python3 --version | head -1 || exit 81
+
 )}
 
