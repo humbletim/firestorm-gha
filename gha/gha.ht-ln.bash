@@ -32,7 +32,6 @@ function ht-ln() {
     # for directories /J junctions are used; /D (directory symbolic) is another option to consider
     test -d "$source" && opts="/J"
 
-    PATH=/usr/bin
     COMMAND="mklink $opts \"$(/usr/bin/cygpath -wa "$linkfilepath")\" \"$(/usr/bin/cygpath -wa "$source")\""
     cmd="/c/Windows/system32/cmd.exe //C call $(echo "$COMMAND" | /usr/bin/sed 's@/@//@g;s@\\@\\\\@g') "
   fi
