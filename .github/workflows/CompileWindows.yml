@@ -54,7 +54,10 @@ jobs:
     - name: Populate local bin
       uses: ./fsvr-action
       with:
-        run: . $gha_fsvr_dir/gha-populate-bin.bash && gha-populate-bin-windows
+        run: |
+         wget --version | head -1
+         . $gha_fsvr_dir/gha-populate-bin.bash
+         gha-populate-bin-windows
 
     - name: Expand Source Repositories
       uses: ./fsvr-action

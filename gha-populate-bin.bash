@@ -59,9 +59,9 @@ function get_yaml2json-windows() {(
 function gha-populate-bin-windows() {(
   set -Euo pipefail
   echo cache_id=$cache_id
-  test -d "$fsvr_dir" || exit 50
-  test -n "$cache_id" || exit 51
-  wget --version      || exit 52
+  test -d "$fsvr_dir"    || exit 50
+  test -n "$cache_id"    || exit 51
+  wget --version|head -1 || exit 52
 
   source $ghash/gha.cachette.bash
   source $ghash/gha.ht-ln.bash
@@ -76,6 +76,9 @@ function gha-populate-bin-windows() {(
     generate_BASH_FUNC_invoke
     gha-cache-save-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || exit 89
   )
+
+  wget --version | head -1 || exit 80
+  python3 --version | head -1 || exit 81
 
   {
     ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
@@ -116,7 +119,5 @@ function gha-populate-bin-windows() {(
     xxtest_bin || exit `_err $? "!xxtest_bin"`
     gha-cache-save-fast $cache_id-bin-b bin || exit 85
   )
-
-  python3 --version || exit 119
 )}
 
