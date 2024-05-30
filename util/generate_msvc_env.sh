@@ -21,10 +21,11 @@ test -d $CRT || { echo "msvc CRT '$CRT' does not exist" &>2 ; exit 20 ; }
 {
   echo msvc_dir=$CRT
   PATH="$msvc_path:$PATH:/usr/bin:/c/Windows/system32"
-  for x in cl lib link mt rc cmake ninja python cmcldeps; do
+  for x in cl lib link mt rc cmake ninja python3 cmcldeps; do
     y="$(which $x.exe)"
     test -x "$y" || { echo "could not locate $x '$y'" >&2 ; exit 26; }
     echo ${x}_exe=$(cygpath -msa "$y")
   done
   echo "cmd_exe=$(cygpath -wsa "${COMSPEC:-$(which cmd.exe)}")"
+  echo 'python_exe=$python3_exe'
 } | tee build/msvc.nunja.env

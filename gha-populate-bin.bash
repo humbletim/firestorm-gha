@@ -15,8 +15,8 @@ function get_ninja-windows() {(
 function get_colout() {(
     echo "get_colout..." >&2
     set -Euo pipefail
-    python -m pip install --break-system-packages --no-warn-script-location --user colout
-    local pysite="$(python -msite --user-site)"
+    python3 -m pip install --break-system-packages --no-warn-script-location --user colout
+    local pysite="$(python3 -msite --user-site)"
     if grep SIGPIPE $pysite/colout/colout.py ; then
       # workaround SIGPIPE on Win32 missing with some colout versions
       perl -i.bak -pe 's@^.*[.]SIGPIPE.*$@#$&@g' $pysite/colout/colout.py
@@ -75,23 +75,11 @@ function gha-populate-bin-windows() {(
   function generate_BASH_FUNC_invoke() {
     echo "generate_BASH_FUNC_invoke..." >&2
     source $gha_fsvr_dir/bashland/BASH_FUNC/gha.alias-exe.bash
-    BASH=$(cygpath -was "$BASH") make-stub bin/BASH_FUNC_invoke.exe || return 90
+    BASH=$(cygpath -was "$BASH") make-stub bin/_invoke.exe || return 90
   }
-
-  gha-cache-restore-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || (
-    generate_BASH_FUNC_invoke
-    gha-cache-save-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || exit 89
-  )
 
   wget --version | head -1 || exit 80
   python3 --version | head -1 || exit 81
-
-  {
-    ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
-    ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
-    ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
-    ht-ln bin/BASH_FUNC_invoke.exe bin/envsubst.exe
-  } || exit 86
 
   function xxtest_bin() {
     echo "xxtest_bin..." >&2
@@ -109,24 +97,22 @@ function gha-populate-bin-windows() {(
     echo "xxprovision_tools... PATH=$PATH" >&2
     set -Euo pipefail
     wget --version | head -1 || exit 80
-    python3 --version | head -1 || exit 81
     source $ghash/gha.wget-sha256.bash
     source $ghash/gha.literally-exists.bash
     pysite="$(cygpath -m "$(python3 -msite --user-site)")"
 
-    literally-exists bin/ninja.exe    || get_ninja-windows    || exit `_err $? "failed to provision ninja $?"`
-    literally-exists $pysite/colout   || get_colout   || exit `_err $? "failed to provision colout $?"`
-    literally-exists bin/parallel     || get_parallel || exit `_err $? "failed to provision parallel $?"`
-    literally-exists bin/colout.exe   || ht-ln bin/BASH_FUNC_invoke.exe bin/colout.exe
-    literally-exists bin/parallel.exe || ht-ln bin/BASH_FUNC_invoke.exe bin/parallel.exe
+    literally-exists bin/_invoke.exe  || generate_BASH_FUNC_invoke || exit `_err $? "failed to provision BASH_FUNC_invoke $?"`
+    literally-exists bin/ninja.exe    || get_ninja-windows         || exit `_err $? "failed to provision ninja $?"`
+    literally-exists $pysite/colout   || get_colout                || exit `_err $? "failed to provision colout $?"`
+    literally-exists bin/parallel     || get_parallel              || exit `_err $? "failed to provision parallel $?"`
+
+    for x in colout parallel ht-ln hostname jq envsubst ; do
+      literally-exists bin/$x.exe || ht-ln bin/_invoke.exe bin/$x.exe || exit `_err $? "error symlinking $x $?"`
+    done
 
     # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
-    python -m pip install --no-warn-script-location --user llsd
+    python3 -m pip install --no-warn-script-location --user llsd
   )}
-
-  echo "..PATH=$PATH" >&2
-  wget --version | head -1 || exit 80
-  python3 --version | head -1 || exit 81
 
   gha-cache-restore-fast $cache_id-bin-b bin || (
     xxprovision_tools || exit `_err $? "!xxprovision_tools"` 
@@ -134,7 +120,6 @@ function gha-populate-bin-windows() {(
     gha-cache-save-fast $cache_id-bin-b bin || exit 85
   )
 
-  wget --version | head -1 || exit 80
   python3 --version | head -1 || exit 81
 
 )}
