@@ -106,7 +106,7 @@ function gha-populate-bin-windows() {(
   }
 
   function xxprovision_tools() {(
-    echo "xxprovision_tools..." >&2
+    echo "xxprovision_tools... PATH=$PATH" >&2
     set -Euo pipefail
     wget --version | head -1 || exit 80
     python3 --version | head -1 || exit 81
@@ -123,6 +123,10 @@ function gha-populate-bin-windows() {(
     # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
     python -m pip install --no-warn-script-location --user llsd
   )}
+
+  echo "..PATH=$PATH" >&2
+  wget --version | head -1 || exit 80
+  python3 --version | head -1 || exit 81
 
   gha-cache-restore-fast $cache_id-bin-b bin || (
     xxprovision_tools || exit `_err $? "!xxprovision_tools"` 
