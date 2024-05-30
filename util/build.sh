@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source $(dirname "$BASH_SOURCE")/_utils.sh || exit 3
-test -v _assert || exit 4
+_assert true true || exit 4
 
 _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
