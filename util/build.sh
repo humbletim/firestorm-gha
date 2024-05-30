@@ -1,15 +1,15 @@
 #!/bin/bash
 
-source _utils.sh
-
-source $ghash/gha.load-level.bash
-source $ghash/gha.upload-artifact.bash
-source $ghash/gha.cachette.bash
+source $(dirname "$BASH_SOURCE")/_utils.sh || exit 3
+test -v _assert || exit 4
 
 _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
 _assert "version_xyzw" test -n "$version_xyzw"
 _assert "build_id" test -n "$build_id"
+
+source $ghash/gha.upload-artifact.bash || exit 11
+source $ghash/gha.cachette.bash || exit 12
 
 function 010_ensure_build_directories() {( $_dbgopts;
     local directories=(
