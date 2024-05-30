@@ -34,7 +34,7 @@ jobs:
     - name: ~Clone
       run: |
         source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
-        echo "BASH_ENV=$(cygpath -was SHELL.env)" | tee -a $GITHUB_ENV
+        echo "BASH_ENV=$(pwd -W)\\SHELL.env" | tee -a $GITHUB_ENV
         mkdir -pv env.d bin bin/pystuff cache repo build
         echo cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g') | tee -a env.d/local.env
         source $GITHUB_ENV
