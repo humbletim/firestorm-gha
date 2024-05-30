@@ -114,6 +114,7 @@ function gha-populate-bin-windows() {(
     python3 -m pip install --no-warn-script-location --user llsd
   )}
 
+  echo "cache restore?... $cache_id-bin-b" >&2
   gha-cache-restore-fast $cache_id-bin-b bin || (
     xxprovision_tools || exit `_err $? "!xxprovision_tools"` 
     xxtest_bin || exit `_err $? "!xxtest_bin"`
