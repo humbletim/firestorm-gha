@@ -2,12 +2,10 @@
 
 # fsvr script utilities -- humbletim 2024.03.08
 
-_fsvr_utils_dir=$(readlink -f $(dirname "$BASH_SOURCE"))
-
-source $_fsvr_utils_dir/gha.reduce-paths.bash
-source $_fsvr_utils_dir/gha.wget-sha256.bash
-source $_fsvr_utils_dir/gha.ht-ln.bash
-source $_fsvr_utils_dir/gha.cygpath.bash
+source $ghash/gha.reduce-paths.bash
+source $ghash/gha.wget-sha256.bash
+source $ghash/gha.ht-ln.bash
+source $ghash/gha.cygpath.bash
 
 _dbgopts='set -Euo pipefail'
 

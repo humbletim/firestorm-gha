@@ -3,7 +3,7 @@
 
 function get_ninja-windows() {(
     set -Euo pipefail
-    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
+    local archive=$( wget-sha256 \
         bbde850d247d2737c5764c927d1071cbb1f1957dcabda4a130fa8547c12c695f \
         https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip \
       .
@@ -25,7 +25,7 @@ function get_colout() {(
 
 function get_parallel() {(
     set -Euo pipefail
-    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
+    local archive=$( wget-sha256 \
       3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 \
       https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst \
       .
@@ -48,7 +48,7 @@ function get_parallel() {(
 # yaml2json < fsvr/.github/workflows/CompileWindows.yml | jq '.jobs[].steps[]| "#"+.name+"\n"+.if+"\n"+(.run // .with.run)' -r
 function get_yaml2json-windows() {(
     set -Euo pipefail
-    local archive=$( $fsvr_dir/util/_utils.sh wget-sha256 \
+    local archive=$( wget-sha256 \
         a73fb27e36e30062c48dc0979c96afbbe25163e0899f6f259b654d56fda5cc26 \
         https://github.com/bronze1man/yaml2json/releases/download/v1.3/yaml2json_windows_amd64.exe\
       .
@@ -62,10 +62,11 @@ function gha-populate-bin-windows() {(
   test -d "$fsvr_dir" || exit 50
   test -n "$cache_id" || exit 51
 
-  source $fsvr_dir/util/gha.cachette.bash
+  source $ghash/gha.cachette.bash
+  source $ghash/gha.ht-ln.bash
 
   function generate_BASH_FUNC_invoke() {
-    source $fsvr_dir/bashland/gha.alias-exe.bash
+    source $gha_fsvr_dir/bashland/BASH_FUNC/gha.alias-exe.bash
     BASH=$(cygpath -was $BASH) make-stub bin/BASH_FUNC_invoke.exe || return 90
   }
 
@@ -75,7 +76,7 @@ function gha-populate-bin-windows() {(
   )
 
   {
-    $fsvr_dir/util/_utils.sh ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
+    ht-ln bin/BASH_FUNC_invoke.exe bin/ht-ln.exe
     ht-ln bin/BASH_FUNC_invoke.exe bin/hostname.exe
     ht-ln bin/BASH_FUNC_invoke.exe bin/jq.exe
     ht-ln bin/BASH_FUNC_invoke.exe bin/envsubst.exe
@@ -94,9 +95,8 @@ function gha-populate-bin-windows() {(
 
   function xxprovision_tools() {(
     set -Euo pipefail
-    source $fsvr_dir/gha-bootstrap.sh
-    source $fsvr_dir/util/gha.wget-sha256.bash
-    source $fsvr_dir/util/gha.literally-exists.bash
+    source $ghash/gha.wget-sha256.bash
+    source $ghash/gha.literally-exists.bash
     pysite="$(cygpath -m "$(python3 -msite --user-site)")"
 
     literally-exists bin/ninja.exe    || get_ninja-windows    || exit `_err $? "failed to provision ninja $?"`

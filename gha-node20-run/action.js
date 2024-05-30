@@ -1,6 +1,6 @@
 // helper to invoke a script in full node20 actions environment
 // -- humbletim 2024.03.13
- 
+
 const child_process = require('child_process');
 
 var {
@@ -22,7 +22,7 @@ const shells = {
   msys2: process.env.GHCUP_MSYS2 ? `${process.env.GHCUP_MSYS2}\\usr\\bin\\bash.exe` : 'msys2',
 };
 var cmd = shells[shell] ? `"${shells[shell]}" --noprofile --norc -e -o pipefail {0}` : shell;
-    
+
 var exe;
 var args = cmd
     .replace(/^"([^\"]+)" |^([^ ]+) /, (_, a, b) => { exe=a || b; return ''; })
@@ -60,7 +60,7 @@ var options = {
 
 delete options.env['*'];
 var tmp = JSON.parse(JSON.stringify(options));
-if (parsedEnv['*'] !== 'none') tmp.env = '{ /* inherit process.env + parsed */ }'; 
+if (parsedEnv['*'] !== 'none') tmp.env = '{ /* inherit process.env + parsed */ }';
 if (process.env.DEBUG) console.debug('PARSED_', { exe: exe, args: JSON.stringify(args), options: tmp, forwardEnv: Object.keys(forwardEnv).length, parsedEnv: parsedEnv });
 
 const bash = child_process.spawn(exe, args, options );
@@ -94,28 +94,3 @@ function parseKeyValueString(input) {
 
     return result;
 }
-
-// console.log(parseKeyValueString("keyx=\"a value with spaces\" key2=value2 squot='c:\\Program Files' ekey=a\\ value\\ with\\ slashspaces anotherkey=complexvalue=weird other=\"embedded=\\\"super complex\\\"\""))
-// process.exit(1);
-
-// process.stdin.pipe(bash.stdin);
-// bash.stdout.pipe(process.stdout);
-// bash.stderr.pipe(process.stderr);
-
-
-// var reps={};
-// var n=0;
-// function absorb(_, value) {
-//     var key = `__xx__${n++}`;
-//     reps[key]= value;
-//     return ' '+key;
-// }
-// // handle escaped chars
-// shell = ` ${shell} `; 
-// console.log('before', shell)
-// shell = shell.replace(/ "((?:[^"]+|\\")+)"/g, absorb);
-// shell = shell.replace(/ ((?:[^ ]+\\ [^ ]+)+)/g, absorb)
-// var args = shell.split(/ +/)
-//   .map((x)=> x in reps ? reps[x] : x)
-//   .filter((x)=> x !== '');
-// console.log('reps', reps)

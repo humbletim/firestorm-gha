@@ -1,12 +1,10 @@
 #!/bin/bash
 
-require_here=`readlink -f $(dirname $BASH_SOURCE)`
-function require() { source $require_here/$@ ; }
-require _utils.sh
+source _utils.sh
 
-require gha.load-level.bash
-require gha.upload-artifact.bash
-require gha.cachette.bash
+source $ghash/gha.load-level.bash
+source $ghash/gha.upload-artifact.bash
+source $ghash/gha.cachette.bash
 
 _assert "root_dir" 'test -d "$root_dir"'
 _assert "build_dir" 'test -d "$build_dir"'
@@ -76,7 +74,7 @@ function 020_perform_replacements() {( $_dbgopts;
     ht-ln $fsvr_dir/newview/cmake_pch.cxx $build_dir/newview/
 
     if [[ $viewer_id == blackdragon ]] ; then
-      source $gha_fsvr_dir/bashland/gha.alias-exe.bash
+      source $gha_fsvr_dir/bashland/BASH_FUNC/gha.alias-exe.bash
       make-echo-exe "$build_dir/newview/BDVersionChecker.exe" "TODO: newview/BDVersionChecker.exe" || exit 67
       test -x "$build_dir/newview/BDVersionChecker.exe" || exit 68
     fi

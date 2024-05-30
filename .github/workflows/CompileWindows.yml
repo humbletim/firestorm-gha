@@ -14,45 +14,12 @@ defaults:
     shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
 #   shell: c:\Program Files\Git\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
 #   shell: C:\msys64\usr\bin\bash.exe --noprofile --norc -e -o pipefail {0}
-env:
-    BASH_ENV: ${{ github.workspace }}\SHELL.env
 
 jobs:
-  # generate-bin:
-  #   runs-on: windows-2022
-  #   steps:
-  #   - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
-  #     if: false
-  #   - uses: actions/cache@v4
-  #     if: false
-  #   - name: SHELL.env
-  #     run: source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
-  # 
-  #   - name: postflight tests
-  #     run: |
-  #       set -Euo pipefail
-  #       echo cache_id=$cache_id
-  #       echo "PATH='$PATH'"
-  #       jq --version
-  #       python3 --version
-  # 
-  #   - name: Populate local bin
-  #     uses: ./fsvr-action
-  #     with:
-  #       run: . $gha_fsvr_dir/gha-populate-bin.sh && gha-populate-bin-windows
-  # 
-  #   - name: ~000 Setup tmate session
-  #     uses: mxschmitt/action-tmate@v3
-  #     if: failure() && fromJSON(inputs.fstuple).pause != 'never'
-  #     with:
-  #       limit-access-to-actor: true
-            
   windows-build:
-    # if: true
-    # needs: generate-bin
     runs-on: windows-2022
     steps:
-    - uses: humbletim/firestorm-gha/actions-node-script@tpv-gha-nunja
+    - uses: humbletim/firestorm-gha/gha-node20-run@tpv-gha-nunja
       if: false
     - uses: actions/upload-artifact@v4
       if: false
@@ -67,27 +34,34 @@ jobs:
     - name: ~Clone
       run: |
         source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
+        echo BASH_ENV=$(cygpath -ma SHELL.env) | tee -a $GITHUB_ENV
+        mkdir -pv env.d bin bin/pystuff cache repo build
+        echo cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g') | tee -a env.d/local.env
+        source $GITHUB_ENV
         source $BASH_ENV
-        source $gha_fsvr_dir/util/gha.quiet-clone.bash
+        source $ghash/gha.quiet-clone.bash
         quiet-clone github.com ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
-        echo fsvr_dir=$PWD/fsvr | tee -a $GITHUB_ENV
+        (
+          echo fsvr_dir=$PWD/fsvr
+          echo 'function fsvr_step() {( set -Euo pipefail; $fsvr_dir/util/build.sh "$@" ; )} ; declare -xf fsvr_step'
+        ) | tee -a env.d/local.env
 
     - name: Generate gha-bootstrap.env
       run: |
-        source $gha_fsvr_dir/gha-bootstrap.sh
+        source $gha_fsvr_dir/gha-bootstrap.bash
         get_bootstrap_vars | tee env.d/gha-bootstrap.env || exit 127
 
     - name: Populate local bin
       uses: ./fsvr-action
       with:
-        run: . $gha_fsvr_dir/gha-populate-bin.sh && gha-populate-bin-windows
+        run: . $gha_fsvr_dir/gha-populate-bin.bash && gha-populate-bin-windows
 
     - name: Expand Source Repositories
       uses: ./fsvr-action
       with:
         run: |
-          source $gha_fsvr_dir/util/gha.cachette.bash
-          source $gha_fsvr_dir/util/gha.quiet-clone.bash
+          source $ghash/gha.cachette.bash
+          source $ghash/gha.quiet-clone.bash
           echo "[sourcing] $nunja_dir/000.bash" >&2
           . $nunja_dir/000.bash $hub $repo "$ref"
 
@@ -139,7 +113,6 @@ jobs:
           | cache_id       | $cache_id       |
           | hostname       | `hostname`      |
           $repos
-          # $tools
           | ---------      | -----------     |
           EOF
 
@@ -148,7 +121,7 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          source $gha_fsvr_dir/util/gha.cachette.bash
+          source $ghash/gha.cachette.bash
           declare -a msvcs=(build/msvc.env build/msvc.nunja.env build/msvc_path.env)
 
           gha-cache-restore-fast "$cache_id-msvc-a" "$(echo "${msvcs[@]}" | tr ' ' '\n')" || (
@@ -165,7 +138,7 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          source $gha_fsvr_dir/util/gha.cachette.bash
+          source $ghash/gha.cachette.bash
           gha-cache-restore-fast $cache_id-openvr-d "cache/openvr-**" || (
             source $fsvr_dir/openvr/improvise.bash
             provision_openvr "$fsvr_cache_dir" || _die "openvr/improvise failed"
@@ -183,7 +156,7 @@ jobs:
       with:
         run: |
           set -Euo pipefail
-          source $gha_fsvr_dir/util/gha.cachette.bash
+          source $ghash/gha.cachette.bash
           gha-cache-restore-fast $cache_id-build-packages-c build/packages || (
             source $gha_fsvr_dir/util/reconstitute-dependencies.bash
             manifest=$build_dir/packages-info.json

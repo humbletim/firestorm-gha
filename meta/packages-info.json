@@ -8,5 +8,10 @@
     "copyright": "$viewer_source_url",
     "name": "_repo_viewer",
     "version": "$version_full"
+  },
+  "_build": {
+    "copyright": "",
+    "name": "$GHA_REPORT",
+    "version": "$build_id"
   }
 }
