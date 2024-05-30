@@ -61,6 +61,7 @@ function gha-populate-bin-windows() {(
   echo cache_id=$cache_id
   test -d "$fsvr_dir" || exit 50
   test -n "$cache_id" || exit 51
+  wget --version      || exit 52
 
   source $ghash/gha.cachette.bash
   source $ghash/gha.ht-ln.bash

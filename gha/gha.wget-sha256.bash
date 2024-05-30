@@ -7,7 +7,7 @@
 
 function wget-sha256() {(
   set -Euo pipefail
-  PATH="$PATH:/usr/bin"
+  export PATH="$PATH:/usr/bin"
   local hash="$1" url="$2" dir="${3:-.}"
   local filename=$(basename "$url")
   test ! -d "$dir" || cd "$dir"
