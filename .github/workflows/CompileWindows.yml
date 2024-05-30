@@ -31,20 +31,25 @@ jobs:
         echo '${{ github.event.inputs.fstuple }}'
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
 
-    - name: ~Clone
+    - name: _gha-inline
       run: |
         source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
-        echo "BASH_ENV=$(cygpath -was SHELL.env)" | sed 's@\\@\\\\@g' | tee -a $GITHUB_ENV
+        $gha_fsvr_dir/gha-generate-shell-env.bash | tee -a SHELL.env
+        echo BASH_ENV=$(cygpath -was SHELL.env) | sed 's@\\@\\\\@g' | tee -a $GITHUB_ENV
+        source $ghash/gha.ht-ln.bash
+        ht-ln $gha_fsvr_dir/gha-node20-run ./fsvr-action
+
         mkdir -pv env.d bin bin/pystuff cache repo build
-        echo cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g') | tee -a env.d/local.env
-        source $GITHUB_ENV
-        source $BASH_ENV
-        source $ghash/gha.quiet-clone.bash
-        quiet-clone github.com ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} fsvr
         (
+          echo cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g')
           echo fsvr_dir=$PWD/fsvr
           echo 'function fsvr_step() {( set -Euo pipefail; $fsvr_dir/util/build.sh "$@" ; )} ; declare -xf fsvr_step'
         ) | tee -a env.d/local.env
+
+    - name: ~Clone
+      run: |
+        source $ghash/gha.quiet-clone.bash
+        quiet-clone github.com ${GITHUB_REPOSITORY} ${GITHUB_REF_NAME} ${fsvr_dir}
 
     - name: Generate gha-bootstrap.env
       run: |
@@ -56,7 +61,7 @@ jobs:
       with:
         run: |
          wget --version | head -1
-         . $gha_fsvr_dir/gha-populate-bin.bash
+         source $gha_fsvr_dir/gha-populate-bin.bash
          gha-populate-bin-windows
 
     - name: Expand Source Repositories
