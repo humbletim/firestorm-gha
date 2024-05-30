@@ -15,4 +15,4 @@ jq '.inputs.fstuple|fromjson' $GITHUB_EVENT_PATH \
 source $GITHUB_ENV
 export workspace=${GITHUB_WORKSPACE:-${workspace:-$PWD}}
 
-$gha_fsvr_dir/gha-generate-shell-env.sh | tee -a SHELL.env
+$gha_fsvr_dir/gha-generate-shell-env.bash | tee -a SHELL.env
