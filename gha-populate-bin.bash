@@ -65,9 +65,10 @@ function gha-populate-bin-windows() {(
   source $ghash/gha.cachette.bash
   source $ghash/gha.ht-ln.bash
 
+  export BASH
   function generate_BASH_FUNC_invoke() {
     source $gha_fsvr_dir/bashland/BASH_FUNC/gha.alias-exe.bash
-    BASH=$(cygpath -was $BASH) make-stub bin/BASH_FUNC_invoke.exe || return 90
+    BASH=$(cygpath -was "$BASH") make-stub bin/BASH_FUNC_invoke.exe || return 90
   }
 
   gha-cache-restore-fast $cache_id-BASH_FUNC_invoke bin/BASH_FUNC_invoke.exe || (
