@@ -27,7 +27,7 @@ function _relativize() {
     local rel="$@" x=
     for x in build_dir source_dir root_dir ghash gha_fsvr_dir fsvr_dir fsvr_cache_dir nunja_dir p373r_dir openvr_dir ; do
       test ! -v $x || {
-        local y="$( echo "${!x}" | tr \\ / )"
+        local y="$( echo "${!x}" | tr '\\' '/' )"
 	rel=${rel//${!x}/\{${x}\}}
 	rel=${rel//${y}/\{${x}\}}
       }
