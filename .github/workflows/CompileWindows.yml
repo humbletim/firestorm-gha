@@ -90,8 +90,11 @@ jobs:
         # some legacy viewer packaging logic reaches from build* to ../indra
         test -d $root_dir/indra && ht-ln $root_dir/indra indra
         viewer_version=`cat $nunja_dir/viewer_version.txt | tr -d '\r'`
-        $gha_fsvr_dir/util/generate_build_vars.sh ${viewer_channel:-${viewer_name}-VR-GHA} ${viewer_version} build/ \
-           | tee env.d/build_vars.env
+        (
+          $gha_fsvr_dir/util/generate_build_vars.sh ${viewer_channel:-${viewer_name}-VR-GHA} ${viewer_version} build/
+          echo blueprint_rel=$(echo "$viewer_version" | cut -d "." -f 4)
+          echo upstream_rel=$(git -C repo/viewer rev-list --count HEAD)
+        ) | tee env.d/build_vars.env
 
     - name: Generate Report
       uses: ./fsvr-action
@@ -109,6 +112,8 @@ jobs:
           cat <<EOF | tee $GITHUB_STEP_SUMMARY
           | name           | value           |
           | ---------      | -----------     |
+          | blueprint      | $blueprint_rel  |
+          | upstream       | $upstream_rel   |
           | viewer_id      | $viewer_id      |
           | viewer_name    | $viewer_name    |
           | viewer_bin     | $viewer_bin     |
