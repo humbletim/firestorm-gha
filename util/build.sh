@@ -302,7 +302,7 @@ function 0b1_upload_installer() {( $_dbgopts;
   mkdir dist
   ht-ln $Installer dist/$InstallerExe
 
-  ( cd dist && gha-upload-artifact ${InstallerExe/.exe/} $InstallerExe )
+  ( cd dist && gha-upload-artifact-fast ${InstallerExe/.exe/} $InstallerExe 2)
 )}
 
 
@@ -317,7 +317,7 @@ function 0b3_upload_7z() {( $_dbgopts;
   mkdir dist || true
   ht-ln $Portable dist/$PortableArchive
 
-  ( cd dist && gha-upload-artifact ${PortableArchive/.7z/} $PortableArchive )
+  ( cd dist && gha-upload-artifact-fast ${PortableArchive/.7z/} $PortableArchive 2)
 )}
 
 function 0b4_bundle_zip() {( $_dbgopts;
