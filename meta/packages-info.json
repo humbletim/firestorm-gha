@@ -10,8 +10,8 @@
     "version": "$version_full"
   },
   "_build": {
-    "copyright": "GHA_REPORT",
-    "name": "$GHA_REPORT",
+    "copyright": "$GHA_REPORT",
+    "name": "_build",
     "version": "$build_id"
   }
 }

@@ -149,6 +149,13 @@ function 039_provision_p373r() {( $_dbgopts;
 function 040_generate_package_infos() {( $_dbgopts;
     _assert $fsvr_dir/meta/packages-info.json 'test -s "$fsvr_dir/meta/packages-info.json"'
 
+    export GHA_REPORT="$(
+      echo "$base | $version_release"
+      for id in `ls -1d repo/* fsvr` ; do
+        echo "./$id | $(git rev-list --count HEAD) | $(cat $id/.gha_source 2>/dev/null)"
+      done
+    )"
+
     cat $fsvr_dir/meta/packages-info.json | envsubst | merge_packages_info || return `_err $? meta-packages-info`
 
     merge_packages_info $nunja_dir/packages-info.json || return `_err $? nunja-packages-info`
