@@ -150,10 +150,10 @@ function 040_generate_package_infos() {( $_dbgopts;
     _assert $fsvr_dir/meta/packages-info.json 'test -s "$fsvr_dir/meta/packages-info.json"'
 
     export GHA_REPORT="$(
-      echo "$base | $version_release"
+      ( echo "$base | $version_release"
       for id in `ls -1d repo/* fsvr 2>/dev/null` ; do
         echo "./$id | $(git -C $id rev-list --count HEAD) | $(cat $id/.gha_source 2>/dev/null)"
-      done
+      done ) | jq -sR | sed 's@^"@@;s@"$@@'
     )"
 
     cat $fsvr_dir/meta/packages-info.json | envsubst | merge_packages_info || return `_err $? meta-packages-info`
