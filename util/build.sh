@@ -151,8 +151,8 @@ function 040_generate_package_infos() {( $_dbgopts;
 
     export GHA_REPORT="$(
       echo "$base | $version_release"
-      for id in `ls -1d repo/* fsvr` ; do
-        echo "./$id | $(git rev-list --count HEAD) | $(cat $id/.gha_source 2>/dev/null)"
+      for id in `ls -1d repo/* fsvr 2>/dev/null` ; do
+        echo "./$id | $(git -C $id rev-list --count HEAD) | $(cat $id/.gha_source 2>/dev/null)"
       done
     )"
 

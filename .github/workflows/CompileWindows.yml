@@ -97,9 +97,9 @@ jobs:
       uses: ./fsvr-action
       with:
         run: |
-          repos="$(for id in `ls -1d repo/* fsvr` ; do
+          repos="$(for id in `ls -1d repo/* fsvr 2>/dev/null` ; do
             url="$(test -s $id/.gha_source && echo "[$id]($(cat $id/.gha_source))" || git -C $id rev-parse --short HEAD)"
-            echo "| ./$id | $(git rev-list --count HEAD) $(git -C $id describe --all --always) *$(git -C $id rev-parse --short HEAD)* $url |"
+            echo "| ./$id | $(git -C $id rev-list --count HEAD) $(git -C $id describe --all --always) *$(git -C $id rev-parse --short HEAD)* $url |"
           done)"
 
           # tools="$(for id in jq ninja parallel bash ; do
