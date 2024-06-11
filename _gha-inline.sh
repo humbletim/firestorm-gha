@@ -17,6 +17,7 @@ else
      echo repo=local
      echo ref=local
      echo root_dir=$PWD
+     test ! -v nunja_dir || echo nunja_dir=$nunja_dir
   } | tee -a $GITHUB_ENV env.d/local.env
 fi
 source $GITHUB_ENV
