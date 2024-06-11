@@ -33,7 +33,7 @@ jobs:
 
     - name: _gha-inline
       run: |
-        source /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/_gha-inline.sh
+        source ${gha_fsvr_dir:-/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja}/_gha-inline.sh
         $gha_fsvr_dir/gha-generate-shell-env.bash | tee -a SHELL.env
         echo BASH_ENV=$(cygpath -was SHELL.env) | sed 's@\\@\\\\@g' | tee -a $GITHUB_ENV
         source $ghash/gha.ht-ln.bash
@@ -41,8 +41,8 @@ jobs:
 
         mkdir -pv env.d bin bin/pystuff cache repo build
         (
-          echo cache_id=$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g')
-          echo fsvr_dir=$PWD/fsvr
+          echo cache_id=${cache_id:-$(echo "$base-$repo" | sed 's@[^-a-zA-Z0-9_.]@-@g')}
+          echo fsvr_dir=${fsvr_dir:-$PWD/fsvr}
           echo 'function fsvr_step() {( set -Euo pipefail; $fsvr_dir/util/build.sh "$@" ; )} ; declare -xf fsvr_step'
         ) | tee -a env.d/local.env
 
@@ -93,7 +93,7 @@ jobs:
         (
           $gha_fsvr_dir/util/generate_build_vars.sh ${viewer_channel:-${viewer_name}-VR-GHA} ${viewer_version} build/
           echo blueprint_rel=$(echo "$viewer_version" | cut -d "." -f 4)
-          echo upstream_rel=$(git -C repo/viewer rev-list --count HEAD)
+          echo upstream_rel=$(git -C $root_dir rev-list --count HEAD)
         ) | tee env.d/build_vars.env
 
     - name: Generate Report
