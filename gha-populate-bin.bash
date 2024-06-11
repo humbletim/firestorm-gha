@@ -26,11 +26,13 @@ function get_colout() {(
 )}
 
 function get_parallel() {(
-    echo "get_parallel..." >&2
+    # local mirror=mirror.msys2.org
+    local mirror=mirror.umd.edu
+    echo "get_parallel... mirror=$mirror" >&2
     set -Euo pipefail
     local archive=$( wget-sha256 \
       3f9a262cdb7ba9b21c4aa2d6d12e6ccacbaf6106085fdaafd3b8a063e15ea782 \
-      https://mirror.msys2.org/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst \
+      https://$mirror/msys/x86_64/parallel-20231122-1-any.pkg.tar.zst \
       .
     ) && tar -C bin --strip-components=2 -vxf $archive usr/bin/parallel && {
       mkdir -pv bin/parallel-home/tmp/sshlogin/`hostname`/
