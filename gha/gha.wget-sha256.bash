@@ -11,7 +11,7 @@ function wget-sha256() {(
   local hash="$1" url="$2" dir="${3:-.}"
   local filename=$(basename "$url")
   test ! -d "$dir" || cd "$dir"
-  wget -q -N "$url" >&2
+  wget -q -N "$url" >&2 || { local ec=$? ; echo "wget $url failed $ec" >&2 ; return $ec ; }
   echo "$hash $filename" | sha256sum --strict --check >&2 || return $?
   echo "$dir/$filename"
 )}
