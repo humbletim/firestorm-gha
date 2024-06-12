@@ -15,7 +15,7 @@ declare -xp msvc_path | tee build/msvc_path.env
 test -n "$VCToolsVersion" || _die "!VCToolsVersion"
 test -d "$VCToolsRedistDir" || _die "!VCToolsRedistDir"
 TOOLSVER=$(echo $VCToolsVersion | sed -e 's@^\([0-9]\+\)[.]\([0-9]\).*$@\1\2@')
-CRT=$(cygpath -mas "$VCToolsRedistDir/x64/Microsoft.VC$TOOLSVER.CRT/")
+CRT=$(cygpath -mas "$VCToolsRedistDir"/x64/Microsoft.VC*.CRT/)
 test -d $CRT || { echo "msvc CRT '$CRT' does not exist" &>2 ; exit 20 ; }
 
 {
