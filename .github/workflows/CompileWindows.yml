@@ -182,7 +182,9 @@ jobs:
           )
 
     - name: 089_ninja_build accomodate mis-manifested llwebrtc
-      run: fsvr_step 0a0 llwebrtc
+      run: |
+        fsvr_step 090 || true   # needed here for build.ninja to become instrumented
+        fsvr_step 0a0 llwebrtc  # llwebrtc.dll has to be compiled first (then actual preflight below can succeed)
 
     - name: 090_ninja_preflight
       run: fsvr_step 090
