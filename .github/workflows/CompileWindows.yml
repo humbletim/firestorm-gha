@@ -190,6 +190,9 @@ jobs:
       with:
         limit-access-to-actor: true
 
+    - name: 0a0_ninja_build llwebrtc
+      run: fsvr_step 0a0 llwebrtc
+
     - name: 0a0_ninja_build SLPlugin.exe
       run: fsvr_step 0a0 SLPlugin.exe
 
