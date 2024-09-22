@@ -181,6 +181,9 @@ jobs:
             gha-cache-save-fast $cache_id-build-packages-c build/packages || exit 220
           )
 
+    - name: 089_ninja_build accomodate mis-manifested llwebrtc
+      run: fsvr_step 0a0 llwebrtc
+
     - name: 090_ninja_preflight
       run: fsvr_step 090
 
@@ -189,9 +192,6 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
-
-    - name: 0a0_ninja_build llwebrtc
-      run: fsvr_step 0a0 llwebrtc
 
     - name: 0a0_ninja_build SLPlugin.exe
       run: fsvr_step 0a0 SLPlugin.exe
