@@ -2,6 +2,7 @@
 set -Euo pipefail
 
 _PRESHELL_PATH="${_PRESHELL_PATH:-}"
+_SYSTEM_PATH="${PATH:-}"
 PATH="$PATH:/usr/bin"
 
 gha_fsvr_dir="$(dirname "${BASH_SOURCE}")"
@@ -23,7 +24,13 @@ else
   _PYTHONUSERBASE="$(readlink -f bin/pystuff)"
 fi
 
-pysite="$(PYTHONUSERBASE="$_PYTHONUSERBASE" python3 -msite --user-site)"
+python3="$(PATH="$PATH:$_PRESHELL_PATH" which python3)"
+$python3 --version >/dev/null || { echo "!python3" 2>&1 ; exit 26 ; }
+
+jqexe="$(PATH="$_SYSTEM_PATH:$_PRESHELL_PATH" which jq)"
+$jqexe --version >/dev/null || { which jq ; echo "!jq" 2>&1 ; exit 27 ; }
+
+pysite="$(PYTHONUSERBASE="$_PYTHONUSERBASE" ${python3} -msite --user-site)"
 
 ######################################################################
 echo "$(cat<<EOF
@@ -53,20 +60,20 @@ function _err() { local rc=\$1 ; shift; echo "[_err rc=\$rc] \$@" >&2; return \$
 
 function ht-ln() {( source "$ghash/gha.ht-ln.bash" && ht-ln "\$@" )}
 function hostname(){ echo '$_hostname' ; }
-function tee() { TEE="`which tee`" "`which python3`" "$gha_fsvr_dir/util/tee.py" "\$@" ; }
+function tee() { TEE="`which tee`" "${python3}" "$gha_fsvr_dir/util/tee.py" "\$@" ; }
 function colout() { $(
-  if which colout 2>/dev/null > /dev/null ; then
+  if PATH="$_SYSTEM_PATH" which colout 2>/dev/null > /dev/null ; then
     echo \"`which colout`\"
   else
-    echo \"`which python3`\" \"$pysite/colout/colout.py\"
+    echo \"${python3}\" \"$pysite/colout/colout.py\"
   fi
 ) "\$@" ; }
 function parallel() { PARALLEL_SHELL="$BASH" PARALLEL_HOME="$PWD/bin/parallel-home" "`which perl`" "$PWD/bin/parallel" "\$@" ; }
-function jq() { "`which jq`" $(
+function jq() { "${jqexe}" $(
   # grr... detect if jq supports -b (binary)
   # otherwise... fall back to tr -d '\r' workaround
   # TODO: jq.exe also croaks if jq 'filter\r' contains LFs...
-  jq -ben 1 2>/dev/null > /dev/null
+  ${jqexe} -ben 1 2>/dev/null > /dev/null
   if [[ $? == 0 ]] ; then
     echo '-b "$@"'
   else
