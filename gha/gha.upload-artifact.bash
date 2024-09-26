@@ -23,6 +23,7 @@ function gha-upload-artifact() {(
       INPUT_retention-days=${3:-1}
       INPUT_compression-level=${4:-0}
       INPUT_overwrite=${5:-false}
+      INPUT_include-hidden-files=true
       INPUT_if-no-files-found=error # warn | error | ignore
     )
 
@@ -77,6 +78,7 @@ function gha-upload-artifact-fast() {(
     INPUT_retention-days=${3:-1} \
     INPUT_compression-level=${4:-0} \
     INPUT_overwrite=${5:-false} \
+    INPUT_include-hidden-files=true \
     INPUT_if-no-files-found=error \
     /c/Program\ Files/nodejs/node /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || return $?
   echo "uploaded: ${INPUT_path}" >&2
