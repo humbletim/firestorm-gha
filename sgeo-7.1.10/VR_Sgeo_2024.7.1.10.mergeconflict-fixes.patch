@@ -1,7 +1,7 @@
 diff -ur --binary '--exclude=.git' ../Firestormx/indra/llrender/llrendertarget.h ./indra/llrender/llrendertarget.h
 --- ../Firestormx/indra/llrender/llrendertarget.h	2024-10-13 00:20:15.021678600 +0000
 +++ ./indra/llrender/llrendertarget.h	2024-10-13 00:14:01.000000000 +0000
-@@ -144,16 +144,13 @@
+@@ -144,16 +144,12 @@
  
      LLTexUnit::eTextureType getUsage(void) const { return mUsage; }
  
@@ -13,7 +13,7 @@ diff -ur --binary '--exclude=.git' ../Firestormx/indra/llrender/llrendertarget.h
  	U32 getFBO();
  	// END P373R Sgeo
  
- 	U32 getDepth(void) const { return mDepth; }
+- 	U32 getDepth(void) const { return mDepth; }
 ->>>>>>> sgeo/VR_Sgeo_2024
  
      U32 getDepth(void) const { return mDepth; }
