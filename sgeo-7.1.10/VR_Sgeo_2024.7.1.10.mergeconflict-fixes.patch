@@ -119,8 +119,8 @@ diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewercamera.h 
      F32 getDefaultFOV() { return mCameraFOVDefault; }
 -=======
 +
-- 	void setDefaultFOV(F32 fov) ;
-- 	F32 getDefaultFOV() { return mCameraFOVDefault; }
+-	void setDefaultFOV(F32 fov) ;
+-	F32 getDefaultFOV() { return mCameraFOVDefault; }
  	// P373R Sgeo
 @@ -103,7 +103,6 @@
  	void setHorizontalOffset(F32 offset) { mHorizontalOffset = offset; }
