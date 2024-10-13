@@ -227,7 +227,7 @@ function _get_APPLICATION_EXE() {(
     if [[ $viewer_id == blackdragon ]] ; then
       APPLICATION_EXE=SecondLifeViewer.exe
     fi
-    APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *${viewer_channel}.exe 2>/dev/null | head -n 1)
+    APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *${viewer_channel}.exe *${viewer_channel/Firestorm/FirestormOS}.exe 2>/dev/null | head -n 1)
     echo "$APPLICATION_EXE"
 )}
 

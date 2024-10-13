@@ -166,10 +166,10 @@ diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewerdisplay.c
  		//################################### P373R ######################################
  		sec:
  		gVR.ProcessVRCamera();
-@@ -806,7 +804,6 @@
+@@ -806,7 +804,5 @@
  		stop_glerror();
  				
- 		{
+-		{
 ->>>>>>> sgeo/VR_Sgeo_2024
              LL_PROFILE_ZONE_NAMED_CATEGORY_DISPLAY("Env Update");
              // update all the sky/atmospheric/water settings
@@ -218,7 +218,7 @@ diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewerdisplay.c
      gGL.color4f(1, 1, 1, 1);
  
      // Coordinate axes
-@@ -1745,9 +1734,7 @@
+@@ -1745,9 +1734,6 @@
  
  void render_ui_2d()
  {
@@ -231,7 +231,7 @@ diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewerdisplay.c
 @@ -1761,7 +1748,6 @@
  	// }
  	// /P373R Sgeo
- 	LLGLSUIDefault gls_ui;
+-	LLGLSUIDefault gls_ui;
 ->>>>>>> sgeo/VR_Sgeo_2024
  
      /////////////////////////////////////////////////////////////
