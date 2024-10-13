@@ -13,7 +13,7 @@ diff -ur --binary '--exclude=.git' ../Firestormx/indra/llrender/llrendertarget.h
  	U32 getFBO();
  	// END P373R Sgeo
  
-- 	U32 getDepth(void) const { return mDepth; }
+-	U32 getDepth(void) const { return mDepth; }
 ->>>>>>> sgeo/VR_Sgeo_2024
  
      U32 getDepth(void) const { return mDepth; }
