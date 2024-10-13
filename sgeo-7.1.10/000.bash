@@ -20,6 +20,7 @@ gha-cache-restore $cache_id-repo-0000 repo/viewer || (
       # ... blindly copy conflicting files from manually patched work tree:
       # tar -C ../Fixed -cf - `git status|grep both|sed -e 's@both modified:@@;'`  | tar xf -
       patch -p1 < $nunja_dir/VR_Sgeo_2024.7.1.10.mergeconflict-fixes.patch
+      git add -u
       git -c user.email=CITEST -c user.name=CITEST commit -m "VR_Sgeo_2024.7.1.10 locally patched"
     }
 
