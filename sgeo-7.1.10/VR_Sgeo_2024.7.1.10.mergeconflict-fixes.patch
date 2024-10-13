@@ -1,0 +1,275 @@
+diff -ur --binary '--exclude=.git' ../Firestormx/indra/llrender/llrendertarget.h ./indra/llrender/llrendertarget.h
+--- ../Firestormx/indra/llrender/llrendertarget.h	2024-10-13 00:20:15.021678600 +0000
++++ ./indra/llrender/llrendertarget.h	2024-10-13 00:14:01.000000000 +0000
+@@ -144,16 +144,13 @@
+ 
+     LLTexUnit::eTextureType getUsage(void) const { return mUsage; }
+ 
+-<<<<<<< HEAD
+     U32 getTexture(U32 attachment = 0) const;
+     U32 getNumTextures() const;
+-=======
+ 	// P373R Sgeo
+ 	U32 getFBO();
+ 	// END P373R Sgeo
+ 
+ 	U32 getDepth(void) const { return mDepth; }
+->>>>>>> sgeo/VR_Sgeo_2024
+ 
+     U32 getDepth(void) const { return mDepth; }
+ 
+diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewercamera.cpp ./indra/newview/llviewercamera.cpp
+--- ../Firestormx/indra/newview/llviewercamera.cpp	2024-10-13 00:20:15.021678600 +0000
++++ ./indra/newview/llviewercamera.cpp	2024-10-13 00:14:01.000000000 +0000
+@@ -87,7 +87,6 @@
+ 
+ LLViewerCamera::LLViewerCamera() : LLCamera()
+ {
+-<<<<<<< HEAD
+     calcProjection(getFar());
+     mCameraFOVDefault = DEFAULT_FIELD_OF_VIEW;
+     mPrevCameraFOVDefault = DEFAULT_FIELD_OF_VIEW;
+@@ -103,7 +102,7 @@
+     // mCameraAngleChangedSignal = gSavedSettings.getControl("CameraAngle")->getCommitSignal()->connect(boost::bind(&LLViewerCamera::updateCameraAngle, this, _2));
+     connectCameraAngleSignal();
+     // </FS:Zi>
+-=======
++
+ 	calcProjection(getFar());
+ 	mCameraFOVDefault = DEFAULT_FIELD_OF_VIEW;
+ 	mPrevCameraFOVDefault = DEFAULT_FIELD_OF_VIEW;
+@@ -119,7 +118,6 @@
+ 	mVerticalOffset = 0.f;
+ 	// END P373R Sgeo
+ 	gSavedSettings.getControl("CameraAngle")->getCommitSignal()->connect(boost::bind(&LLViewerCamera::updateCameraAngle, this, _2));
+->>>>>>> sgeo/VR_Sgeo_2024
+ }
+ 
+ LLViewerCamera::~LLViewerCamera()
+@@ -215,14 +213,13 @@
+ 
+     f = 1/tan(fov_y*0.5f);
+ 
+-<<<<<<< HEAD
+     mProjectionMatrix.setZero();
+     mProjectionMatrix.mMatrix[0][0] = f/aspect;
+     mProjectionMatrix.mMatrix[1][1] = f;
+     mProjectionMatrix.mMatrix[2][2] = (z_far + z_near)/(z_near - z_far);
+     mProjectionMatrix.mMatrix[3][2] = (2*z_far*z_near)/(z_near - z_far);
+     mProjectionMatrix.mMatrix[2][3] = -1;
+-=======
++
+ 	mProjectionMatrix.setZero();
+ 	mProjectionMatrix.mMatrix[0][0] = f/aspect;
+ 	mProjectionMatrix.mMatrix[1][1] = f;
+@@ -234,7 +231,6 @@
+ 	mProjectionMatrix.mMatrix[2][0] = getHorizontalOffset();
+ 	mProjectionMatrix.mMatrix[2][1] = getVerticalOffset();
+ 	// END P373R Sgeo
+->>>>>>> sgeo/VR_Sgeo_2024
+ }
+ 
+ // Sets up opengl state for 3D drawing.  If for selection, also
+@@ -420,13 +416,11 @@
+         proj_mat = translate*proj_mat;
+     }
+ 
+-<<<<<<< HEAD
+     calcProjection(z_far); // Update the projection matrix cache
+-=======
++
+ 	// P373R Sgeo, replaces non-VR version
+ 	proj_mat *= gl_perspective_vr(fov_y,aspect,z_near,z_far, getHorizontalOffset(), getVerticalOffset());
+ 	// END P373R Sgeo
+->>>>>>> sgeo/VR_Sgeo_2024
+ 
+     proj_mat *= gl_perspective(fov_y,aspect,z_near,z_far);
+ 
+@@ -949,9 +943,7 @@
+     mCosHalfCameraFOV = cosf(mCameraFOVDefault * 0.5f);
+ }
+ 
+-<<<<<<< HEAD
+-bool LLViewerCamera::isDefaultFOVChanged()
+-=======
++
+ // P373R Sgeo
+ // Takes tan angles. Provided directly from OpenVR
+ // OpenXR provides angles instead. Convert to tan at callsite or here?
+@@ -966,8 +958,7 @@
+ }
+ // END P373R Sgeo
+ 
+-BOOL LLViewerCamera::isDefaultFOVChanged()
+->>>>>>> sgeo/VR_Sgeo_2024
++bool LLViewerCamera::isDefaultFOVChanged()
+ {
+     if(mPrevCameraFOVDefault != mCameraFOVDefault)
+     {
+diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewercamera.h ./indra/newview/llviewercamera.h
+--- ../Firestormx/indra/newview/llviewercamera.h	2024-10-13 00:20:15.021678600 +0000
++++ ./indra/newview/llviewercamera.h	2024-10-13 00:14:01.000000000 +0000
+@@ -90,10 +90,10 @@
+     // Sets the current matrix
+     /* virtual */ void setView(F32 vertical_fov_rads); // NOTE: broadcasts to simulator
+     void setViewNoBroadcast(F32 vertical_fov_rads);  // set FOV without broadcasting to simulator (for temporary local cameras)
+-<<<<<<< HEAD
++
+     void setDefaultFOV(F32 fov) ;
+     F32 getDefaultFOV() { return mCameraFOVDefault; }
+-=======
++
+ 	void setDefaultFOV(F32 fov) ;
+ 	F32 getDefaultFOV() { return mCameraFOVDefault; }
+ 	// P373R Sgeo
+@@ -103,7 +103,6 @@
+ 	void setHorizontalOffset(F32 offset) { mHorizontalOffset = offset; }
+ 	void setVerticalOffset(F32 offset) { mVerticalOffset = offset; }
+ 	// END P373R Sgeo
+->>>>>>> sgeo/VR_Sgeo_2024
+ 
+     bool isDefaultFOVChanged();
+ 
+@@ -147,16 +146,13 @@
+ // END P373R Sgeo
+ 
+ public:
+-<<<<<<< HEAD
+     // <FS:Zi> Enable external classes to disconnect and connect the "CameraAngle" settings
+     //         changed signal, so classes can copy and overwrite the camera class and restore
+     //         the signal handler
+     void connectCameraAngleSignal();
+     void disconnectCameraAngleSignal();
+     // </FS:Zi>
+-=======
+ 
+->>>>>>> sgeo/VR_Sgeo_2024
+ };
+ 
+ 
+diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewerdisplay.cpp ./indra/newview/llviewerdisplay.cpp
+--- ../Firestormx/indra/newview/llviewerdisplay.cpp	2024-10-13 00:20:15.021678600 +0000
++++ ./indra/newview/llviewerdisplay.cpp	2024-10-13 00:14:01.000000000 +0000
+@@ -777,7 +777,6 @@
+             gPipeline.mHeroProbeManager.renderProbes();
+         }
+ 
+-<<<<<<< HEAD
+         LL_PROFILE_ZONE_NAMED_CATEGORY_DISPLAY("display - 1");
+         LLAppViewer::instance()->pingMainloopTimeout("Display:Update");
+         if (gPipeline.hasRenderType(LLPipeline::RENDER_TYPE_HUD))
+@@ -795,7 +794,6 @@
+         stop_glerror();
+ 
+         {
+-=======
+ 		//################################### P373R ######################################
+ 		sec:
+ 		gVR.ProcessVRCamera();
+@@ -806,7 +804,6 @@
+ 		stop_glerror();
+ 				
+ 		{
+->>>>>>> sgeo/VR_Sgeo_2024
+             LL_PROFILE_ZONE_NAMED_CATEGORY_DISPLAY("Env Update");
+             // update all the sky/atmospheric/water settings
+             LLEnvironment::instance().update(&camera); // <FS:Ansariel> Factor out calls to getInstance
+@@ -1133,14 +1130,13 @@
+             LLSceneMonitor::getInstance()->capture();
+         }
+ 
+-<<<<<<< HEAD
+         LLAppViewer::instance()->pingMainloopTimeout("Display:RenderUI");
+         if (!for_snapshot)
+         {
+             render_ui();
+             swap();
+         }
+-=======
++
+ 		LLAppViewer::instance()->pingMainloopTimeout("Display:RenderUI");
+ 		if (!for_snapshot)
+ 		{
+@@ -1167,7 +1163,6 @@
+ 
+ 			//################################### END P373R ##################################
+ 		}
+->>>>>>> sgeo/VR_Sgeo_2024
+ 
+ 
+         LLSpatialGroup::sNoDelete = false;
+@@ -1706,18 +1701,12 @@
+ 
+     // Debugging stuff goes before the UI.
+ 
+-<<<<<<< HEAD
+     stop_glerror();
+-
+-    gUIProgram.bind();
+-=======
+-	stop_glerror();
+ 	
+-	gUIProgram.bind();
++    gUIProgram.bind();
+ 	//################################### P373R ######################################
+ 	gVR.RenderControllerAxes();
+ 	//################################### END P373R ##################################
+->>>>>>> sgeo/VR_Sgeo_2024
+     gGL.color4f(1, 1, 1, 1);
+ 
+     // Coordinate axes
+@@ -1745,9 +1734,7 @@
+ 
+ void render_ui_2d()
+ {
+-<<<<<<< HEAD
+     LLGLSUIDefault gls_ui;
+-=======
+ 	// P373R Sgeo
+ 	// LLRenderTarget *priorTarget = NULL;
+ 	// if (gVR.m_bVrActive)
+@@ -1761,7 +1748,6 @@
+ 	// }
+ 	// /P373R Sgeo
+ 	LLGLSUIDefault gls_ui;
+->>>>>>> sgeo/VR_Sgeo_2024
+ 
+     /////////////////////////////////////////////////////////////
+     //
+@@ -2002,13 +1988,10 @@
+ 
+ void display_cleanup()
+ {
+-<<<<<<< HEAD
+     gDisconnectedImagep = NULL;
+-=======
+ 	//################################### P373R ######################################
+ 		gVR.vrStartup(TRUE);
+ 	//################################### END P373R ######################################
+ 	gDisconnectedImagep = NULL;
+->>>>>>> sgeo/VR_Sgeo_2024
+ }
+ 
+diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/pipeline.cpp ./indra/newview/pipeline.cpp
+--- ../Firestormx/indra/newview/pipeline.cpp	2024-10-13 00:20:15.021678600 +0000
++++ ./indra/newview/pipeline.cpp	2024-10-13 00:14:02.000000000 +0000
+@@ -914,10 +914,9 @@
+         }
+     }
+ 
+-<<<<<<< HEAD
+     S32 shadow_detail = RenderShadowDetail;
+     bool ssao = RenderDeferredSSAO;
+-=======
++
+ 	if (true || RenderUIBuffer) // P373R Sgeo
+ 	{
+ 		if (!mRT->uiScreen.allocate(resX,resY, GL_RGBA))
+@@ -925,7 +924,6 @@
+ 			return false;
+ 		}
+ 	}	
+->>>>>>> sgeo/VR_Sgeo_2024
+ 
+     //allocate deferred rendering color buffers
+     if (!mRT->deferredScreen.allocate(resX, resY, GL_RGBA, true)) return false;
