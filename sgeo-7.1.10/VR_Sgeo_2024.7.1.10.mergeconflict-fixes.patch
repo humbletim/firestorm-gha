@@ -218,7 +218,7 @@ diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewerdisplay.c
      gGL.color4f(1, 1, 1, 1);
  
      // Coordinate axes
-@@ -1745,9 +1734,6 @@
+@@ -1745,9 +1734,7 @@
  
  void render_ui_2d()
  {
@@ -228,7 +228,7 @@ diff -ur --binary '--exclude=.git' ../Firestormx/indra/newview/llviewerdisplay.c
  	// P373R Sgeo
  	// LLRenderTarget *priorTarget = NULL;
  	// if (gVR.m_bVrActive)
-@@ -1761,7 +1748,6 @@
+@@ -1761,7 +1748,5 @@
  	// }
  	// /P373R Sgeo
 -	LLGLSUIDefault gls_ui;
