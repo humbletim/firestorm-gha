@@ -13,16 +13,15 @@ gha-cache-restore $cache_id-repo-0000 repo/viewer || (
     git remote add sgeo https://github.com/Sgeo/phoenix-firestorm-alpha
     git fetch sgeo VR_Sgeo_2024
     git -c user.email=CITEST -c user.name=CITEST \
-      merge --no-edit sgeo/VR_Sgeo_2024
-    
-    # NOTES:
-    # ... capture wholemeal between manually-patched worktree and an original Firestormx worktree
-    # diff -ur --binary . ../Firestormx/  > ../VR_Sgeo_2024.7.1.10.wholmeal.patch
-    # ... blindly copy conflicting files from manually patched work tree:
-    # tar -C ../Fixed -cf - `git status|grep both|sed -e 's@both modified:@@;'`  | tar xf -
-    patch -p1 < $nunja_dir/VR_Sgeo_2024.7.1.10.mergeconflict-fixes.patch
-    
-    git -c user.email=CITEST -c user.name=CITEST commit -m "VR_Sgeo_2024.7.1.10 locally patched"
+      merge --no-edit sgeo/VR_Sgeo_2024 || {
+      # NOTES:
+      # ... capture wholemeal between manually-patched worktree and an original Firestormx worktree
+      # diff -ur --binary . ../Firestormx/  > ../VR_Sgeo_2024.7.1.10.wholmeal.patch
+      # ... blindly copy conflicting files from manually patched work tree:
+      # tar -C ../Fixed -cf - `git status|grep both|sed -e 's@both modified:@@;'`  | tar xf -
+      patch -p1 < $nunja_dir/VR_Sgeo_2024.7.1.10.mergeconflict-fixes.patch
+      git -c user.email=CITEST -c user.name=CITEST commit -m "VR_Sgeo_2024.7.1.10 locally patched"
+    }
 
 patch -p1 < <(cat <<'EOF'
 diff --git a/indra/newview/llviewerVR.h b/indra/newview/llviewerVR.h
