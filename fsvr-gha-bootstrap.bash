@@ -38,7 +38,7 @@ function get_bootstrap_vars() {(
   echo cache_id=$(echo "$base-$repo" | to-id)
   echo build_id=$(echo "${build_id:-$base}" | to-id)
 
-  echo nunja_dir=`$gha_fsvr_dir/util/_utils.sh _realpath ${nunja_dir:-$fsvr_dir/$base}`
+  echo nunja_dir=`$gha_fsvr_dir/util/_utils.sh _realpath ${nunja_dir:-$fsvr_dir/blueprints/$base}`
   echo fsvr_cache_dir=${fsvr_cache_dir:-$pwd/cache}
 
 )}
