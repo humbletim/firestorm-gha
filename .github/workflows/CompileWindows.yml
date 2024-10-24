@@ -199,12 +199,12 @@ jobs:
           )
 
     - name: 0a-1_ninja_fauxbuild
-      if: fromJSON(inputs.fstuple).fauxbuild
+      if: fromJSON(inputs.fstuple).fauxbuild != ''
       run: |
         fsvr_step 0a-1_ninja_fauxbuild
 
     - name: 089_ninja_build accomodate mis-manifested llwebrtc
-      if: !fromJSON(inputs.fstuple).fauxbuild
+      if: fromJSON(inputs.fstuple).fauxbuild == ''
       run: |
         fsvr_step 090 || true   # needed here for build.ninja to become instrumented
         fsvr_step 0a0 llwebrtc  # llwebrtc.dll has to be compiled first (then actual preflight below can succeed)
