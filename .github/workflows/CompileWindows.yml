@@ -164,6 +164,24 @@ jobs:
     - name: 040_generate_package_infos && 050_generate_packages_info_text
       run: fsvr_step 040 && fsvr_step 050
 
+    - name: 077_preserve
+      if: fromJSON(inputs.fstuple).preserve == '3ps'
+      uses: ./fsvr-action
+      with:
+        run: |
+          set -Euo pipefail
+          source $ghash/gha.upload-artifact.bash
+          source $gha_fsvr_dir/util/reconstitute-dependencies.bash
+          manifest=$build_dir/packages-info.json
+          mkdir -pv $fsvr_cache_dir
+          cp -av $manifest $fsvr_cache_dir/
+          cp -av $nunja_dir/viewer_version.txt $fsvr_cache_dir/
+          download_packages $manifest $fsvr_cache_dir               || exit 60
+          verify_downloads  $manifest $fsvr_cache_dir               || exit 70
+          gha-upload-artifact-fast \
+             ${base/-avx2}-3p-x86_64-pc-windows-msvc $fsvr_cache_dir   || exit 178
+          )
+
     - name: 080_untar_packages
       uses: ./fsvr-action
       with:
