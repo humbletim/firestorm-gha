@@ -34,5 +34,6 @@ popd
 
 pushd repo/viewer
   patch -p1 < $nunja_dir/../fs-7.1.11/installer_template.nsi.patch
+  patch -p1 < $nunja_dir/../fs-7.1.11/viewer_manifest.DL_URL.patch
   git diff
 popd
