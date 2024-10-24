@@ -207,7 +207,7 @@ jobs:
       run: fsvr_step 090
 
     - name: ~004 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '004'
+      if: fromJSON(inputs.fstuple).pause == '004' || fromJSON(inputs.fstuple).pause == 'always'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
@@ -261,7 +261,7 @@ jobs:
     #       )"
 
     - name: ~Setup tmate session
-      if: failure() && fromJSON(inputs.fstuple).pause != 'never'
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: false
