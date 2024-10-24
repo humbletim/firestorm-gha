@@ -280,7 +280,7 @@ function make_installer() {
   local VARCH="_LEGACY"
   if [[ $base == *avx2* ]] ; then VARCH="_AVX2" ; fi
   #eg: FirestormOS-VR-GHA_AVX2.7.1.11.76496-7dc08a7-419c06c_Setup.exe
-  local InstallerExe=${viewer_name}OS-${viewer_channel/${viewer_name}-/}${VARCH}.${version_xyzw}-${version_shas}_Setup.exe
+  local InstallerExe=${viewer_bin^}OS-${viewer_channel/${viewer_name}-/}${VARCH}.${version_xyzw}-${version_shas}_Setup.exe
   mv -v $build_dir/newview/*Setup*.exe $build_dir/$InstallerExe
   # echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
 }
