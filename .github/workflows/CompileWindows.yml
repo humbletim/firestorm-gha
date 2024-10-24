@@ -264,4 +264,4 @@ jobs:
       if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
       uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: false
+        limit-access-to-actor: true

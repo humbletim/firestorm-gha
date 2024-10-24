@@ -265,8 +265,6 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
 
 function make_installer() {
   local nsi=$build_dir/newview/${viewer_bin}_setup_tmp.nsi
-  # correct FirestormOSSgeo-VR-GHA => FirestormOS-Sgeo-VR-GHA
-  perl -i.bak2 -pe "s@(${viewer_name}OS)(${viewer_channel})@\$1-\$2@g" $nsi
   #s@^SetCompressor .*$@SetCompressor zlib@g;
 
   export XZ_DEFAULTS=-T0
