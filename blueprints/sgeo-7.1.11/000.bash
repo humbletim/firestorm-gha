@@ -5,11 +5,6 @@ echo $BASH_SOURCE -- skipping > repo/p373r/applied
 echo 'https://github.com/Sgeo/p373r-sgeo-minimal/tree/sgeo_min_vr_7.1.9' > repo/p373r/.gha_source
 
 pushd repo/viewer
-  patch -p1 < $nunja_dir/../fs-7.1.11/installer_template.nsi.patch
-  git diff
-popd
-
-pushd repo/viewer
     git remote add sgeo-minimal https://github.com/Sgeo/p373r-sgeo-minimal
     git fetch sgeo-minimal sgeo_min_vr_7.1.9
     git -c user.email=CITEST -c user.name=CITEST merge --no-edit sgeo-minimal/sgeo_min_vr_7.1.9
@@ -34,5 +29,10 @@ index fd2aa7880..89804262b 100644
  #include "string.h"
 EOF
 )
+  git diff
+popd
+
+pushd repo/viewer
+  patch -p1 < $nunja_dir/../fs-7.1.11/installer_template.nsi.patch
   git diff
 popd

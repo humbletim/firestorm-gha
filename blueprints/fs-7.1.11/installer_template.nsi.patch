@@ -1,10 +1,13 @@
 diff --git a/indra/newview/installers/windows/installer_template.nsi b/indra/newview/installers/windows/installer_template.nsi
-index 29ae1e54f05..53d6ff09826 100644
+index 29ae1e54f05..a21e6c26661 100644
 --- a/indra/newview/installers/windows/installer_template.nsi
 +++ b/indra/newview/installers/windows/installer_template.nsi
-@@ -244,7 +244,7 @@ Function CheckCPUFlagsAVX2
+@@ -242,9 +242,9 @@ Function CheckCPUFlagsAVX2
+     StrCpy $2 "${DL_URL}"
+     StrCpy $2 "-legacy-cpus" /APPEND    
      ; Replace %DLURL% in the language string with the URL
-     ${WordReplace} "$(MissingAVX2)" "%DLURL%" "$2" "+*" $3
+-    ${WordReplace} "$(MissingAVX2)" "%DLURL%" "$2" "+*" $3
++    ${WordReplace} "$(MissingAVX2)" "%DLURL%" "${DL_URL}-legacy-cpus" "+*" $3
      MessageBox MB_OK "$3"    
 -    ${OpenURL} '$2'
 +    ${OpenURL} "${DL_URL}-legacy-cpus#version-${VERSION_LONG}"
