@@ -199,6 +199,7 @@ EOF
 
 function 0a-1_ninja_fauxbuild() {( $_dbgopts;
     cd $build_dir
+    touch llwebrtc/llwebrtc.lib llwebrtc/llwebrtc.dll sharedlibs/llwebrtc.dll
     touch llplugin/slplugin/slplugin.exe
     touch media_plugins/libvlc/media_plugin_libvlc.dll
     touch media_plugins/cef/media_plugin_cef.dll
