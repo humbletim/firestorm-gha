@@ -199,11 +199,17 @@ EOF
 
 function 0a-1_ninja_fauxbuild() {( $_dbgopts;
     cd $build_dir
-    touch llwebrtc/llwebrtc.lib llwebrtc/llwebrtc.dll sharedlibs/llwebrtc.dll
-    touch llplugin/slplugin/slplugin.exe
-    touch media_plugins/libvlc/media_plugin_libvlc.dll
-    touch media_plugins/cef/media_plugin_cef.dll
-    touch newview/${viewer_bin}-bin.exe
+    function ptouch() {
+        for x in "$@" ; do
+            mkdir -pv $(dirname $x)
+            touch $x
+        done
+    }
+    ptouch llwebrtc/llwebrtc.lib llwebrtc/llwebrtc.dll sharedlibs/llwebrtc.dll
+    ptouch llplugin/slplugin/slplugin.exe
+    ptouch media_plugins/libvlc/media_plugin_libvlc.dll
+    ptouch media_plugins/cef/media_plugin_cef.dll
+    ptouch newview/${viewer_bin}-bin.exe
     cat <<EOF>> msvc.nunja.env
 cl_exe=true.exe
 lib_exe=true.exe
