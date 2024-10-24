@@ -265,6 +265,8 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
 
 function make_installer() {
   local nsi=$build_dir/newview/${viewer_bin}_setup_tmp.nsi
+  # correct FirestormOSSgeo-VR-GHA => FirestormOS-Sgeo-VR-GHA
+  perl -i.bak2 -pe "s@(${viewer_name}OS)(${viewer_channel})@\$1-\$2@g" $nsi
   #s@^SetCompressor .*$@SetCompressor zlib@g;
 
   export XZ_DEFAULTS=-T0
@@ -275,6 +277,10 @@ function make_installer() {
 
   local InstallerName=$(basename $build_dir/newview/*Setup*.exe)
   local InstallerExe=${InstallerName/.exe/-$version_shas.exe}
+  local VARCH="_LEGACY"
+  if [[ $base == *avx2* ]] ; then VARCH="_AVX2" ; fi
+  #eg: FirestormOS-VR-GHA_AVX2.7.1.11.76496-7dc08a7-419c06c_Setup.exe
+  local InstallerExe=${viewer_name}OS-${viewer_channel/${viewer_name}-/}_${VARCH}.${version_xyzw}-${version_shas}_Setup.exe
   mv -v $build_dir/newview/*Setup*.exe $build_dir/$InstallerExe
   # echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
 }
