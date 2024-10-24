@@ -180,7 +180,6 @@ jobs:
           verify_downloads  $manifest $fsvr_cache_dir               || exit 70
           gha-upload-artifact-fast \
              ${base/-avx2}-3p-x86_64-pc-windows-msvc $fsvr_cache_dir   || exit 178
-          )
 
     - name: 080_untar_packages
       uses: ./fsvr-action
