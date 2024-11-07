@@ -209,6 +209,7 @@ function 0a-1_ninja_fauxbuild() {( $_dbgopts;
     ptouch llplugin/slplugin/slplugin.exe
     ptouch media_plugins/libvlc/media_plugin_libvlc.dll
     ptouch media_plugins/cef/media_plugin_cef.dll
+    ptouch media_plugins/example/media_plugin_example.dll
     ptouch newview/${viewer_bin}-bin.exe
     cat <<EOF>> msvc.nunja.env
 cl_exe=true.exe
