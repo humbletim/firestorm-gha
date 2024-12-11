@@ -201,7 +201,7 @@ jobs:
     - name: 0a-1_ninja_fauxbuild
       if: fromJSON(inputs.fstuple).fauxbuild != ''
       run: |
-        fsvr_step 0a-1_ninja_fauxbuild {{ fromJSON(inputs.fstuple).fauxbuild }}
+        fsvr_step 0a-1_ninja_fauxbuild ${{ fromJSON(inputs.fstuple).fauxbuild }}
 
     - name: 089_ninja_build accomodate mis-manifested llwebrtc
       if: fromJSON(inputs.fstuple).fauxbuild == ''

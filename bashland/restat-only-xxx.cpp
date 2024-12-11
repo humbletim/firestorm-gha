@@ -39,7 +39,7 @@ std::string get_tool_name(int argc, char* argv[]) {
 
 std::string get_artifact_name(int argc, char* argv[]) {
   std::string artifact_filename;
-  std::regex artifact_regex("[-/](?:Fo|out:)([^ ]+)");
+  std::regex artifact_regex("[-/](?:Fo|out:)[ ]*([^ ]+)");
   std::cmatch match;
 
   for (int i = 1; i < argc; ++i) {

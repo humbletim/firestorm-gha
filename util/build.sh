@@ -225,9 +225,13 @@ EOF
 _cl_exe=$cl_exe
 _lib_exe=$lib_exe
 _link_exe=$link_exe
+_cmcldeps_exe=$cmcldeps_exe
+_rc_exe=$rc_exe
 cl_exe=restat-only-cl.exe
 lib_exe=restat-only-lib.exe
 link_exe=restat-only-link.exe
+cmcldeps_exe=true.exe
+rc_exe=true.exe
 EOF
 
 )}
