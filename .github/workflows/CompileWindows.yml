@@ -231,7 +231,9 @@ jobs:
       run: fsvr_step 0a1
 
     - name: 0a2 custom postbuild
-      run: fsvr_step 0a2
+      uses: ./fsvr-action
+      with:
+        run: fsvr_step 0a2
 
     - name: 0b0 installer
       run: fsvr_step 0b0
