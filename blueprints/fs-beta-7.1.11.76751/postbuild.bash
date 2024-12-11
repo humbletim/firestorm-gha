@@ -2,22 +2,22 @@
 
 source $ghash/gha.upload-artifact.bash
 
-mkdir -pv build/snapshot
+mkdir -pv $build_dir/snapshot
 
-test -s build/snapshot/includes.tar.xz || (
-    find indra/ -name \*.inl -o -name \*.h > build/snapshot/all.includes.txt
+test -s $build_dir/snapshot/includes.tar.xz || (
+    find indra/ -name \*.inl -o -name \*.h > $build_dir/snapshot/all.includes.txt
     time (
-        tar -cvf - -T build/snapshot/all.includes.txt --show-transformed-names \
+        tar -cvf - -T $build_dir/snapshot/all.includes.txt --show-transformed-names \
             --transform "s|^${PWD#/}/||" \
-             2>build/snapshot/includes.tar.rsp \
-        | xz -T0 - -c > build/snapshot/includes.tar.xz
+             2>$build_dir/snapshot/includes.tar.rsp \
+        | xz -T0 - -c > $build_dir/snapshot/includes.tar.xz
     )
 )
 
-pushd build/
+pushd $build_dir/
 
 test -s snapshot/all.objs.rsp || (
-    find ~+ -name \*.c*.obj | grep -vE '(firestorm-bin.dir|llwebrtc|media_plugins|slplugin)/' > snapshot/all.objs.rsp
+    find ~+ -name \*.c*.obj | grep -vE '(llwebrtc|media_plugins|slplugin)/' > snapshot/all.objs.rsp
     echo ~+/llwebrtc/llwebrtc.lib >> snapshot/all.objs.rsp
     # echo ~+/llwebrtc/llwebrtc.dll >> snapshot/all.objs.rsp
 )
@@ -35,7 +35,6 @@ test -s snapshot/objs.tar.xz || (
 popd
 
 
-cd build/snapshot
+cp -av $build_dir/packages-info.json $build_dir/snapshot
 
-gha-upload-artifact-fast ${version_full}-snapshot-dotobjs objs.tar.xz
-gha-upload-artifact-fast ${version_full}-snapshot-includes includes.tar.xz
+cd $build_dir && gha-upload-artifact-fast ${version_full}-snapshot snapshot
