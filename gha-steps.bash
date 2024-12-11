@@ -9,6 +9,10 @@ function gha_steps() {(
 function gha_step() {(
   local workspace=$(dirname $BASH_SOURCE)
   PATH=$PATH:bin
+  if [[ $# == 0 ]] ; then
+    gha_steps
+    return
+  fi
   if [[ "$1" =~ ^[0-9a-f][0-9a-f][0-9a-f]$ ]]; then
     yaml2json < $workspace/.github/workflows/CompileWindows.yml | jq -r --arg prefix "$1" '.jobs[].steps[]|select((.name//"")|startswith($prefix))|"# "+.name+"\n"+(.with.run//.run)'
   elif [[ "$1" =~ ^[0-9]+$ ]]; then

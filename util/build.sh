@@ -186,6 +186,7 @@ EOF
     set -a
     . $build_dir/msvc.env
     . $build_dir/msvc_path.env
+    . $build_dir/msvc.nunja.env
     . $BASH_ENV
 
     echo $msvc_path
@@ -198,6 +199,15 @@ EOF
 )}
 
 function 0a-1_ninja_fauxbuild() {( $_dbgopts;
+    test -x bin/restat-only-cl.exe || {
+        ${CXX:-'/c/Program Files/LLVM/bin/clang++'} -w -std=c++17 $gha_fsvr_dir/bashland/restat-only-xxx.cpp -o bin/_restat-only-xxx.exe
+        cp -av bin/_restat-only-xxx.exe bin/restat-only-cl.exe
+        cp -av bin/_restat-only-xxx.exe bin/restat-only-lib.exe
+        cp -av bin/_restat-only-xxx.exe bin/restat-only-link.exe
+    } || _die $? "error compiling restat-only-xxx for fauxbuilds"
+    grep FAUXBUILD env.d/local.env 2>&1 >/dev/null || cat <<EOF>> env.d/local.env
+FAUXBUILD=${1:-1}
+EOF
     cd $build_dir
     function ptouch() {
         for x in "$@" ; do
@@ -211,10 +221,13 @@ function 0a-1_ninja_fauxbuild() {( $_dbgopts;
     ptouch media_plugins/cef/media_plugin_cef.dll
     ptouch media_plugins/example/media_plugin_example.dll
     ptouch newview/${viewer_bin}-bin.exe
-    cat <<EOF>> msvc.nunja.env
-cl_exe=true.exe
-lib_exe=true.exe
-link_exe=true.exe
+    grep restat-only-cl.exe msvc.nunja.env || cat <<'EOF'>> msvc.nunja.env
+_cl_exe=$cl_exe
+_lib_exe=$lib_exe
+_link_exe=$link_exe
+cl_exe=restat-only-cl.exe
+lib_exe=restat-only-lib.exe
+link_exe=restat-only-link.exe
 EOF
 
 )}
@@ -224,10 +237,11 @@ function 0a0_ninja_build() {( $_dbgopts;
     set -a
     . $build_dir/msvc.env
     . $build_dir/msvc_path.env
+    . $build_dir/msvc.nunja.env
     . $BASH_ENV
     [[ "$OSTYPE" != "msys" ]] || which cl.exe > /dev/null || return 241
     echo "[$FUNCNAME] ninja -C $build_dir ${@:-llpackage}" >&2
-    ninja -C "$build_dir" "${@:-llpackage}" | colout -t ninja || _die_exit_code=$? _die "ninja failed"
+    ninja -C "$build_dir" "${@:-llpackage}" | ${NINJA_COLOUT:-colout -t ninja} || _die_exit_code=$? _die "ninja failed"
 )}
 
 function _get_APPLICATION_EXE() {(
@@ -270,6 +284,12 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
     ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
 )}
 
+function 0a2_postbuild() {( $_dbgopts;
+    if [[ -x $nunja_dir/postbuild.bash ]] ; then
+      echo "[sourcing] $nunja_dir/postbuild.bash" >&2
+      . $nunja_dir/postbuild.bash
+    fi
+)}
 
 function make_installer() {
   local nsi=$build_dir/newview/${viewer_bin}_setup_tmp.nsi
@@ -370,8 +390,12 @@ function _steps() {
 # Check if the script is being sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   $_dbgopts
-  cmd=$1
-  shift
+  if [[ $# == 0 ]] ; then
+      cmd=_steps
+  else
+      cmd=$1
+      shift
+  fi
   if [[ $cmd =~ ^[0-9a-fA-F]{3}$ ]] ; then
     cmd=$(echo $(_steps | grep $cmd))
     echo "cmd=$cmd" >&2
