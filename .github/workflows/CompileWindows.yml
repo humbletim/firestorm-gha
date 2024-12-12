@@ -28,7 +28,7 @@ jobs:
 
     - name: Output Inputs
       run: |
-        echo '${{ github.event.inputs.fstuple }}'
+        echo '${{ github.event.inputs.fstuple }}' | tee fstuple.json
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
 
     - name: _gha-inline
