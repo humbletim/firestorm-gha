@@ -235,6 +235,12 @@ jobs:
       with:
         run: fsvr_step 0a2
 
+    - name: ~0a2 Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == '0a2'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: 0b0 installer
       run: fsvr_step 0b0
     - name: 0b1 upload installer
