@@ -218,11 +218,11 @@ jobs:
       with:
         limit-access-to-actor: true
 
-    - name: 0a0_ninja_build SLPlugin.exe
-      run: fsvr_step 0a0 SLPlugin.exe
+    - name: 0a0_ninja_build SLPlugin
+      run: fsvr_step 0a0 SLPlugin
 
-    - name: 0a0_ninja_build application-bin.exe
-      run: fsvr_step 0a0 ${viewer_bin}-bin.exe
+    - name: 0a0_ninja_build application-bin
+      run: fsvr_step 0a0 ${viewer_bin}-bin
 
     - name: 0a0_ninja_build llpackage
       run: fsvr_step 0a0 llpackage
