@@ -3,13 +3,10 @@ maybe-clone viewer ${hub:-github.com} $repo "$ref"
 maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
 echo "snapshot test" -- skipping > repo/p373r/applied
 
-echo build_dir=$build_dir
-echo '#include <string>' | tee $build_dir/dummy.cpp
+echo '#include <string>' | tee build/dummy.cpp
 
-ls -lrtha $build_dir/dummy.cpp || { echo wtf ; exit 8 ; }
-
-    pushd repo/viewer
-patch -p1 < <(cat <<'EOF'
+pushd repo/viewer
+  patch -p1 < <(cat <<'EOF'
 diff --git a/indra/newview/viewer_manifest.py b/indra/newview/viewer_manifest.py
 index 9fa11fd534..2effbae944 100755
 --- a/indra/newview/viewer_manifest.py
@@ -27,5 +24,5 @@ EOF
 )
   git diff
   # git -C repo/viewer diff
-  popd
+popd
 
