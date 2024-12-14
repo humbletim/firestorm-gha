@@ -3455,7 +3455,7 @@ build llfilesystem\CMakeFiles\llfilesystem.dir\llfilesystem.cpp.obj: CXX_COMPILE
 
 build llfilesystem\CMakeFiles\llfilesystem.dir\lldir_win32.cpp.obj: CXX_COMPILER__llfilesystem_unscanned_Release $source_dir\llfilesystem\lldir_win32.cpp || cmake_object_order_depends_target_llfilesystem
   DEFINES = $DEFINES_2
-  FLAGS = $WX  -FI$nunja_dir/GetModuleFilename.inline.h  -Z7 -Y-
+  FLAGS = $WX  -FI$nunja_dir/GetModuleFileName.inline.h  -Z7 -Y-
   INCLUDES = $INCLUDE_3
   OBJECT_DIR = llfilesystem\CMakeFiles\llfilesystem.dir
   OBJECT_FILE_DIR = llfilesystem\CMakeFiles\llfilesystem.dir
