@@ -2,8 +2,11 @@
 maybe-clone viewer ${hub:-github.com} $repo "$ref"
 maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
 echo "snapshot test" -- skipping > repo/p373r/applied
-echo '#include <string>' > $build_dir/dummy.cpp
-ls -lrtha $build_dir
+
+echo build_dir=$build_dir
+echo '#include <string>' | tee $build_dir/dummy.cpp
+
+ls -lrtha $build_dir/dummy.cpp || { echo wtf ; exit 8 ; }
 
     pushd repo/viewer
 patch -p1 < <(cat <<'EOF'
