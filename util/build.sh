@@ -108,13 +108,18 @@ function 020_perform_replacements() {( $_dbgopts;
 )}
 
 function merge_packages_info() {( $_dbgopts;
+    echo 111 >&2
     local packages_info=${1:-}
     test -z "$packages_info" && packages_info=- \
     || test -s "$packages_info" || _die "merge_packages_info -- packages-info.json or stdin missing"
     test -s $build_dir/packages-info.json || { echo '{}' > $build_dir/packages-info.json ; }
+    echo 111 >&2
     local json="$(jq --sort-keys '. + $p' --argjson p "$(jq '.' $packages_info)" $build_dir/packages-info.json)"
+    echo 111 >&2
     test -n "$json" || _die "problem merging packages infos $packages_info $build_dir/packages-info.json"
+    echo 111 >&2
     echo "$json" > $build_dir/packages-info.json
+    echo 111 >&2
     _relativize "merged $packages_info" >&2
 )}
 
@@ -156,11 +161,15 @@ function 040_generate_package_infos() {( $_dbgopts;
       done ) | jq -sR | sed 's@^"@@;s@"$@@'
     )"
 
+    echo 159 >&2
     cat $fsvr_dir/meta/packages-info.json | envsubst | merge_packages_info || return `_err $? meta-packages-info`
 
+    echo 162 >&2
     merge_packages_info $nunja_dir/packages-info.json || return `_err $? nunja-packages-info`
+    echo 164 >&2
     test ! -s $fsvr_cache_dir/openvr-*.tar.*.json || \
       merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json || return `_err $? openvr-packages-info`
+    echo 167 >&2
     test ! -s repo/p373r/meta/packages-info.json || \
       merge_packages_info repo/p373r/meta/packages-info.json || return `_err $? p373r-packages-info`
 )}
@@ -291,6 +300,11 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
 function 0a2_postbuild() {( $_dbgopts;
     if [[ -x $nunja_dir/postbuild.bash ]] ; then
       echo "[sourcing] $nunja_dir/postbuild.bash" >&2
+      set -a
+      . $BASH_ENV
+      . $build_dir/msvc.env
+      . $build_dir/msvc_path.env
+      . $build_dir/msvc.nunja.env
       . $nunja_dir/postbuild.bash
     fi
 )}
@@ -359,9 +373,9 @@ function 0b3_upload_7z() {( $_dbgopts;
 function 0b4_bundle_zip() {( $_dbgopts;
   # mkdir ziptest
   # tar -C $build_dir -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
-  export APPLICATION_EXE=$(_get_APPLICATION_EXE)
-  _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
-  bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir/newview && 7z -mx5 -bd -bt -tzip a "$build_dir/${APPLICATION_EXE/.exe/.zip}" "$build_dir/newview/$APPLICATION_EXE"'
+  #export APPLICATION_EXE=$(_get_APPLICATION_EXE)
+  #_assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
+  #bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir/newview && 7z -mx5 -bd -bt -tzip a "$build_dir/${APPLICATION_EXE/.exe/.zip}" "$build_dir/newview/$APPLICATION_EXE"'
   bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir && 7z -mx5 -bd -bt -tzip a "$build_dir/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"'
 )}
 

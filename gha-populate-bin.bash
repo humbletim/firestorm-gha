@@ -108,10 +108,14 @@ function gha-populate-bin-windows() {(
     literally-exists $pysite/colout   || get_colout                || exit `_err $? "failed to provision colout $?"`
     literally-exists bin/parallel     || get_parallel              || exit `_err $? "failed to provision parallel $?"`
 
-    for x in colout parallel ht-ln hostname jq envsubst ; do
-      literally-exists bin/$x.exe || ht-ln bin/_invoke.exe bin/$x.exe || exit `_err $? "error symlinking $x $?"`
+    for x in colout parallel ht-ln hostname ; do
+        literally-exists bin/$x.exe || ht-ln bin/_invoke.exe bin/$x.exe || exit `_err $? "error symlinking $x $?"`
     done
-
+    if [[ "$GITHUB_ACTIONS" != "local" ]] ; then
+        for x in jq envsubst ; do
+            literally-exists bin/$x.exe || ht-ln bin/_invoke.exe bin/$x.exe || exit `_err $? "error symlinking $x $?"`
+        done
+    fi
     # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
     python3 -m pip install --no-warn-script-location --user llsd
   )}

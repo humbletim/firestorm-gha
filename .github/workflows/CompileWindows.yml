@@ -242,8 +242,10 @@ jobs:
         limit-access-to-actor: true
 
     - name: 0b0 installer
+      if: fromJSON(inputs.fstuple).installer != 'false'
       run: fsvr_step 0b0
     - name: 0b1 upload installer
+      if: fromJSON(inputs.fstuple).installer != 'false'
       uses: ./fsvr-action
       with:
         run: fsvr_step 0b1

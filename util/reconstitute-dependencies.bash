@@ -62,7 +62,7 @@ function untar_packages() {( set -Euo pipefail;
     echo cache_dir=$cache_dir >&2
     export cache_dir
     cd $packages_dir
-    jq -r '.[]|.url' $packages_json | grep -vE '^null$' \
+    jq -r '.[]|.url' $packages_json | grep -vE 'null' \
       | _parallel "$FUNCNAME" -j8 'basename {} && tar --exclude=autobuild-package.xml --force-local -xf "$cache_dir/$(basename {})"' \
       || _die "untar failed $?"
 )}
