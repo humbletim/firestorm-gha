@@ -22,12 +22,14 @@ function 010_ensure_build_directories() {( $_dbgopts;
     )
 
     for x in "${directories[@]}"; do
-      test -d $build_dir/$x && echo "[exists] $x" >&2 || mkdir -pv $build_dir/$x
+      test -d $build_dir/$x && echo "[exists] $x" >&2 || mkdir -pv $build_dir/$x || true
     done
 
-    if [[ -x $nunja_dir/010.bash ]] ; then
+    if [[ -f $nunja_dir/010.bash ]] ; then
       echo "[sourcing] $nunja_dir/010.bash" >&2
       . $nunja_dir/010.bash
+    else
+        echo "[NOT sourcing] $nunja_dir/010.bash" >&2
     fi
 )}
 
@@ -298,7 +300,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
 )}
 
 function 0a2_postbuild() {( $_dbgopts;
-    if [[ -x $nunja_dir/postbuild.bash ]] ; then
+    if [[ -f $nunja_dir/postbuild.bash ]] ; then
       echo "[sourcing] $nunja_dir/postbuild.bash" >&2
       set -a
       . $BASH_ENV
