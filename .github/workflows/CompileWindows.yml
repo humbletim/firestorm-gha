@@ -127,6 +127,10 @@ jobs:
           | hostname       | `hostname`      |
           $repos
           | ---------      | -----------     |
+
+          \`\`\`json
+          ${{ github.event.inputs.fstuple }}
+          \`\`\`
           EOF
 
     - name: Detect MSVC

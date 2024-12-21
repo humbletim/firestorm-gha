@@ -4,6 +4,8 @@ maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
 echo "snapshot test" -- skipping > repo/p373r/applied
 
 echo '#include <string>' | tee build/dummy.cpp
+mkdir -p build/newview
+touch build/newview/firestorm-bin.exe
 
 pushd repo/viewer
   patch -p1 < <(cat <<'EOF'

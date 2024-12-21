@@ -4,7 +4,7 @@ set -Euo pipefail
 
 source $ghash/gha.upload-artifact.bash
 
-snapshot_dir=$build_dir/${version_full}-snapshot
+snapshot_dir=$build_dir/${base}
 mkdir -pv $snapshot_dir
 
 cpsync() { cp -lunrp "$@" ; }
@@ -83,7 +83,12 @@ cp -ua $build_dir/newview/fsversionvalues.h $snapshot_dir/source/ || true
 
 echo "[7z] GENERATING ${version_full}-snapshot.zip..." >&2
 cd $build_dir
-time 7z -mx5 -bd -bt -tzip a ${version_full}-snapshot.zip ${version_full}-snapshot/
+time 7z -mx5 -bd -bt -tzip a ${version_full}-snapshot.zip $base
+
+ht-ln $build_dir/newview $base/runtime
+sed "s@^$viewer_channel-$version_full/@$base/runtime/@g" $build_dir/installer.txt > $base/runtime.txt
+head -2 $base/runtime.txt
+time 7z -mx5 -bd -bt -tzip a ${version_full}-snapshot.zip @$base/runtime.txt
 
 echo "UPLOADING ARTIFACT...${GITHUB_ACTIONS}" >&2
 gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; }
