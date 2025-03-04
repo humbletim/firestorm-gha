@@ -1,0 +1,12 @@
+diff --git a/indra/newview/viewer_manifest.py b/indra/newview/viewer_manifest.py
+index 9fa11fd534c..0dcc76d3ab3 100755
+--- a/indra/newview/viewer_manifest.py
++++ b/indra/newview/viewer_manifest.py
+@@ -939,6 +939,7 @@ class Windows_x86_64_Manifest(ViewerManifest):
+         return result
+         # </FS:Ansariel>
+     def dl_url_from_channel(self):
++        return str.format('https://github.com/humbletim/firestorm-gha/releases/#v{}', os.getenv('version_xyz'))
+         if self.channel_type() == 'release':
+             return 'https://www.firestormviewer.org/choose-your-platform'
+         elif self.channel_type() == 'beta':
