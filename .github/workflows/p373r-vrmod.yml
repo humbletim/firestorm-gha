@@ -110,7 +110,6 @@ jobs:
     - name: test compile
       run: |
         clang++ @winsdk.rsp @llobjs.rsp @link.rsp -o ${snapshot_dir}/runtime/test.exe
-        cmd //c "mklink /j ${base}-test ${snapshot_dir//\//\\}\\runtime"
 
     - name: test executable
       run: |

@@ -46,6 +46,8 @@ env | grep INPUT > $snapshot_dir/metadata/INPUT.env
 env | grep -i version=  > $snapshot_dir/metadata/version.env
 
 find $build_dir/ -type f > $snapshot_dir/metadata/build_dir.files.tmp
+( cat /d/a/_temp/_runner_file_commands/step_summary_*-scrubbed > $snapshot_dir/metadata/summary.md ) || true
+( ninja -C $build_dir -t commands ${viewer_bin}-bin | grep -Eo '[-]D[^ =]+(=[^ ]*)?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > $snapshot_dir/lldefines.rsp ) || true
 
 echo "SNAPSHOT PACKAGES..." >&2
 mkdir -pv $snapshot_dir/3p/lib
