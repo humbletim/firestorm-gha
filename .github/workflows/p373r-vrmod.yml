@@ -43,6 +43,16 @@ jobs:
         mklink /D winsdk\crt\lib "%VCToolsInstallDir%\lib"
         FOR /F "tokens=*" %%g IN ('cygpath -ma winsdk') do (echo winsdk=%%g >> %GITHUB_ENV%)
 
+    - name: link gha-node20-run
+      shell: cmd
+      run: mklink /j gha-node20-run "d:/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha-node20-run"
+
+    - name: test gha-node20-run
+      uses: ./gha-node20-run
+      with:
+        run: |
+          echo "testing 1 2 3..."
+
     - name: prepare llvm
       run: |
         cat <<EOF > winsdk.rsp
@@ -52,15 +62,17 @@ jobs:
           --target=x86_64-pc-windows-msvc -Wno-msvc-not-found -nostdinc -nodefaultlibs -fuse-ld=lld
         EOF
 
-    - name: download snapshot
+    - name: download and unpack snapshot
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh --repo ${{github.repository}} run download --name ${{fromJSON(inputs.fstuple).artifact}} --dir _snapshot
         export snapshot_dir=$(dirname _snapshot/*/llobjs.rsp.in)
+        export base=$(basename ${snapshot_dir})
+        cmd //c "mklink /j ${base}-test ${snapshot_dir//\//\\}\\runtime"
         (
           echo snapshot_dir=${snapshot_dir}
-          echo base=$(basename ${snapshot_dir})
+          echo base=${base}
         ) | tee -a $GITHUB_ENV
 
     - name: unfurl snapshot
@@ -80,7 +92,7 @@ jobs:
     - name: ninja blueprint test
       if: true
       run: |
-        curl -LO https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+        curl -sLO https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
         unzip ninja-win.zip
         cat <<EOF > build.ninja
         nunja_dir=d:/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/blueprints/${base}
@@ -89,9 +101,27 @@ jobs:
         EOF
         ./ninja -t commands | grep -Eo '[-]D[^ =]+(=[^ ]*)?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > defines.rsp
 
+    - name: provision p373r vrmod
+      run: |
+        . /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha/gha.quiet-clone.bash
+        quiet-clone github.com humbletim/firestorm-gha P373R_6.6.8 p373r
+        patch --directory=${snapshot_dir}/source/newview --ignore-whitespace --verbose --merge -p1 < p373r/0001-P373R-6.6.8-baseline-diff.patch
+
     - name: test compile
       run: |
-        clang++ @winsdk.rsp @llobjs.rsp @link.rsp -o test.exe
+        clang++ @winsdk.rsp @llobjs.rsp @link.rsp -o ${snapshot_dir}/runtime/test.exe
+        cmd //c "mklink /j ${base}-test ${snapshot_dir//\//\\}\\runtime"
+
+    - name: test executable
+      run: |
+        PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ${snapshot_dir}/runtime/test.exe --help 2>&1 | tail -5 || true
+
+    - name: bundle
+      uses: ./gha-node20-run
+      with:
+        run: |
+          . /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha/gha.upload-artifact.bash
+          gha-upload-artifact-fast ${base}-test ${snapshot_dir}/runtime/test.exe 1 9
 
     - name: ~Setup tmate session
       if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
