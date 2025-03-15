@@ -7,7 +7,7 @@ on:
           type: string
           required: true
 
-run-name: ${{ fromJSON(inputs.fstuple).title }} ${{ github.ref_name }} | ${{ fromJSON(inputs.fstuple).base }} @ ${{ fromJSON(inputs.fstuple).ref }}
+run-name: p373r-vrmod | ${{ fromJSON(inputs.fstuple).title }} ${{ fromJSON(inputs.fstuple).artifact }}
 
 defaults:
   run:
@@ -17,6 +17,8 @@ jobs:
   windows-build:
     runs-on: windows-latest
     steps:
+
+    - uses: humbletim/vsdevenv-shell@windows-2022-test
     - uses: humbletim/firestorm-gha/gha-node20-run@tpv-gha-nunja
       if: false
     - uses: actions/upload-artifact@v4
@@ -28,6 +30,21 @@ jobs:
       run: |
         echo '${{ github.event.inputs.fstuple }}' | tee fstuple.json
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
+    - name: Provision LLVM-compat
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: vsdevenv x64 cmd {0}
+      run: |
+        mkdir winsdk
+        mkdir winsdk\sdk
+        mklink /D winsdk\sdk\include "c:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0
+        mklink /D winsdk\sdk\lib "c:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0"
+        mkdir winsdk\crt
+        mklink /D winsdk\crt\include "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.43.34808\include"
+        mklink /D winsdk\crt\lib "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.43.34808\lib"
+        gh --repo ${{github.repository}} run download --name ${{fromJSON(inputs.fstuple).artifact}} --dir snapshot
+        where cl
+        where clang++
 
     - name: ~Setup tmate session
       # if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
