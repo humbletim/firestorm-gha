@@ -1,0 +1,36 @@
+name: p373r-vrmod
+
+on:
+  workflow_dispatch:
+      inputs:
+        fstuple:
+          type: string
+          required: true
+
+run-name: ${{ fromJSON(inputs.fstuple).title }} ${{ github.ref_name }} | ${{ fromJSON(inputs.fstuple).base }} @ ${{ fromJSON(inputs.fstuple).ref }}
+
+defaults:
+  run:
+    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+    - uses: humbletim/firestorm-gha/gha-node20-run@tpv-gha-nunja
+      if: false
+    - uses: actions/upload-artifact@v4
+      if: false
+    - uses: actions/cache@v4
+      if: false
+
+    - name: Output Inputs
+      run: |
+        echo '${{ github.event.inputs.fstuple }}' | tee fstuple.json
+        echo '${{ fromJSON(github.event.inputs.fstuple) }}'
+
+    - name: ~Setup tmate session
+      # if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
