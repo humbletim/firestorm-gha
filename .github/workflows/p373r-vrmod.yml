@@ -30,24 +30,71 @@ jobs:
       run: |
         echo '${{ github.event.inputs.fstuple }}' | tee fstuple.json
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
-    - name: Provision LLVM-compat
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: detect winsdk
       shell: vsdevenv x64 cmd {0}
       run: |
         mkdir winsdk
         mkdir winsdk\sdk
-        mklink /D winsdk\sdk\include "c:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0
-        mklink /D winsdk\sdk\lib "c:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0"
         mkdir winsdk\crt
-        mklink /D winsdk\crt\include "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.43.34808\include"
-        mklink /D winsdk\crt\lib "c:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.43.34808\lib"
-        gh --repo ${{github.repository}} run download --name ${{fromJSON(inputs.fstuple).artifact}} --dir snapshot
-        where cl
-        where clang++
+        mklink /D winsdk\sdk\include "%WindowsSdkDir%\Include\%WindowsSDKVersion%"
+        mklink /D winsdk\sdk\lib "%WindowsSdkDir%\Lib\%WindowsSDKVersion"
+        mklink /D winsdk\crt\include "%VCToolsInstallDir%\include"
+        mklink /D winsdk\crt\lib "%VCToolsInstallDir%\lib"
+        FOR /F "tokens=*" %%g IN ('cygpath -ma winsdk') do (echo winsdk=%%g >> %GITHUB_ENV%)
+
+    - name: prepare llvm
+      run: |
+        cat <<EOF > winsdk.rsp
+          -isystem$winsdk/crt/include -isystem$winsdk/sdk/include/ucrt -isystem$winsdk/sdk/include/shared -isystem$winsdk/sdk/include/um
+          -L$winsdk/crt/lib/x86_64 -L$winsdk/sdk/lib/um/x86_64 -L$winsdk/sdk/lib/ucrt/x86_64
+          -Wno-unused-command-line-argument -Wl,-ignore:4099 -DNOMINMAX -DNDEBUG
+          --target=x86_64-pc-windows-msvc -Wno-msvc-not-found -nostdinc -nodefaultlibs -fuse-ld=lld
+        EOF
+
+    - name: download snapshot
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh --repo ${{github.repository}} run download --name ${{fromJSON(inputs.fstuple).artifact}} --dir _snapshot
+        export snapshot_dir=$(dirname _snapshot/*/llobjs.rsp.in)
+        (
+          echo snapshot_dir=${snapshot_dir}
+          echo base=$(basename ${snapshot_dir})
+        ) | tee -a $GITHUB_ENV
+
+    - name: unfurl snapshot
+      run: |
+        test -f ${snapshot_dir}/llobjs.rsp.in
+        envsubst < ${snapshot_dir}/llobjs.rsp.in > llobjs.rsp
+        envsubst < ${snapshot_dir}/llincludes.rsp.in > llincludes.rsp || true
+        envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp || true
+        cat <<EOF > link.rsp
+          -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -fms-runtime-lib=dll -Wno-inconsistent-dllimport
+          -lpsapi -ladvapi32 -lws2_32 -lmswsock -lrpcrt4 -lshell32 -lnetapi32 -lwer -ldbghelp -lgdi32 -lcomdlg32 -ldxgi -lopengl32 -limm32 -lwinmm -lcrypt32
+          -L${snapshot_dir}/3p/lib -llibpng16 -lapr-1 -laprutil-1 -llibexpat -lminizip -lzlib -lmeshoptimizer -llibcollada14dom23-s -lfreetype -ljpeg -llibhunspell -lopenjp2 -llibcurl -llibssl -llibcrypto -lOpenAL32 -lalut -llibvorbisfile -llibvorbis -llibvorbisenc -llibogg -lnghttp2.lib -llibxml2 -Llxmlrpc-epi -llibndofdev -lhacd -lnd_hacdConvexDecomposition -lnd_pathing -lglu32 -lnvapi -ldiscord-rpc -lglod -lgrowl++
+          ${snapshot_dir}/objs/llwebrtc.lib
+          -llibboost_program_options-mt-x64 -llibboost_thread-mt-x64 -llibboost_url-mt-x64 -llibboost_fiber-mt-x64 -llibboost_context-mt-x64 -llibboost_wave-mt-x64 -llibboost_filesystem-mt-x64
+        EOF
+
+    - name: ninja blueprint test
+      if: true
+      run: |
+        curl -LO https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+        unzip ninja-win.zip
+        cat <<EOF > build.ninja
+        nunja_dir=d:/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/blueprints/${base}
+        include ${snapshot_dir}/metadata/env.d/build_vars.env
+        include \$nunja_dir/blueprint.arrant.nunja
+        EOF
+        ./ninja -t commands | grep -Eo '[-]D[^ =]+(=[^ ]*)?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > defines.rsp
+
+    - name: test compile
+      run: |
+        clang++ @winsdk.rsp @llobjs.rsp @link.rsp -o test.exe
 
     - name: ~Setup tmate session
-      # if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
