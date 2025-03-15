@@ -3523,7 +3523,7 @@ build cmake_object_order_depends_target_llwebrtc: phony || llwebrtc\CMakeFiles\l
 
 build llwebrtc\CMakeFiles\llwebrtc.dir\llwebrtc.cpp.obj: CXX_COMPILER__llwebrtc_unscanned_Release $source_dir\llwebrtc\llwebrtc.cpp || cmake_object_order_depends_target_llwebrtc
   DEFINES = $DEFINES_8 -Dllwebrtc_EXPORTS
-  FLAGS = $FLAGS_7
+  FLAGS = $FLAGS_9
   INCLUDES = -external:I$packages_dir\include\webrtc -external:I$packages_dir\include\webrtc\third_party\abseil-cpp -external:W0
   OBJECT_DIR = llwebrtc\CMakeFiles\llwebrtc.dir
   OBJECT_FILE_DIR = llwebrtc\CMakeFiles\llwebrtc.dir
@@ -5538,7 +5538,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\fsfloaterplacedetails.cpp.obj
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\fsfloaterposer.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\fsfloaterposer.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -5629,7 +5629,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\fsfloaterwhitelisthelper.cpp.
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\fsjointpose.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\fsjointpose.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -5671,7 +5671,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\fslslpreprocviewer.cpp.obj: C
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\fsmaniprotatejoint.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\fsmaniprotatejoint.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -5783,14 +5783,14 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\fspose.cpp.obj: CXX_COMPILER_
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\fsposeranimator.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\fsposeranimator.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\fsposingmotion.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\fsposingmotion.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -5944,7 +5944,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\vjlocalmesh.cpp.obj: CXX_COMP
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\vjfloaterlocalmesh.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\vjfloaterlocalmesh.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX  -I$packages_dir/include/collada -I$packages_dir/include/collada/1.4
+  FLAGS = $WX  -I$packages_dir/include/collada -I$packages_dir/include/collada/1.4  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -7120,7 +7120,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llfloaterimcontainer.cpp.obj:
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\llfloaterinspect.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\llfloaterinspect.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -7533,7 +7533,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llfloaterspellchecksettings.c
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\llfloatertelehub.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\llfloatertelehub.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -7554,7 +7554,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llfloatertestlistview.cpp.obj
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\llfloatertools.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\llfloatertools.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -8450,7 +8450,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llpanelclassified.cpp.obj: CX
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\llpanelcontents.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\llpanelcontents.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -8709,7 +8709,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llpanelnearbymedia.cpp.obj: C
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\llpanelobject.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\llpanelobject.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -8912,7 +8912,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llpanelvoicedevicesettings.cp
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\llpanelvolume.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\llpanelvolume.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -9654,7 +9654,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\lltoastscriptquestion.cpp.obj
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\lltool.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\lltool.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -9675,7 +9675,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\lltoolbrush.cpp.obj: CXX_COMP
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\lltoolcomp.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\lltoolcomp.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -9724,7 +9724,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\lltoolindividual.cpp.obj: CXX
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\lltoolmgr.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\lltoolmgr.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -9759,7 +9759,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\lltoolpipette.cpp.obj: CXX_CO
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\lltoolplacer.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\lltoolplacer.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -9990,7 +9990,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llviewerdisplayname.cpp.obj: 
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\llviewerfloaterreg.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\llviewerfloaterreg.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX  -I$packages_dir/include/collada -I$packages_dir/include/collada/1.4
+  FLAGS = $WX  -I$packages_dir/include/collada -I$packages_dir/include/collada/1.4  -FIchrono
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -10277,7 +10277,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llviewerwearable.cpp.obj: CXX
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\llviewerwindow.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\llviewerwindow.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX  -Z7 -Y-
+  FLAGS = $WX  -FIchrono  -Z7 -Y-
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -10789,7 +10789,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llwindebug.cpp.obj: CXX_COMPI
 build newview\CMakeFiles\firestorm-bin_objects.dir\viewerRes.rc.res: RC_COMPILER__firestorm-bin_objects_unscanned_Release $build_dir\newview\viewerRes.rc || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
   DEP_FILE = newview\CMakeFiles\firestorm-bin_objects.dir\viewerRes.rc.res.d
-  FLAGS = $FLAGS_6
+  FLAGS = $FLAGS_8
   INCLUDES = -I $build_dir\newview -I $source_dir\llaudio -I $source_dir\llappearance -I $source_dir\llcharacter -I $source_dir\llcommon -I $source_dir\llcorehttp -I $source_dir\llfilesystem -I $source_dir\llimage -I $source_dir\llinventory -I $source_dir\lllogin -I $source_dir\llmath -I $source_dir\llmeshoptimizer -I $source_dir\llmessage -I $source_dir\llplugin -I $source_dir\llprimitive -I $source_dir\llrender -I $source_dir\llui -I $source_dir\llwebrtc -I $source_dir\llwindow -I $source_dir\llxml -I $source_dir\viewer_components\login -I $packages_dir\include -I $packages_dir\include\llphysicsextensions -I $packages_dir\include\apr-1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
