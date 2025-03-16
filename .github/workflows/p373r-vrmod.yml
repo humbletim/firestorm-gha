@@ -107,8 +107,11 @@ jobs:
           -w -std=c++20 -isystem${snapshot_dir}/3p/include/apr-1
           -fms-runtime-lib=dll -pthread
         EOF
-        echo "priming clang++ invocation delay in background..."
+        echo "neutralizing Strawberry Perl threat (of confusing PATHs with its ownpatch.exe) ..."
+        test ! -d /c/Strawberry || mv -v /c/Strawberry /c/Strawberry.not
+        echo "nudging cold clang++ startup times by pre-warming in background..."
         clang++ @link.rsp @llobjs.rsp --version 2>&1 > /dev/null &
+        llvm-rc -h 2>&1 > /dev/null &
         exit 0
 
     - name: ninja blueprint test
@@ -174,6 +177,7 @@ jobs:
                 s@(VALUE (.)LegalCopyright.), .*@ \1, \2${LegalCopyright}\2 @;
                 s@firestorm_icon.ico@${icon}@;
         ' | envsubst)" < ${snapshot_dir}/source/viewerRes.rc > viewerRes.rc
+        echo "updating metadata via llvm-rc... "
         llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc
 
     - name: compile llviewerdisplay.cpp
