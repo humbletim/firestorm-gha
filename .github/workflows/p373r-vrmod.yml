@@ -177,16 +177,17 @@ jobs:
                 s@(VALUE (.)LegalCopyright.), .*@ \1, \2${LegalCopyright}\2 @;
                 s@firestorm_icon.ico@${icon}@;
         ' | envsubst)" < ${snapshot_dir}/source/viewerRes.rc > viewerRes.rc
-        echo "updating metadata via llvm-rc... "
-        llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc
 
-    - name: compile llviewerdisplay.cpp
+    - name: compile overrides
       run: |
-        clang++ @compile.rsp @mm.rsp -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj
-
-    - name: workaround boost::json quirk
-      run: |
-        echo "boost::json::detail::default_resource boost::json::detail::default_resource::instance_;" | clang++ @compile.rsp -includeboost/json.hpp -x c++ -c - -o bjson.o
+        llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc &
+        process1_pid=$!
+        clang++ @compile.rsp @mm.rsp -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj &
+        process2_pid=$!
+        echo "boost::json::detail::default_resource boost::json::detail::default_resource::instance_;" | clang++ @compile.rsp -includeboost/json.hpp -x c++ -c - -o bjson.o &
+        process3_pid=$!
+        echo "waiting on subprocesses... $process1_pid $process2_pid $process3_pid"
+        wait $process1_pid $process2_pid $process3_pid
 
     - name: link executable
       run: |
