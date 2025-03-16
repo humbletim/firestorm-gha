@@ -34,14 +34,14 @@ jobs:
     - name: detect winsdk
       shell: vsdevenv x64 cmd {0}
       run: |
+        @echo off
         mkdir winsdk
         mkdir winsdk\sdk
         mkdir winsdk\crt
         mklink /D winsdk\sdk\include "%WindowsSdkDir%\Include\%WindowsSDKVersion%"
-        mklink /D winsdk\sdk\lib "%WindowsSdkDir%\Lib\%WindowsSDKVersion"
+        mklink /D winsdk\sdk\lib "%WindowsSdkDir%\Lib\%WindowsSDKVersion%"
         mklink /D winsdk\crt\include "%VCToolsInstallDir%\include"
         mklink /D winsdk\crt\lib "%VCToolsInstallDir%\lib"
-        FOR /F "tokens=*" %%g IN ('cygpath -ma winsdk') do (echo winsdk=%%g >> %GITHUB_ENV%)
 
     - name: link gha-node20-run
       shell: cmd
@@ -55,11 +55,17 @@ jobs:
 
     - name: prepare llvm
       run: |
+        winsdk=$(cygpath -ma winsdk)
         cat <<EOF > winsdk.rsp
           -isystem$winsdk/crt/include -isystem$winsdk/sdk/include/ucrt -isystem$winsdk/sdk/include/shared -isystem$winsdk/sdk/include/um
           -L$winsdk/crt/lib/x86_64 -L$winsdk/sdk/lib/um/x86_64 -L$winsdk/sdk/lib/ucrt/x86_64
           -Wno-unused-command-line-argument -Wl,-ignore:4099 -DNOMINMAX -DNDEBUG
           --target=x86_64-pc-windows-msvc -Wno-msvc-not-found -nostdinc -nodefaultlibs -fuse-ld=lld
+        EOF
+        _llvm=$(cygpath -ms "$(dirname "$(which clang++)")/../lib/clang/"/*/include)
+        cat <<EOF > mm.rsp
+          -D_INCLUDED_AMM -D_INCLUDED_IMM -D_INCLUDED_EMM -D_INCLUDED_NMM -D_INCLUDED_PMM -D_INCLUDED_SMM -D_INCLUDED_TMM -D_INCLUDED_WMM -D_INCLUDED_MM2 -D_MMINTRIN_H_INCLUDED -D_MMINTRIN_H_INCLUDED -D_INCLUDED_INTRIN -D__INTRIN_H_
+          -isystem${_llvm} -include${_llvm}/mmintrin.h -include${_llvm}/xmmintrin.h -include${_llvm}/emmintrin.h -include${_llvm}/adcintrin.h
         EOF
 
     - name: download and unpack snapshot
@@ -80,36 +86,98 @@ jobs:
         test -f ${snapshot_dir}/llobjs.rsp.in
         envsubst < ${snapshot_dir}/llobjs.rsp.in > llobjs.rsp
         envsubst < ${snapshot_dir}/llincludes.rsp.in > llincludes.rsp || true
-        envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp || true
+        test -f ${snapshot_dir}/lldefines.rsp.in && ( envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp ) || true
         cat <<EOF > link.rsp
-          -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -fms-runtime-lib=dll -Wno-inconsistent-dllimport
+          @winsdk.rsp
+          -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -Wno-inconsistent-dllimport
           -lpsapi -ladvapi32 -lws2_32 -lmswsock -lrpcrt4 -lshell32 -lnetapi32 -lwer -ldbghelp -lgdi32 -lcomdlg32 -ldxgi -lopengl32 -limm32 -lwinmm -lcrypt32
           -L${snapshot_dir}/3p/lib -llibpng16 -lapr-1 -laprutil-1 -llibexpat -lminizip -lzlib -lmeshoptimizer -llibcollada14dom23-s -lfreetype -ljpeg -llibhunspell -lopenjp2 -llibcurl -llibssl -llibcrypto -lOpenAL32 -lalut -llibvorbisfile -llibvorbis -llibvorbisenc -llibogg -lnghttp2.lib -llibxml2 -Llxmlrpc-epi -llibndofdev -lhacd -lnd_hacdConvexDecomposition -lnd_pathing -lglu32 -lnvapi -ldiscord-rpc -lglod -lgrowl++
           ${snapshot_dir}/objs/llwebrtc.lib
           -llibboost_program_options-mt-x64 -llibboost_thread-mt-x64 -llibboost_url-mt-x64 -llibboost_fiber-mt-x64 -llibboost_context-mt-x64 -llibboost_wave-mt-x64 -llibboost_filesystem-mt-x64
         EOF
+        cat <<EOF > compile.rsp
+          @winsdk.rsp @llincludes.rsp @lldefines.rsp
+          -DLL_WINDOWS
+          -isystem${snapshot_dir}/3p/include
+          -w -std=c++20 -isystem${snapshot_dir}/3p/include/apr-1
+          -fms-runtime-lib=dll -pthread
+        EOF
 
     - name: ninja blueprint test
       if: true
       run: |
-        curl -sLO https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-        unzip ninja-win.zip
+        test -x ninja || (
+          curl -sLO https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+          unzip ninja-win.zip
+        )
         cat <<EOF > build.ninja
         nunja_dir=d:/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/blueprints/${base}
         include ${snapshot_dir}/metadata/env.d/build_vars.env
         include \$nunja_dir/blueprint.arrant.nunja
         EOF
-        ./ninja -t commands | grep -Eo '[-]D[^ =]+(=[^ ]*)?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > defines.rsp
+        ./ninja -t commands | grep -Eo '(")?[-]D[^ =]+(=[^ ]*)?\1?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > defines.rsp
+        test -s lldefines.rsp || ( cat defines.rsp >> lldefines.rsp )
 
     - name: provision p373r vrmod
       run: |
         . /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha/gha.quiet-clone.bash
-        quiet-clone github.com humbletim/firestorm-gha P373R_6.6.8 p373r
-        patch --directory=${snapshot_dir}/source/newview --ignore-whitespace --verbose --merge -p1 < p373r/0001-P373R-6.6.8-baseline-diff.patch
+        test -d p373r || quiet-clone github.com humbletim/firestorm-gha P373R_6.6.8 p373r
+        grep P373R ${snapshot_dir}/source/newview/llviewerdisplay.cpp >/dev/null || \
+          ( patch --directory=${snapshot_dir}/source/newview --ignore-whitespace --verbose --merge -p1 < p373r/0001-P373R-6.6.8-baseline-diff.patch )
+        cat <<'EOF' | sed 's@^        @@;' | base64 -d | gunzip -c > icon.ico
+        H4sICAwo1mcAA2ljb24uaWNvAO1Y+0+TZxT+9h/4035cyJQFLZdSWvrJra2lyApTjNAhRC1YcRlO
+        FzMvuylab/MS9Ict2ZYQMl0WtYqXLSpRtkRN3DINIG5uZpkCpf16odAOAgnw7Lynk0SZMfZiTPRp
+        TnNy3ue8z3fe2/e2kvQKfVJSJPEtXZ0lSa9KkpRGRiHJKEXjjFnSDOAlYsLU1NRDlixMTk4iEolg
+        MDQIf8APxafAq3jh8XrgJfN4B6Z9RVGI4yNukHNEbryYmJhAaCgEv99HuqTnGcDAgJusH4FgAIHB
+        ANzkc8zjZo7Pr2CIckRuoiHG+kFd37edxLk2F/silsx5eBTXr12BJU/DJvxnifv3/kblm2aU5Oeg
+        JC8HVVYzein2LDA2NobGuloUy2qUGWWUGWSYyW+sr8U4tSUbhz7bBZM2g7Wthqi+8I0UO7Rvd1K1
+        O9rPU93ZsBbpSZusSGbjZ6GYGJOO9gtJ0Va8XtjKS7AwXztdc7GsQfF8zX/zMJ/bbGUW4noSru/8
+        eDMW6LKi2oaodl5mGptFPAPpCxMc50ebEqp95acO1hP9lxbosCA3E+XmAtQtW4q66kosMhdSLIvb
+        BEfMkchJBMbHx7GyqoJqzOY6qxeV4uzJEwjS2Rc9+4HBYBBnT7mwbHEpcwRX5IjceHHadRy6ebNh
+        1GXA/nYF+vt6H8t19/XBbqvgvZBLOaddx+LSFrU5am2Q01NhyMlA180bT8zpvPkrDLpMyBlvwFFj
+        i+tM7qd6zHIO63+wds10/Iczbfi8eT/7R1q+xm+3uvHjpXZ8900rxwRXzkylXA2PSay41dUJE61n
+        ozaddL7imKimYXk1ykx5GAqF0LRlI9avqcdbtAavX7vKnKPEFTkmWqc93Z0x6/9+u4fXfaF6Ho4d
+        idZ245ef8f47q3CYzjoR27P9UxzYtR0Hdu+A85MtzDl+tBVFGhXM+mzcoT5ihY/uGaWFMnRzX8f+
+        nU0c27tjK75tbcHdP+5gXUMdmj7ciHfrl6Nx1Qq0fPkFcwRX5Cws1FMfSsz6Au857JBVqahdYsU/
+        dKcR94/R0VFu671/Dx63G7dp/v+6+yfHIuEwaiqsvGbWOlbGpS1w+eJ5WvvpNJZZPOZPgngHmfVq
+        ylHhEuUmAts2b4CR9p9YC817dyI8PDyDE6a6m+ndaCGO4G7dtCEh2tw36a1vsHNN+eq5qCy34OAe
+        J864TvBZKHRtFCtQp8GgVWHdavv/PmM8GB0Z4XVlonM+N302tGkpyJ7zGpvw9ao53LbPuQ0jxE0W
+        erq7uHZHTRWWlJjIjORX4iDtv3j2+tOCfxfQnEfCwwm557/Ei4mZ/wg8P/gXxoQ5DtoQAAA=
+        EOF
+        set -a
+        . ${snapshot_dir}/metadata/env.d/build_vars.env
+        CompanyName=${GITHUB_REPOSITORY}
+        FileDescription=${GITHUB_WORKFLOW}
+        ProductName=$(echo "${GITHUB_WORKFLOW_REF}" | tr '@' '#')
+        ProductVersion=${version_full}
+        FileVersion=${viewer_version}
+        InternalName=${viewer_channel}
+        LegalCopyright=$(date +"%Y.%m.%d.%H:%M:%S" )
+        icon=icon.ico
+        sed -E "$(echo '
+                s@\b((FILE|PRODUCT)VERSION\s+(([0-9]+.){3}))[0-9]{5}@\10@g;
+                s@(VALUE (.)CompanyName.), .*@    \1, \2${CompanyName}\2    @;
+                s@(VALUE (.)ProductName.), .*@    \1, \2${ProductName}\2    @;
+                s@(VALUE (.)ProductVersion.), .*@ \1, \2${ProductVersion}\2 @;
+                s@(VALUE (.)InternalName.), .*@   \1, \2${InternalName}\2   @;
+                s@(VALUE (.)FileDescription.), .*@\1, \2${FileDescription}\2@;
+                s@(VALUE (.)FileVersion.), .*@    \1, \2${FileVersion}\2    @;
+                s@(VALUE (.)LegalCopyright.), .*@ \1, \2${LegalCopyright}\2 @;
+                s@firestorm_icon.ico@${icon}@;
+        ' | envsubst)" < ${snapshot_dir}/source/viewerRes.rc > viewerRes.rc
+        llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc
 
-    - name: test compile
+    - name: compile llviewerdisplay.cpp
       run: |
-        clang++ @winsdk.rsp @llobjs.rsp @link.rsp -o ${snapshot_dir}/runtime/test.exe
+        clang++ @compile.rsp @mm.rsp -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj
+
+    - name: workaround boost::json quirk
+      run: |
+        echo "boost::json::detail::default_resource boost::json::detail::default_resource::instance_;" | clang++ @compile.rsp -includeboost/json.hpp -x c++ -c - -o bjson.o
+
+    - name: link executable
+      run: |
+        clang++ @link.rsp @llobjs.rsp bjson.o -o ${snapshot_dir}/runtime/test.exe
 
     - name: test executable
       run: |
@@ -120,7 +188,25 @@ jobs:
       with:
         run: |
           . /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha/gha.upload-artifact.bash
-          gha-upload-artifact-fast ${base}-test ${snapshot_dir}/runtime/test.exe 1 9
+          gha-upload-artifact-fast $(date +"%Y%m%d-%H%M%S" )-${base}-test ${snapshot_dir}/runtime/test.exe 1 9
+
+    - name: gha_step recovery
+      if: failure()
+      run: |
+        cat <<'EOF' > _yaml.bash
+          ghash=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha
+          . $ghash/gha.quiet-clone.bash
+          test -d clone || quiet-clone github.com humbletim/firestorm-gha tpv-gha-nunja clone
+          test -x bin/yaml2json || (
+            . $ghash/gha.wget-sha256.bash
+            . $ghash/../gha-populate-bin.bash
+              mkdir -pv bin
+              get_yaml2json-windows
+          )
+          . $ghash/../gha-steps.bash
+          workflow=clone/.github/workflows/p373r-vrmod.yml
+        EOF
+
 
     - name: ~Setup tmate session
       if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'

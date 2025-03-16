@@ -42,12 +42,16 @@ cp -ua env.d $snapshot_dir/metadata
 test ! -s fstuple.json || cp -av fstuple.json $snapshot_dir/metadata/
 cp -ua $build_dir/packages-info.json $snapshot_dir/metadata/
 cp -ua $nunja_dir/viewer_version.txt $snapshot_dir/metadata/
-env | grep INPUT > $snapshot_dir/metadata/INPUT.env
-env | grep -i version=  > $snapshot_dir/metadata/version.env
+cp -ua $nunja_dir/runtime.installer.nsi $snapshot_dir/metadata/
 
-find $build_dir/ -type f > $snapshot_dir/metadata/build_dir.files.tmp
+mkdir -pv $snapshot_dir/metadata/tmp
+cp -ua $nunja_dir/runtime.installer.original.nsi $snapshot_dir/metadata/tmp/
+env | grep INPUT > $snapshot_dir/metadata/tmp/INPUT.env
+env | grep -i version=  > $snapshot_dir/metadata/tmp/version.env
+find $build_dir/ -type f > $snapshot_dir/metadata/tmp/build_dir.files
+
 ( cat /d/a/_temp/_runner_file_commands/step_summary_*-scrubbed > $snapshot_dir/metadata/summary.md ) || true
-( ninja -C $build_dir -t commands ${viewer_bin}-bin | grep -Eo '[-]D[^ =]+(=[^ ]*)?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > $snapshot_dir/lldefines.rsp ) || true
+( ninja -C $build_dir -t commands ${viewer_bin}-bin | grep -Eo '(")?[-]D[^ =]+(=[^ ]*)?\1?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > $snapshot_dir/lldefines.rsp ) || true
 
 echo "SNAPSHOT PACKAGES..." >&2
 mkdir -pv $snapshot_dir/3p/lib
