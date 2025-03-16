@@ -281,6 +281,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
         echo "nsi=$nsi"
         echo "application_bin=${viewer_bin}-bin.exe"
       ) | tee $build_dir/APPLICATION_EXE.env
+      cat "$nsi" | sed -e "s@File [^ ]\+[/\\]newview[/\\]@File @g;s@^File @runtime/@g;s@$APPLICATION_EXE@APPLICATION_EXE@g;" > $build_dir/runtime.installer.nsi
       _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
       cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
         | APPLICATION_EXE=$APPLICATION_EXE envsubst \
@@ -298,7 +299,6 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
       grep "openvr_api.dll" -C2 $nsi
     )
     cp -av "$nsi" $build_dir/runtime.installer.original.nsi
-    cat "$nsi" | sed -e "s@File [^ ]\+[/\\]newview[/\\]@File @g;s@^File @runtime/@g;s@$APPLICATION_EXE@APPLICATION_EXE@g;" > $build_dir/runtime.installer.nsi
     grep -E ^File "$nsi" | sed -e "s@File [^ ]\+[/\\]newview[/\\]@File @g;s@^File @$viewer_channel-$version_full/@g" | sort -u > $build_dir/installer.txt
     echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
     tail -2 $build_dir/installer.txt

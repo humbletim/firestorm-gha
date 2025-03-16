@@ -37,17 +37,24 @@ build_dir_rel=$(realpath --relative-to="$(pwd -W)" $build_dir || echo $build_dir
     # )
 )
 
+(
+    cd $snapshot_dir
+    find objs/ -name \*.obj -o -name \*.res | sed 's@^@${snapshot_dir}/@' > $snapshot_dir/llobjs.rsp.in || exit 77
+    cd ..
+)
+
 ###########################################################################
 echo "SNAPSHOT METADATA..." >&2
 mkdir -pv $snapshot_dir/metadata
 mkdir -pv $snapshot_dir/metadata/tmp
 cp -ua env.d $snapshot_dir/metadata
+
+cp -ua $nunja_dir $snapshot_dir/metadata/tmp
+cp -ua $build_dir/msvc.nunja.env $snapshot_dir/metadata/tmp
+
 test ! -s fstuple.json || cp -av fstuple.json $snapshot_dir/metadata/
 cp -ua $build_dir/packages-info.json $snapshot_dir/metadata/
 cp -ua $nunja_dir/viewer_version.txt $snapshot_dir/metadata/
-cp -ua $build_dir/runtime.installer.nsi $snapshot_dir/metadata/
-
-cp -ua $build_dir/runtime.installer.original.nsi $snapshot_dir/metadata/tmp/
 env | grep INPUT > $snapshot_dir/metadata/tmp/INPUT.env
 env | grep -i version=  > $snapshot_dir/metadata/tmp/version.env
 find $build_dir/ -type f > $snapshot_dir/metadata/tmp/build_dir.files
@@ -71,6 +78,8 @@ cpsync $build_dir/newview/packages-info.txt $snapshot_dir/3p/
 ###########################################################################
 echo "SNAPSHOT CORRESPONDING SOURCE..." >&2
 mkdir -pv $snapshot_dir/source
+cp -ua $source_dir/../LICENSE $snapshot_dir/
+
 cp -ua $build_dir/newview/fsversionvalues.h $snapshot_dir/source/ || true
 cp -ua $build_dir/newview/viewerRes.rc $snapshot_dir/source/ || true
 
@@ -94,7 +103,6 @@ done
 (
     cd $snapshot_dir
     ls source/* -1d | sed 's@^@-I${snapshot_dir}/@' > $snapshot_dir/llincludes.rsp.in
-    find objs/ -name \*.obj -o -name \*.res | sed 's@^@${snapshot_dir}/@' > $snapshot_dir/llobjs.rsp.in || exit 77
     cd ..
 )
 
@@ -102,12 +110,23 @@ done
 # stage installer/runtime
 cp -av $build_dir/APPLICATION_EXE.env $snapshot_dir/metadata/tmp/
 . $build_dir/APPLICATION_EXE.env
-sed "s@^$viewer_channel-$version_full/@$base/runtime/@g" $build_dir/installer.txt \
-    | grep -vE "${application_bin}|${APPLICATION_EXE}" > $base/runtime.txt
-head -2 $base/runtime.txt
-cp -av $base/runtime.txt $snapshot_dir/metadata/tmp/
-sed "s@$base/runtime/@\${snapshot_dir}/runtime/@g" $base/runtime.txt > $snapshot_dir/metadata/runtime.rsp.in
-sed "s@$base/runtime/@runtime/@g" $base/runtime.txt > $snapshot_dir/metadata/runtime.rsp
+
+cp -ua $build_dir/runtime.installer.original.nsi $snapshot_dir/metadata/tmp/
+
+mkdir -pv $snapshot_dir/metadata/nsi/
+sed 's@"[^"]\+\\newview\\installers\\windows\\@\${snapshot_dir}/metadata/nsi/@g' $build_dir/runtime.installer.nsi \
+    > $snapshot_dir/metadata/installer.nsi.in
+grep -Eo '[^"]+\\newview\\installers\\windows\\[^"]+' $build_dir/runtime.installer.nsi | sort -u > $build_dir/nsis.txt
+for x in `cat $build_dir/nsis.txt` ; do
+    cpsync "$x" $snapshot_dir/metadata/nsi/
+done
+
+sed "s@^$viewer_channel-$version_full/@$base/runtime/@g;" $build_dir/installer.txt \
+    | grep -vE "${application_bin}|${APPLICATION_EXE}" > $build_dir/runtime.txt
+head -2 $build_dir/runtime.txt
+cp -av $build_dir/runtime.txt $snapshot_dir/metadata/tmp/
+sed "s@$base/runtime/@\${snapshot_dir}/runtime/@g" $build_dir/runtime.txt > $snapshot_dir/metadata/runtime.rsp.in
+sed "s@$base/runtime/@runtime/@g" $build_dir/runtime.txt > $snapshot_dir/metadata/runtime.rsp
 head -2 $snapshot_dir/metadata/runtime.rsp.in
 
 ###########################################################################
@@ -115,17 +134,19 @@ echo "[7z] GENERATING ${version_full}-(devtime|runtime|snapshot).zip..." >&2
 
 cd $build_dir
 
+test ! -d $base/runtime || rm -v $base/runtime
 # package ${base:-fs-beta-7.1.12-e}/ => "devtime" capture
-time 7z -mx5 -bd -bt -tzip a ${version_full}-devtime.zip $base
+time ${_7z:-7z} -mx5 -bd -bt -tzip a ${version_full}-devtime.zip $base
 
 # stage fs-beta-7.1.12-e/runtime/
 ht-ln $build_dir/newview $base/runtime
-time 7z -mx5 -bd -bt -tzip a ${version_full}-runtime.zip @$base/runtime.txt
+time ${_7z:-7z} -mx5 -bd -bt -tzip a ${version_full}-runtime.zip @$build_dir/runtime.txt
 
 # make a copy of devtime and append @precision manifested runtime/ folder (to emerge a combined snapshot)
 cp -av ${version_full}-devtime.zip ${version_full}-snapshot.zip
-time 7z -mx5 -bd -bt -tzip a ${version_full}-snapshot.zip @$base/runtime.txt
+time ${_7z:-7z} -mx5 -bd -bt -tzip a ${version_full}-snapshot.zip @$build_dir/runtime.txt
 
+test "${_7z}" == 7z || { echo "NOUPLOAD 7z=${_7z}" >&2 ; exit 141 ; }
 echo "UPLOADING ARTIFACTS...${GITHUB_ACTIONS}" >&2
 gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; } 
 grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
