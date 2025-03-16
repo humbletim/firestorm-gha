@@ -87,7 +87,11 @@ jobs:
         test -f ${snapshot_dir}/llobjs.rsp.in
         envsubst < ${snapshot_dir}/llobjs.rsp.in > llobjs.rsp
         envsubst < ${snapshot_dir}/llincludes.rsp.in > llincludes.rsp
-        envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp
+        if [[ -f ${snapshot_dir}/lldefines.rsp.in ]] ; then
+          envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp
+        else
+          cp -av ${snapshot_dir}/lldefines.rsp lldefines.rsp
+        fi
         cat <<EOF > link.rsp
           @winsdk.rsp
           -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -Wno-inconsistent-dllimport
