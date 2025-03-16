@@ -100,6 +100,11 @@ for x in `grep -Eo '[^"]+[.](cur|ico)' $build_dir/newview/viewerRes.rc | sort -u
     cpsync $source_dir/newview/res/$x $snapshot_dir/source/newview/res/
 done
 
+mkdir -pv $snapshot_dir/metadata/tmp/icons/
+for x in `ls $source_dir/newview/icons/*-os/*.ico` ; do
+    cp -ua $x $snapshot_dir/metadata/tmp/icons/$viewer_bin-$(basename $(dirname $x)).ico
+done
+
 (
     cd $snapshot_dir
     ls source/* -1d | sed 's@^@-I${snapshot_dir}/@' > $snapshot_dir/llincludes.rsp.in
@@ -108,8 +113,6 @@ done
 
 ###########################################################################
 # stage installer/runtime
-cp -av $build_dir/APPLICATION_EXE.env $snapshot_dir/metadata/tmp/
-. $build_dir/APPLICATION_EXE.env
 
 cp -ua $build_dir/runtime.installer.original.nsi $snapshot_dir/metadata/tmp/
 
@@ -121,8 +124,11 @@ for x in `cat $build_dir/nsis.txt` ; do
     cpsync "$x" $snapshot_dir/metadata/nsi/
 done
 
+cp -av $build_dir/APPLICATION_EXE.env $snapshot_dir/metadata/tmp/
+. $build_dir/APPLICATION_EXE.env
 sed "s@^$viewer_channel-$version_full/@$base/runtime/@g;" $build_dir/installer.txt \
-    | grep -vE "${application_bin}|${APPLICATION_EXE}" > $build_dir/runtime.txt
+    | grep -vE "${application_bin}|${APPLICATION_EXE}" \
+    | tr '\\' '/' > $build_dir/runtime.txt
 head -2 $build_dir/runtime.txt
 cp -av $build_dir/runtime.txt $snapshot_dir/metadata/tmp/
 sed "s@$base/runtime/@\${snapshot_dir}/runtime/@g" $build_dir/runtime.txt > $snapshot_dir/metadata/runtime.rsp.in
@@ -136,17 +142,17 @@ cd $build_dir
 
 test ! -d $base/runtime || rm -v $base/runtime
 # package ${base:-fs-beta-7.1.12-e}/ => "devtime" capture
-time ${_7z:-7z} -mx5 -bd -bt -tzip a ${version_full}-devtime.zip $base
+time ${_7z:-7z} -mx5 -bd -tzip a ${version_full}-devtime.zip $base
 
 # stage fs-beta-7.1.12-e/runtime/
 ht-ln $build_dir/newview $base/runtime
-time ${_7z:-7z} -mx5 -bd -bt -tzip a ${version_full}-runtime.zip @$build_dir/runtime.txt
+time ${_7z:-7z} -mx5 -bd -tzip a ${version_full}-runtime.zip @$build_dir/runtime.txt
 
 # make a copy of devtime and append @precision manifested runtime/ folder (to emerge a combined snapshot)
 cp -av ${version_full}-devtime.zip ${version_full}-snapshot.zip
-time ${_7z:-7z} -mx5 -bd -bt -tzip a ${version_full}-snapshot.zip @$build_dir/runtime.txt
+time ${_7z:-7z} -mx5 -bd -tzip a ${version_full}-snapshot.zip @$build_dir/runtime.txt
 
-test "${_7z}" == 7z || { echo "NOUPLOAD 7z=${_7z}" >&2 ; exit 141 ; }
+test "${_7z:-7z}" == 7z || { echo "NOUPLOAD 7z=${_7z}" >&2 ; exit 141 ; }
 echo "UPLOADING ARTIFACTS...${GITHUB_ACTIONS}" >&2
 gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; } 
 grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
