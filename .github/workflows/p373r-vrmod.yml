@@ -144,6 +144,7 @@ jobs:
         J864TvBZKHRtFCtQp8GgVWHdavv/PmM8GB0Z4XVlonM+N302tGkpyJ7zGpvw9ao53LbPuQ0jxE0W
         erq7uHZHTRWWlJjIjORX4iDtv3j2+tOCfxfQnEfCwwm557/Ei4mZ/wg8P/gXxoQ5DtoQAAA=
         EOF
+        file icon.ico
         set -a
         . ${snapshot_dir}/metadata/env.d/build_vars.env
         CompanyName=${GITHUB_REPOSITORY}

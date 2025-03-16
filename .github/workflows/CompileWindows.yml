@@ -262,8 +262,10 @@ jobs:
     #     run: fsvr_step 0b3
 
     - name: 0b4 Zip
+      if: fromJSON(inputs.fstuple).installer != 'false'
       run: fsvr_step 0b4
     - name: 0b5 upload zip
+      if: fromJSON(inputs.fstuple).installer != 'false'
       uses: ./fsvr-action
       with:
         run: fsvr_step 0b5

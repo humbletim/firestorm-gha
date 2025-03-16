@@ -9,6 +9,7 @@ mkdir -pv $snapshot_dir
 
 cpsync() { cp -lunrp "$@" ; }
 
+###########################################################################
 echo "SNAPSHOT EMERGED OBJECT FILES..." >&2
 mkdir -pv $snapshot_dir/objs
 build_dir_rel=$(realpath --relative-to="$(pwd -W)" $build_dir || echo $build_dir)
@@ -36,16 +37,17 @@ build_dir_rel=$(realpath --relative-to="$(pwd -W)" $build_dir || echo $build_dir
     # )
 )
 
+###########################################################################
 echo "SNAPSHOT METADATA..." >&2
 mkdir -pv $snapshot_dir/metadata
+mkdir -pv $snapshot_dir/metadata/tmp
 cp -ua env.d $snapshot_dir/metadata
 test ! -s fstuple.json || cp -av fstuple.json $snapshot_dir/metadata/
 cp -ua $build_dir/packages-info.json $snapshot_dir/metadata/
 cp -ua $nunja_dir/viewer_version.txt $snapshot_dir/metadata/
-cp -ua $nunja_dir/runtime.installer.nsi $snapshot_dir/metadata/
+cp -ua $build_dir/runtime.installer.nsi $snapshot_dir/metadata/
 
-mkdir -pv $snapshot_dir/metadata/tmp
-cp -ua $nunja_dir/runtime.installer.original.nsi $snapshot_dir/metadata/tmp/
+cp -ua $build_dir/runtime.installer.original.nsi $snapshot_dir/metadata/tmp/
 env | grep INPUT > $snapshot_dir/metadata/tmp/INPUT.env
 env | grep -i version=  > $snapshot_dir/metadata/tmp/version.env
 find $build_dir/ -type f > $snapshot_dir/metadata/tmp/build_dir.files
@@ -53,6 +55,7 @@ find $build_dir/ -type f > $snapshot_dir/metadata/tmp/build_dir.files
 ( cat /d/a/_temp/_runner_file_commands/step_summary_*-scrubbed > $snapshot_dir/metadata/summary.md ) || true
 ( ninja -C $build_dir -t commands ${viewer_bin}-bin | grep -Eo '(")?[-]D[^ =]+(=[^ ]*)?\1?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > $snapshot_dir/lldefines.rsp ) || true
 
+###########################################################################
 echo "SNAPSHOT PACKAGES..." >&2
 mkdir -pv $snapshot_dir/3p/lib
 for x in `ls -1 $packages_dir/lib/release | grep -v webrtc` ; do
@@ -64,11 +67,8 @@ for x in `ls -1 $packages_dir/include| grep -v webrtc` ; do
 done
 cpsync $build_dir/newview/licenses.txt $snapshot_dir/3p/
 cpsync $build_dir/newview/packages-info.txt $snapshot_dir/3p/
-# cpsync $packages_dir/lib/release $snapshot_dir/3p/lib/
-# cpsync $packages_dir/include $snapshot_dir/3p/include/
-# rm -rf $snapshot_dir/3p/include/webrtc $snapshot_dir/3p/lib/*webrtc*
-# ln $source_dir $snapshot_dir/source
 
+###########################################################################
 echo "SNAPSHOT CORRESPONDING SOURCE..." >&2
 mkdir -pv $snapshot_dir/source
 cp -ua $build_dir/newview/fsversionvalues.h $snapshot_dir/source/ || true
@@ -76,9 +76,10 @@ cp -ua $build_dir/newview/viewerRes.rc $snapshot_dir/source/ || true
 
 (
     cd $source_dir
-    find ~+ -name \*.cpp -o -name \*.inl -o -name \*.h > $snapshot_dir/metadata/all.includes.txt
+    find ~+ -name \*.cpp -o -name \*.inl -o -name \*.h -o -name \*.hpp \
+        | grep -vE '/tests?/' > $snapshot_dir/metadata/tmp/primary.source.txt
     time (
-        tar -cf - -T $snapshot_dir/metadata/all.includes.txt --show-transformed-names \
+        tar -cf - -T $snapshot_dir/metadata/tmp/primary.source.txt --show-transformed-names \
         --transform "s|^${PWD#/}/||" \
          2>/dev/null \
          | tar -xf - -C$snapshot_dir/source #xz -T0 - -c > $snapshot_dir/includes.tar.xz
@@ -97,19 +98,40 @@ done
     cd ..
 )
 
-echo "[7z] GENERATING ${version_full}-snapshot.zip..." >&2
-cd $build_dir
-time 7z -mx5 -bd -bt -tzip a ${version_full}-snapshot.zip $base
-
-ht-ln $build_dir/newview $base/runtime
-sed "s@^$viewer_channel-$version_full/@$base/runtime/@g" $build_dir/installer.txt > $base/runtime.txt
+###########################################################################
+# stage installer/runtime
+cp -av $build_dir/APPLICATION_EXE.env $snapshot_dir/metadata/tmp/
+. $build_dir/APPLICATION_EXE.env
+sed "s@^$viewer_channel-$version_full/@$base/runtime/@g" $build_dir/installer.txt \
+    | grep -vE "${application_bin}|${APPLICATION_EXE}" > $base/runtime.txt
 head -2 $base/runtime.txt
+cp -av $base/runtime.txt $snapshot_dir/metadata/tmp/
+sed "s@$base/runtime/@\${snapshot_dir}/runtime/@g" $base/runtime.txt > $snapshot_dir/metadata/runtime.rsp.in
+sed "s@$base/runtime/@runtime/@g" $base/runtime.txt > $snapshot_dir/metadata/runtime.rsp
+head -2 $snapshot_dir/metadata/runtime.rsp.in
+
+###########################################################################
+echo "[7z] GENERATING ${version_full}-(devtime|runtime|snapshot).zip..." >&2
+
+cd $build_dir
+
+# package ${base:-fs-beta-7.1.12-e}/ => "devtime" capture
+time 7z -mx5 -bd -bt -tzip a ${version_full}-devtime.zip $base
+
+# stage fs-beta-7.1.12-e/runtime/
+ht-ln $build_dir/newview $base/runtime
+time 7z -mx5 -bd -bt -tzip a ${version_full}-runtime.zip @$base/runtime.txt
+
+# make a copy of devtime and append @precision manifested runtime/ folder (to emerge a combined snapshot)
+cp -av ${version_full}-devtime.zip ${version_full}-snapshot.zip
 time 7z -mx5 -bd -bt -tzip a ${version_full}-snapshot.zip @$base/runtime.txt
 
-echo "UPLOADING ARTIFACT...${GITHUB_ACTIONS}" >&2
-gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; }
- 
+echo "UPLOADING ARTIFACTS...${GITHUB_ACTIONS}" >&2
+gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; } 
 grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
+
+zipUploadStream=${version_full}-devtime.zip gha-upload-artifact-fast ${version_full}-devtime ${version_full}-devtime.zip
+zipUploadStream=${version_full}-runtime.zip gha-upload-artifact-fast ${version_full}-runtime ${version_full}-runtime.zip
 zipUploadStream=${version_full}-snapshot.zip gha-upload-artifact-fast ${version_full}-snapshot ${version_full}-snapshot.zip
 
 # UPLOAD SNAPSHOT
