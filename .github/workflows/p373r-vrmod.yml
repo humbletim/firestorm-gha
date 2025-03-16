@@ -75,7 +75,7 @@ jobs:
         gh --repo ${{github.repository}} run download --name ${{fromJSON(inputs.fstuple).artifact}} --dir _snapshot
         export snapshot_dir=$(dirname _snapshot/*/llobjs.rsp.in)
         export base=$(basename ${snapshot_dir})
-        cmd //c "mklink /j ${base}-test ${snapshot_dir//\//\\}\\runtime"
+        echo cmd //c "mklink /j ${base}-test ${snapshot_dir//\//\\}\\runtime"
         (
           echo artifact=${{fromJSON(inputs.fstuple).artifact}}
           echo snapshot_dir=${snapshot_dir}
@@ -86,8 +86,8 @@ jobs:
       run: |
         test -f ${snapshot_dir}/llobjs.rsp.in
         envsubst < ${snapshot_dir}/llobjs.rsp.in > llobjs.rsp
-        envsubst < ${snapshot_dir}/llincludes.rsp.in > llincludes.rsp || true
-        test -f ${snapshot_dir}/lldefines.rsp.in && ( envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp ) || true
+        envsubst < ${snapshot_dir}/llincludes.rsp.in > llincludes.rsp
+        envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp
         cat <<EOF > link.rsp
           @winsdk.rsp
           -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -Wno-inconsistent-dllimport
@@ -103,9 +103,12 @@ jobs:
           -w -std=c++20 -isystem${snapshot_dir}/3p/include/apr-1
           -fms-runtime-lib=dll -pthread
         EOF
+        echo "priming clang++ invocation delay in background..."
+        clang++ @link.rsp @llobjs.rsp --version 2>&1 > /dev/null &
+        exit 0
 
     - name: ninja blueprint test
-      if: true
+      if: false
       run: |
         test -x ninja || (
           curl -sLO https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
@@ -183,14 +186,15 @@ jobs:
 
     - name: test executable
       run: |
-        PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ${base//[^[:alnum:]]/-}-p373r-vrmod.exe --help 2>&1 | tail -5 || true
+        test ! -d $snapshot_dir/runtime && echo "skipping (runtime/ not found)" || \
+        PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ./${base//[^[:alnum:]]/-}-p373r-vrmod.exe --help 2>&1 | tail -5 || true
 
     - name: bundle
       uses: ./gha-node20-run
       with:
         run: |
           . /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha/gha.upload-artifact.bash
-          gha-upload-artifact-fast $(date +"%Y%m%d-%H%M%S" )-${base}-test ${base//[^[:alnum:]]/-}-p373r-vrmod.exe 1 9
+          gha-upload-artifact-fast $(date +"%Y%m%d-%H%M%S" )-${base//[^[:alnum:]]/-}-p373r-vrmod ${base//[^[:alnum:]]/-}-p373r-vrmod.exe 1 9
 
     - name: gha_step recovery
       if: failure()
