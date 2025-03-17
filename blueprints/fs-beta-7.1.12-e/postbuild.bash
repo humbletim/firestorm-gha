@@ -61,7 +61,7 @@ find $build_dir/ -type f > $snapshot_dir/metadata/tmp/build_dir.files
 
 ( cat /d/a/_temp/_runner_file_commands/step_summary_*-scrubbed > $snapshot_dir/metadata/summary.md ) || true
 ( ninja -C $build_dir -t commands ${viewer_bin}-bin | grep -Eo '(")?[-]D[^ =]+(=[^ ]*)?\1?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > $snapshot_dir/lldefines.rsp ) || true
-
+cp -uav $nunja_dir/*defines.rsp $snapshot_dir/metadata/ 2>/dev/null || true
 ###########################################################################
 echo "SNAPSHOT PACKAGES..." >&2
 mkdir -pv $snapshot_dir/3p/lib

@@ -85,7 +85,7 @@ build rebuild_cache: phony CMakeFiles\rebuild_cache.util
 build cmake_object_order_depends_target_cmake: phony || cmake\CMakeFiles\cmake.dir
 
 build cmake\CMakeFiles\cmake.dir\cmake_dummy.cpp.obj: CXX_COMPILER__cmake_unscanned_Release $source_dir\cmake\cmake_dummy.cpp || cmake_object_order_depends_target_cmake
-  DEFINES = $DEFINES_8
+  DEFINES = $DEFINES_7
   FLAGS = $WX
   OBJECT_DIR = cmake\CMakeFiles\cmake.dir
   OBJECT_FILE_DIR = cmake\CMakeFiles\cmake.dir
@@ -3522,7 +3522,7 @@ build llfilesystem\rebuild_cache: phony llfilesystem\CMakeFiles\rebuild_cache.ut
 build cmake_object_order_depends_target_llwebrtc: phony || llwebrtc\CMakeFiles\llwebrtc.dir
 
 build llwebrtc\CMakeFiles\llwebrtc.dir\llwebrtc.cpp.obj: CXX_COMPILER__llwebrtc_unscanned_Release $source_dir\llwebrtc\llwebrtc.cpp || cmake_object_order_depends_target_llwebrtc
-  DEFINES = $DEFINES_8 -Dllwebrtc_EXPORTS
+  DEFINES = $DEFINES_7 -Dllwebrtc_EXPORTS
   FLAGS = $FLAGS_9
   INCLUDES = -external:I$packages_dir\include\webrtc -external:I$packages_dir\include\webrtc\third_party\abseil-cpp -external:W0
   OBJECT_DIR = llwebrtc\CMakeFiles\llwebrtc.dir
@@ -5205,9 +5205,9 @@ build media_plugins\libvlc\rebuild_cache: phony media_plugins\libvlc\CMakeFiles\
 build cmake_object_order_depends_target_firestorm-bin: phony || cmake_object_order_depends_target_firestorm-bin_objects cmake_object_order_depends_target_llappearance cmake_object_order_depends_target_llaudio cmake_object_order_depends_target_llcharacter cmake_object_order_depends_target_llcommon cmake_object_order_depends_target_llcorehttp cmake_object_order_depends_target_llfilesystem cmake_object_order_depends_target_llimage cmake_object_order_depends_target_llinventory cmake_object_order_depends_target_lllogin cmake_object_order_depends_target_llmath cmake_object_order_depends_target_llmessage cmake_object_order_depends_target_llplugin cmake_object_order_depends_target_llprimitive cmake_object_order_depends_target_llrender cmake_object_order_depends_target_llui cmake_object_order_depends_target_llwebrtc cmake_object_order_depends_target_llxml copy_win_scripts\copy_win_scripts llcommon\stage_third_party_libs llplugin\slplugin\SLPlugin.exe newview\copy_w_viewer_manifest
 
 build newview\cmake_pch.cxx.obj: CXX_COMPILER__firestorm-bin_unscanned_Release newview\cmake_pch.cxx | newview\cmake_pch.hxx || cmake_object_order_depends_target_firestorm-bin
-  DEFINES = $DEFINES_7
+  DEFINES = $DEFINES_1
   FLAGS = $WX /bigobj /Ycnewview\cmake_pch.hxx /Fpnewview\cmake_pch.cxx.pch /FInewview\cmake_pch.hxx -I. 
-  INCLUDES = -I$build_dir\newview -I$source_dir\llaudio -I$source_dir\llcommon -I$source_dir\llmath -I$source_dir\llmeshoptimizer -I$source_dir\llmessage -I$source_dir\llfilesystem -I$source_dir\llcorehttp -I$source_dir\llxml -I$source_dir\llcharacter -I$source_dir\llimage -I$source_dir\llinventory -I$source_dir\llplugin -I$source_dir\llrender -I$source_dir\llwindow -I$source_dir\llprimitive -I$source_dir\llui -I$source_dir\llwebrtc -I$source_dir\viewer_components\login -I$source_dir\llappearance -external:I$packages_dir\include\apr-1 -external:I$packages_dir\include -external:I$packages_dir\include\zlib-ng -external:I$packages_dir\include\meshoptimizer -external:I$packages_dir\include\nghttp2 -external:I$packages_dir\include\AL -external:I$packages_dir\include\openjpeg -external:I$packages_dir\include\libpng16 -external:I$packages_dir\include\freetype2 -external:I$packages_dir\include\collada -external:I$packages_dir\include\collada\1.4 -external:I$packages_dir\include\hunspell -external:I$packages_dir\include\glod -external:I$packages_dir\include\discord-rpc -external:I$packages_dir\include\Growl -external:W0
+  INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin.dir
 
@@ -5218,9 +5218,9 @@ build newview\cmake_pch.cxx.obj: CXX_COMPILER__firestorm-bin_unscanned_Release n
 build newview\cmake_pch.cxx.pch: phony newview\cmake_pch.cxx.obj
 
 build newview\CMakeFiles\firestorm-bin.dir\__\dummy.cpp.obj: CXX_COMPILER__firestorm-bin_unscanned_Release $build_dir\dummy.cpp | newview\cmake_pch.hxx newview\cmake_pch.cxx.pch || cmake_object_order_depends_target_firestorm-bin
-  DEFINES = $DEFINES_7
+  DEFINES = $DEFINES_1
   FLAGS = $WX /bigobj $PCH -I. 
-  INCLUDES = -I$build_dir\newview -I$source_dir\llaudio -I$source_dir\llcommon -I$source_dir\llmath -I$source_dir\llmeshoptimizer -I$source_dir\llmessage -I$source_dir\llfilesystem -I$source_dir\llcorehttp -I$source_dir\llxml -I$source_dir\llcharacter -I$source_dir\llimage -I$source_dir\llinventory -I$source_dir\llplugin -I$source_dir\llrender -I$source_dir\llwindow -I$source_dir\llprimitive -I$source_dir\llui -I$source_dir\llwebrtc -I$source_dir\viewer_components\login -I$source_dir\llappearance -external:I$packages_dir\include\apr-1 -external:I$packages_dir\include -external:I$packages_dir\include\zlib-ng -external:I$packages_dir\include\meshoptimizer -external:I$packages_dir\include\nghttp2 -external:I$packages_dir\include\AL -external:I$packages_dir\include\openjpeg -external:I$packages_dir\include\libpng16 -external:I$packages_dir\include\freetype2 -external:I$packages_dir\include\collada -external:I$packages_dir\include\collada\1.4 -external:I$packages_dir\include\hunspell -external:I$packages_dir\include\glod -external:I$packages_dir\include\discord-rpc -external:I$packages_dir\include\Growl -external:W0
+  INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin.dir\__
 
@@ -5247,7 +5247,7 @@ build newview\firestorm-bin.lib: CXX_STATIC_LIBRARY_LINKER__firestorm-bin_Releas
 #############################################
 # Order-only phony target for firestorm-bin_objects
 
-build cmake_object_order_depends_target_firestorm-bin_objects: phony || newview\packages-info.txt
+build cmake_object_order_depends_target_firestorm-bin_objects: phony || cmake_object_order_depends_target_llappearance cmake_object_order_depends_target_llaudio cmake_object_order_depends_target_llcharacter cmake_object_order_depends_target_llcommon cmake_object_order_depends_target_llcorehttp cmake_object_order_depends_target_llfilesystem cmake_object_order_depends_target_llimage cmake_object_order_depends_target_llinventory cmake_object_order_depends_target_lllogin cmake_object_order_depends_target_llmath cmake_object_order_depends_target_llmessage cmake_object_order_depends_target_llplugin cmake_object_order_depends_target_llprimitive cmake_object_order_depends_target_llrender cmake_object_order_depends_target_llui cmake_object_order_depends_target_llwebrtc cmake_object_order_depends_target_llxml newview\packages-info.txt
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\alfloaterregiontracker.cpp.obj: CXX_COMPILER__firestorm-bin_objects_unscanned_Release $source_dir\newview\alfloaterregiontracker.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
@@ -10790,7 +10790,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\viewerRes.rc.res: RC_COMPILER
   DEFINES = $DEFINES_1
   DEP_FILE = newview\CMakeFiles\firestorm-bin_objects.dir\viewerRes.rc.res.d
   FLAGS = $FLAGS_8
-  INCLUDES = -I $build_dir\newview -I $source_dir\llaudio -I $source_dir\llappearance -I $source_dir\llcharacter -I $source_dir\llcommon -I $source_dir\llcorehttp -I $source_dir\llfilesystem -I $source_dir\llimage -I $source_dir\llinventory -I $source_dir\lllogin -I $source_dir\llmath -I $source_dir\llmeshoptimizer -I $source_dir\llmessage -I $source_dir\llplugin -I $source_dir\llprimitive -I $source_dir\llrender -I $source_dir\llui -I $source_dir\llwebrtc -I $source_dir\llwindow -I $source_dir\llxml -I $source_dir\viewer_components\login -I $packages_dir\include -I $packages_dir\include\llphysicsextensions -I $packages_dir\include\apr-1
+  INCLUDES = -I $build_dir\newview -I $source_dir\llaudio -I $source_dir\llcommon -I $source_dir\llmath -I $source_dir\llmeshoptimizer -I $source_dir\llmessage -I $source_dir\llfilesystem -I $source_dir\llcorehttp -I $source_dir\llxml -I $source_dir\llcharacter -I $source_dir\llimage -I $source_dir\llinventory -I $source_dir\llplugin -I $source_dir\llrender -I $source_dir\llwindow -I $source_dir\llprimitive -I $source_dir\llui -I $source_dir\llwebrtc -I $source_dir\viewer_components\login -I $source_dir\llappearance -I $packages_dir\include\apr-1 -I $packages_dir\include -I $packages_dir\include\zlib-ng -I $packages_dir\include\meshoptimizer -I $packages_dir\include\nghttp2 -I $packages_dir\include\AL -I $packages_dir\include\openjpeg -I $packages_dir\include\libpng16 -I $packages_dir\include\freetype2 -I $packages_dir\include\collada -I $packages_dir\include\collada\1.4 -I $packages_dir\include\hunspell -I $packages_dir\include\glod -I $packages_dir\include\discord-rpc -I $packages_dir\include\Growl
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
 
