@@ -1,0 +1,135 @@
+name: 'vrmod'
+branding:
+  icon: 'play'
+  color: 'orange'
+
+inputs:
+  artifact:
+    type: string
+    required: true
+  github-token:
+    default: ${{ github.token }}
+runs:
+  using: 'composite'
+  steps:
+  - name: verify inputs
+    shell: bash
+    run: test -n "${{ inputs.artifact }}"
+
+  - name: cache llvm winsdk stuff
+    id: winsdk
+    uses: actions/cache/restore@v4
+    with:
+      path: winsdk
+      key: ${{ github.jobs[github.job].runs-on }}-llvm-winsdk
+
+  - uses: humbletim/vsdevenv-shell@v2
+    if: steps.winsdk.outputs.cache-hit != 'true'
+  - name: detect winsdk
+    if: steps.winsdk.outputs.cache-hit != 'true'
+    shell: vsdevenv x64 cmd {0}
+    run: |
+      @echo off
+      mkdir winsdk
+      mkdir winsdk\sdk
+      mkdir winsdk\crt
+      mklink /D winsdk\sdk\include "%WindowsSdkDir%\Include\%WindowsSDKVersion%"
+      mklink /D winsdk\sdk\lib "%WindowsSdkDir%\Lib\%WindowsSDKVersion%"
+      mklink /D winsdk\crt\include "%VCToolsInstallDir%\include"
+      mklink /D winsdk\crt\lib "%VCToolsInstallDir%\lib"
+  - name: prepare llvm
+    if: steps.winsdk.outputs.cache-hit != 'true'
+    shell: bash
+    run: |
+      winsdk=$(cygpath -ma winsdk)
+      cat <<EOF > winsdk/winsdk.rsp
+        -isystem$winsdk/crt/include -isystem$winsdk/sdk/include/ucrt -isystem$winsdk/sdk/include/shared -isystem$winsdk/sdk/include/um
+        -L$winsdk/crt/lib/x86_64 -L$winsdk/sdk/lib/um/x86_64 -L$winsdk/sdk/lib/ucrt/x86_64
+        -Wno-unused-command-line-argument -Wl,-ignore:4099 -DNOMINMAX -DNDEBUG
+        --target=x86_64-pc-windows-msvc -Wno-msvc-not-found -nostdinc -nodefaultlibs -fuse-ld=lld
+      EOF
+      _llvm=$(cygpath -ms "$(dirname "$(which clang++)")/../lib/clang/"/*/include)
+      cat <<EOF > winsdk/mm.rsp
+        -D_INCLUDED_AMM -D_INCLUDED_IMM -D_INCLUDED_EMM -D_INCLUDED_NMM -D_INCLUDED_PMM -D_INCLUDED_SMM -D_INCLUDED_TMM -D_INCLUDED_WMM -D_INCLUDED_MM2 -D_MMINTRIN_H_INCLUDED -D_MMINTRIN_H_INCLUDED -D_INCLUDED_INTRIN -D__INTRIN_H_
+        -isystem${_llvm} -include${_llvm}/mmintrin.h -include${_llvm}/xmmintrin.h -include${_llvm}/emmintrin.h -include${_llvm}/adcintrin.h
+      EOF
+  - name: '/WINSDK' 
+    if: always() && steps.winsdk.outputs.cache-hit != 'true'
+    uses: actions/cache/save@v4
+    with:
+      path: winsdk
+      key:  ${{ steps.winsdk.outputs.cache-primary-key }}
+
+  - name: 'ARTIFACT:'
+    id: artifact
+    uses: actions/cache/restore@v4
+    with:
+      path: _snapshot
+      key: ${{ runner.os }}-${{ inputs.artifact }}-artifact
+  - name: '  cached env setup'
+    if: steps.artifact.outputs.cache-hit == 'true'
+    shell: bash
+    run: cat _snapshot/GITHUB_ENV | tee -a $GITHUB_ENV
+  - name: '  download and unpack artifact'
+    if: steps.artifact.outputs.cache-hit != 'true'
+    shell: bash
+    env:
+      GH_TOKEN: ${{ inputs.github-token }}
+    run: |
+      gh --repo humbletim/firestorm-gha run download --name ${{inputs.artifact}} --dir _snapshot
+      export snapshot_dir=$(dirname _snapshot/*/llobjs.rsp.in)
+      export base=$(basename ${snapshot_dir})
+      (
+        echo artifact=${{inputs.artifact}}
+        echo snapshot_dir=${snapshot_dir}
+        echo base=${base}
+        echo prefix=${base//[^[:alnum:]]/-}
+      ) | tee -a $GITHUB_ENV _snapshot/GITHUB_ENV
+  - name: '/ARTIFACT' 
+    if: always() && steps.artifact.outputs.cache-hit != 'true'
+    uses: actions/cache/save@v4
+    with:
+      path: _snapshot
+      key:  ${{ steps.artifact.outputs.cache-primary-key }}
+
+  - name: cache devtime
+    id: devtime
+    uses: actions/cache@v4
+    with:
+      path: devtime
+      key: $${{ github.jobs[github.job].runs-on }}-${{ inputs.artifact }}-unfurled
+
+  - name: unfurl devtime
+    shell: bash
+    if: steps.devtime.outputs.cache-hit != 'true'
+    run: |
+      test -f ${snapshot_dir}/llobjs.rsp.in
+      mkdir devtime
+      envsubst < ${snapshot_dir}/llobjs.rsp.in > devtime/llobjs.rsp
+      envsubst < ${snapshot_dir}/llincludes.rsp.in > devtime/llincludes.rsp
+      if [[ -f ${snapshot_dir}/lldefines.rsp.in ]] ; then
+        envsubst < ${snapshot_dir}/lldefines.rsp.in > devtime/lldefines.rsp
+      else
+        cp -av ${snapshot_dir}/lldefines.rsp devtime/lldefines.rsp
+      fi
+      cat <<EOF > devtime/link.rsp
+        @winsdk/winsdk.rsp
+        -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -Wno-inconsistent-dllimport
+        -lpsapi -ladvapi32 -lws2_32 -lmswsock -lrpcrt4 -lshell32 -lnetapi32 -lwer -ldbghelp -lgdi32 -lcomdlg32 -ldxgi -lopengl32 -limm32 -lwinmm -lcrypt32
+        -L${snapshot_dir}/3p/lib -llibpng16 -lapr-1 -laprutil-1 -llibexpat -lminizip -lzlib -lmeshoptimizer -llibcollada14dom23-s -lfreetype -ljpeg -llibhunspell -lopenjp2 -llibcurl -llibssl -llibcrypto -lOpenAL32 -lalut -llibvorbisfile -llibvorbis -llibvorbisenc -llibogg -lnghttp2.lib -llibxml2 -Llxmlrpc-epi -llibndofdev -lhacd -lnd_hacdConvexDecomposition -lnd_pathing -lglu32 -lnvapi -ldiscord-rpc -lglod -lgrowl++
+        ${snapshot_dir}/objs/llwebrtc.lib
+        -llibboost_program_options-mt-x64 -llibboost_thread-mt-x64 -llibboost_url-mt-x64 -llibboost_fiber-mt-x64 -llibboost_context-mt-x64 -llibboost_wave-mt-x64 -llibboost_filesystem-mt-x64
+      EOF
+      cat <<EOF > devtime/compile.rsp
+        @winsdk/winsdk.rsp @devtime/llincludes.rsp @devtime/lldefines.rsp
+        -DLL_WINDOWS
+        -isystem${snapshot_dir}/3p/include
+        -w -std=c++20 -isystem${snapshot_dir}/3p/include/apr-1
+        -fms-runtime-lib=dll -pthread
+      EOF
+      echo "neutralizing Strawberry Perl threat (of confusing PATHs with its own patch.exe) ..."
+      test ! -d /c/Strawberry || mv -v /c/Strawberry /c/Strawberry.not
+      echo "working around boost::json::default_resource::instance_ msvc-vs-llvm quirk"
+      echo "boost::json::detail::default_resource boost::json::detail::default_resource::instance_;" | clang++ @devtime/compile.rsp -includeboost/json.hpp -x c++ -c - -o devtime/bjson.o
+      echo devtime/bjson.o > devtime/custom-objs.rsp
+      echo '@devtime/link.rsp @devtime/llobjs.rsp @devtime/custom-objs.rsp' > devtime/application-bin.rsp

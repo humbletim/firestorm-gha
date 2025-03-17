@@ -11,37 +11,39 @@ run-name: p373r-vrmod | ${{ fromJSON(inputs.fstuple).title }} ${{ fromJSON(input
 
 defaults:
   run:
-    shell: c:/PROGRA~1/Git/usr/bin/bash.exe --noprofile --norc -e -o pipefail {0}
+    shell: bash
 
 jobs:
   windows-build:
     runs-on: windows-latest
     steps:
-
-    - uses: humbletim/vsdevenv-shell@windows-2022-test
+    # - uses: humbletim/vsdevenv-shell@windows-2022-test
     - uses: humbletim/firestorm-gha/gha-node20-run@tpv-gha-nunja
       if: false
     - uses: actions/upload-artifact@v4
       if: false
-    - uses: actions/cache@v4
-      if: false
+    # - uses: actions/cache@v4
+    #   if: false
 
     - name: Output Inputs
       run: |
         echo '${{ github.event.inputs.fstuple }}' | tee fstuple.json
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
 
-    - name: detect winsdk
-      shell: vsdevenv x64 cmd {0}
-      run: |
-        @echo off
-        mkdir winsdk
-        mkdir winsdk\sdk
-        mkdir winsdk\crt
-        mklink /D winsdk\sdk\include "%WindowsSdkDir%\Include\%WindowsSDKVersion%"
-        mklink /D winsdk\sdk\lib "%WindowsSdkDir%\Lib\%WindowsSDKVersion%"
-        mklink /D winsdk\crt\include "%VCToolsInstallDir%\include"
-        mklink /D winsdk\crt\lib "%VCToolsInstallDir%\lib"
+    - uses: humbletim/firestorm-gha/.github/vrmod@tpv-gha-nunja
+      with:
+        artifact: ${{fromJSON(inputs.fstuple).artifact}}
+    # - name: detect winsdk
+    #   shell: vsdevenv x64 cmd {0}
+    #   run: |
+    #     @echo off
+    #     mkdir winsdk
+    #     mkdir winsdk\sdk
+    #     mkdir winsdk\crt
+    #     mklink /D winsdk\sdk\include "%WindowsSdkDir%\Include\%WindowsSDKVersion%"
+    #     mklink /D winsdk\sdk\lib "%WindowsSdkDir%\Lib\%WindowsSDKVersion%"
+    #     mklink /D winsdk\crt\include "%VCToolsInstallDir%\include"
+    #     mklink /D winsdk\crt\lib "%VCToolsInstallDir%\lib"
 
     - name: link gha-node20-run
       shell: cmd
@@ -53,81 +55,89 @@ jobs:
         run: |
           echo "testing 1 2 3..."
 
-    - name: prepare llvm
-      run: |
-        winsdk=$(cygpath -ma winsdk)
-        cat <<EOF > winsdk.rsp
-          -isystem$winsdk/crt/include -isystem$winsdk/sdk/include/ucrt -isystem$winsdk/sdk/include/shared -isystem$winsdk/sdk/include/um
-          -L$winsdk/crt/lib/x86_64 -L$winsdk/sdk/lib/um/x86_64 -L$winsdk/sdk/lib/ucrt/x86_64
-          -Wno-unused-command-line-argument -Wl,-ignore:4099 -DNOMINMAX -DNDEBUG
-          --target=x86_64-pc-windows-msvc -Wno-msvc-not-found -nostdinc -nodefaultlibs -fuse-ld=lld
-        EOF
-        _llvm=$(cygpath -ms "$(dirname "$(which clang++)")/../lib/clang/"/*/include)
-        cat <<EOF > mm.rsp
-          -D_INCLUDED_AMM -D_INCLUDED_IMM -D_INCLUDED_EMM -D_INCLUDED_NMM -D_INCLUDED_PMM -D_INCLUDED_SMM -D_INCLUDED_TMM -D_INCLUDED_WMM -D_INCLUDED_MM2 -D_MMINTRIN_H_INCLUDED -D_MMINTRIN_H_INCLUDED -D_INCLUDED_INTRIN -D__INTRIN_H_
-          -isystem${_llvm} -include${_llvm}/mmintrin.h -include${_llvm}/xmmintrin.h -include${_llvm}/emmintrin.h -include${_llvm}/adcintrin.h
-        EOF
+    # - name: prepare llvm
+    #   run: |
+    #     winsdk=$(cygpath -ma winsdk)
+    #     cat <<EOF > winsdk.rsp
+    #       -isystem$winsdk/crt/include -isystem$winsdk/sdk/include/ucrt -isystem$winsdk/sdk/include/shared -isystem$winsdk/sdk/include/um
+    #       -L$winsdk/crt/lib/x86_64 -L$winsdk/sdk/lib/um/x86_64 -L$winsdk/sdk/lib/ucrt/x86_64
+    #       -Wno-unused-command-line-argument -Wl,-ignore:4099 -DNOMINMAX -DNDEBUG
+    #       --target=x86_64-pc-windows-msvc -Wno-msvc-not-found -nostdinc -nodefaultlibs -fuse-ld=lld
+    #     EOF
+    #     _llvm=$(cygpath -ms "$(dirname "$(which clang++)")/../lib/clang/"/*/include)
+    #     cat <<EOF > mm.rsp
+    #       -D_INCLUDED_AMM -D_INCLUDED_IMM -D_INCLUDED_EMM -D_INCLUDED_NMM -D_INCLUDED_PMM -D_INCLUDED_SMM -D_INCLUDED_TMM -D_INCLUDED_WMM -D_INCLUDED_MM2 -D_MMINTRIN_H_INCLUDED -D_MMINTRIN_H_INCLUDED -D_INCLUDED_INTRIN -D__INTRIN_H_
+    #       -isystem${_llvm} -include${_llvm}/mmintrin.h -include${_llvm}/xmmintrin.h -include${_llvm}/emmintrin.h -include${_llvm}/adcintrin.h
+    #     EOF
 
-    - name: download and unpack snapshot
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh --repo ${{github.repository}} run download --name ${{fromJSON(inputs.fstuple).artifact}} --dir _snapshot
-        export snapshot_dir=$(dirname _snapshot/*/llobjs.rsp.in)
-        export base=$(basename ${snapshot_dir})
-        echo cmd //c "mklink /j ${base}-test ${snapshot_dir//\//\\}\\runtime"
-        (
-          echo artifact=${{fromJSON(inputs.fstuple).artifact}}
-          echo snapshot_dir=${snapshot_dir}
-          echo base=${base}
-        ) | tee -a $GITHUB_ENV
+    # - name: download and unpack snapshot
+    #   env:
+    #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   run: |
+    #     gh --repo ${{github.repository}} run download --name ${{fromJSON(inputs.fstuple).artifact}} --dir _snapshot
+    #     export snapshot_dir=$(dirname _snapshot/*/llobjs.rsp.in)
+    #     export base=$(basename ${snapshot_dir})
+    #     echo cmd //c "mklink /j ${base}-test ${snapshot_dir//\//\\}\\runtime"
+    #     (
+    #       echo artifact=${{fromJSON(inputs.fstuple).artifact}}
+    #       echo snapshot_dir=${snapshot_dir}
+    #       echo base=${base}
+    #     ) | tee -a $GITHUB_ENV
 
-    - name: unfurl snapshot
-      run: |
-        test -f ${snapshot_dir}/llobjs.rsp.in
-        envsubst < ${snapshot_dir}/llobjs.rsp.in > llobjs.rsp
-        envsubst < ${snapshot_dir}/llincludes.rsp.in > llincludes.rsp
-        if [[ -f ${snapshot_dir}/lldefines.rsp.in ]] ; then
-          envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp
-        else
-          cp -av ${snapshot_dir}/lldefines.rsp lldefines.rsp
-        fi
-        cat <<EOF > link.rsp
-          @winsdk.rsp
-          -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -Wno-inconsistent-dllimport
-          -lpsapi -ladvapi32 -lws2_32 -lmswsock -lrpcrt4 -lshell32 -lnetapi32 -lwer -ldbghelp -lgdi32 -lcomdlg32 -ldxgi -lopengl32 -limm32 -lwinmm -lcrypt32
-          -L${snapshot_dir}/3p/lib -llibpng16 -lapr-1 -laprutil-1 -llibexpat -lminizip -lzlib -lmeshoptimizer -llibcollada14dom23-s -lfreetype -ljpeg -llibhunspell -lopenjp2 -llibcurl -llibssl -llibcrypto -lOpenAL32 -lalut -llibvorbisfile -llibvorbis -llibvorbisenc -llibogg -lnghttp2.lib -llibxml2 -Llxmlrpc-epi -llibndofdev -lhacd -lnd_hacdConvexDecomposition -lnd_pathing -lglu32 -lnvapi -ldiscord-rpc -lglod -lgrowl++
-          ${snapshot_dir}/objs/llwebrtc.lib
-          -llibboost_program_options-mt-x64 -llibboost_thread-mt-x64 -llibboost_url-mt-x64 -llibboost_fiber-mt-x64 -llibboost_context-mt-x64 -llibboost_wave-mt-x64 -llibboost_filesystem-mt-x64
-        EOF
-        cat <<EOF > compile.rsp
-          @winsdk.rsp @llincludes.rsp @lldefines.rsp
-          -DLL_WINDOWS
-          -isystem${snapshot_dir}/3p/include
-          -w -std=c++20 -isystem${snapshot_dir}/3p/include/apr-1
-          -fms-runtime-lib=dll -pthread
-        EOF
-        echo "neutralizing Strawberry Perl threat (of confusing PATHs with its ownpatch.exe) ..."
-        test ! -d /c/Strawberry || mv -v /c/Strawberry /c/Strawberry.not
-        echo "nudging cold clang++ startup times by pre-warming in background..."
-        clang++ @link.rsp @llobjs.rsp --version 2>&1 > /dev/null &
-        llvm-rc -h 2>&1 > /dev/null &
-        exit 0
+    # - name: unfurl snapshot
+    #   run: |
+    #     test -f ${snapshot_dir}/llobjs.rsp.in
+    #     envsubst < ${snapshot_dir}/llobjs.rsp.in > llobjs.rsp
+    #     envsubst < ${snapshot_dir}/llincludes.rsp.in > llincludes.rsp
+    #     if [[ -f ${snapshot_dir}/lldefines.rsp.in ]] ; then
+    #       envsubst < ${snapshot_dir}/lldefines.rsp.in > lldefines.rsp
+    #     else
+    #       cp -av ${snapshot_dir}/lldefines.rsp lldefines.rsp
+    #     fi
+    #     cat <<EOF > link.rsp
+    #       @winsdk.rsp
+    #       -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -Wno-inconsistent-dllimport
+    #       -lpsapi -ladvapi32 -lws2_32 -lmswsock -lrpcrt4 -lshell32 -lnetapi32 -lwer -ldbghelp -lgdi32 -lcomdlg32 -ldxgi -lopengl32 -limm32 -lwinmm -lcrypt32
+    #       -L${snapshot_dir}/3p/lib -llibpng16 -lapr-1 -laprutil-1 -llibexpat -lminizip -lzlib -lmeshoptimizer -llibcollada14dom23-s -lfreetype -ljpeg -llibhunspell -lopenjp2 -llibcurl -llibssl -llibcrypto -lOpenAL32 -lalut -llibvorbisfile -llibvorbis -llibvorbisenc -llibogg -lnghttp2.lib -llibxml2 -Llxmlrpc-epi -llibndofdev -lhacd -lnd_hacdConvexDecomposition -lnd_pathing -lglu32 -lnvapi -ldiscord-rpc -lglod -lgrowl++
+    #       ${snapshot_dir}/objs/llwebrtc.lib
+    #       -llibboost_program_options-mt-x64 -llibboost_thread-mt-x64 -llibboost_url-mt-x64 -llibboost_fiber-mt-x64 -llibboost_context-mt-x64 -llibboost_wave-mt-x64 -llibboost_filesystem-mt-x64
+    #     EOF
+    #     cat <<EOF > compile.rsp
+    #       @winsdk.rsp @llincludes.rsp @lldefines.rsp
+    #       -DLL_WINDOWS
+    #       -isystem${snapshot_dir}/3p/include
+    #       -w -std=c++20 -isystem${snapshot_dir}/3p/include/apr-1
+    #       -fms-runtime-lib=dll -pthread
+    #     EOF
+    #     echo "neutralizing Strawberry Perl threat (of confusing PATHs with its ownpatch.exe) ..."
+    #     test ! -d /c/Strawberry || mv -v /c/Strawberry /c/Strawberry.not
+    #     echo "nudging cold clang++ startup times by pre-warming in background..."
+    #     clang++ @link.rsp @llobjs.rsp --version 2>&1 > /dev/null &
+    #     llvm-rc -h 2>&1 > /dev/null &
+    #     exit 0
 
-    - name: ninja blueprint test
-      if: false
+    # - name: ninja blueprint test
+    #   if: false
+    #   run: |
+    #     test -x ninja || (
+    #       curl -sLO https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
+    #       unzip ninja-win.zip
+    #     )
+    #     cat <<EOF > build.ninja
+    #     nunja_dir=d:/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/blueprints/${base}
+    #     include ${snapshot_dir}/metadata/env.d/build_vars.env
+    #     include \$nunja_dir/blueprint.arrant.nunja
+    #     EOF
+    #     ./ninja -t commands | grep -Eo '(")?[-]D[^ =]+(=[^ ]*)?\1?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > defines.rsp
+    #     test -s lldefines.rsp || ( cat defines.rsp >> lldefines.rsp )
+
+    - name: preflight tests
       run: |
-        test -x ninja || (
-          curl -sLO https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-          unzip ninja-win.zip
-        )
-        cat <<EOF > build.ninja
-        nunja_dir=d:/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/blueprints/${base}
-        include ${snapshot_dir}/metadata/env.d/build_vars.env
-        include \$nunja_dir/blueprint.arrant.nunja
-        EOF
-        ./ninja -t commands | grep -Eo '(")?[-]D[^ =]+(=[^ ]*)?\1?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > defines.rsp
-        test -s lldefines.rsp || ( cat defines.rsp >> lldefines.rsp )
+        test -v prefix              || exit 103
+        test -v snapshot_dir        || exit 104
+        test -s devtime/link.rsp    || exit 100
+        test -s devtime/compile.rsp || exit 101
+        test -s winsdk/winsdk.rsp   || exit 102
 
     - name: provision p373r vrmod
       run: |
@@ -184,26 +194,24 @@ jobs:
         process1_pid=$!
         clang++ @compile.rsp @mm.rsp -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj &
         process2_pid=$!
-        echo "boost::json::detail::default_resource boost::json::detail::default_resource::instance_;" | clang++ @compile.rsp -includeboost/json.hpp -x c++ -c - -o bjson.o &
-        process3_pid=$!
-        echo "waiting on subprocesses... $process1_pid $process2_pid $process3_pid"
-        wait $process1_pid $process2_pid $process3_pid
+        echo "waiting on subprocesses... $process1_pid $process2_pid"
+        wait $process1_pid $process2_pid
 
     - name: link executable
       run: |
-        clang++ @link.rsp @llobjs.rsp bjson.o -o ${base//[^[:alnum:]]/-}-p373r-vrmod.exe
+        clang++ @application-bin.rsp -o ${prefix}-p373r-vrmod.exe
 
     - name: test executable
       run: |
         test ! -d $snapshot_dir/runtime && echo "skipping (runtime/ not found)" || \
-        PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ./${base//[^[:alnum:]]/-}-p373r-vrmod.exe --help 2>&1 | tail -5 || true
+        PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ./${prefix}-p373r-vrmod.exe --help 2>&1 | tail -5 || true
 
     - name: bundle
       uses: ./gha-node20-run
       with:
         run: |
           . /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha/gha.upload-artifact.bash
-          gha-upload-artifact-fast $(date +"%Y%m%d-%H%M%S" )-${base//[^[:alnum:]]/-}-p373r-vrmod ${base//[^[:alnum:]]/-}-p373r-vrmod.exe 1 9
+          gha-upload-artifact-fast $(date +"%Y%m%d-%H%M%S" )-${prefix}-p373r-vrmod ${prefix}-p373r-vrmod.exe 1 9
 
     - name: gha_step recovery
       if: failure()
