@@ -8,7 +8,7 @@ on:
         required: true
       fstuple:
         type: string
-        default: '{"pause":"never", "key":"Windows"}'
+        default: '{"pause":"never"}'
 
 run-name: sgeo-minimal-vrmod | ${{ inputs.artifact }}
 
@@ -32,7 +32,15 @@ jobs:
           echo build_id=$(date +"%Y%m%d-%H%M%S")
         ) | tee -a $GITHUB_ENV
 
+    - name: sgeo-min-7.1.9.patch
+      id: patch
+      uses: actions/cache@v4
+      with:
+        path: sgeo-min-7.1.9.patch
+        key: p373r-sgeo-minimal-sgeo-min-7.1.9.patch
+
     - name: calculate sgeo_min_vr_7.1.9 vrmod
+      if: steps.patch.outputs.cache-hit != 'true'
       shell: bash
       run: |
         git clone --quiet --filter=tree:0 --single-branch https://github.com/Sgeo/p373r-sgeo-minimal --branch sgeo_min_vr_7.1.9 p373r-sgeo-minimal 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
