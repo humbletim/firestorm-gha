@@ -127,6 +127,7 @@ runs:
       else
         cp -av ${snapshot_dir}/lldefines.rsp devtime/lldefines.rsp
       fi
+      cat devtime/lldefines.rsp
       cat <<EOF > devtime/link.rsp
         @winsdk/winsdk.rsp
         -Wl,-ignore:4217 -Wl,-subsystem:windows -Wl,-machine:x64 -Wno-inconsistent-dllimport
@@ -142,8 +143,6 @@ runs:
         -w -std=c++20 -isystem${snapshot_dir}/3p/include/apr-1
         -fms-runtime-lib=dll -pthread
       EOF
-      echo "neutralizing Strawberry Perl threat (of confusing PATHs with its own patch.exe) ..."
-      test ! -d /c/Strawberry || mv -v /c/Strawberry /c/Strawberry.not
       echo "working around boost::json::default_resource::instance_ msvc-vs-llvm quirk"
       echo "boost::json::detail::default_resource boost::json::detail::default_resource::instance_;" | clang++ @devtime/compile.rsp -includeboost/json.hpp -x c++ -c - -o devtime/bjson.o
       echo devtime/bjson.o > devtime/custom-objs.rsp

@@ -136,30 +136,31 @@ sed "s@$base/runtime/@runtime/@g" $build_dir/runtime.txt > $snapshot_dir/metadat
 head -2 $snapshot_dir/metadata/runtime.rsp.in
 
 ###########################################################################
-echo "[7z] GENERATING ${version_full}-(devtime|runtime|snapshot).zip..." >&2
+bundle=${base}-${upstream_rel}-${version_shas}
+echo "[7z] GENERATING ${bundle}-(devtime|runtime|snapshot).zip..." >&2
 
 cd $build_dir
 
 test ! -d $base/runtime || rm -v $base/runtime
 # package ${base:-fs-beta-7.1.12-e}/ => "devtime" capture
-time ${_7z:-7z} -mx5 -bd -tzip a ${version_full}-devtime.zip $base
+time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-devtime.zip $base
 
 # stage fs-beta-7.1.12-e/runtime/
 ht-ln $build_dir/newview $base/runtime
-time ${_7z:-7z} -mx5 -bd -tzip a ${version_full}-runtime.zip @$build_dir/runtime.txt
+time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-runtime.zip @$build_dir/runtime.txt
 
 # make a copy of devtime and append @precision manifested runtime/ folder (to emerge a combined snapshot)
-cp -av ${version_full}-devtime.zip ${version_full}-snapshot.zip
-time ${_7z:-7z} -mx5 -bd -tzip a ${version_full}-snapshot.zip @$build_dir/runtime.txt
+cp -av ${bundle}-devtime.zip ${bundle}-snapshot.zip
+time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-snapshot.zip @$build_dir/runtime.txt
 
 test "${_7z:-7z}" == 7z || { echo "NOUPLOAD 7z=${_7z}" >&2 ; exit 141 ; }
 echo "UPLOADING ARTIFACTS...${GITHUB_ACTIONS}" >&2
 gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; } 
 grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
 
-zipUploadStream=${version_full}-devtime.zip gha-upload-artifact-fast ${version_full}-devtime ${version_full}-devtime.zip
-zipUploadStream=${version_full}-runtime.zip gha-upload-artifact-fast ${version_full}-runtime ${version_full}-runtime.zip
-zipUploadStream=${version_full}-snapshot.zip gha-upload-artifact-fast ${version_full}-snapshot ${version_full}-snapshot.zip
+zipUploadStream=${bundle}-devtime.zip gha-upload-artifact-fast ${bundle}-devtime ${bundle}-devtime.zip
+zipUploadStream=${bundle}-runtime.zip gha-upload-artifact-fast ${bundle}-runtime ${bundle}-runtime.zip
+zipUploadStream=${bundle}-snapshot.zip gha-upload-artifact-fast ${bundle}-snapshot ${bundle}-snapshot.zip
 
 # UPLOAD SNAPSHOT
 
