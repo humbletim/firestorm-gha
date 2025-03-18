@@ -32,6 +32,7 @@ jobs:
 
     - uses: humbletim/firestorm-gha/.github/vrmod@tpv-gha-nunja
       with:
+        key: ${{ github.jobs[github.job].runs-on }}
         artifact: ${{fromJSON(inputs.fstuple).artifact}}
     # - name: detect winsdk
     #   shell: vsdevenv x64 cmd {0}
@@ -192,14 +193,14 @@ jobs:
       run: |
         llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc &
         process1_pid=$!
-        clang++ @compile.rsp @mm.rsp -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj &
+        clang++ @devtime/compile.rsp @devtime/mm.rsp -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj &
         process2_pid=$!
         echo "waiting on subprocesses... $process1_pid $process2_pid"
         wait $process1_pid $process2_pid
 
     - name: link executable
       run: |
-        clang++ @application-bin.rsp -o ${prefix}-p373r-vrmod.exe
+        clang++ @devtime/application-bin.rsp -o ${prefix}-p373r-vrmod.exe
 
     - name: test executable
       run: |

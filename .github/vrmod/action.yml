@@ -7,6 +7,8 @@ inputs:
   artifact:
     type: string
     required: true
+  key:
+    default: ${{ runner.os }}
   github-token:
     default: ${{ github.token }}
 runs:
@@ -14,14 +16,18 @@ runs:
   steps:
   - name: verify inputs
     shell: bash
-    run: test -n "${{ inputs.artifact }}"
+    run: |
+      test -n "${{ inputs.artifact }}"
+      echo ${{ toJSON(inputs) }} 
+      echo ${{ toJSON(runner) }} 
 
   - name: cache llvm winsdk stuff
     id: winsdk
     uses: actions/cache/restore@v4
     with:
       path: winsdk
-      key: ${{ github.jobs[github.job].runs-on }}-llvm-winsdk
+      key: ${{ inputs.key }}-llvm-winsdk
+      restore-keys: -${{ inputs.artifact }}-artifact
 
   - uses: humbletim/vsdevenv-shell@v2
     if: steps.winsdk.outputs.cache-hit != 'true'
@@ -65,7 +71,8 @@ runs:
     uses: actions/cache/restore@v4
     with:
       path: _snapshot
-      key: ${{ runner.os }}-${{ inputs.artifact }}-artifact
+      key: ${{ input.key }}-${{ inputs.artifact }}-artifact
+      restore-keys: ${{ runner.os }}-${{ inputs.artifact }}-artifact
   - name: '  cached env setup'
     if: steps.artifact.outputs.cache-hit == 'true'
     shell: bash
@@ -92,12 +99,12 @@ runs:
       path: _snapshot
       key:  ${{ steps.artifact.outputs.cache-primary-key }}
 
-  - name: cache devtime
+  - name: devtime
     id: devtime
-    uses: actions/cache@v4
+    uses: actions/cache/restore@v4
     with:
       path: devtime
-      key: $${{ github.jobs[github.job].runs-on }}-${{ inputs.artifact }}-unfurled
+      key: $${{ inputs.key }}-${{ inputs.artifact }}-unfurled
 
   - name: unfurl devtime
     shell: bash
@@ -133,3 +140,9 @@ runs:
       echo "boost::json::detail::default_resource boost::json::detail::default_resource::instance_;" | clang++ @devtime/compile.rsp -includeboost/json.hpp -x c++ -c - -o devtime/bjson.o
       echo devtime/bjson.o > devtime/custom-objs.rsp
       echo '@devtime/link.rsp @devtime/llobjs.rsp @devtime/custom-objs.rsp' > devtime/application-bin.rsp
+  - name: '/devtime' 
+    if: always() && steps.devtime.outputs.cache-hit != 'true'
+    uses: actions/cache/save@v4
+    with:
+      path: devtime
+      key:  ${{ steps.devtime.outputs.cache-primary-key }}
