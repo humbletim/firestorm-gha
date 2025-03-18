@@ -8,26 +8,33 @@ inputs:
     type: string
     required: true
   key:
-    default: ${{ runner.os }}
+    type: string
   github-token:
     default: ${{ github.token }}
+    required: true
 runs:
   using: 'composite'
   steps:
-  - name: verify inputs
+  - name: calculate steps.input.outputs.key
+    id: input
     shell: bash
     run: |
       test -n "${{ inputs.artifact }}"
-      echo ${{ toJSON(inputs) }} 
-      echo ${{ toJSON(runner) }} 
+      key="${{ inputs.key }}"
+      (
+        export LC_ALL=en_US.UTF-8
+        echo A=$(grep -oP 'Image: \K[^\]+' /c/imagedata.json 2>&1)
+        echo B=$(grep -oP 'Image: \K[^\\]+' /c/imagedata.json 2>&1)
+        echo C=$(sed -n 's/.*Image: \([^\]*\).*/\1/p' /c/imagedata.json 2>&1)
+      ) || true
+      echo key=${key:-$(sed -n 's/.*Image: \([^\]*\).*/\1/p' /c/imagedata.json || echo $RUNNER_OS)} | tee -a $GITHUB_OUTPUT
 
   - name: cache llvm winsdk stuff
     id: winsdk
     uses: actions/cache/restore@v4
     with:
       path: winsdk
-      key: ${{ inputs.key }}-llvm-winsdk
-      restore-keys: -${{ inputs.artifact }}-artifact
+      key: ${{ steps.input.outputs.key }}-llvm-winsdk
 
   - uses: humbletim/vsdevenv-shell@v2
     if: steps.winsdk.outputs.cache-hit != 'true'
@@ -64,20 +71,20 @@ runs:
     uses: actions/cache/save@v4
     with:
       path: winsdk
-      key:  ${{ steps.winsdk.outputs.cache-primary-key }}
+      key: ${{ steps.winsdk.outputs.cache-primary-key }}
 
   - name: 'ARTIFACT:'
     id: artifact
     uses: actions/cache/restore@v4
     with:
       path: _snapshot
-      key: ${{ input.key }}-${{ inputs.artifact }}-artifact
-      restore-keys: ${{ runner.os }}-${{ inputs.artifact }}-artifact
+      key: ${{ steps.input.outputs.key }}-${{ inputs.artifact }}-artifact
   - name: '  cached env setup'
     if: steps.artifact.outputs.cache-hit == 'true'
     shell: bash
     run: cat _snapshot/GITHUB_ENV | tee -a $GITHUB_ENV
   - name: '  download and unpack artifact'
+    id: ghdl
     if: steps.artifact.outputs.cache-hit != 'true'
     shell: bash
     env:
@@ -93,20 +100,21 @@ runs:
         echo prefix=${base//[^[:alnum:]]/-}
       ) | tee -a $GITHUB_ENV _snapshot/GITHUB_ENV
   - name: '/ARTIFACT' 
-    if: always() && steps.artifact.outputs.cache-hit != 'true'
+    if: always() && steps.artifact.outputs.cache-hit != 'true' && steps.ghdl.outcome == 'success'
     uses: actions/cache/save@v4
     with:
       path: _snapshot
-      key:  ${{ steps.artifact.outputs.cache-primary-key }}
+      key: ${{ steps.artifact.outputs.cache-primary-key }}
 
   - name: devtime
     id: devtime
     uses: actions/cache/restore@v4
     with:
       path: devtime
-      key: $${{ inputs.key }}-${{ inputs.artifact }}-unfurled
+      key: ${{ steps.input.outputs.key }}-${{ inputs.artifact }}-unfurled
 
   - name: unfurl devtime
+    id: unfurl
     shell: bash
     if: steps.devtime.outputs.cache-hit != 'true'
     run: |
@@ -141,8 +149,8 @@ runs:
       echo devtime/bjson.o > devtime/custom-objs.rsp
       echo '@devtime/link.rsp @devtime/llobjs.rsp @devtime/custom-objs.rsp' > devtime/application-bin.rsp
   - name: '/devtime' 
-    if: always() && steps.devtime.outputs.cache-hit != 'true'
+    if: always() && steps.devtime.outputs.cache-hit != 'true' && steps.unfurl.outcome == 'success'
     uses: actions/cache/save@v4
     with:
       path: devtime
-      key:  ${{ steps.devtime.outputs.cache-primary-key }}
+      key: ${{ steps.devtime.outputs.cache-primary-key }}
