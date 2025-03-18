@@ -59,7 +59,7 @@ jobs:
         # . /d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha/gha.quiet-clone.bash
         # test -d p373r || quiet-clone github.com humbletim/firestorm-gha P373R_6.6.8 p373r
         grep P373R ${snapshot_dir}/source/newview/llviewerdisplay.cpp >/dev/null || \
-          ( patch --directory=${snapshot_dir}/source/newview --ignore-whitespace --verbose --merge -p1 < p373r/0001-P373R-6.6.8-baseline-diff.patch )
+          ( C:/PROGRA~1/Git/usr/bin/patch.exe --directory=${snapshot_dir}/source/newview --ignore-whitespace --verbose --merge -p1 < p373r/0001-P373R-6.6.8-baseline-diff.patch )
         cat <<'EOF' | sed 's@^        @@;' | base64 -d | gunzip -c > icon.ico
         H4sICAwo1mcAA2ljb24uaWNvAO1Y+0+TZxT+9h/4035cyJQFLZdSWvrJra2lyApTjNAhRC1YcRlO
         FzMvuylab/MS9Ict2ZYQMl0WtYqXLSpRtkRN3DINIG5uZpkCpf16odAOAgnw7Lynk0SZMfZiTPRp
@@ -142,7 +142,7 @@ jobs:
               get_yaml2json-windows
           )
           . $ghash/../gha-steps.bash
-          workflow=clone/.github/workflows/p373r-vrmod.yml
+          workflow=clone/.github/workflows/${GITHUB_WORKFLOW}.yml
         EOF
 
 
