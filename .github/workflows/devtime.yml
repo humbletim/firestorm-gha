@@ -36,7 +36,7 @@ jobs:
       shell: bash
       run: |
         git clone --quiet --filter=tree:0 --single-branch https://github.com/humbletim/firestorm-gha --branch jira-34020 jira-34020 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
-        diff jira-34020/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/llurllineeditorctrl.cpp
+        diff jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/llurllineeditorctrl.cpp
         cp -av jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/
 
     - name: provision jira-34020
