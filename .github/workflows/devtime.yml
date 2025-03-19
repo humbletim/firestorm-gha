@@ -36,8 +36,13 @@ jobs:
       shell: bash
       run: |
         git clone --quiet --filter=tree:0 --single-branch https://github.com/humbletim/firestorm-gha --branch jira-34020 jira-34020 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
-        diff -U4 -w $snapshot_dir/source/newview/llurllineeditorctrl.cpp jira-34020/7.1.12/newview/llurllineeditorctrl.cpp \
-          | tee ${{ env.prefix }}-${{ env.workflow }}.llurllineeditorctrl.cpp.diff.txt || true
+        (
+          echo '### ${{ env.prefix }}-${{ env.workflow }}.llurllineeditorctrl.cpp.diff.txt'
+          echo '```diff'
+          diff -U4 -w $snapshot_dir/source/newview/llurllineeditorctrl.cpp jira-34020/7.1.12/newview/llurllineeditorctrl.cpp \
+            | tee ${{ env.prefix }}-${{ env.workflow }}.llurllineeditorctrl.cpp.diff.txt || true
+          echo '```'
+        ) | tee $GITHUB_STEP_SUMMARY
         cp -av jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/
         cp -av jira-34020/7.1.12/fsversionvalues.h $snapshot_dir/source/
 
