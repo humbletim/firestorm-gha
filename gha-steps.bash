@@ -1,13 +1,13 @@
 #!/bin/bash
 
 function gha_steps() {(
-  local workflow=${workflow:-${workspace:-$(dirname "$BASH_SOURCE")}/.github/workflows/${GITHUB_WORKFLOW:-CompileWindows}.yml}
+  local _workflow=${_workflow:-${workspace:-$(dirname "$BASH_SOURCE")}/.github/workflows/${GITHUB_WORKFLOW:-CompileWindows}.yml}
   PATH=$PATH:bin
-  yaml2json < $workflow | jq -r '.jobs[].steps|to_entries[]|select(.value.name and ((.value.name//"")|startswith("~")|not))|.value.name+" # "+(.key|tostring)'
+  yaml2json < $_workflow | jq -r '.jobs[].steps|to_entries[]|select(.value.name and ((.value.name//"")|startswith("~")|not))|.value.name+" # "+(.key|tostring)'
 )}
 
 function gha_step() {(
-  local workflow=${workflow:-${workspace:-$(dirname "$BASH_SOURCE")}/.github/workflows/${GITHUB_WORKFLOW:-CompileWindows}.yml}
+  local _workflow=${_workflow:-${workspace:-$(dirname "$BASH_SOURCE")}/.github/workflows/${GITHUB_WORKFLOW:-CompileWindows}.yml}
   PATH=$PATH:bin
   if [[ $# == 0 ]] ; then
     gha_steps
