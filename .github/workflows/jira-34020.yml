@@ -1,0 +1,114 @@
+name: jira-34020
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact:
+        type: string
+        required: true
+      fstuple:
+        type: string
+        default: '{"pause":"never"}'
+
+run-name: jira-34020 | ${{ inputs.artifact }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+    - uses: humbletim/firestorm-gha/.github/vrmod@tpv-gha-nunja
+      with:
+        key: ${{ fromJSON(inputs.fstuple).key }}
+        artifact: ${{ inputs.artifact }}
+
+    - name: preflight
+      run: |
+        (
+          echo workflow=${{ github.workflow }}
+          echo build_id=$(date +"%Y%m%d-%H%M%S")
+        ) | tee -a $GITHUB_ENV
+
+    - name: apply jira-34020 fix
+      shell: bash
+      run: |
+        git clone --quiet --filter=tree:0 --single-branch https://github.com/humbletim/firestorm-gha --branch jira-34020 jira-34020 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
+        diff jira-34020/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/llurllineeditorctrl.cpp
+        cp -av jira-34020/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/
+
+    - name: provision jira-34020
+      run: |
+        file jira-34020/icon.ico
+        set -a
+        . ${snapshot_dir}/metadata/env.d/build_vars.env
+        CompanyName=${GITHUB_REPOSITORY}
+        FileDescription=${GITHUB_WORKFLOW}
+        ProductName=$(echo "${GITHUB_WORKFLOW_REF}" | tr '@' '#')
+        ProductVersion=${version_full}
+        FileVersion=${viewer_version}
+        InternalName=${viewer_channel}
+        LegalCopyright=$(date +"%Y.%m.%d.%H:%M:%S" )
+        icon=jira-34020/icon.ico
+        sed -E "$(echo '
+                s@\b((FILE|PRODUCT)VERSION\s+(([0-9]+.){3}))[0-9]{5}@\10@g;
+                s@(VALUE (.)CompanyName.), .*@    \1, \2${CompanyName}\2    @;
+                s@(VALUE (.)ProductName.), .*@    \1, \2${ProductName}\2    @;
+                s@(VALUE (.)ProductVersion.), .*@ \1, \2${ProductVersion}\2 @;
+                s@(VALUE (.)InternalName.), .*@   \1, \2${InternalName}\2   @;
+                s@(VALUE (.)FileDescription.), .*@\1, \2${FileDescription}\2@;
+                s@(VALUE (.)FileVersion.), .*@    \1, \2${FileVersion}\2    @;
+                s@(VALUE (.)LegalCopyright.), .*@ \1, \2${LegalCopyright}\2 @;
+                s@firestorm_icon.ico@${icon}@;
+        ' | envsubst)" < ${snapshot_dir}/source/viewerRes.rc > viewerRes.rc
+
+    - name: compile overrides
+      run: |
+        time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp $snapshot_dir/source/newview/llurllineeditorctrl.cpp -c -o $snapshot_dir/objs/newview/llurllineeditorctrl.cpp.obj && echo compiled" &
+        process2_pid=$!
+        time bash -c "sleep 5 && llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc && echo rc done" &
+        process1_pid=$!
+        echo "waiting on subprocesses... $process1_pid $process2_pid"
+        wait $process1_pid $process2_pid
+
+    - name: link executable
+      run: |
+        clang++ @devtime/application-bin.rsp -o ${prefix}-${workflow}.exe
+
+    - name: test executable
+      run: |
+        test ! -d $snapshot_dir/runtime && echo "skipping (runtime/ not found)" || \
+        PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ./${prefix}-${workflow}.exe --help 2>&1 | tail -5 || true
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        retention-days: 1
+        name: ${{ env.build_id }}-${{ env.prefix }}-${{ env.workflow }}
+        path: ${{ env.prefix }}-${{ env.workflow }}.exe
+
+    - name: gha_step recovery
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      run: |
+        cat <<'EOF' > _yaml.bash
+          ghash=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha
+          . $ghash/gha.quiet-clone.bash
+          test -d clone || quiet-clone github.com humbletim/firestorm-gha tpv-gha-nunja clone
+          test -x bin/yaml2json || (
+            . $ghash/gha.wget-sha256.bash
+            . $ghash/../gha-populate-bin.bash
+              mkdir -pv bin
+              get_yaml2json-windows
+          )
+          . $ghash/../gha-steps.bash
+          workflow=clone/.github/workflows/${GITHUB_WORKFLOW}.yml
+        EOF
+
+
+    - name: ~Setup tmate session
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
