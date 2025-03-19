@@ -186,7 +186,7 @@ jobs:
               get_yaml2json-windows
           )
           . $ghash/../gha-steps.bash
-          workflow=clone/.github/workflows/${GITHUB_WORKFLOW}.yml
+          _workflow=clone/.github/workflows/${GITHUB_WORKFLOW}.yml
         EOF
 
 
