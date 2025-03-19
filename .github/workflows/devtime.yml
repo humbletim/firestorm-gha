@@ -36,8 +36,8 @@ jobs:
       shell: bash
       run: |
         git clone --quiet --filter=tree:0 --single-branch https://github.com/humbletim/firestorm-gha --branch jira-34020 jira-34020 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
-        diff -U3 -w jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/llurllineeditorctrl.cpp \
-          | tee -a llurllineeditorctrl.cpp.jira-34020.diff.txt
+        diff -U4 -w $snapshot_dir/source/newview/llurllineeditorctrl.cpp jira-34020/7.1.12/newview/llurllineeditorctrl.cpp \
+          | tee ${{ env.prefix }}-${{ env.workflow }}.llurllineeditorctrl.cpp.diff.txt || true
         cp -av jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/
         cp -av jira-34020/7.1.12/fsversionvalues.h $snapshot_dir/source/
 
@@ -68,7 +68,7 @@ jobs:
 
     - name: compile overrides
       run: |
-        time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp $snapshot_dir/source/newview/llversioninfo.cpp -c -o $snapshot_dir/objs/newview/llversioninfo.cpp.obj && echo llversioninfo" &
+        time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp -I$snapshot_dir/source $snapshot_dir/source/newview/llversioninfo.cpp -c -o $snapshot_dir/objs/newview/llversioninfo.cpp.obj && echo llversioninfo" &
         process3_pid=$!
         time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp $snapshot_dir/source/newview/llurllineeditorctrl.cpp -c -o $snapshot_dir/objs/newview/llurllineeditorctrl.cpp.obj && echo compiled" &
         process2_pid=$!
