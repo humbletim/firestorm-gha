@@ -36,8 +36,10 @@ jobs:
       shell: bash
       run: |
         git clone --quiet --filter=tree:0 --single-branch https://github.com/humbletim/firestorm-gha --branch jira-34020 jira-34020 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
-        diff -w jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/llurllineeditorctrl.cpp || true
+        diff -U3 -w jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/llurllineeditorctrl.cpp \
+          | tee -a llurllineeditorctrl.cpp.jira-34020.diff.txt
         cp -av jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/
+        cp -av jira-34020/7.1.12/fsversionvalues.h $snapshot_dir/source/
 
     - name: provision jira-34020
       run: |
@@ -66,12 +68,14 @@ jobs:
 
     - name: compile overrides
       run: |
+        time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp $snapshot_dir/source/newview/llversioninfo.cpp -c -o $snapshot_dir/objs/newview/llversioninfo.cpp.obj && echo llversioninfo" &
+        process3_pid=$!
         time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp $snapshot_dir/source/newview/llurllineeditorctrl.cpp -c -o $snapshot_dir/objs/newview/llurllineeditorctrl.cpp.obj && echo compiled" &
         process2_pid=$!
         time bash -c "sleep 5 && llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc && echo rc done" &
         process1_pid=$!
-        echo "waiting on subprocesses... $process1_pid $process2_pid"
-        wait $process1_pid $process2_pid
+        echo "waiting on subprocesses... $process1_pid $process2_pid $process3_pid"
+        wait $process1_pid $process2_pid $process3_pid
 
     - name: link executable
       run: |
@@ -85,9 +89,11 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        retention-days: 1
+        retention-days: 3
         name: ${{ env.build_id }}-${{ env.prefix }}-${{ env.workflow }}
-        path: ${{ env.prefix }}-${{ env.workflow }}.exe
+        path: |
+          ${{ env.prefix }}-${{ env.workflow }}.llurllineeditorctrl.cpp.diff.txt
+          ${{ env.prefix }}-${{ env.workflow }}.exe
 
     - name: gha_step recovery
       if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
