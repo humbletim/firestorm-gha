@@ -1,4 +1,4 @@
-name: jira-34020
+name: FIRE-34020-pull-92
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
         type: string
         default: '{"pause":"never"}'
 
-run-name: jira-34020 | ${{ inputs.artifact }}
+run-name: FIRE-34020-pull-92 | ${{ inputs.artifact }}
 
 defaults:
   run:
@@ -36,15 +36,16 @@ jobs:
       shell: bash
       run: |
         git clone --quiet --filter=tree:0 --single-branch https://github.com/humbletim/firestorm-gha --branch jira-34020 jira-34020 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
+        curl -s -o pull-92.patch https://patch-diff.githubusercontent.com/raw/FirestormViewer/phoenix-firestorm/pull/92.diff
         (
           echo '### ${{ env.prefix }}-${{ env.workflow }}.llurllineeditorctrl.cpp.diff.txt'
           echo '```diff'
-          diff -U4 -w $snapshot_dir/source/newview/llurllineeditorctrl.cpp jira-34020/7.1.12/newview/llurllineeditorctrl.cpp \
-            | tee ${{ env.prefix }}-${{ env.workflow }}.llurllineeditorctrl.cpp.diff.txt || true
+          # diff -U4 -w $snapshot_dir/source/newview/llurllineeditorctrl.cpp jira-34020/7.1.12/newview/llurllineeditorctrl.cpp
+          cat pull-92.patch
           echo '```'
         ) | tee $GITHUB_STEP_SUMMARY
-        cp -av jira-34020/7.1.12/newview/llurllineeditorctrl.cpp $snapshot_dir/source/newview/
-        cp -av jira-34020/7.1.12/fsversionvalues.h $snapshot_dir/source/
+        C:/PROGRA~1/Git/usr/bin/patch.exe --directory=$snapshot_dir/source/newview < pull-92.patch
+        sed 's@jira-34020@FIRE-34020@g' jira-34020/7.1.12/fsversionvalues.h > $snapshot_dir/source/fsversionvalues.h
 
     - name: provision jira-34020
       run: |
