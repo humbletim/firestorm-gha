@@ -202,8 +202,8 @@ EOF
 
     echo $msvc_path
     [[ "$OSTYPE" != "msys" ]] || which cl.exe > /dev/null || return 241
-    local out="$(ninja -C "$build_dir" -n 2>&1 && echo ninja_preflight_OK | colout -t ninja)"
-    echo "$out" | grep ninja_preflight_OK || { echo "$out" ; _die "ninja -n failed" ; }
+    local out="$($ninja_exe -C "$build_dir" -n 2>&1 && echo ninja_preflight_OK | colout -t ninja)"
+    echo "$out" | grep ninja_preflight_OK || { echo "$out" ; _die "$ninja_exe -n failed" ; }
     echo "$out" | head -3
     echo "..."
     echo "$out" | tail -3
@@ -255,8 +255,8 @@ function 0a0_ninja_build() {( $_dbgopts;
     . $build_dir/msvc.nunja.env
     . $BASH_ENV
     [[ "$OSTYPE" != "msys" ]] || which cl.exe > /dev/null || return 241
-    echo "[$FUNCNAME] ninja -C $build_dir ${@:-llpackage}" >&2
-    ninja -C "$build_dir" "${@:-llpackage}" | ${NINJA_COLOUT:-colout -t ninja} || _die_exit_code=$? _die "ninja failed"
+    echo "[$FUNCNAME] $ninja_exe -C $build_dir ${@:-llpackage}" >&2
+    $ninja_exe -C "$build_dir" "${@:-llpackage}" | ${NINJA_COLOUT:-colout -t ninja} || _die_exit_code=$? _die "ninja failed"
 )}
 
 function _get_APPLICATION_EXE() {(

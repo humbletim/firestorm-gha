@@ -1,4 +1,6 @@
 #!/bin/bash
+#cmake_path=${cmake_path:-"$(dirname "$(which cmake.exe)")"}
+#echo "cmake path: $cmake_path" >&2
 
 test -s build/msvc.env || $gha_fsvr_dir/util/generate_msvc_env.bat > build/msvc.env
 . build/msvc.env
@@ -20,7 +22,17 @@ test -d $CRT || { echo "msvc CRT '$CRT' does not exist" &>2 ; exit 20 ; }
 
 {
   echo msvc_dir=$CRT
-  PATH="$msvc_path:$PATH:/usr/bin:/c/Windows/system32"
+  for x in ninja_path cmake_path cl_path ; do
+    if test -v $x ; then
+      eval "${x}=\"\$(cygpath -ua \"${!x}\")\""
+    fi
+  done
+  # cmake_path=$(cygpath -ua "$cmake_path")
+  # test ! -v ninja_path || ninja_path=$(cygpath -ua "$ninja_path")
+  export PATH="$ninja_path:$cmake_path:$msvc_path:$PATH:/usr/bin:/c/Windows/system32"
+  echo "cmake : $PATH $(which cmake)" >&2
+  cl_path="$(dirname "$(which cl.exe)")"
+  PATH="$cl_path:$PATH"
   for x in cl lib link mt rc cmake ninja python3 cmcldeps; do
     y="$(which $x.exe)"
     test -x "$y" || { echo "could not locate $x '$y'" >&2 ; exit 26; }

@@ -30,7 +30,7 @@ $python3 --version >/dev/null || { echo "!python3" 2>&1 ; exit 26 ; }
 jqexe="$(PATH="$_SYSTEM_PATH:$_PRESHELL_PATH" which jq)"
 $jqexe --version >/dev/null || { which jq ; echo "!jq" 2>&1 ; exit 27 ; }
 envsubstexe="$(PATH="$_SYSTEM_PATH:$_PRESHELL_PATH" which envsubst)"
-$envsubstexe --version 2>&1 | head -1 1>&2 || { which envsubst ; echo "!envsubst" 2>&1 ; exit 28 ; }
+"$envsubstexe" --version 2>&1 | head -1 1>&2 || { which envsubst ; echo "!envsubst" 2>&1 ; exit 28 ; }
 pysite="$(PYTHONUSERBASE="$_PYTHONUSERBASE" ${python3} -msite --user-site)"
 
 ######################################################################
