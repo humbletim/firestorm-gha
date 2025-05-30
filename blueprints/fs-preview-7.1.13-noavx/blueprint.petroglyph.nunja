@@ -3500,7 +3500,7 @@ build cmake_object_order_depends_target_llwebrtc: phony || llwebrtc\CMakeFiles\l
 
 build llwebrtc\CMakeFiles\llwebrtc.dir\llwebrtc.cpp.obj: CXX_COMPILER__llwebrtc_Release $source_dir\llwebrtc\llwebrtc.cpp || cmake_object_order_depends_target_llwebrtc
   DEFINES = $DEFINES_7 -Dllwebrtc_EXPORTS
-  FLAGS = $FLAGS_9
+  FLAGS = $FLAGS_10
   INCLUDES = -I$packages_dir\include\webrtc -I$packages_dir\include\webrtc\third_party\abseil-cpp
   OBJECT_DIR = llwebrtc\CMakeFiles\llwebrtc.dir
   OBJECT_FILE_DIR = llwebrtc\CMakeFiles\llwebrtc.dir
@@ -5284,7 +5284,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\exoflickrauth.cpp.obj: CXX_CO
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\fsprimfeedauth.cpp.obj: CXX_COMPILER__firestorm-bin_objects_Release $source_dir\newview\fsprimfeedauth.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIllpreprocessor.h -FIllevents.h
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -5893,7 +5893,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llfloaterflickr.cpp.obj: CXX_
 
 build newview\CMakeFiles\firestorm-bin_objects.dir\fsprimfeedconnect.cpp.obj: CXX_COMPILER__firestorm-bin_objects_Release $source_dir\newview\fsprimfeedconnect.cpp || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
-  FLAGS = $WX
+  FLAGS = $WX  -FIllpreprocessor.h -FIllevents.h
   INCLUDES = $INCLUDE_1
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
@@ -10780,7 +10780,7 @@ build newview\CMakeFiles\firestorm-bin_objects.dir\llwindebug.cpp.obj: CXX_COMPI
 build newview\CMakeFiles\firestorm-bin_objects.dir\viewerRes.rc.res: RC_COMPILER__firestorm-bin_objects_Release $build_dir\newview\viewerRes.rc || cmake_object_order_depends_target_firestorm-bin_objects
   DEFINES = $DEFINES_1
   DEP_FILE = newview\CMakeFiles\firestorm-bin_objects.dir\viewerRes.rc.res.d
-  FLAGS = $FLAGS_8
+  FLAGS = $FLAGS_9
   INCLUDES = -I $build_dir\newview -I $source_dir\llaudio -I $source_dir\llcommon -I $source_dir\llmath -I $source_dir\llmeshoptimizer -I $source_dir\llmessage -I $source_dir\llfilesystem -I $source_dir\llcorehttp -I $source_dir\llxml -I $source_dir\llcharacter -I $source_dir\llimage -I $source_dir\llinventory -I $source_dir\llplugin -I $source_dir\llrender -I $source_dir\llwindow -I $source_dir\llprimitive -I $source_dir\llui -I $source_dir\llwebrtc -I $source_dir\viewer_components\login -I $source_dir\llappearance -I $packages_dir\include\apr-1 -I $packages_dir\include -I $packages_dir\include\zlib-ng -I $packages_dir\include\meshoptimizer -I $packages_dir\include\nghttp2 -I $packages_dir\include\AL -I $packages_dir\include\openjpeg -I $packages_dir\include\libpng16 -I $packages_dir\include\freetype2 -I $packages_dir\include\collada -I $packages_dir\include\collada\1.4 -I $packages_dir\include\hunspell -I $packages_dir\include\glod -I $packages_dir\include\discord-rpc -I $packages_dir\include\Growl
   OBJECT_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
   OBJECT_FILE_DIR = newview\CMakeFiles\firestorm-bin_objects.dir
