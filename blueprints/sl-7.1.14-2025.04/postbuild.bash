@@ -99,11 +99,17 @@ cp -ua $build_dir/newview/viewerRes.rc $snapshot_dir/source/ || true
 )
 
 for x in `grep -Eo '[^"]+[.](cur|ico)' $build_dir/newview/viewerRes.rc | sort -u ` ; do
-    cpsync $source_dir/newview/res/$x $snapshot_dir/source/newview/res/
+    if [[ -f $source_dir/newview/res/$x ]]; then
+        cpsync $source_dir/newview/res/$x $snapshot_dir/source/newview/res/
+    elif [[ -f $build_dir/newview/$x ]]; then
+        cpsync $build_dir/newview/$x $snapshot_dir/source/newview/res/
+    else
+        echo "$build_dir/newview/viewerRes.rc::$x source icon not found..." >&2 ;
+    fi
 done
 
 mkdir -pv $snapshot_dir/metadata/tmp/icons/
-for x in `ls $source_dir/newview/icons/*-os/*.ico` ; do
+for x in `ls $source_dir/newview/icons/*/*.ico` ; do
     cp -ua $x $snapshot_dir/metadata/tmp/icons/$viewer_bin-$(basename $(dirname $x)).ico
 done
 
