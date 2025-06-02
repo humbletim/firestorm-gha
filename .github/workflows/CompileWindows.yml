@@ -64,6 +64,14 @@ jobs:
          source $gha_fsvr_dir/gha-populate-bin.bash
          gha-populate-bin-windows
 
+    - name: Populate bin/yaml2json
+      if: fromJSON(inputs.fstuple).pause != '' && fromJSON(inputs.fstuple).pause != 'never'
+      uses: ./fsvr-action
+      with:
+        run: |
+         source $gha_fsvr_dir/gha-populate-bin.bash
+         get_yaml2json-windows
+
     - name: Expand Source Repositories
       uses: ./fsvr-action
       with:
@@ -224,8 +232,8 @@ jobs:
     - name: 090_ninja_preflight
       run: fsvr_step 090
 
-    - name: ~004 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '004' || fromJSON(inputs.fstuple).pause == 'always'
+    - name: ~prebuild Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == 'prebuild'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
@@ -242,16 +250,22 @@ jobs:
     - name: 0a1 postbuild
       run: fsvr_step 0a1
 
+      - name: ~postbuild Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == 'postbuild'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: 0a2 custom postbuild
       uses: ./fsvr-action
       with:
         run: fsvr_step 0a2
 
-    # - name: ~0a2 Setup tmate session
-    #   if: fromJSON(inputs.fstuple).pause == '0a2'
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true
+    - name: ~postcustom Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == 'postcustom'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
 
     # - name: 0b0 installer
     #   if: fromJSON(inputs.fstuple).installer != 'false'
@@ -294,7 +308,7 @@ jobs:
     #       )"
 
     - name: ~Setup tmate session
-      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always' || fromJSON(inputs.fstuple).pause == 'finally'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true

@@ -80,7 +80,9 @@ echo "SNAPSHOT CORRESPONDING SOURCE..." >&2
 mkdir -pv $snapshot_dir/source
 cp -ua $source_dir/../LICENSE $snapshot_dir/
 
-cp -ua $build_dir/newview/fsversionvalues.h $snapshot_dir/source/ || true
+if [[ $viewer_bin == firestorm ]] ; then
+    cp -ua $build_dir/newview/fsversionvalues.h $snapshot_dir/source/ || true
+fi
 cp -ua $build_dir/newview/viewerRes.rc $snapshot_dir/source/ || true
 
 (

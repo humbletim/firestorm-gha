@@ -53,6 +53,7 @@ function get_parallel() {(
 # yaml2json < fsvr/.github/workflows/CompileWindows.yml | jq '.jobs[].steps[]| "#"+.name+"\n"+.if+"\n"+(.run // .with.run)' -r
 function get_yaml2json-windows() {(
     echo "get_yaml2json-windows..." >&2
+    source $ghash/gha.wget-sha256.bash
     set -Euo pipefail
     local archive=$( wget-sha256 \
         a73fb27e36e30062c48dc0979c96afbbe25163e0899f6f259b654d56fda5cc26 \
