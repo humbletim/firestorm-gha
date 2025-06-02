@@ -100,11 +100,13 @@ cp -ua $build_dir/newview/viewerRes.rc $snapshot_dir/source/ || true
 
 for x in `grep -Eo '[^"]+[.](cur|ico)' $build_dir/newview/viewerRes.rc | sort -u ` ; do
     if [[ -f $source_dir/newview/res/$x ]]; then
+        echo "$build_dir/newview/viewerRes.rc::$x found in $source_dir/newview/res/ ..." >&2
         cpsync $source_dir/newview/res/$x $snapshot_dir/source/newview/res/
     elif [[ -f $build_dir/newview/$x ]]; then
+        echo "$build_dir/newview/viewerRes.rc::$x found in $build_dir/newview/ ..." >&2
         cpsync $build_dir/newview/$x $snapshot_dir/source/newview/res/
     else
-        echo "$build_dir/newview/viewerRes.rc::$x source icon not found..." >&2 ;
+        echo "$build_dir/newview/viewerRes.rc::$x source icon not found..." >&2
     fi
 done
 
