@@ -136,7 +136,7 @@ jobs:
     # memorialize the fstuple input for posterity; annotations seem survive longer (ie: > 6 months) than step summaries or raw logs
     - name: annotation
       run: |
-        echo "::notice title=inputs.fstuple::${{ github.event.inputs.fstuple }}"
+        echo "::notice title=inputs.fstuple::$(echo '${{ github.event.inputs.fstuple }}')"
         echo "::notice title=mini-report::$(for id in `ls -1d repo/* fsvr 2>/dev/null` ; do
           echo -n "$(basename $id)=$(git -C $id rev-parse --short HEAD),$(git -C $id rev-list --count HEAD),$(git -C $id describe --all --always | sed 's@heads/@@'); "
         done)"
