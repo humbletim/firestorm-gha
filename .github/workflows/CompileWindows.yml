@@ -250,7 +250,7 @@ jobs:
     - name: 0a1 postbuild
       run: fsvr_step 0a1
 
-      - name: ~postbuild Setup tmate session
+    - name: ~postbuild Setup tmate session
       if: fromJSON(inputs.fstuple).pause == 'postbuild'
       uses: mxschmitt/action-tmate@v3
       with:
