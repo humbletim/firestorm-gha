@@ -237,7 +237,6 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
-        timeout-minutes: 15
 
     - name: 0a0_ninja_build SLPlugin
       run: fsvr_step 0a0 SLPlugin
@@ -262,7 +261,6 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
-        timeout-minutes: 15
 
     - name: 0a2 custom postbuild
       uses: ./fsvr-action
@@ -274,7 +272,6 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
-        timeout-minutes: 15
 
     # - name: 0b0 installer
     #   if: fromJSON(inputs.fstuple).installer != 'false'
@@ -321,4 +318,3 @@ jobs:
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
-        timeout-minutes: 15
