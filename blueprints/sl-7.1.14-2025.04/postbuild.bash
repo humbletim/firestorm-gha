@@ -17,7 +17,7 @@ build_dir_rel=$(realpath --relative-to="$(pwd -W)" $build_dir || echo $build_dir
     (
         # echo ~+/llwebrtc/llwebrtc.lib
         # grep -vE '/(llwebrtc|media_plugins|slplugin)/
-        for x in `ls -1d $build_dir_rel/{ll*,newview,viewer_components/login}/CMakeFiles/ | grep -v /llwebrtc/`; do
+        for x in `ls -1d $build_dir_rel/{ll*,newview,viewer_components/login,newview/llphysicsextensions}/CMakeFiles/ | grep -v /llwebrtc/`; do
             y=$(basename $(dirname "$x"))
             objs=$(find $x -name \*.c*.obj -o -name \*.res)
             test -z "$objs" || {
@@ -26,6 +26,7 @@ build_dir_rel=$(realpath --relative-to="$(pwd -W)" $build_dir || echo $build_dir
             }
         done
         cpsync $build_dir_rel/llwebrtc/llwebrtc.lib $snapshot_dir/objs/
+        cpsync $build_dir_rel/newview/llphysicsextensions/llphysicsextensionsstub.lib $snapshot_dir/objs/
     )
      # > $snapshot_dir/metadata/all.objs.rsp
     # time (
@@ -85,6 +86,10 @@ if [[ $viewer_bin == firestorm ]] ; then
 fi
 cp -ua $build_dir/newview/viewerRes.rc $snapshot_dir/source/ || true
 
+if [[ $viewer_bin == secondlife ]] ; then
+    cpsync $packages_dir/llphysicsextensions $snapshot_dir/source
+fi
+
 (
     cd $source_dir
     find ~+ -name \*.cpp -o -name \*.inl -o -name \*.h -o -name \*.hpp \
@@ -117,9 +122,14 @@ done
 
 (
     cd $snapshot_dir
-    ls source/* -1d | sed 's@^@-I${snapshot_dir}/@' > $snapshot_dir/llincludes.rsp.in
+    for x in `ls source/* -1d` ; do
+        if [[ -d "$x" ]]; then
+            echo "$x" | sed 's@^@-I${snapshot_dir}/@'
+        else
+            echo "skipping non-directory source/ entry: $x" >&2
+        fi
     cd ..
-)
+) > $snapshot_dir/llincludes.rsp.in
 
 ###########################################################################
 # stage installer/runtime
