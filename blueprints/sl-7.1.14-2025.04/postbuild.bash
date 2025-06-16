@@ -128,6 +128,7 @@ done
         else
             echo "skipping non-directory source/ entry: $x" >&2
         fi
+    done
     cd ..
 ) > $snapshot_dir/llincludes.rsp.in
 
