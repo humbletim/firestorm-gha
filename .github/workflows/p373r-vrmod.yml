@@ -176,6 +176,7 @@ jobs:
       if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
       run: |
         cat <<'EOF' > _yaml.bash
+          test -d /d/a || cmd //c mklink //j d:\\a c:\\a
           ghash=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha
           . $ghash/gha.quiet-clone.bash
           test -d clone || quiet-clone github.com humbletim/firestorm-gha tpv-gha-nunja clone
