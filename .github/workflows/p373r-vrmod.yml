@@ -165,12 +165,42 @@ jobs:
         test ! -d $snapshot_dir/runtime && echo "skipping (runtime/ not found)" || \
         PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ./${prefix}-p373r-vrmod.exe --help 2>&1 | tail -5 || true
 
-    - name: Upload Artifact
+    - name: Upload Application Artifact
       uses: actions/upload-artifact@v4
       with:
-        retention-days: 1
+        retention-days: 2
         name: ${{ env.build_id }}-${{ env.prefix }}-${{ env.workflow }}
         path: ${{ env.prefix }}-${{ env.workflow }}.exe
+
+    - name: make classic nsis installer
+      if: fromJSON(inputs.fstuple).installer == 'true'
+      run: |
+        test -d $snapshot_dir/runtime || exit 171
+        sed -e "s@C:.a.firestorm-gha.firestorm-gha.repo.viewer.indra.newview.installers.windows.@$snapshot_dir\\\\metadata\\\\nsi\\\\@g;" \
+            -e "s@C:.a.firestorm-gha.firestorm-gha.build.newview.@$snapshot_dir\\\\runtime\\\\@g;" \
+            ${snapshot_dir}/metadata/tmp/runtime.installer.original.nsi > classic.installer.nsi
+        # upstream nsis seems to want this available in PWD
+        cp -av $snapshot_dir/runtime/VivoxAUP.txt .
+        cp -av ${prefix}-p373r-vrmod.exe $snapshot_dir/runtime/FirestormOS-VR-GHA.exe
+        XZ_DEFAULTS=-T0 makensis -V3 classic.installer.nsi
+        . $snapshot_dir/metadata/env.d/build_vars.env
+        . $snapshot_dir/metadata/env.d/gha-bootstrap.env
+        VARCH="_LEGACY"
+        if [[ $base == *avx2* ]] ; then VARCH="_AVX2" ; fi
+        InstallerExe=${viewer_bin^}OS-${viewer_channel/${viewer_bin^}-/}${VARCH}.${version_xyzw}-${version_shas}_Setup.exe
+        mv -v *Setup*.exe $InstallerExe
+        ( echo InstallerName=${InstallerExe/.exe/} ; echo InstallerExe=$InstallerExe ) | tee -a $GITHUB_ENV
+        # ghash=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha
+        # source $ghash/gha.upload-artifact.bash
+        # gha-upload-artifact-fast ${InstallerExe/.exe/} $InstallerExe 2
+
+    - name: Upload Installer
+      if: fromJSON(inputs.fstuple).installer == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        retention-days: 2
+        name: ${{ env.build_id }}-${{ env.prefix }}-${{ env.workflow }}-${{ env.InstallerName }}
+        path: ${{ env.InstallerExe }}
 
     - name: gha_step recovery
       if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
