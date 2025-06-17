@@ -151,7 +151,8 @@ jobs:
       run: |
         time bash -c "llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc && echo rc done" &
         process1_pid=$!
-        time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj && echo compiled" &
+        [[ $base == *avx2* ]] && flags='-mavx2' || flags=''
+        time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp -O3 $flags -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj && echo compiled" &
         process2_pid=$!
         echo "waiting on subprocesses... $process1_pid $process2_pid"
         wait $process1_pid $process2_pid
