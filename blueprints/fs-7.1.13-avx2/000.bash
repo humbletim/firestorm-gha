@@ -2,7 +2,7 @@
 maybe-clone viewer ${hub:-github.com} $repo "$ref"
 maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
 
-pushd repo/p373r_dir
+pushd repo/p373r
   patch -p1 < <(cat <<'EOF'
 diff --git a/llviewerVR.h b/llviewerVR.h
 index 0d221b2..108e96c 100644
