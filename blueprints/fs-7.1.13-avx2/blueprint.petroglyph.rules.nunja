@@ -503,31 +503,24 @@ rule CXX_COMPILER__firestorm-bin_Release
 
 
 #############################################
-# Rule for linking CXX static library.
-
-rule CXX_STATIC_LIBRARY_LINKER__firestorm-bin_Release
-  command = $cmd_exe /C "$PRE_LINK && $lib_exe /nologo $LINK_FLAGS /out:$TARGET_FILE $in  && $POST_BUILD"
-  description = Linking CXX static library $TARGET_FILE
-  restat = $RESTAT
-
-
-#############################################
-# Rule for compiling CXX files.
-
-rule CXX_COMPILER__firestorm-bin_objects_Release
-  deps = msvc
-  command = $cl_exe  /nologo /TP $DEFINES $INCLUDES $FLAGS /showIncludes /Fo$out /FS -c $in
-  description = Building CXX object $out
-
-
-#############################################
 # Rule for compiling RC files.
 
-rule RC_COMPILER__firestorm-bin_objects_Release
+rule RC_COMPILER__firestorm-bin_Release
   depfile = $DEP_FILE
   deps = gcc
   command = $cmcldeps_exe RC $in $DEP_FILE $out "Note: including file: " $cl_exe $rc_exe $DEFINES $INCLUDES $FLAGS /fo $out $in
   description = Building RC object $out
+
+
+#############################################
+# Rule for linking CXX executable.
+
+rule CXX_EXECUTABLE_LINKER__firestorm-bin_Release
+  command = $cmd_exe /C "$PRE_LINK && $cmake_exe -E vs_link_exe --intdir=$OBJECT_DIR --rc=$rc_exe --mt=$mt_exe --manifests $MANIFESTS -- $link_exe /nologo @$RSP_FILE  /out:$TARGET_FILE /implib:$TARGET_IMPLIB /version:0.0 $LINK_FLAGS  && $POST_BUILD"
+  description = Linking CXX executable $TARGET_FILE
+  rspfile = $RSP_FILE
+  rspfile_content = $in_newline $LINK_PATH $LINK_LIBRARIES
+  restat = $RESTAT
 
 
 #############################################
