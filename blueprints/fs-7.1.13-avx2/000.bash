@@ -1,6 +1,26 @@
 #!/bin/bash
 maybe-clone viewer ${hub:-github.com} $repo "$ref"
 maybe-clone p373r github.com ${GITHUB_REPOSITORY} P373R_6.6.8
+
+pushd repo/p373r_dir
+  patch -p1 < <(cat <<'EOF'
+diff --git a/llviewerVR.h b/llviewerVR.h
+index 0d221b2..108e96c 100644
+--- a/llviewerVR.h
++++ b/llviewerVR.h
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include <openvr.h>
++#include "glh/glh_linear.h"
+ #include "llhudtext.h"
+ #include "llgl.h"
+ #include "string.h"
+EOF
+)
+  git diff
+popd
+
 #echo "snapshot test" -- skipping > repo/p373r/applied
 
 echo '#include <string>' | tee build/dummy.cpp
