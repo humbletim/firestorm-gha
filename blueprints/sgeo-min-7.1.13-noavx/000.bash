@@ -7,7 +7,10 @@ echo 'https://github.com/Sgeo/p373r-sgeo-minimal/tree/sgeo_min_vr_7.1.9' > repo/
 pushd repo/viewer
     git remote add sgeo-minimal https://github.com/Sgeo/p373r-sgeo-minimal
     git fetch sgeo-minimal sgeo_min_vr_7.1.9
-    git -c user.email=CITEST -c user.name=CITEST merge --no-edit sgeo-minimal/sgeo_min_vr_7.1.9
+    git checkout sgeo-minimal/sgeo_min_vr_7.1.9 -- indra/newview/llviewerVR.\*
+    bash $fsvr_dir/util/git_union_merge.bash sgeo-minimal/sgeo_min_vr_7.1.9 indra/newview/llviewerdisplay.cpp
+    # git diff -U0 ...sgeo-minimal/sgeo_min_vr_7.1.9 | patch -p1 --merge
+    # git -c user.email=CITEST -c user.name=CITEST merge --no-edit sgeo-minimal/sgeo_min_vr_7.1.9
     # || {
     #   dos2unix --to-stdout $nunja_dir/sgeo-minimal.7.1.10.mergeconflict-fixes.patch | patch -p1
     #   git add -u
