@@ -1,6 +1,7 @@
 #!/bin/bash
 maybe-clone viewer ${hub:-github.com} $repo "$ref"
-maybe-clone p373r github.com Sgeo/p373r-sgeo-minimal sgeo_min_vr_7.1.9
+#maybe-clone p373r github.com Sgeo/p373r-sgeo-minimal sgeo_min_vr_7.1.9
+mkdir -pv repo/p373r
 echo $BASH_SOURCE -- skipping > repo/p373r/applied
 echo 'https://github.com/Sgeo/p373r-sgeo-minimal/tree/sgeo_min_vr_7.1.9' > repo/p373r/.gha_source
 
@@ -9,6 +10,7 @@ pushd repo/viewer
     git fetch sgeo-minimal sgeo_min_vr_7.1.9
     git checkout sgeo-minimal/sgeo_min_vr_7.1.9 -- indra/newview/llviewerVR.\*
     bash $fsvr_dir/util/git_union_merge.bash sgeo-minimal/sgeo_min_vr_7.1.9 indra/newview/llviewerdisplay.cpp
+    git status
     # git diff -U0 ...sgeo-minimal/sgeo_min_vr_7.1.9 | patch -p1 --merge
     # git -c user.email=CITEST -c user.name=CITEST merge --no-edit sgeo-minimal/sgeo_min_vr_7.1.9
     # || {
@@ -56,4 +58,3 @@ EOF
   git diff
   # git -C repo/viewer diff
 popd
-
