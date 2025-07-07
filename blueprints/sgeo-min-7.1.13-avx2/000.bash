@@ -1,6 +1,7 @@
 #!/bin/bash
 maybe-clone viewer ${hub:-github.com} $repo "$ref"
-maybe-clone p373r github.com Sgeo/p373r-sgeo-minimal sgeo_min_vr_7.1.9
+#maybe-clone p373r github.com Sgeo/p373r-sgeo-minimal sgeo_min_vr_7.1.9
+mkdir -pv repo/p373r
 echo $BASH_SOURCE -- skipping > repo/p373r/applied
 echo 'https://github.com/Sgeo/p373r-sgeo-minimal/tree/sgeo_min_vr_7.1.9' > repo/p373r/.gha_source
 
