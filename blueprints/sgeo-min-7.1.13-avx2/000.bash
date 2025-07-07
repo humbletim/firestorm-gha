@@ -58,6 +58,3 @@ EOF
   git diff
   # git -C repo/viewer diff
 popd
-
-echo "triggering tmate session with non-zero exit code"
-exit 62
