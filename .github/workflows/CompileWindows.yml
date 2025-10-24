@@ -245,6 +245,10 @@ jobs:
     - name: 0a0_ninja_build application-bin
       run: fsvr_step 0a0 ${viewer_bin}-bin
 
+    - name: 0a0_ninja_build {{ fromJSON(inputs.fstuple).ninja_build }}
+      if: fromJSON(inputs.fstuple).ninja_build != ''
+      run: fsvr_step 0a0 {{ fromJSON(inputs.fstuple).ninja_build }}
+
     - name: 0a0_ninja_build llpackage
       run: fsvr_step 0a0 llpackage
 
