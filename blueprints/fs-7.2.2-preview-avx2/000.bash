@@ -2,7 +2,7 @@
 maybe-clone viewer ${hub:-github.com} $repo "$ref"
 maybe-clone p373r-vrmod github.com humbletim/p373r-vrmod main
 
-ht-ln p373r p373r-vrmod/community
+ht-ln p373r-vrmod/community p373r
 
 echo '#include <string>' | tee build/dummy.cpp
 mkdir -p build/newview
