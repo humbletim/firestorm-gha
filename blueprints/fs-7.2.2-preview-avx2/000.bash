@@ -3,6 +3,7 @@ maybe-clone viewer ${hub:-github.com} $repo "$ref"
 maybe-clone p373r-vrmod github.com humbletim/p373r-vrmod main
 
 ht-ln repo/p373r-vrmod/community repo/p373r
+ht-ln repo/p373r-vrmod/sgeo-minimal/0001-sgeo_min_vr_7.1.9-baseline-diff.patch repo/p373r/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
 
 echo '#include <string>' | tee build/dummy.cpp
 mkdir -p build/newview
