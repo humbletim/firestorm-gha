@@ -1,6 +1,6 @@
 #!/bin/bash
 
-avx2_nunja_dir=${nunja_dir/noavx/avx2}
+avx2_nunja_dir=${nunja_dir/noavx2/avx2}
 
 pushd $nunja_dir
   # clone avx2 blueprint
@@ -11,7 +11,7 @@ pushd $nunja_dir
   perl -i'' -pe 's@ ?(/arch:AVX2|-DUSE_AVX2_OPTIMIZATION)@@g' *
 
   # confirm no residue
-  fgrep -i avx2 * >&2
+  fgrep AVX2 * >&2
 
 popd
 
