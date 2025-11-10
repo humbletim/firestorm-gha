@@ -1,0 +1,207 @@
+name: sgeo-minimal-vrmod
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact:
+        type: string
+        required: true
+      fstuple:
+        type: string
+        default: '{"pause":"never"}'
+
+run-name: sgeo-minimal-vrmod | ${{ inputs.artifact }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+    - uses: humbletim/firestorm-gha/.github/vrmod@tpv-gha-nunja
+      with:
+        key: ${{ fromJSON(inputs.fstuple).key }}
+        artifact: ${{ inputs.artifact }}
+
+    - name: preflight
+      run: |
+        (
+          echo workflow=${{ github.workflow }}
+          echo build_id=$(date +"%Y%m%d-%H%M%S")
+        ) | tee -a $GITHUB_ENV
+
+    - name: sgeo-min-7.1.9.patch
+      id: patch
+      uses: actions/cache@v4
+      with:
+        path: sgeo-min-7.1.9.patch
+        key: p373r-sgeo-minimal-sgeo-min-7.1.9.patch
+
+    - name: calculate sgeo_min_vr_7.1.9 vrmod
+      if: steps.patch.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        git clone --quiet --filter=tree:0 --single-branch https://github.com/Sgeo/p373r-sgeo-minimal --branch sgeo_min_vr_7.1.9 p373r-sgeo-minimal 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
+        git -C p373r-sgeo-minimal remote set-branches --add origin Firestorm_7.1.9
+        git -C p373r-sgeo-minimal remote update
+        git -C p373r-sgeo-minimal diff -w -U8  remotes/origin/Firestorm_7.1.9..sgeo_min_vr_7.1.9 > sgeo-min-7.1.9.patch
+        cat <<'EOF' | patch --ignore-whitespace sgeo-min-7.1.9.patch
+        2190,2191c2190,2191
+        < +#include "../../../openvr/headers/openvr.h"
+        < +#pragma comment(lib, "../../../openvr/lib/win64/openvr_api.lib")
+        ---
+        > +#include "openvr.h"
+        > +#pragma comment(lib, "openvr_api.lib")
+        EOF
+
+    - name: apply sgeo_min_vr_7.1.9 vrmod
+      shell: bash
+      run: |
+        C:/PROGRA~1/Git/usr/bin/patch.exe --directory=${snapshot_dir}/source/newview --ignore-whitespace --fuzz=9 < sgeo-min-7.1.9.patch
+
+    - name: provision sgeo vrmod
+      run: |
+        cat <<'EOF' | sed 's@^        @@;' | base64 -d | gunzip -c > icon.ico
+        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
+        EOF
+        file icon.ico
+        set -a
+        . ${snapshot_dir}/metadata/env.d/build_vars.env
+        CompanyName=${GITHUB_REPOSITORY}
+        FileDescription=${GITHUB_WORKFLOW}
+        ProductName=$(echo "${GITHUB_WORKFLOW_REF}" | tr '@' '#')
+        ProductVersion=${version_full}
+        FileVersion=${viewer_version}
+        InternalName=${viewer_channel}
+        LegalCopyright=$(date +"%Y.%m.%d.%H:%M:%S" )
+        icon=icon.ico
+        sed -E "$(echo '
+                s@\b((FILE|PRODUCT)VERSION\s+(([0-9]+.){3}))[0-9]{5}@\10@g;
+                s@(VALUE (.)CompanyName.), .*@    \1, \2${CompanyName}\2    @;
+                s@(VALUE (.)ProductName.), .*@    \1, \2${ProductName}\2    @;
+                s@(VALUE (.)ProductVersion.), .*@ \1, \2${ProductVersion}\2 @;
+                s@(VALUE (.)InternalName.), .*@   \1, \2${InternalName}\2   @;
+                s@(VALUE (.)FileDescription.), .*@\1, \2${FileDescription}\2@;
+                s@(VALUE (.)FileVersion.), .*@    \1, \2${FileVersion}\2    @;
+                s@(VALUE (.)LegalCopyright.), .*@ \1, \2${LegalCopyright}\2 @;
+                s@firestorm_icon.ico@${icon}@;
+        ' | envsubst)" < ${snapshot_dir}/source/viewerRes.rc > viewerRes.rc
+
+    - name: compile overrides
+      run: |
+        time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj && echo compiled" &
+        process2_pid=$!
+        time bash -c "sleep 5 && llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc && echo rc done" &
+        process1_pid=$!
+        echo "waiting on subprocesses... $process1_pid $process2_pid"
+        wait $process1_pid $process2_pid
+
+    - name: link executable
+      run: |
+        clang++ @devtime/application-bin.rsp -o ${prefix}-${workflow}.exe
+
+    - name: test executable
+      run: |
+        test ! -d $snapshot_dir/runtime && echo "skipping (runtime/ not found)" || \
+        PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ./${prefix}-${workflow}.exe --help 2>&1 | tail -5 || true
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        retention-days: 1
+        name: ${{ env.build_id }}-${{ env.prefix }}-${{ env.workflow }}
+        path: ${{ env.prefix }}-${{ env.workflow }}.exe
+
+    - name: gha_step recovery
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      run: |
+        cat <<'EOF' > _yaml.bash
+          test -d /d/a || cmd //c mklink //j d:\\a c:\\a
+          ghash=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha
+          . $ghash/gha.quiet-clone.bash
+          test -d clone || quiet-clone github.com humbletim/firestorm-gha tpv-gha-nunja clone
+          test -x bin/yaml2json || (
+            . $ghash/gha.wget-sha256.bash
+            . $ghash/../gha-populate-bin.bash
+              mkdir -pv bin
+              get_yaml2json-windows
+          )
+          . $ghash/../gha-steps.bash
+          _workflow=clone/.github/workflows/${GITHUB_WORKFLOW}.yml
+        EOF
+
+
+    - name: ~Setup tmate session
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true

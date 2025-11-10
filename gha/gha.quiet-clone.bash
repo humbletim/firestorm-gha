@@ -4,14 +4,15 @@
 function quiet-clone() {(
     local hub="$1" repo="$2" ref="$3" folder="$4"
     set -Euo pipefail
-    echo "[gha-bootstrap] quiet_clone $hub $repo $ref $folder" >&2
     if [[ "$ref" =~ [a-f0-9]{40} ]]; then
+      echo "[gha-bootstrap] quiet_clone[commit] $hub $repo $ref $folder" >&2
       # "ref" refers to a fully-qualified git hash; clone + reset rather than --branch
-      git clone --quiet https://$hub/$repo $folder 2>&1 | grep -vE '^(remote:|Receive|Resolve)' \
+      git clone --quiet https://$hub/$repo $folder 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d' \
        && git -C $folder reset --hard "$ref"
     else
+      echo "[gha-bootstrap] quiet_clone[single-branch] $hub $repo $ref $folder" >&2
       git clone --quiet --filter=tree:0 --single-branch \
-          https://$hub/$repo --branch "$ref" $folder 2>&1 | grep -vE '^(remote:|Receive|Resolve)' || true
+          https://$hub/$repo --branch "$ref" $folder 2>&1 | sed -E '/^(remote:|Receive|Resolve)/d'
     fi
     test -e $folder/.git || return 1
     echo "https://$hub/$repo/tree/$(git -C $folder rev-parse --short HEAD)" > $folder/.gha_source

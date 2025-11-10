@@ -99,19 +99,20 @@ int main(int argc, char *argv[]) {
     }
 
     // Construct new argument list for execv
-    char *new_argv[argc + 5]; // Account for 'bash', '-c', function command, '--' and NULL terminator
-    new_argv[0] = bash_path;
-    new_argv[1] = "-c";
-    new_argv[2] = bash_command;
-    new_argv[3] = exe_name;
-    for (int i = 1; i < argc; i++) new_argv[i + 3] = argv[i];
-    new_argv[argc + 3] = NULL; // Null terminator
+    char *new_argv[argc + 10]; // Account for 'bash', '-c', function command, '--' and NULL terminator
+    int idx = 0;
+    new_argv[idx++] = bash_path;
+    new_argv[idx++] = "-c";
+    new_argv[idx++] = bash_command;
+    new_argv[idx++] = exe_name;
+    for (int i = 1; i < argc; i++) new_argv[idx++] = argv[i];
 
-    for (int i = 0; i < argc + 3; i++) new_argv[i] = esc_dquotes(new_argv[i]);
+    for (int i = 0; i < idx; i++) new_argv[i] = esc_dquotes(new_argv[i]);
+    new_argv[idx++] = NULL; // Null terminator
     new_argv[1] = "-c";
 
 #if DEBUG_COMMAND_STRING
-    for (int i = 0; i < argc + 4; i++) fprintf(stderr, "new_argv[%d]=%s\n", i, new_argv[i]); fflush(stderr);
+    for (int i = 0; i < idx; i++) fprintf(stderr, "new_argv[%d]=%s\n", i, new_argv[i]); fflush(stderr);
 #endif
 
     // Execute Bash using execv

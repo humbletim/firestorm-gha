@@ -7,7 +7,7 @@ on:
           type: string
           required: true
 
-run-name: ${{ github.ref_name }} | ${{ fromJSON(inputs.fstuple).base }} @ ${{ fromJSON(inputs.fstuple).ref }}
+run-name: ${{ fromJSON(inputs.fstuple).base }} @ ${{ fromJSON(inputs.fstuple).ref }}
 
 defaults:
   run:
@@ -28,11 +28,12 @@ jobs:
 
     - name: Output Inputs
       run: |
-        echo '${{ github.event.inputs.fstuple }}'
+        echo '${{ github.event.inputs.fstuple }}' | tee fstuple.json
         echo '${{ fromJSON(github.event.inputs.fstuple) }}'
 
     - name: _gha-inline
       run: |
+        test -d /d/a || cmd //c mklink //j d:\\a c:\\a
         source ${gha_fsvr_dir:-/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja}/_gha-inline.sh
         $gha_fsvr_dir/gha-generate-shell-env.bash | tee -a SHELL.env
         echo BASH_ENV=$(cygpath -was SHELL.env) | sed 's@\\@\\\\@g' | tee -a $GITHUB_ENV
@@ -63,6 +64,14 @@ jobs:
          wget --version | head -1
          source $gha_fsvr_dir/gha-populate-bin.bash
          gha-populate-bin-windows
+
+    - name: Populate bin/yaml2json
+      if: fromJSON(inputs.fstuple).pause != '' && fromJSON(inputs.fstuple).pause != 'never'
+      uses: ./fsvr-action
+      with:
+        run: |
+         source $gha_fsvr_dir/gha-populate-bin.bash
+         get_yaml2json-windows
 
     - name: Expand Source Repositories
       uses: ./fsvr-action
@@ -127,7 +136,19 @@ jobs:
           | hostname       | `hostname`      |
           $repos
           | ---------      | -----------     |
+
+          \`\`\`json
+          ${{ github.event.inputs.fstuple }}
+          \`\`\`
           EOF
+
+    # memorialize the fstuple input for posterity; annotations seem survive longer (ie: > 6 months) than step summaries or raw logs
+    - name: annotation
+      run: |
+        echo "::notice title=inputs.fstuple::$(echo '${{ github.event.inputs.fstuple }}')"
+        echo "::notice title=mini-report::$(for id in `ls -1d repo/* fsvr 2>/dev/null` ; do
+          echo -n "$(basename $id)=$(git -C $id rev-parse --short HEAD),$(git -C $id rev-list --count HEAD),$(git -C $id describe --all --always | sed 's@heads/@@'); "
+        done)"
 
     - name: Detect MSVC
       uses: ./fsvr-action
@@ -164,6 +185,23 @@ jobs:
     - name: 040_generate_package_infos && 050_generate_packages_info_text
       run: fsvr_step 040 && fsvr_step 050
 
+    - name: 077_preserve
+      if: fromJSON(inputs.fstuple).preserve == '3ps'
+      uses: ./fsvr-action
+      with:
+        run: |
+          set -Euo pipefail
+          source $ghash/gha.upload-artifact.bash
+          source $gha_fsvr_dir/util/reconstitute-dependencies.bash
+          manifest=$build_dir/packages-info.json
+          mkdir -pv $fsvr_cache_dir
+          cp -av $manifest $fsvr_cache_dir/
+          cp -av $nunja_dir/viewer_version.txt $fsvr_cache_dir/
+          download_packages $manifest $fsvr_cache_dir               || exit 60
+          verify_downloads  $manifest $fsvr_cache_dir               || exit 70
+          gha-upload-artifact-fast \
+             ${base/-avx2}-3p-x86_64-pc-windows-msvc $fsvr_cache_dir 7   || exit 178
+
     - name: 080_untar_packages
       uses: ./fsvr-action
       with:
@@ -181,7 +219,13 @@ jobs:
             gha-cache-save-fast $cache_id-build-packages-c build/packages || exit 220
           )
 
+    - name: 0a-1_ninja_fauxbuild
+      if: fromJSON(inputs.fstuple).fauxbuild != ''
+      run: |
+        fsvr_step 0a-1_ninja_fauxbuild ${{ fromJSON(inputs.fstuple).fauxbuild }}
+
     - name: 089_ninja_build accomodate mis-manifested llwebrtc
+      if: fromJSON(inputs.fstuple).fauxbuild == ''
       run: |
         fsvr_step 090 || true   # needed here for build.ninja to become instrumented
         fsvr_step 0a0 llwebrtc  # llwebrtc.dll has to be compiled first (then actual preflight below can succeed)
@@ -189,17 +233,21 @@ jobs:
     - name: 090_ninja_preflight
       run: fsvr_step 090
 
-    - name: ~004 Setup tmate session
-      if: fromJSON(inputs.fstuple).pause == '004'
+    - name: ~prebuild Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == 'prebuild'
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true
 
-    - name: 0a0_ninja_build SLPlugin.exe
-      run: fsvr_step 0a0 SLPlugin.exe
+    - name: 0a0_ninja_build SLPlugin
+      run: fsvr_step 0a0 SLPlugin
 
-    - name: 0a0_ninja_build application-bin.exe
-      run: fsvr_step 0a0 ${viewer_bin}-bin.exe
+    - name: 0a0_ninja_build application-bin
+      run: fsvr_step 0a0 ${viewer_bin}-bin
+
+    - name: 0a0_ninja_build ${{ fromJSON(inputs.fstuple).ninja_build }}
+      if: fromJSON(inputs.fstuple).ninja_build != ''
+      run: fsvr_step 0a0 ${{ fromJSON(inputs.fstuple).ninja_build }}
 
     - name: 0a0_ninja_build llpackage
       run: fsvr_step 0a0 llpackage
@@ -207,9 +255,34 @@ jobs:
     - name: 0a1 postbuild
       run: fsvr_step 0a1
 
+    - name: ~postbuild inspection
+      if: fromJSON(inputs.fstuple).pause == 'postbuild'
+      run: |
+        ls -lrth || true
+        ps faux
+
+    - name: ~postbuild Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == 'postbuild'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
+    - name: 0a2 custom postbuild
+      uses: ./fsvr-action
+      with:
+        run: fsvr_step 0a2
+
+    - name: ~postcustom Setup tmate session
+      if: fromJSON(inputs.fstuple).pause == 'postcustom'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
     - name: 0b0 installer
+      if: fromJSON(inputs.fstuple).installer != 'false'
       run: fsvr_step 0b0
     - name: 0b1 upload installer
+      if: fromJSON(inputs.fstuple).installer != 'false'
       uses: ./fsvr-action
       with:
         run: fsvr_step 0b1
@@ -221,12 +294,14 @@ jobs:
     #   with:
     #     run: fsvr_step 0b3
 
-    - name: 0b4 Zip
-      run: fsvr_step 0b4
-    - name: 0b5 upload zip
-      uses: ./fsvr-action
-      with:
-        run: fsvr_step 0b5
+    # - name: 0b4 Zip
+    #   if: fromJSON(inputs.fstuple).installer != 'false'
+    #   run: fsvr_step 0b4
+    # - name: 0b5 upload zip
+    #   if: fromJSON(inputs.fstuple).installer != 'false'
+    #   uses: ./fsvr-action
+    #   with:
+    #     run: fsvr_step 0b5
 
     # - name: log env on error
     #   if: failure()
@@ -244,7 +319,7 @@ jobs:
     #       )"
 
     - name: ~Setup tmate session
-      if: failure() && fromJSON(inputs.fstuple).pause != 'never'
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always' || fromJSON(inputs.fstuple).pause == 'finally'
       uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: false
+        limit-access-to-actor: true

@@ -53,6 +53,7 @@ function get_parallel() {(
 # yaml2json < fsvr/.github/workflows/CompileWindows.yml | jq '.jobs[].steps[]| "#"+.name+"\n"+.if+"\n"+(.run // .with.run)' -r
 function get_yaml2json-windows() {(
     echo "get_yaml2json-windows..." >&2
+    source $ghash/gha.wget-sha256.bash
     set -Euo pipefail
     local archive=$( wget-sha256 \
         a73fb27e36e30062c48dc0979c96afbbe25163e0899f6f259b654d56fda5cc26 \
@@ -108,10 +109,14 @@ function gha-populate-bin-windows() {(
     literally-exists $pysite/colout   || get_colout                || exit `_err $? "failed to provision colout $?"`
     literally-exists bin/parallel     || get_parallel              || exit `_err $? "failed to provision parallel $?"`
 
-    for x in colout parallel ht-ln hostname jq envsubst ; do
-      literally-exists bin/$x.exe || ht-ln bin/_invoke.exe bin/$x.exe || exit `_err $? "error symlinking $x $?"`
+    for x in colout parallel ht-ln hostname ; do
+        literally-exists bin/$x.exe || ht-ln bin/_invoke.exe bin/$x.exe || exit `_err $? "error symlinking $x $?"`
     done
-
+    if [[ "$GITHUB_ACTIONS" != "local" ]] ; then
+        for x in jq envsubst ; do
+            literally-exists bin/$x.exe || ht-ln bin/_invoke.exe bin/$x.exe || exit `_err $? "error symlinking $x $?"`
+        done
+    fi
     # note: autobuild is not necessary here, but viewer_manifest still depends on python-llsd
     python3 -m pip install --no-warn-script-location --user llsd
   )}

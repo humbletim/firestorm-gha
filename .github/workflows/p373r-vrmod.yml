@@ -1,0 +1,229 @@
+name: p373r-vrmod
+
+on:
+  workflow_dispatch:
+    inputs:
+      artifact:
+        type: string
+        required: true
+      fstuple:
+        type: string
+        default: '{"pause":"never"}'
+
+run-name: p373r-vrmod | ${{ inputs.artifact }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+    - uses: humbletim/firestorm-gha/.github/vrmod@tpv-gha-nunja
+      with:
+        key: ${{ fromJSON(inputs.fstuple).key }}
+        artifact: ${{ inputs.artifact }}
+
+    - name: preflight tests
+      run: |
+        test -v prefix              || exit 103
+        test -v snapshot_dir        || exit 104
+        test -s devtime/link.rsp    || exit 100
+        test -s devtime/compile.rsp || exit 101
+        test -s winsdk/winsdk.rsp   || exit 102
+        (
+          echo workflow=${{ github.workflow }}
+          echo build_id=$(date +"%Y%m%d-%H%M%S")
+        ) | tee -a $GITHUB_ENV
+
+    - name: checkout p373r vrmod branch
+      shell: bash
+      run: |
+        repository=humbletim/firestorm-gha
+        ref=P373R_6.6.8
+        path=p373r
+        git clone --quiet --filter=tree:0 --single-branch https://github.com/$repository --branch "$ref" $path 2>&1 \
+          | sed -E '/^(remote:|Receive|Resolve)/d'
+      # uses: actions/checkout@v4
+      # with:
+      #   persist-credentials: false
+      #   show-progress: false
+      #   clean: false
+      #   repository: humbletim/firestorm-gha
+      #   ref: P373R_6.6.8
+      #   path: p373r
+
+    - name: provision p373r vrmod
+      run: |
+        C:/PROGRA~1/Git/usr/bin/patch.exe --directory=${snapshot_dir}/source/newview --ignore-whitespace --verbose --merge -p1 < p373r/0001-P373R-6.6.8-baseline-diff.patch
+        cat <<'EOF' | sed 's@^        @@;' | base64 -d | gunzip -c > icon.ico
+        H4sICEME2WcAA2ljb24uaWNvAO1ae3BT15k/elgyfr/fNsYY27JlPa50n9K9kq7esmRgKSU0LU3S
+        ZJakf3S32e5saMNmJrSBbZi2IZ007TTTodtsp5lSHt20CXEJISRtSaebhAZCaDsdQjuBkLDFPAOc
+        /b6rB/IDsMGxmFl/zGeZq6PvfL9zvsfvHJkQHfzz+wn87CR3qIQ0EEL6QOEReYikn2viJ3MyJ3My
+        J9cVp1PXF4no1ZoaUlxoX2ZXdNrP3bsNT1FqopEI6SiwQ7MsafwjI4bvIf5Q6P8n/hdeMHwX8UNf
+        bbvmaN3H6Mn0bc+ANzn8uP+Xli8nbQ88QD6992Xdf+/ZQ17atk2/XuBJS/4nOjtJyRe/SIa3b9dt
+        gjEju3eTV17eQ366ebPufli/9slmKYaq8q9fIqvXrTOs7egglVfzZrq2V63Sp772NcO/d3Vd3eaU
+        8O80wv7rz508SbZSqrt0+jT5/bmz5BClhF6+pD8cDmdJlY6sX09WpZ+Tk6Oj5PenR8lvL14k78Ln
+        KOjxu+8micnmGBkhG3HMQw+Rz1zNl6nbTtt85RXDZozbaJTMvxn8O3can8B5YQ3eW72auEtLCamq
+        IuTJJ8l9OPebb5KtRmN6/F136ZSv/wdZ2dZGKqqrCUFtbSVFDz+s+wcYewrW67jNRhrHz7Tik5VL
+        KDXQQ4f0I8VX6TJTtz0mby9D3Zo07qaLf+NGcm/+u4j57bd1z1FqvMTzpOt6drZsMaxHO2vXkuX5
+        6dmzsHtxTPb8ff/rNbiP54eHycB0fRxrW689myn8YOdJSosoxPkEvx59VHc/xgDkZfx6JQd8W40+
+        rltH7s6Otdus9mWJ0IcqK9HHHl1I8X2oK+vy55+KjLU94/i1+q+q4/ufjnz5y+TOzLwrruVvXR0h
+        Bw7ofwk5RD/7WcLhs472trrhqHowLnM07hHpZ5a66OgpMz17tvxdq7W1YapejrPNjve7EPuPXNHv
+        1/vuuIMEYW1uP3iQPI/rNDKi22gwEGI2zSPxgPxsKiDSpI+nQz6BhgWR7ny2RYuB9etsO/S60km9
+        uobtR02mMX5n+/aim8Gfl//35b+byf/nJ8t/qLkLcO503dRqJ92xQ3c/YifEQNx229dTAY+GPRng
+        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
+        EOF
+        file icon.ico
+        set -a
+        . ${snapshot_dir}/metadata/env.d/build_vars.env
+        CompanyName=${GITHUB_REPOSITORY}
+        FileDescription=${GITHUB_WORKFLOW}
+        ProductName=$(echo "${GITHUB_WORKFLOW_REF}" | tr '@' '#')
+        ProductVersion=${version_full}
+        FileVersion=${viewer_version}
+        InternalName=${viewer_channel}
+        LegalCopyright=$(date +"%Y.%m.%d.%H:%M:%S" )
+        icon=icon.ico
+        sed -E "$(echo '
+                s@\b((FILE|PRODUCT)VERSION\s+(([0-9]+.){3}))[0-9]{5}@\10@g;
+                s@(VALUE (.)CompanyName.), .*@    \1, \2${CompanyName}\2    @;
+                s@(VALUE (.)ProductName.), .*@    \1, \2${ProductName}\2    @;
+                s@(VALUE (.)ProductVersion.), .*@ \1, \2${ProductVersion}\2 @;
+                s@(VALUE (.)InternalName.), .*@   \1, \2${InternalName}\2   @;
+                s@(VALUE (.)FileDescription.), .*@\1, \2${FileDescription}\2@;
+                s@(VALUE (.)FileVersion.), .*@    \1, \2${FileVersion}\2    @;
+                s@(VALUE (.)LegalCopyright.), .*@ \1, \2${LegalCopyright}\2 @;
+                s@firestorm_icon.ico@${icon}@;
+        ' | envsubst)" < ${snapshot_dir}/source/viewerRes.rc > viewerRes.rc
+
+    - name: compile overrides
+      run: |
+        time bash -c "llvm-rc -c1252 -I${snapshot_dir}/source/newview/res -Iwinsdk/sdk/include/um -Iwinsdk/sdk/include/shared -Fo${snapshot_dir}/objs/newview/viewerRes.rc.res viewerRes.rc && echo rc done" &
+        process1_pid=$!
+        [[ $base == *avx2* ]] && flags='-mavx2' || flags=''
+        time bash -c "clang++ @devtime/compile.rsp @winsdk/mm.rsp -O3 $flags -Ip373r -includeglh/glh_linear.h $snapshot_dir/source/newview/llviewerdisplay.cpp -c -o $snapshot_dir/objs/newview/llviewerdisplay.cpp.obj && echo compiled" &
+        process2_pid=$!
+        echo "waiting on subprocesses... $process1_pid $process2_pid"
+        wait $process1_pid $process2_pid
+
+    - name: link executable
+      run: |
+        clang++ @devtime/application-bin.rsp -o ${prefix}-${workflow}.exe
+
+    - name: test executable
+      run: |
+        test ! -d $snapshot_dir/runtime && echo "skipping (runtime/ not found)" || \
+        PATH=$PATH:$snapshot_dir/runtime EXEROOT=$snapshot_dir/runtime timeout 3 ./${prefix}-p373r-vrmod.exe --help 2>&1 | tail -5 || true
+
+    - name: Upload Application Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        retention-days: 2
+        name: ${{ env.build_id }}-${{ env.prefix }}-${{ env.workflow }}
+        path: ${{ env.prefix }}-${{ env.workflow }}.exe
+
+    - name: make classic nsis installer
+      if: fromJSON(inputs.fstuple).installer == 'true'
+      run: |
+        test -d $snapshot_dir/runtime || exit 171
+        sed -e "s@C:.a.firestorm-gha.firestorm-gha.repo.viewer.indra.newview.installers.windows.@$snapshot_dir\\\\metadata\\\\nsi\\\\@g;" \
+            -e "s@C:.a.firestorm-gha.firestorm-gha.build.newview.@$snapshot_dir\\\\runtime\\\\@g;" \
+            ${snapshot_dir}/metadata/tmp/runtime.installer.original.nsi > classic.installer.nsi
+        # upstream nsis seems to want this available in PWD
+        cp -av $snapshot_dir/runtime/VivoxAUP.txt .
+        cp -av ${prefix}-p373r-vrmod.exe $snapshot_dir/runtime/FirestormOS-VR-GHA.exe
+        XZ_DEFAULTS=-T0 makensis -V3 classic.installer.nsi
+        . $snapshot_dir/metadata/env.d/build_vars.env
+        . $snapshot_dir/metadata/env.d/gha-bootstrap.env
+        VARCH="_LEGACY"
+        if [[ $base == *avx2* ]] ; then VARCH="_AVX2" ; fi
+        InstallerExe=${viewer_bin^}OS-${viewer_channel/${viewer_bin^}-/}${VARCH}.${version_xyzw}-${version_shas}_Setup.exe
+        mv -v *Setup*.exe $InstallerExe
+        ( echo InstallerName=${InstallerExe/.exe/} ; echo InstallerExe=$InstallerExe ) | tee -a $GITHUB_ENV
+        # ghash=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha
+        # source $ghash/gha.upload-artifact.bash
+        # gha-upload-artifact-fast ${InstallerExe/.exe/} $InstallerExe 2
+
+    - name: Upload Installer
+      if: fromJSON(inputs.fstuple).installer == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        retention-days: 2
+        name: ${{ env.build_id }}-${{ env.prefix }}-${{ env.workflow }}-${{ env.InstallerName }}
+        path: ${{ env.InstallerExe }}
+
+    - name: gha_step recovery
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      run: |
+        cat <<'EOF' > _yaml.bash
+          test -d /d/a || cmd //c mklink //j d:\\a c:\\a
+          ghash=/d/a/_actions/humbletim/firestorm-gha/tpv-gha-nunja/gha
+          . $ghash/gha.quiet-clone.bash
+          test -d clone || quiet-clone github.com humbletim/firestorm-gha tpv-gha-nunja clone
+          test -x bin/yaml2json || (
+            . $ghash/gha.wget-sha256.bash
+            . $ghash/../gha-populate-bin.bash
+              mkdir -pv bin
+              get_yaml2json-windows
+          )
+          . $ghash/../gha-steps.bash
+          _workflow=clone/.github/workflows/${GITHUB_WORKFLOW}.yml
+        EOF
+
+
+    - name: ~Setup tmate session
+      if: (failure() && fromJSON(inputs.fstuple).pause != 'never') || fromJSON(inputs.fstuple).pause == 'always'
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true

@@ -22,12 +22,14 @@ function 010_ensure_build_directories() {( $_dbgopts;
     )
 
     for x in "${directories[@]}"; do
-      test -d $build_dir/$x && echo "[exists] $x" >&2 || mkdir -pv $build_dir/$x
+      test -d $build_dir/$x && echo "[exists] $x" >&2 || mkdir -pv $build_dir/$x || true
     done
 
-    if [[ -x $nunja_dir/010.bash ]] ; then
+    if [[ -f $nunja_dir/010.bash ]] ; then
       echo "[sourcing] $nunja_dir/010.bash" >&2
       . $nunja_dir/010.bash
+    else
+        echo "[NOT sourcing] $nunja_dir/010.bash" >&2
     fi
 )}
 
@@ -108,13 +110,18 @@ function 020_perform_replacements() {( $_dbgopts;
 )}
 
 function merge_packages_info() {( $_dbgopts;
+    echo 111 >&2
     local packages_info=${1:-}
     test -z "$packages_info" && packages_info=- \
     || test -s "$packages_info" || _die "merge_packages_info -- packages-info.json or stdin missing"
     test -s $build_dir/packages-info.json || { echo '{}' > $build_dir/packages-info.json ; }
+    echo 111 >&2
     local json="$(jq --sort-keys '. + $p' --argjson p "$(jq '.' $packages_info)" $build_dir/packages-info.json)"
+    echo 111 >&2
     test -n "$json" || _die "problem merging packages infos $packages_info $build_dir/packages-info.json"
+    echo 111 >&2
     echo "$json" > $build_dir/packages-info.json
+    echo 111 >&2
     _relativize "merged $packages_info" >&2
 )}
 
@@ -128,6 +135,10 @@ function 039_provision_p373r() {( $_dbgopts;
       cd $source_dir
       grep P373R newview/llviewerdisplay.cpp >/dev/null || (
         applied=`cat $p373r_dir/applied 2>/dev/null`
+        if patch --directory=newview --dry-run --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-sgeo_min_vr_7.1.9-baseline-diff.patch > /dev/null ; then
+          patch --directory=newview --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
+          applied=0001-sgeo_min_vr_7.1.9-baseline-diff.patch
+        fi
         if patch --directory=newview --dry-run --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-6.6.8-baseline-diff.patch > /dev/null ; then
           patch --directory=newview --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-6.6.8-baseline-diff.patch
           applied=0001-P373R-6.6.8-baseline-diff.patch
@@ -142,8 +153,9 @@ function 039_provision_p373r() {( $_dbgopts;
     )
 
     # note: -I$build_dir/newview is already part of stock build opts
-    ht-ln $p373r_dir/llviewerVR.h $build_dir/newview/
-    ht-ln $p373r_dir/llviewerVR.cpp $build_dir/newview/
+    for x in $p373r_dir/llviewerVR.* ; do
+      ht-ln $x $build_dir/newview/
+    done
 )}
 
 function 040_generate_package_infos() {( $_dbgopts;
@@ -156,11 +168,15 @@ function 040_generate_package_infos() {( $_dbgopts;
       done ) | jq -sR | sed 's@^"@@;s@"$@@'
     )"
 
+    echo 159 >&2
     cat $fsvr_dir/meta/packages-info.json | envsubst | merge_packages_info || return `_err $? meta-packages-info`
 
+    echo 162 >&2
     merge_packages_info $nunja_dir/packages-info.json || return `_err $? nunja-packages-info`
+    echo 164 >&2
     test ! -s $fsvr_cache_dir/openvr-*.tar.*.json || \
       merge_packages_info $fsvr_cache_dir/openvr-*.tar.*.json || return `_err $? openvr-packages-info`
+    echo 167 >&2
     test ! -s repo/p373r/meta/packages-info.json || \
       merge_packages_info repo/p373r/meta/packages-info.json || return `_err $? p373r-packages-info`
 )}
@@ -186,27 +202,52 @@ EOF
     set -a
     . $build_dir/msvc.env
     . $build_dir/msvc_path.env
+    . $build_dir/msvc.nunja.env
     . $BASH_ENV
 
     echo $msvc_path
     [[ "$OSTYPE" != "msys" ]] || which cl.exe > /dev/null || return 241
-    local out="$(ninja -C "$build_dir" -n 2>&1 && echo ninja_preflight_OK | colout -t ninja)"
-    echo "$out" | grep ninja_preflight_OK || { echo "$out" ; _die "ninja -n failed" ; }
+    local out="$($ninja_exe -C "$build_dir" -n 2>&1 && echo ninja_preflight_OK | colout -t ninja)"
+    echo "$out" | grep ninja_preflight_OK || { echo "$out" ; _die "$ninja_exe -n failed" ; }
     echo "$out" | head -3
     echo "..."
     echo "$out" | tail -3
 )}
 
 function 0a-1_ninja_fauxbuild() {( $_dbgopts;
+    test -x bin/restat-only-cl.exe || {
+        ${CXX:-'/c/Program Files/LLVM/bin/clang++'} -w -std=c++17 $gha_fsvr_dir/bashland/restat-only-xxx.cpp -o bin/_restat-only-xxx.exe
+        cp -av bin/_restat-only-xxx.exe bin/restat-only-cl.exe
+        cp -av bin/_restat-only-xxx.exe bin/restat-only-lib.exe
+        cp -av bin/_restat-only-xxx.exe bin/restat-only-link.exe
+    } || _die $? "error compiling restat-only-xxx for fauxbuilds"
+    grep FAUXBUILD env.d/local.env 2>&1 >/dev/null || cat <<EOF>> env.d/local.env
+FAUXBUILD=${1:-1}
+EOF
     cd $build_dir
-    touch llplugin/slplugin/slplugin.exe
-    touch media_plugins/libvlc/media_plugin_libvlc.dll
-    touch media_plugins/cef/media_plugin_cef.dll
-    touch newview/${viewer_bin}-bin.exe
-    cat <<EOF>> msvc.nunja.env
-cl_exe=true.exe
-lib_exe=true.exe
-link_exe=true.exe
+    function ptouch() {
+        for x in "$@" ; do
+            mkdir -pv $(dirname $x)
+            touch $x
+        done
+    }
+    ptouch llwebrtc/llwebrtc.lib llwebrtc/llwebrtc.dll sharedlibs/llwebrtc.dll
+    ptouch llplugin/slplugin/slplugin.exe
+    ptouch media_plugins/libvlc/media_plugin_libvlc.dll
+    ptouch media_plugins/cef/media_plugin_cef.dll
+    ptouch media_plugins/example/media_plugin_example.dll
+    ptouch newview/${viewer_bin}-bin.exe
+    grep restat-only-cl.exe msvc.nunja.env || cat <<'EOF'>> msvc.nunja.env
+_cl_exe=$cl_exe
+_lib_exe=$lib_exe
+_link_exe=$link_exe
+_cmcldeps_exe=$cmcldeps_exe
+_rc_exe=$rc_exe
+cl_exe=restat-only-cl.exe
+lib_exe=restat-only-lib.exe
+link_exe=restat-only-link.exe
+cmcldeps_exe=true.exe
+rc_exe=true.exe
 EOF
 
 )}
@@ -216,10 +257,11 @@ function 0a0_ninja_build() {( $_dbgopts;
     set -a
     . $build_dir/msvc.env
     . $build_dir/msvc_path.env
+    . $build_dir/msvc.nunja.env
     . $BASH_ENV
     [[ "$OSTYPE" != "msys" ]] || which cl.exe > /dev/null || return 241
-    echo "[$FUNCNAME] ninja -C $build_dir ${@:-llpackage}" >&2
-    ninja -C "$build_dir" "${@:-llpackage}" | colout -t ninja || _die_exit_code=$? _die "ninja failed"
+    echo "[$FUNCNAME] $ninja_exe -C $build_dir ${@:-llpackage}" >&2
+    $ninja_exe -C "$build_dir" "${@:-llpackage}" | ${NINJA_COLOUT:-colout -t ninja} || _die_exit_code=$? _die "ninja failed"
 )}
 
 function _get_APPLICATION_EXE() {(
@@ -227,7 +269,7 @@ function _get_APPLICATION_EXE() {(
     if [[ $viewer_id == blackdragon ]] ; then
       APPLICATION_EXE=SecondLifeViewer.exe
     fi
-    APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *${viewer_channel}.exe 2>/dev/null | head -n 1)
+    APPLICATION_EXE=$(cd $build_dir/newview ; ls $APPLICATION_EXE *Viewer*.exe *-GHA.exe *${viewer_channel}.exe *${viewer_channel/Firestorm/FirestormOS}.exe 2>/dev/null | head -n 1)
     echo "$APPLICATION_EXE"
 )}
 
@@ -239,6 +281,12 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
     ) || exit $?
     (
       APPLICATION_EXE=$(_get_APPLICATION_EXE)
+      (
+        echo "APPLICATION_EXE=${APPLICATION_EXE}"
+        echo "nsi=$nsi"
+        echo "application_bin=${viewer_bin}-bin.exe"
+      ) | tee $build_dir/APPLICATION_EXE.env
+      cat "$nsi" | sed -e "s@File [^ ]\+[/\\]newview[/\\]@File @g;s@^File @runtime/@g;s@$APPLICATION_EXE@APPLICATION_EXE@g;" > $build_dir/runtime.installer.nsi
       _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
       cat $fsvr_dir/util/load_with_settings_and_cache_here.bat \
         | APPLICATION_EXE=$APPLICATION_EXE envsubst \
@@ -255,6 +303,7 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
          $nsi
       grep "openvr_api.dll" -C2 $nsi
     )
+    cp -av "$nsi" $build_dir/runtime.installer.original.nsi
     grep -E ^File "$nsi" | sed -e "s@File [^ ]\+[/\\]newview[/\\]@File @g;s@^File @$viewer_channel-$version_full/@g" | sort -u > $build_dir/installer.txt
     echo "$viewer_channel-$version_full/load_with_settings_and_cache_here.bat" >> $build_dir/installer.txt
     tail -2 $build_dir/installer.txt
@@ -262,6 +311,17 @@ function 0a1_ninja_postbuild() {( $_dbgopts;
     ht-ln $build_dir/newview $build_dir/$viewer_channel-$version_full
 )}
 
+function 0a2_postbuild() {( $_dbgopts;
+    if [[ -f $nunja_dir/postbuild.bash ]] ; then
+      echo "[sourcing] $nunja_dir/postbuild.bash" >&2
+      set -a
+      . $BASH_ENV
+      . $build_dir/msvc.env
+      . $build_dir/msvc_path.env
+      . $build_dir/msvc.nunja.env
+      . $nunja_dir/postbuild.bash
+    fi
+)}
 
 function make_installer() {
   local nsi=$build_dir/newview/${viewer_bin}_setup_tmp.nsi
@@ -275,6 +335,10 @@ function make_installer() {
 
   local InstallerName=$(basename $build_dir/newview/*Setup*.exe)
   local InstallerExe=${InstallerName/.exe/-$version_shas.exe}
+  local VARCH="_LEGACY"
+  if [[ $base == *avx2* ]] ; then VARCH="_AVX2" ; fi
+  #eg: FirestormOS-VR-GHA_AVX2.7.1.11.76496-7dc08a7-419c06c_Setup.exe
+  local InstallerExe=${viewer_bin^}OS-${viewer_channel/${viewer_bin^}-/}${VARCH}.${version_xyzw}-${version_shas}_Setup.exe
   mv -v $build_dir/newview/*Setup*.exe $build_dir/$InstallerExe
   # echo windows_installer=$build_dir/$InstallerExe | tee -a $GITHUB_OUTPUT
 }
@@ -323,9 +387,9 @@ function 0b3_upload_7z() {( $_dbgopts;
 function 0b4_bundle_zip() {( $_dbgopts;
   # mkdir ziptest
   # tar -C $build_dir -cf - --verbatim-files-from -T $build_dir/installer.txt | tar -C ziptest -xf -
-  export APPLICATION_EXE=$(_get_APPLICATION_EXE)
-  _assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
-  bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir/newview && 7z -mx5 -bd -bt -tzip a "$build_dir/${APPLICATION_EXE/.exe/.zip}" "$build_dir/newview/$APPLICATION_EXE"'
+  #export APPLICATION_EXE=$(_get_APPLICATION_EXE)
+  #_assert APPLICATION_EXE test -f $build_dir/newview/$APPLICATION_EXE
+  #bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir/newview && 7z -mx5 -bd -bt -tzip a "$build_dir/${APPLICATION_EXE/.exe/.zip}" "$build_dir/newview/$APPLICATION_EXE"'
   bash -c 'set +x; echo $PATH ; which 7z ; cd $build_dir && 7z -mx5 -bd -bt -tzip a "$build_dir/$viewer_channel-$version_full.zip" "@$build_dir/installer.txt"'
 )}
 
@@ -358,8 +422,12 @@ function _steps() {
 # Check if the script is being sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   $_dbgopts
-  cmd=$1
-  shift
+  if [[ $# == 0 ]] ; then
+      cmd=_steps
+  else
+      cmd=$1
+      shift
+  fi
   if [[ $cmd =~ ^[0-9a-fA-F]{3}$ ]] ; then
     cmd=$(echo $(_steps | grep $cmd))
     echo "cmd=$cmd" >&2

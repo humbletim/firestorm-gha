@@ -2,6 +2,8 @@
 
 # fsvr script utilities -- humbletim 2024.03.08
 
+test -v ghash || { echo "ERROR: missing ghash env var" >&2 ; exit 5 ;  }
+
 source $ghash/gha.reduce-paths.bash
 source $ghash/gha.wget-sha256.bash
 source $ghash/gha.ht-ln.bash
