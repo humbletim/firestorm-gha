@@ -139,6 +139,10 @@ function 039_provision_p373r() {( $_dbgopts;
           patch --directory=newview --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
           applied=0001-sgeo_min_vr_7.1.9-baseline-diff.patch
         fi
+        if patch --directory=newview --dry-run --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-7.2.2-baseline-diff.patch > /dev/null ; then
+          patch --directory=newview --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-7.2.2-baseline-diff.patch
+          applied=0001-P373R-7.2.2-baseline-diff.patch
+        fi
         if patch --directory=newview --dry-run --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-6.6.8-baseline-diff.patch > /dev/null ; then
           patch --directory=newview --ignore-whitespace --verbose --merge -p1 < $p373r_dir/0001-P373R-6.6.8-baseline-diff.patch
           applied=0001-P373R-6.6.8-baseline-diff.patch
