@@ -14,7 +14,7 @@ if [[ $OSTYPE == msys ]] ; then
   _programfiles=$(cygpath -ua "$PROGRAMFILES") # | /usr/bin/sed -e 's@[cC]:/@/c/@')
   _comspec=$(cygpath -ua "$COMSPEC") # | /usr/bin/sed -e 's@[cC]:/@/c/@')
 
-  _pythonx64=`ls /c/hostedtoolcache/windows/Python/3.14.*/x64 | tail -1 | tee /dev/stderr`
+  _pythonx64=`ls -1d /c/hostedtoolcache/windows/Python/3.14.*/x64/ | tail -1`
   _PATH="$_workspace/bin:$_userprofile/bin:/c/tools/zstd:$_programfiles/Git/bin:$_programfiles/Git/usr/bin:$_programfiles/Git/mingw64/bin:$_pythonx64/Scripts:$_pythonx64:$_programfiles/OpenSSL/bin:/c/Windows/System32/OpenSSH:$_programfiles/nodejs:$_programfiles/LLVM/bin:/c/ProgramData/Chocolatey/bin:$_programfiles/CMake/bin:/c/Windows/system32:/usr/bin:/bin:/c/msys64/usr/bin"
 
   export PATH="$_PATH"
