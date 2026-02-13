@@ -3635,7 +3635,7 @@ build llwebrtc\CMakeFiles\llwebrtc.dir\llwebrtc.cpp.obj: CXX_COMPILER__llwebrtc_
 # Link the shared library llwebrtc\llwebrtc.dll
 
 build llwebrtc\llwebrtc.dll llwebrtc\llwebrtc.lib: CXX_SHARED_LIBRARY_LINKER__llwebrtc_Release llwebrtc\CMakeFiles\llwebrtc.dir\llwebrtc.cpp.obj | $packages_dir\lib\release\webrtc.lib
-  LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /GR /EHsc /MD /O2 /Ob2 /Zc:wchar_t- /GR /DLL_RELEASE=1 /DLL_RELEASE_FOR_DOWNLOAD=1 /DNDEBUG /D_SECURE_STL=0 /D_HAS_ITERATOR_DEBUGGING=0 /DWIN32 /D_WINDOWS /DLL_WINDOWS=1 /DUNICODE /D_UNICODE /DWINVER=0x0601 /D_WIN32_WINNT=0x0601 /DLL_OS_DRAGDROP_ENABLED=1 /DLIB_NDOF=1 /O2 /Ob2 /DNDEBUG -MTd
+  LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /GR /EHsc /MD /O2 /Ob2 /Zc:wchar_t /GR /DLL_RELEASE=1 /DLL_RELEASE_FOR_DOWNLOAD=1 /DNDEBUG /D_SECURE_STL=0 /D_HAS_ITERATOR_DEBUGGING=0 /DWIN32 /D_WINDOWS /DLL_WINDOWS=1 /DUNICODE /D_UNICODE /DWINVER=0x0601 /D_WIN32_WINNT=0x0601 /DLL_OS_DRAGDROP_ENABLED=1 /DLIB_NDOF=1 /O2 /Ob2 /DNDEBUG -MTd
   LINK_FLAGS = /machine:x64 /LARGEADDRESSAWARE  /LARGEADDRESSAWARE /IGNORE:4099
   LINK_LIBRARIES = secur32.lib  winmm.lib  dmoguids.lib  wmcodecdspuuid.lib  msdmo.lib  strmiids.lib  iphlpapi.lib  libcmt.lib  $packages_dir\lib\release\webrtc.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   LINK_PATH = -LIBPATH:$packages_dir\lib\release
