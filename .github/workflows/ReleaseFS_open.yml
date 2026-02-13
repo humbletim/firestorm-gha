@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          repository: FirestormViewer/phoenix-firestorm
           ref: ${{ inputs.ref }}
 
       - name: Set up Python
@@ -38,6 +39,7 @@ jobs:
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
 
       - name: ~Setup tmate session
+        if: always()
         # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
         uses: mxschmitt/action-tmate@v3
         with:
