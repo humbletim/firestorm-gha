@@ -1,0 +1,59 @@
+name: ReleaseFS_open
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        type: string
+        required: true
+
+run-name: ReleaseFS_open | ${{ inputs.ref }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install autobuild dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set up build variables
+        run: |
+          git clone https://github.com/FirestormViewer/fs-build-variables.git build-variables
+          echo "AUTOBUILD_VARIABLES_FILE=$PWD/build-variables/variables" >> $GITHUB_ENV
+          echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
+
+      - name: ~Setup tmate session
+        # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+
+      - name: Configure (open source build)
+        run: |
+          autobuild configure -A 64 -c ReleaseFS_open -- --package -DLL_TESTS:BOOL=FALSE
+
+      - name: Build
+        run: |
+          autobuild build -A 64 -c ReleaseFS_open --no-configure
+
+      - name: Upload unsigned installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: firestorm-installer
+          path: build-*/newview/Release/*Setup.exe
+
