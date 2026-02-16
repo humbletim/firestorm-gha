@@ -44,8 +44,9 @@ jobs:
 
       - name: Preflight Check
         uses: ./tpv-gha-nunja/gha-node20-run
-        run: |
-          echo OK
+        with:
+          run: |
+            echo OK
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -94,8 +95,9 @@ jobs:
 
       - name: Post Build
         uses: ./tpv-gha-nunja/gha-node20-run
-        run: |
-          ghash=./tpv-gha-nunja/gha ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
+        with:
+          run: |
+            ghash=./tpv-gha-nunja/gha ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
 
       - name: Upload unsigned installer
         uses: actions/upload-artifact@v4
