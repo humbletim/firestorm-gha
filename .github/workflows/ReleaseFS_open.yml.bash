@@ -258,7 +258,7 @@ echo "[7z] GENERATING ${bundle}-(devtime|runtime|snapshot).zip..." >&2
 
 #test ! -d $base/runtime || rm -v $base/runtime
 # package ${base:-fs-beta-7.1.12-e}/ => "devtime" capture
-time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-devtime.zip $base
+time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-devtime.zip $base -xr!$base/tmp
 
 # stage fs-beta-7.1.12-e/runtime/
 if test -x C:\\windows\\system32\\cmd.exe ; then
@@ -272,7 +272,11 @@ time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-runtime.zip @$build_dir/runtime.txt
 
 # make a copy of devtime and append @precision manifested runtime/ folder (to emerge a combined snapshot)
 cp -av ${bundle}-devtime.zip ${bundle}-snapshot.zip
-time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-snapshot.zip @$build_dir/runtime.txt
+mkdir -pv $base/devtime $base/tmp
+( cd $base/tmp ; git clone https://github.com/humbletim/p373r-vrmod --single-branch --branch devtime ; )
+rsync -av $base/tmp/p373r-vrmod/experiments/portables/ $base/tmp/p373r-vrmod/experiments/winsdk.in/other/vs-emulate-xwin.bat $base/devtime/
+time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-snapshot.zip @$build_dir/runtime.txt $base/devtime/
+
 
 test "${_7z:-7z}" == 7z || { echo "NOUPLOAD 7z=${_7z}" >&2 ; exit 141 ; }
 echo "UPLOADING ARTIFACTS...${GITHUB_ACTIONS}" >&2
