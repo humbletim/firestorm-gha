@@ -171,7 +171,9 @@ def load_tlogs():
     files = glob.glob(pattern, recursive=True)
     
     print(f"[*] Found {len(files)} TLOG files in {BUILD_ROOT}...")
-    
+    files = [ f for f in files if not ( 'plugin' in f or 'webrtc' in f or 'cmake' in f) ]
+    print(f"[**] (pruned plugin|webrtc|cmake) Found {len(files)} TLOG files in {BUILD_ROOT}...")
+
     for fpath in files:
         try:
             with open(fpath, 'r', encoding='utf-16') as f: content = f.read()

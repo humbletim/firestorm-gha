@@ -42,6 +42,11 @@ jobs:
           ref: main
           path: p373r-vrmod-main
 
+      - name: Preflight Check
+        uses: ./tpv-gha-nunja/gha-node20-run
+        run: |
+          echo OK
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -66,6 +71,7 @@ jobs:
           provision_openvr $PWD
           autobuild installables add --archive file:///`cygpath -m $PWD/openvr-v*.*.*.*.tar.bz2`
           autobuild install openvr --verbose
+          PATH=/c/Program\ Files/Git/usr/bin:$PATH patch -p1 --merge < build-vc${AUTOBUILD_VSVER}-64/packages/lib/release/openvr_api.viewer_manifest.patch
 
       - name: Provision 3p-p373r-vrmod
         run: |
@@ -82,16 +88,14 @@ jobs:
         run: |
           autobuild configure -A 64 -c ReleaseFS_open -- --package -DLL_TESTS:BOOL=FALSE
 
-      - name: ~Setup tmate session
-        if: always()
-        # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
-
       - name: Build
         run: |
           autobuild build -A 64 -c ReleaseFS_open --no-configure
+
+      - name: Post Build
+        uses: ./tpv-gha-nunja/gha-node20-run
+        run: |
+          ghash=./tpv-gha-nunja/gha ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
 
       - name: Upload unsigned installer
         uses: actions/upload-artifact@v4
@@ -99,10 +103,10 @@ jobs:
           name: firestorm-installer
           path: build-*/newview/Release/*Setup.exe
 
-      # - name: ~Setup tmate session
-      #   if: always()
-      #   # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
-      #   uses: mxschmitt/action-tmate@v3
-      #   with:
-      #     limit-access-to-actor: true
+      - name: ~Setup tmate session
+        if: always()
+        # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
 
