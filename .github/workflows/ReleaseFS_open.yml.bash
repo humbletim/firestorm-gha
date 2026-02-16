@@ -6,11 +6,12 @@ source $ghash/gha.upload-artifact.bash
 
 HERE=$(pwd -W 2>/dev/null || pwd)
 
+base=${base:-fs-open}
 config_name=${config_name:-Release}
 build_dir=${build_dir:-build-vc170-64}
 packages_dir=${packages_dir:-$build_dir/packages}
 source_dir=${source_dir:-indra}
-snapshot_dir=${snapshot_dir:-fs-test}
+snapshot_dir=${snapshot_dir:-$base}
 
 function git_kv_sha() {
     function _git_sha() {
