@@ -99,10 +99,10 @@ jobs:
           name: firestorm-installer
           path: build-*/newview/Release/*Setup.exe
 
-      - name: ~Setup tmate session
-        if: always()
-        # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
+      # - name: ~Setup tmate session
+      #   if: always()
+      #   # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
+      #   uses: mxschmitt/action-tmate@v3
+      #   with:
+      #     limit-access-to-actor: true
 
