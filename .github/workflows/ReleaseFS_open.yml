@@ -60,15 +60,17 @@ jobs:
         run: |
           set -Euo pipefail
           source p373r-vrmod-main/misc/3p-openvr/improvise.bash
-          provision_openvr .
-          autobuild installables edit --archive openvr-v?.?.?.*.tar.bz2
+          provision_openvr $PWD
+          autobuild installables add --archive file:///`cygpath -m $PWD/openvr-v*.*.*.*.tar.bz2`
+          autobuild install openvr --verbose
 
       - name: Provision 3p-p373r-vrmod
         run: |
           set -Euo pipefail
           source p373r-vrmod-main/misc/3p-p373r-vrmod/improvise.bash
-          provision_p373r_vrmod .
-          autobuild installables edit --archive p373r-vrmod-v?.?.?.*.tar.bz2
+          provision_p373r_vrmod $PWD
+          autobuild installables add --archive file:///`cygpath -m $PWD/p373r-vrmod-v*.*.*.*.tar.bz2`
+          autobuild install p373r-vrmod --verbose
 
       - name: Install NSIS
         run: choco install nsis
