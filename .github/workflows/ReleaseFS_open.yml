@@ -56,6 +56,9 @@ jobs:
           echo "AUTOBUILD_VARIABLES_FILE=$PWD/build-variables/variables" >> $GITHUB_ENV
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
 
+      - name: Install WGET
+        run: choco install wget
+
       - name: Provision 3p-openvr
         run: |
           set -Euo pipefail
