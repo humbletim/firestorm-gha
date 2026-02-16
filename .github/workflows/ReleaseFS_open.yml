@@ -29,6 +29,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install NSIS
+        run: choco install nsis
+
       - name: Install autobuild dependencies
         run: pip install -r requirements.txt
 
@@ -37,13 +40,6 @@ jobs:
           git clone https://github.com/FirestormViewer/fs-build-variables.git build-variables
           echo "AUTOBUILD_VARIABLES_FILE=$PWD/build-variables/variables" >> $GITHUB_ENV
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
-
-      - name: ~Setup tmate session
-        if: always()
-        # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
 
       - name: Configure (open source build)
         run: |
@@ -58,4 +54,11 @@ jobs:
         with:
           name: firestorm-installer
           path: build-*/newview/Release/*Setup.exe
+
+      - name: ~Setup tmate session
+        if: always()
+        # if: (failure() && inputs.pause != 'never') || inputs.pause == 'always'
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
 
