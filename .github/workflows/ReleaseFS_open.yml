@@ -57,12 +57,14 @@ jobs:
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
 
       - name: Provision 3p-openvr
+        run: |
           set -Euo pipefail
           source p373r-vrmod-main/misc/3p-openvr/improvise.bash
           provision_openvr .
           autobuild installables edit --archive openvr-v?.?.?.*.tar.bz2
 
       - name: Provision 3p-p373r-vrmod
+        run: |
           set -Euo pipefail
           source p373r-vrmod-main/misc/3p-p373r-vrmod/improvise.bash
           provision_p373r_vrmod .
