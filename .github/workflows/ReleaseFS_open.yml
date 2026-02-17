@@ -63,7 +63,7 @@ jobs:
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
 
       - name: Install WGET
-        run: choco install wget
+        run: choco install wget --no-progress
 
       - name: Provision 3p-openvr
         run: |
@@ -73,6 +73,7 @@ jobs:
           autobuild installables add --archive file:///`cygpath -m $PWD/openvr-v*.*.*.*.tar.bz2`
           autobuild install openvr --verbose
           PATH=/c/Program\ Files/Git/usr/bin:$PATH patch -p1 --merge < build-vc${AUTOBUILD_VSVER}-64/packages/lib/release/openvr_api.viewer_manifest.patch
+          git diff || true
 
       - name: Provision 3p-p373r-vrmod
         run: |
@@ -83,7 +84,7 @@ jobs:
           autobuild install p373r-vrmod --verbose
 
       - name: Install NSIS
-        run: choco install nsis
+        run: choco install nsis --no-progress
 
       - name: Configure (open source build)
         run: |

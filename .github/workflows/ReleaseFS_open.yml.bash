@@ -123,7 +123,7 @@ done
 
 build_dir_rel=$(realpath --relative-to="$HERE" $build_dir || echo $build_dir)
 cpsync `find $build_dir_rel -name llwebrtc.lib` $snapshot_dir/objs/ || { echo missing llwebrtc.lib >&2 ; exit 61; }
-cpsync `find $build_dir_rel -name llphysicsextensions*.lib` $snapshot_dir/objs/ || { echo missing llphysicsextensions*.lib >&2 ; exit 62; }
+cpsync `find $build_dir_rel -name llphysicsextensions*.lib` $snapshot_dir/objs/ || { echo missing llphysicsextensions*.lib >&2 ; exit 62; } || true
 cpsync `find $build_dir_rel -name media_plugin_base.lib` $snapshot_dir/objs/ || { echo missing media_plugin_base.lib >&2 ; exit 63; }
 
 # find "$build_dir" -name "*.lib" | grep "/$config_name/" | while read -r lib_file; do
@@ -132,7 +132,7 @@ cpsync `find $build_dir_rel -name media_plugin_base.lib` $snapshot_dir/objs/ || 
 
 (
     cd $snapshot_dir
-    find objs/ -name \*.obj -o -name \*.res | sed 's@^@${snapshot_dir}/@' > llobjs.rsp.in || exit 77
+    find objs/ -name \*.obj -o -name \*.res | grep -vE '/(cmake|llwebrtc|slplugin|media_plugins)/' | sed 's@^@${snapshot_dir}/@' > llobjs.rsp.in || exit 77
     cd ..
 )
 
