@@ -62,7 +62,7 @@ jobs:
           echo "AUTOBUILD_VARIABLES_FILE=$PWD/build-variables/variables" >> $GITHUB_ENV
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
 
-     - name: Provision 3p-openvr_api
+      - name: Provision 3p-openvr_api
         run: |
           set -Euo pipefail
           source p373r-vrmod-main/misc/3p-openvr_api/improvise.bash
