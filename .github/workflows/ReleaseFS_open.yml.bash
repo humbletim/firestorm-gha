@@ -156,7 +156,7 @@ find $build_dir/ -type f > $snapshot_dir/metadata/tmp/build_dir.files
 
 ( cat /d/a/_temp/_runner_file_commands/step_summary_*-scrubbed > $snapshot_dir/metadata/summary.md ) || true
 
-python ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.py audit | grep '/D' | sed -e 's@^ \+/D @-D@' | sort -u | tee $snapshot_dir/lldefines.rsp
+python ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.py audit | grep '/D' | sed -e 's@^ \+/D @-D@;s@=\\@=\\"@;s@\\$@\\"@;' | sort -u | tee $snapshot_dir/lldefines.rsp
 
 # ( ninja -C $build_dir -t commands ${viewer_bin}-bin | grep -Eo '(")?[-]D[^ =]+(=[^ ]*)?\1?' | grep -vE '_EXPORTS$' | awk '!seen[$0]++' > $snapshot_dir/lldefines.rsp ) || true
 # cp -uav $nunja_dir/*defines.rsp $snapshot_dir/metadata/ 2>/dev/null || true

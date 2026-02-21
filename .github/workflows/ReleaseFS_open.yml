@@ -62,18 +62,36 @@ jobs:
           echo "AUTOBUILD_VARIABLES_FILE=$PWD/build-variables/variables" >> $GITHUB_ENV
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
 
-      - name: Install WGET
-        run: choco install wget --no-progress
-
-      - name: Provision 3p-openvr
+     - name: Provision 3p-openvr_api
         run: |
           set -Euo pipefail
-          source p373r-vrmod-main/misc/3p-openvr/improvise.bash
-          provision_openvr $PWD
-          autobuild installables add --archive file:///`cygpath -m $PWD/openvr-v*.*.*.*.tar.bz2`
-          autobuild install openvr --verbose
-          PATH=/c/Program\ Files/Git/usr/bin:$PATH patch -p1 --merge < build-vc${AUTOBUILD_VSVER}-64/packages/lib/release/openvr_api.viewer_manifest.patch
-          git diff || true
+          source p373r-vrmod-main/misc/3p-openvr_api/improvise.bash
+          provision_openvr_api $PWD
+          autobuild installables add --archive file:///`cygpath -m $PWD/openvr_api-v*.*.*.*.tar.bz2`
+          autobuild install openvr_api --verbose
+
+      # - name: Install WGET
+      #   run: choco install wget --no-progress
+
+      # - name: Provision 3p-openvr
+      #   run: |
+      #     set -Euo pipefail
+      #     source p373r-vrmod-main/misc/3p-openvr/improvise.bash
+      #     provision_openvr $PWD
+      #     autobuild installables add --archive file:///`cygpath -m $PWD/openvr-v*.*.*.*.tar.bz2`
+      #     autobuild install openvr --verbose
+      #     PATH=/c/Program\ Files/Git/usr/bin:$PATH patch -p1 --merge < build-vc${AUTOBUILD_VSVER}-64/packages/lib/release/openvr_api.viewer_manifest.patch
+      #     git diff || true
+
+      - name: Precompile Devtime
+        run: |
+          autobuild configure -A 64 -c ReleaseFS_open -- --avx2 --package -DLL_TESTS:BOOL=FALSE
+          cmake --build build-vc170-64 --target firestorm-bin --config Release
+
+      - name: Snapshot Devtime
+        uses: ./tpv-gha-nunja/gha-node20-run
+        with:
+          run: ghash=./tpv-gha-nunja/gha ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
 
       - name: Provision 3p-p373r-vrmod
         run: |
@@ -83,27 +101,24 @@ jobs:
           autobuild installables add --archive file:///`cygpath -m $PWD/p373r-vrmod-v*.*.*.*.tar.bz2`
           autobuild install p373r-vrmod --verbose
 
-      - name: Install NSIS
-        run: choco install nsis --no-progress
-
-      - name: Configure (open source build)
-        run: |
-          autobuild configure -A 64 -c ReleaseFS_open -- --package -DLL_TESTS:BOOL=FALSE
-
-      - name: Build
-        run: |
-          autobuild build -A 64 -c ReleaseFS_open --no-configure
-
-      - name: Post Build
+      - name: Apply Community VR Mod
         uses: ./tpv-gha-nunja/gha-node20-run
         with:
           run: |
-            ghash=./tpv-gha-nunja/gha ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
+            PATH=/c/Program\ Files/Git/usr/bin:$PATH patch --directory=indra/newview --ignore-whitespace --verbose --merge -p1 < p373r-vrmod-main/sgeo-minimal/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
+            git diff || true
 
-      - name: Upload unsigned installer
+      - name: Install NSIS
+        run: choco install nsis --no-progress
+
+      - name: Build VR Mod Setup.exe
+        run: |
+          autobuild build -A 64 -c ReleaseFS_open --no-configure
+
+      - name: Upload VR Mod Setup.exe
         uses: actions/upload-artifact@v4
         with:
-          name: firestorm-installer
+          name: community-vrmod-firestorm
           path: build-*/newview/Release/*Setup.exe
 
       - name: ~Setup tmate session
