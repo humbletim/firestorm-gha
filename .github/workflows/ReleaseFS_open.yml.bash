@@ -230,6 +230,21 @@ done
     cd ..
 ) > $snapshot_dir/llincludes.rsp.in
 
+
+	
+###########################################################################
+bundle=${base}-${upstream_rel}-${version_viewer_sha}-${version_fsvr_sha}
+echo "[7z] GENERATING ${bundle}-devtime.zip..." >&2
+
+# package ${base:-fs-beta-7.1.12-e}/ => "devtime" capture
+time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-devtime.zip $base -xr!$base/tmp
+
+echo "UPLOADING ARTIFACTS...${GITHUB_ACTIONS}" >&2
+gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; } 
+grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
+
+zipUploadStream=${bundle}-devtime.zip gha-upload-artifact-fast ${bundle}-devtime ${bundle}-devtime.zip 7
+
 ###########################################################################
 # stage installer/runtime
 
@@ -256,13 +271,7 @@ head -2 $snapshot_dir/metadata/runtime.rsp.in
 
 ###########################################################################
 bundle=${base}-${upstream_rel}-${version_viewer_sha}-${version_fsvr_sha}
-echo "[7z] GENERATING ${bundle}-(devtime|runtime|snapshot).zip..." >&2
-
-#cd $build_dir
-
-#test ! -d $base/runtime || rm -v $base/runtime
-# package ${base:-fs-beta-7.1.12-e}/ => "devtime" capture
-time ${_7z:-7z} -mx5 -bd -tzip a ${bundle}-devtime.zip $base -xr!$base/tmp
+echo "[7z] GENERATING ${bundle}-(runtime|snapshot).zip..." >&2
 
 # stage fs-beta-7.1.12-e/runtime/
 if test -x C:\\windows\\system32\\cmd.exe ; then
@@ -287,7 +296,7 @@ echo "UPLOADING ARTIFACTS...${GITHUB_ACTIONS}" >&2
 gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; } 
 grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
 
-zipUploadStream=${bundle}-devtime.zip gha-upload-artifact-fast ${bundle}-devtime ${bundle}-devtime.zip 7
+# zipUploadStream=${bundle}-devtime.zip gha-upload-artifact-fast ${bundle}-devtime ${bundle}-devtime.zip 7
 zipUploadStream=${bundle}-runtime.zip gha-upload-artifact-fast ${bundle}-runtime ${bundle}-runtime.zip 7
 zipUploadStream=${bundle}-snapshot.zip gha-upload-artifact-fast ${bundle}-snapshot ${bundle}-snapshot.zip 7
 

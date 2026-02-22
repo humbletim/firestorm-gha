@@ -108,18 +108,30 @@ jobs:
             PATH=/c/Program\ Files/Git/usr/bin:$PATH patch --directory=indra/newview --ignore-whitespace --verbose --merge -p1 < p373r-vrmod-main/sgeo-minimal/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
             git diff || true
 
+      - name: Compile VR Mod
+        run: |
+          cmake --build build-vc170-64 --target firestorm-bin --config Release
+
       - name: Install NSIS
         run: choco install nsis --no-progress
 
-      - name: Build VR Mod Setup.exe
+      - name: Generate VR Mod Installer Setup.exe
         run: |
-          autobuild build -A 64 -c ReleaseFS_open --no-configure
+          # autobuild build -A 64 -c ReleaseFS_open --no-configure
+          cmake --build build-vc170-64 --target llpackage --config Release
 
-      - name: Upload VR Mod Setup.exe
-        uses: actions/upload-artifact@v4
+      - name: Upload Community VR Mod Installer
+        uses: ./tpv-gha-nunja/gha-node20-run
         with:
-          name: community-vrmod-firestorm
-          path: build-*/newview/Release/*Setup.exe
+          run: |
+            source tpv-gha-nunja/gha/gha.upload-artifact.bash
+            gha-upload-artifact-fast community-vrmod-firestorm build-*/newview/Release/*Setup.exe 7
+
+      # - name: Upload VR Mod Setup.exe
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: community-vrmod-firestorm
+      #     path: build-*/newview/Release/*Setup.exe
 
       - name: ~Setup tmate session
         if: always()
