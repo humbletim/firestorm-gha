@@ -56,12 +56,11 @@ jobs:
         uses: ./gha-node20-run
         with:
           run: |
-            python -c 'print(__import__("llsd"))' 
+            python -c 'print(__import__("llsd"))'
 
       - name: Preflight Check 2
-        with:
-          run: |
-            python -c 'print(__import__("llsd"))' 
+        run: |
+            python -c 'print(__import__("llsd"))'
 
       - name: Provision 3p-openvr_api
         run: |
