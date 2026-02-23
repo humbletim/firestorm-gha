@@ -25,13 +25,13 @@ jobs:
           git clone --branch ${{ inputs.ref }} --filter=tree:0 --no-progress https://github.com/FirestormViewer/phoenix-firestorm.git . &
 
           # 2. Checkout tpv-gha-nunja (shallow clone)
-          git clone --depth 1 --branch tpv-gha-nunja --single-branch --no-progress https://github.com/humbletim/firestorm-gha.git tpv-gha-nunja &
+          git clone --depth 1 --branch tpv-gha-nunja --single-branch --no-progress https://github.com/humbletim/firestorm-gha.git ../tpv-gha-nunja &
 
           # 3. Checkout p373r-vrmod (shallow clone)
-          git clone --depth 1 --branch main --single-branch --no-progress https://github.com/humbletim/p373r-vrmod.git p373r-vrmod-main &
+          git clone --depth 1 --branch main --single-branch --no-progress https://github.com/humbletim/p373r-vrmod.git ../p373r-vrmod-main &
 
           # 4. Checkout fs-build-variables (shallow clone)
-          git clone --depth 1 --branch master --single-branch --no-progress https://github.com/FirestormViewer/fs-build-variables.git build-variables &
+          git clone --depth 1 --branch master --single-branch --no-progress https://github.com/FirestormViewer/fs-build-variables.git ../build-variables &
 
           _pythonx64=`ls -1d /c/hostedtoolcache/windows/Python/3.*/x64/ | sort -h | tail -1`
           (
@@ -40,69 +40,54 @@ jobs:
           ) | tee -a $GITHUB_PATH
 
           export PATH="$PATH:$_pythonx64/Scripts:$_pythonx64"
-          echo "AUTOBUILD_VARIABLES_FILE=$PWD/build-variables/variables" >> $GITHUB_ENV
+          echo "AUTOBUILD_VARIABLES_FILE=$PWD/../build-variables/variables" >> $GITHUB_ENV
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
 
           wait
 
           pip install -r requirements.txt
+          choco install nsis --no-progress &
 
       - name: Preflight Check
-        uses: ./tpv-gha-nunja/gha-node20-run
+        uses: ../tpv-gha-nunja/gha-node20-run
         with:
           run: echo OK
 
       - name: Provision 3p-openvr_api
         run: |
           set -Euo pipefail
-          source p373r-vrmod-main/misc/3p-openvr_api/improvise.bash
+          source ../p373r-vrmod-main/misc/3p-openvr_api/improvise.bash
           provision_openvr_api $PWD
           autobuild installables add --archive file:///`cygpath -m $PWD/openvr_api-v*.*.*.*.tar.bz2`
           autobuild install openvr_api --verbose
 
-      # - name: Install WGET
-      #   run: choco install wget --no-progress
-
-      # - name: Provision 3p-openvr
-      #   run: |
-      #     set -Euo pipefail
-      #     source p373r-vrmod-main/misc/3p-openvr/improvise.bash
-      #     provision_openvr $PWD
-      #     autobuild installables add --archive file:///`cygpath -m $PWD/openvr-v*.*.*.*.tar.bz2`
-      #     autobuild install openvr --verbose
-      #     PATH=/c/Program\ Files/Git/usr/bin:$PATH patch -p1 --merge < build-vc${AUTOBUILD_VSVER}-64/packages/lib/release/openvr_api.viewer_manifest.patch
-      #     git diff || true
-
       - name: Precompile Devtime
         run: |
           autobuild configure -A 64 -c ReleaseFS_open -- --avx2 --package -DLL_TESTS:BOOL=FALSE
-          cmake --build build-vc170-64 --target firestorm-bin --config Release
+          cmake --source viewer --build build-vc170-64 --target firestorm-bin --config Release
 
       - name: Snapshot Devtime
-        uses: ./tpv-gha-nunja/gha-node20-run
+        uses: ../tpv-gha-nunja/gha-node20-run
         with:
           run: |
             set -Euo pipefail
-            export ghash=./tpv-gha-nunja/ghash
-            source ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
+            export ghash=../tpv-gha-nunja/ghash
+            source ../tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
             generate_env && generate_devtime
 
       - name: Provision 3p-p373r-vrmod
         run: |
           set -Euo pipefail
-          source p373r-vrmod-main/misc/3p-p373r-vrmod/improvise.bash
+          source ../p373r-vrmod-main/misc/3p-p373r-vrmod/improvise.bash
           provision_p373r_vrmod $PWD
           autobuild installables add --archive file:///`cygpath -m $PWD/p373r-vrmod-v*.*.*.*.tar.bz2`
           autobuild install p373r-vrmod --verbose
-          PATH=/c/Program\ Files/Git/usr/bin:$PATH patch --directory=indra/newview --ignore-whitespace --verbose --merge -p1 < p373r-vrmod-main/sgeo-minimal/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
+          PATH=/c/Program\ Files/Git/usr/bin:$PATH patch --directory=indra/newview --ignore-whitespace --verbose --merge -p1 < ../p373r-vrmod-main/sgeo-minimal/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
           git diff || true
 
       - name: Compile VR Mod
         run: |
           cmake --build build-vc170-64 --target firestorm-bin --config Release
-
-      - name: Install NSIS
-        run: choco install nsis --no-progress
 
       - name: Generate VR Mod Installer Setup.exe
         run: |
@@ -110,7 +95,7 @@ jobs:
           cmake --build build-vc170-64 --target llpackage --config Release
 
       - name: Upload Community VR Mod Installer
-        uses: ./tpv-gha-nunja/gha-node20-run
+        uses: ../tpv-gha-nunja/gha-node20-run
         with:
           run: |
             source tpv-gha-nunja/gha/gha.upload-artifact.bash
