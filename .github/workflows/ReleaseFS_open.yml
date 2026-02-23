@@ -6,6 +6,10 @@ on:
       ref:
         type: string
         required: true
+      avx2:
+        required: false
+        type: boolean
+        default: true
 
 run-name: ReleaseFS_open | ${{ inputs.ref }}
 
@@ -72,7 +76,11 @@ jobs:
 
       - name: Autobuild Configure
         run: |
-          autobuild configure -A 64 -c ReleaseFS_open -- --avx2 --package -DLL_TESTS:BOOL=FALSE
+          AVX2=
+          if [ "${{ inputs.avx2 }}" == "true" ]; then
+            AVX2=--avx2
+          fi
+          autobuild configure -A 64 -c ReleaseFS_open -- $AVX2 --package -DLL_TESTS:BOOL=FALSE
 
       - name: Precompile Devtime
         run: |
@@ -110,11 +118,12 @@ jobs:
         uses: ./gha-node20-run
         with:
           run: |
-            source tpv-gha-nunja/gha/gha.upload-artifact.bash
+            source ../tpv-gha-nunja/gha/gha.upload-artifact.bash
             gha-upload-artifact-fast community-vrmod-firestorm build-*/newview/Release/*Setup.exe 7
 
-      # - name: Upload VR Mod Setup.exe
-      #   uses: actions/upload-artifact@v4
+      - name: Upload VR Mod Setup.exe
+        if: false
+        uses: actions/upload-artifact@v4
       #   with:
       #     name: community-vrmod-firestorm
       #     path: build-*/newview/Release/*Setup.exe

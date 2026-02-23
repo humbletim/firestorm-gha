@@ -143,14 +143,14 @@ function generate_devtime() {
     mkdir -pv $snapshot_dir/metadata
     mkdir -pv $snapshot_dir/metadata/tmp
 
-    test -s $snapshot_dir/metadata/artifacts.tar.xz || tar -cJvf $snapshot_dir/metadata/artifacts.tar.xz `find $build_dir_rel -type f -name \*.tlog -o -name \*.vcxproj\* -o -name \*.h -o -name \*.txt | grep -v /packages`
+    test -s $snapshot_dir/metadata/artifacts.tar.xz || tar -cJf $snapshot_dir/metadata/artifacts.tar.xz `find $build_dir_rel -type f -name \*.tlog -o -name \*.vcxproj\* -o -name \*.h -o -name \*.txt | grep -v /packages`
 
     # cp -ua env.d $snapshot_dir/metadata
     # cp -ua $nunja_dir $snapshot_dir/metadata/tmp
     # cp -ua $build_dir/msvc.nunja.env $snapshot_dir/metadata/tmp
 
     # test ! -s fstuple.json || cp -av fstuple.json $snapshot_dir/metadata/
-    cp -ua $build_dir/newview/packages-info.txt $build_dir/newview/build_info.json $snapshot_dir/metadata/
+    cp -ua $build_dir/newview/packages-info.txt $snapshot_dir/metadata
     # cp -ua $nunja_dir/viewer_version.txt $snapshot_dir/metadata/
     env | grep INPUT > $snapshot_dir/metadata/tmp/INPUT.env
     # env | grep -i version=  > $snapshot_dir/metadata/tmp/version.env
@@ -243,14 +243,18 @@ function generate_devtime() {
 
     echo "UPLOADING ARTIFACTS...${GITHUB_ACTIONS}" >&2
     gha-have-runtime || { echo "gha runtime unavailable" && exit 0 ; } 
+    test -d /d/a/_actions/actions/upload-artifact/v4 || git clone --depth 1 --branch v4 https://github.com/actions/upload-artifact.git /d/a/_actions/actions/upload-artifact/v4 --no-progress -c advice.detachedHead=false
     grep gha-patch-upload-artifact /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || gha-patch-upload-artifact
 
     zipUploadStream=${bundle}-devtime.zip gha-upload-artifact-fast ${bundle}-devtime ${bundle}-devtime.zip 7
+
+    # bash -c '. fs-open/ReleaseFS_open.env ; bundle=${base}-${upstream_rel}-${version_viewer_sha}-${version_fsvr_sha} ; echo zipUploadStream=${bundle}-devtime.zip gha-upload-artifact-fast ${bundle}-devtime ${bundle}-devtime.zip 7'
 } # generate_devtime
 
 function generate_runtime() {
     source $snapshot_dir/ReleaseFS_open.env
 
+    cp -ua $build_dir/newview/build_info.json $snapshot_dir/metadata/ || true
 
     ###########################################################################
     # stage installer/runtime
