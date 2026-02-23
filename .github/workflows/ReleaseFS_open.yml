@@ -45,13 +45,23 @@ jobs:
 
           wait
           ln -s ../tpv-gha-nunja/gha-node20-run
+
+      - name: Pip Choco
+        run: |
+          set -xEuo pipefail
           pip install -r requirements.txt
-          choco install nsis --no-progress &
+          choco install nsis --no-progress
 
       - name: Preflight Check
         uses: ./gha-node20-run
         with:
-          run: echo OK
+          run: |
+            python -c 'print(__import__("llsd"))' 
+
+      - name: Preflight Check 2
+        with:
+          run: |
+            python -c 'print(__import__("llsd"))' 
 
       - name: Provision 3p-openvr_api
         run: |
