@@ -44,12 +44,12 @@ jobs:
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
 
           wait
-
+          ln -s ../tpv-gha-nunja/gha-node20-run
           pip install -r requirements.txt
           choco install nsis --no-progress &
 
       - name: Preflight Check
-        uses: ../tpv-gha-nunja/gha-node20-run
+        uses: ./gha-node20-run
         with:
           run: echo OK
 
@@ -67,7 +67,7 @@ jobs:
           cmake --source viewer --build build-vc170-64 --target firestorm-bin --config Release
 
       - name: Snapshot Devtime
-        uses: ../tpv-gha-nunja/gha-node20-run
+        uses: ./gha-node20-run
         with:
           run: |
             set -Euo pipefail
@@ -95,7 +95,7 @@ jobs:
           cmake --build build-vc170-64 --target llpackage --config Release
 
       - name: Upload Community VR Mod Installer
-        uses: ../tpv-gha-nunja/gha-node20-run
+        uses: ./gha-node20-run
         with:
           run: |
             source tpv-gha-nunja/gha/gha.upload-artifact.bash
