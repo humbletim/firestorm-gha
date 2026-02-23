@@ -61,10 +61,13 @@ jobs:
           autobuild installables add --archive file:///`cygpath -m $PWD/openvr_api-v*.*.*.*.tar.bz2`
           autobuild install openvr_api --verbose
 
-      - name: Precompile Devtime
+      - name: Autobuild Configure
         run: |
           autobuild configure -A 64 -c ReleaseFS_open -- --avx2 --package -DLL_TESTS:BOOL=FALSE
-          cmake --source viewer --build build-vc170-64 --target firestorm-bin --config Release
+
+      - name: Precompile Devtime
+        run: |
+          cmake --build build-vc170-64 --target firestorm-bin --config Release
 
       - name: Snapshot Devtime
         uses: ./gha-node20-run
