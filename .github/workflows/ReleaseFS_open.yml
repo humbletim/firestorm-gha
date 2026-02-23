@@ -71,7 +71,7 @@ jobs:
         with:
           run: |
             set -Euo pipefail
-            export ghash=../tpv-gha-nunja/ghash
+            export ghash=$PWD/../tpv-gha-nunja/gha
             source ../tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
             generate_env && generate_devtime
 
