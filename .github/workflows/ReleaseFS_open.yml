@@ -17,50 +17,40 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Checkout Viewer
-        uses: actions/checkout@v5
-        with:
-          repository: FirestormViewer/phoenix-firestorm
-          ref: ${{ inputs.ref }}
-          fetch-depth: 0         # request "all" commits...
-          filter: tree:0         # ...BUT don't download trees or file blobs for them!
-          path: .
+      - name: Clone repos
+        run: |
+          set -xEuo pipefail
 
-      - name: Checkout tpv-gha-nunja
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 1
-          repository: humbletim/firestorm-gha
-          ref: tpv-gha-nunja
-          path: tpv-gha-nunja
+          # 1. Checkout Viewer (treeless clone, full history)
+          git clone --branch ${{ inputs.ref }} --filter=tree:0 --no-progress https://github.com/FirestormViewer/phoenix-firestorm.git . &
 
-      - name: Checkout p373r-vrmod
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 1
-          repository: humbletim/p373r-vrmod
-          ref: main
-          path: p373r-vrmod-main
+          # 2. Checkout tpv-gha-nunja (shallow clone)
+          git clone --depth 1 --branch tpv-gha-nunja --single-branch --no-progress https://github.com/humbletim/firestorm-gha.git tpv-gha-nunja &
+
+          # 3. Checkout p373r-vrmod (shallow clone)
+          git clone --depth 1 --branch main --single-branch --no-progress https://github.com/humbletim/p373r-vrmod.git p373r-vrmod-main &
+
+          # 4. Checkout fs-build-variables (shallow clone)
+          git clone --depth 1 --branch master --single-branch --no-progress https://github.com/FirestormViewer/fs-build-variables.git build-variables &
+
+          _pythonx64=`ls -1d /c/hostedtoolcache/windows/Python/3.*/x64/ | sort -h | tail -1`
+          (
+            echo "$_pythonx64/Scripts"
+            echo "$_pythonx64"
+          ) | tee -a $GITHUB_PATH
+
+          export PATH="$PATH:$_pythonx64/Scripts:$_pythonx64"
+          echo "AUTOBUILD_VARIABLES_FILE=$PWD/build-variables/variables" >> $GITHUB_ENV
+          echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
+
+          wait
+
+          pip install -r requirements.txt
 
       - name: Preflight Check
         uses: ./tpv-gha-nunja/gha-node20-run
         with:
-          run: |
-            echo OK
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-
-      - name: Install autobuild dependencies
-        run: pip install -r requirements.txt
-
-      - name: Set up build variables
-        run: |
-          git clone https://github.com/FirestormViewer/fs-build-variables.git build-variables
-          echo "AUTOBUILD_VARIABLES_FILE=$PWD/build-variables/variables" >> $GITHUB_ENV
-          echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
+          run: echo OK
 
       - name: Provision 3p-openvr_api
         run: |
@@ -91,7 +81,11 @@ jobs:
       - name: Snapshot Devtime
         uses: ./tpv-gha-nunja/gha-node20-run
         with:
-          run: ghash=./tpv-gha-nunja/gha ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
+          run: |
+            set -Euo pipefail
+            export ghash=./tpv-gha-nunja/ghash
+            source ./tpv-gha-nunja/.github/workflows/ReleaseFS_open.yml.bash
+            generate_env && generate_devtime
 
       - name: Provision 3p-p373r-vrmod
         run: |
@@ -100,13 +94,8 @@ jobs:
           provision_p373r_vrmod $PWD
           autobuild installables add --archive file:///`cygpath -m $PWD/p373r-vrmod-v*.*.*.*.tar.bz2`
           autobuild install p373r-vrmod --verbose
-
-      - name: Apply Community VR Mod
-        uses: ./tpv-gha-nunja/gha-node20-run
-        with:
-          run: |
-            PATH=/c/Program\ Files/Git/usr/bin:$PATH patch --directory=indra/newview --ignore-whitespace --verbose --merge -p1 < p373r-vrmod-main/sgeo-minimal/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
-            git diff || true
+          PATH=/c/Program\ Files/Git/usr/bin:$PATH patch --directory=indra/newview --ignore-whitespace --verbose --merge -p1 < p373r-vrmod-main/sgeo-minimal/0001-sgeo_min_vr_7.1.9-baseline-diff.patch
+          git diff || true
 
       - name: Compile VR Mod
         run: |
