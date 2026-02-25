@@ -46,6 +46,7 @@ jobs:
           export PATH="$PATH:$_pythonx64/Scripts:$_pythonx64"
           echo "AUTOBUILD_VARIABLES_FILE=$PWD/../build-variables/variables" >> $GITHUB_ENV
           echo "AUTOBUILD_VSVER=170" >> $GITHUB_ENV
+          echo "AUTOBUILD_LOGLEVEL=--verbose" >> $GITHUB_ENV
 
           wait
           ln -s ../tpv-gha-nunja/gha-node20-run
