@@ -173,7 +173,8 @@ function generate_devtime() {
     for x in `ls -1 $packages_dir/include| grep -v webrtc` ; do
         cpsync $packages_dir/include/$x $snapshot_dir/3p/include/
     done
-    cpsync $build_dir/newview/licenses.txt $snapshot_dir/3p/
+    test ! -s $build_dir/newview/licenses.txt || cpsync $build_dir/newview/licenses.txt $snapshot_dir/3p/
+    test ! -s $build_dir/newview/Release/licenses.txt || cpsync $build_dir/newview/Release/licenses.txt $snapshot_dir/3p/
     cpsync $build_dir/newview/packages-info.txt $snapshot_dir/3p/
 
     ###########################################################################

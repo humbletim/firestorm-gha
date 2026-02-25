@@ -75,6 +75,14 @@ jobs:
           autobuild installables add --archive file:///`cygpath -m $PWD/openvr_api-v*.*.*.*.tar.bz2`
           autobuild install openvr_api --verbose
 
+      - name: Provision 3p-openjp2_api
+        run: |
+          set -Euo pipefail
+          source ../p373r-vrmod-main/misc/3p-openjp2_api/improvise.bash
+          provision_openjp2_api $PWD
+          autobuild installables add --archive file:///`cygpath -m $PWD/openjp2_api-v*.*.*.*.tar.bz2`
+          autobuild install openjp2_api --verbose
+
       - name: Autobuild Configure
         run: |
           autobuild configure -A 64 -c ReleaseFS_open -- ${{ inputs.extra_autobuild_configure }} --package -DLL_TESTS:BOOL=FALSE
