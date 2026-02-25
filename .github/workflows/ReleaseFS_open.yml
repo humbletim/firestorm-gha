@@ -6,12 +6,12 @@ on:
       ref:
         type: string
         required: true
-      avx2:
-        required: false
-        type: boolean
-        default: true
+      extra_autobuild_configure:
+        required: true
+        type: string
+        default: "--avx2"
 
-run-name: ReleaseFS_open | ${{ inputs.ref }}
+run-name: ReleaseFS_open | ${{ inputs.ref }} ${{ inputs.extra_autobuild_configure }}
 
 defaults:
   run:
@@ -26,16 +26,16 @@ jobs:
           set -xEuo pipefail
 
           # 1. Checkout Viewer (treeless clone, full history)
-          git clone --branch ${{ inputs.ref }} --filter=tree:0 --no-progress https://github.com/FirestormViewer/phoenix-firestorm.git . &
+          git clone https://github.com/FirestormViewer/phoenix-firestorm.git --branch ${{ inputs.ref }} --filter=tree:0 --no-progress . &
 
           # 2. Checkout tpv-gha-nunja (shallow clone)
-          git clone --depth 1 --branch tpv-gha-nunja --single-branch --no-progress https://github.com/humbletim/firestorm-gha.git ../tpv-gha-nunja &
+          git clone https://github.com/humbletim/firestorm-gha.git --depth 1 --branch tpv-gha-nunja --single-branch --no-progress ../tpv-gha-nunja &
 
           # 3. Checkout p373r-vrmod (shallow clone)
-          git clone --depth 1 --branch main --single-branch --no-progress https://github.com/humbletim/p373r-vrmod.git ../p373r-vrmod-main &
+          git clone https://github.com/humbletim/p373r-vrmod.git --depth 1 --branch main --single-branch --no-progress ../p373r-vrmod-main &
 
           # 4. Checkout fs-build-variables (shallow clone)
-          git clone --depth 1 --branch master --single-branch --no-progress https://github.com/FirestormViewer/fs-build-variables.git ../build-variables &
+          git clone https://github.com/FirestormViewer/fs-build-variables.git --depth 1 --branch master --single-branch --no-progress ../build-variables &
 
           _pythonx64=`ls -1d /c/hostedtoolcache/windows/Python/3.*/x64/ | sort -h | tail -1`
           (
@@ -77,11 +77,7 @@ jobs:
 
       - name: Autobuild Configure
         run: |
-          AVX2=
-          if [ "${{ inputs.avx2 }}" == "true" ]; then
-            AVX2=--avx2
-          fi
-          autobuild configure -A 64 -c ReleaseFS_open -- $AVX2 --package -DLL_TESTS:BOOL=FALSE
+          autobuild configure -A 64 -c ReleaseFS_open -- ${{ inputs.extra_autobuild_configure }} --package -DLL_TESTS:BOOL=FALSE
 
       - name: Precompile Devtime
         run: |
