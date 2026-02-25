@@ -53,8 +53,9 @@ jobs:
       - name: Pip Choco
         run: |
           set -xEuo pipefail
-          pip install -r requirements.txt
-          choco install nsis --no-progress
+          pip install -r requirements.txt &
+          choco install nsis --no-progress &
+          wait
 
       - name: Preflight Check
         uses: ./gha-node20-run
