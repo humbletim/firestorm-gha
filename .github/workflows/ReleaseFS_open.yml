@@ -79,6 +79,9 @@ jobs:
         run: |
           set -Euo pipefail
           source ../p373r-vrmod-main/misc/3p-openjp2_api/improvise.bash
+          provision_openjpeg_dummy $PWD
+          autobuild installables remove openjpeg
+          autobuild installables add --archive file:///`cygpath -m $PWD/openjpeg-v*-dummy.tar.bz2`
           provision_openjp2 $PWD
           autobuild installables add --archive file:///`cygpath -m $PWD/openjp2_api-v*.*.*.*.tar.bz2`
           autobuild install openjp2_api --verbose
