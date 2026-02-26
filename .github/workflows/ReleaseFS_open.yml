@@ -89,7 +89,7 @@ jobs:
 
       - name: Autobuild Configure
         run: |
-          autobuild configure -A 64 -c ReleaseFS_open -- ${{ inputs.extra_autobuild_configure }} --package -DLL_TESTS:BOOL=FALSE
+          autobuild configure -A 64 -c ReleaseFS_open -- ${{ inputs.extra_autobuild_configure }} --chan VR-GHA --package -DLL_TESTS:BOOL=FALSE
 
       - name: Precompile Devtime
         run: |
