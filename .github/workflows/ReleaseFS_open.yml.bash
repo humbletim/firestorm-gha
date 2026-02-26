@@ -167,7 +167,7 @@ function generate_devtime() {
     echo "SNAPSHOT PACKAGES..." >&2
     mkdir -pv $snapshot_dir/3p/lib
     for x in `ls -1 $packages_dir/lib/release/{*.lib,*.dll} | grep -v webrtc` ; do
-        cpsync $packages_dir/lib/release/$x $snapshot_dir/3p/lib/
+        cpsync $x $snapshot_dir/3p/lib/
     done
     mkdir -pv $snapshot_dir/3p/include
     for x in `ls -1 $packages_dir/include| grep -v webrtc` ; do
