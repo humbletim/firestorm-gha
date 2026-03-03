@@ -72,16 +72,19 @@ function gha-upload-artifact() {(
 function gha-upload-artifact-fast() {(
   test -v GITHUB_ACTIONS || return 0
   set -Euo pipefail
-  export INPUT_name="`gha-esc "$1"`"
-  export INPUT_path="`gha-esc "$2"`"
+  local node="${node:-/c/Program Files/nodejs/node}"
+  local _actions="${_actions:-/d/a/_actions}"
+
+  export INPUT_NAME="`gha-esc "$1"`"
+  export INPUT_PATH="`gha-esc "$2"`"
   env \
-    INPUT_retention-days=${3:-1} \
-    INPUT_compression-level=${4:-0} \
-    INPUT_overwrite=${5:-false} \
-    INPUT_include-hidden-files=true \
-    INPUT_if-no-files-found=error \
-    /c/Program\ Files/nodejs/node /d/a/_actions/actions/upload-artifact/v4/dist/upload/index.js || return $?
-  echo "uploaded: ${INPUT_path}" >&2
+    INPUT_RETENTION-DAYS=${3:-1} \
+    INPUT_COMPRESSION-LEVEL=${4:-0} \
+    INPUT_OVERWRITE=${5:-false} \
+    INPUT_INCLUDE-HIDDEN-FILES=true \
+    INPUT_IF-NO-FILES-FOUND=error \
+    $node $_actions/actions/upload-artifact/v4/dist/upload/index.js || return $?
+  echo "uploaded: ${INPUT_PATH}" >&2
 )}
 
 ##############################################################################
