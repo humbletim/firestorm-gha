@@ -83,7 +83,7 @@ function gha-upload-artifact-fast() {(
     INPUT_OVERWRITE=${5:-false} \
     INPUT_INCLUDE-HIDDEN-FILES=true \
     INPUT_IF-NO-FILES-FOUND=error \
-    $node $_actions/actions/upload-artifact/v4/dist/upload/index.js || return $?
+    "$node" $_actions/actions/upload-artifact/v4/dist/upload/index.js || return $?
   echo "uploaded: ${INPUT_PATH}" >&2
 )}
 
