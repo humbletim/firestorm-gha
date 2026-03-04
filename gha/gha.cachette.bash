@@ -216,6 +216,20 @@ function gha-cache-save() {(
 
 )}
 
+function gha-cache-exists-fast() {(
+  test -v GITHUB_ACTIONS || return 1
+  gha-have-runtime || { echo "gha runtime unavailable" && exit 13 ; }
+  set -Euo pipefail
+  local node="${node:-/c/Program Files/nodejs/node}"
+  local _actions="${_actions:-/d/a/_actions}"
+
+  export INPUT_KEY="$1" INPUT_PATH="$2"
+  env INPUT_LOOKUP-ONLY=true "$node" $_actions/actions/cache/v4/dist/restore-only/index.js \
+    | grep -i 'cache-matched-key' >&2 && return 0
+  echo "(cache not found: ${INPUT_KEY})" >&2
+  return 1
+)}
+
 function gha-cache-restore-fast() {(
   test -v GITHUB_ACTIONS || return 1
   gha-have-runtime || { echo "gha runtime unavailable" && exit 13 ; }
