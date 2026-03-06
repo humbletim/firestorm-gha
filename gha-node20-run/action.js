@@ -4,12 +4,12 @@
 const child_process = require('child_process');
 
 var {
-    INPUT_environment: environment,
+    INPUT_ENVIRONMENT: environment,
     // INPUT_env: env,
-    INPUT_run: run,
-    INPUT_shell: shell,
-    INPUT_args: arguments,
-    "INPUT_working-directory": working_directory,
+    INPUT_RUN: run,
+    INPUT_SHELL: shell,
+    INPUT_ARGS: arguments,
+    "INPUT_WORKING-DIRECTORY": working_directory,
     GITHUB_WORKSPACE: workspace,
 } = process.env;
 
