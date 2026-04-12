@@ -6,7 +6,7 @@ on:
       ref:
         type: string
         required: true
-      vrmod:
+      vrmod_repo:
         type: string
         default: "humbletim/p373r-vrmod"
         required: true
