@@ -19,7 +19,7 @@ on:
         type: string
         default: "--avx2"
 
-run-name: ReleaseFS_open | ${{ inputs.ref }} ${{ inputs.extra_autobuild_configure }}
+run-name: ReleaseFS_open | ${{ inputs.vrmod_repo }}:${{ inputs.vrmod_branch }} x ${{ inputs.ref }} ${{ inputs.extra_autobuild_configure }}
 
 defaults:
   run:
