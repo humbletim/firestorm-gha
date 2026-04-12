@@ -6,6 +6,14 @@ on:
       ref:
         type: string
         required: true
+      vrmod:
+        type: string
+        default: "humbletim/p373r-vrmod"
+        required: true
+      vrmod_branch:
+        type: string
+        default: "main"
+        required: true
       extra_autobuild_configure:
         required: true
         type: string
@@ -32,7 +40,7 @@ jobs:
           git clone https://github.com/humbletim/firestorm-gha.git --depth 1 --branch tpv-gha-nunja --single-branch --no-progress ../tpv-gha-nunja &
 
           # 3. Checkout p373r-vrmod (shallow clone)
-          git clone https://github.com/humbletim/p373r-vrmod.git --depth 1 --branch main --single-branch --no-progress ../p373r-vrmod-main &
+          git clone https://github.com/${{ inputs.vrmod_repo }}.git --depth 1 --branch ${{ inputs.vrmod_branch }} --single-branch --no-progress ../p373r-vrmod-main &
 
           # 4. Checkout fs-build-variables (shallow clone)
           git clone https://github.com/FirestormViewer/fs-build-variables.git --depth 1 --branch master --single-branch --no-progress ../build-variables &
