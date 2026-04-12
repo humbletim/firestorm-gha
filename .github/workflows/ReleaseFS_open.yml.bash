@@ -188,7 +188,7 @@ function generate_devtime() {
     cp -ua $build_dir/newview/viewerRes.rc $snapshot_dir/source/ || true
 
     
-    cp --parents app_settings/shaders/class1/deferred/CASF.glsl /dev/shm/fs-open/source 
+    cp --parents app_settings/shaders/class1/deferred/CASF.glsl $snapshot_dir/source 
 
     if true; then #[[ $viewer_bin == secondlife ]] ; then
         cpsync $packages_dir/llphysicsextensions* $snapshot_dir/source || true
