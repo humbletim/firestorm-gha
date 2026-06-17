@@ -41,8 +41,8 @@ jobs:
           CLEAN_NOTICE=$(echo "$INPUTS_JSON" | jq -r 'to_entries | map("\(.key): \(.value)") | join("\n")')
           # URL-encode the newlines so the GitHub annotation parser reads it as one message
           CLEAN_NOTICE="${CLEAN_NOTICE//$'\n'/'%0A'}"
-          echo "::notice title=github.event.inputs::$CLEAN_NOTICE"
-
+          echo "::notice file=.github/workflows/main.yml,line=1,title=Workflow Dispatch Inputs::$CLEAN_LIST"
+          
       - name: Clone repos
         run: |
           set -xEuo pipefail
