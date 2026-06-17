@@ -32,6 +32,17 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+
+      - name: Create Clean Annotation Notice
+        env:
+          INPUTS_JSON: ${{ toJson(github.event.inputs) }}
+        run: |
+          # Use jq to format as "Key: Value", then swap newlines (\n) with %0A for the annotation
+          CLEAN_NOTICE=$(echo "$INPUTS_JSON" | jq -r 'to_entries | map("\(.key): \(.value)") | join("\n")')
+          # URL-encode the newlines so the GitHub annotation parser reads it as one message
+          CLEAN_NOTICE="${CLEAN_NOTICE//$'\n'/'%0A'}"
+          echo "::notice title=github.event.inputs::$CLEAN_NOTICE"
+
       - name: Clone repos
         run: |
           set -xEuo pipefail
