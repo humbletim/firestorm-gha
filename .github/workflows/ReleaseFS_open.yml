@@ -30,7 +30,7 @@ defaults:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
 
       - name: Create Clean Annotation Notice
