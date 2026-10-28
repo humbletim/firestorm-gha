@@ -89,6 +89,15 @@ jobs:
       - name: Preflight Check 2
         run: |
             python -c 'print(__import__("llsd"))'
+            python -c 'print(__import__("llbase"))'
+            python viewer_manifest.py --help
+
+      - name: ~Setup tmate session
+        # if: always()
+        if: failure()
+        uses: mxschmitt/action-tmate@v3.23
+        with:
+          limit-access-to-actor: true
 
       - name: Provision 3p-openvr_api
         run: |
@@ -162,7 +171,7 @@ jobs:
       - name: ~Setup tmate session
         # if: always()
         if: failure()
-        uses: mxschmitt/action-tmate@v3
+        uses: mxschmitt/action-tmate@v3.23
         with:
           limit-access-to-actor: true
 
