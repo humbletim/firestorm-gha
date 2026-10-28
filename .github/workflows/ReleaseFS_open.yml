@@ -92,10 +92,8 @@ jobs:
             python -c 'print(__import__("llbase"))'
             python viewer_manifest.py --help
 
-      - name: ~Setup tmate session
-        # if: always()
-        if: failure()
-        uses: mxschmitt/action-tmate@v3.23
+      - name: Setup upterm session
+        uses: owenthereal/action-upterm@v2
         with:
           limit-access-to-actor: true
 
@@ -168,10 +166,9 @@ jobs:
       #     name: community-vrmod-firestorm
       #     path: build-*/newview/Release/*Setup.exe
 
-      - name: ~Setup tmate session
+      - name: Setup upterm session
         # if: always()
         if: failure()
-        uses: mxschmitt/action-tmate@v3.23
+        uses: owenthereal/action-upterm@v2
         with:
           limit-access-to-actor: true
-
