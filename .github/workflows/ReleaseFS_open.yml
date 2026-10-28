@@ -133,12 +133,6 @@ jobs:
         run: |
             python -c 'print(__import__("llsd"))'
             python -c 'print(__import__("llbase"))'
-            python viewer_manifest.py --help
-
-      - name: Setup upterm session
-        uses: owenthereal/action-upterm@v2
-        with:
-          limit-access-to-actor: true
 
       - name: Provision 3p-openvr_api
         run: |
