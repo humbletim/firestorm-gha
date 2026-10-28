@@ -60,6 +60,22 @@ jobs:
           git clone https://github.com/FirestormViewer/fs-build-variables.git --depth 1 --branch master --single-branch --no-progress ../build-variables &
 
           _pythonx64=`ls -1d /c/hostedtoolcache/windows/Python/3.*/x64/ | sort -h | tail -1`
+          
+          # -- BEGIN PYTHON PURGE --
+          # 1. Nuke all other Python versions in the GHA toolcache
+          _py_ver_dir=$(dirname "$_pythonx64")
+          find /c/hostedtoolcache/windows/Python -mindepth 1 -maxdepth 1 -type d ! -path "$_py_ver_dir" -exec rm -rf {} + 2>/dev/null || true
+          
+          # 2. Nuke PyPy
+          rm -rf /c/hostedtoolcache/windows/PyPy*
+          
+          # 3. Nuke MSYS2 / MinGW pythons 
+          find /c/msys64 -type f -name "python*.exe" -delete 2>/dev/null || true
+          
+          # 4. Nuke Windows Store app execution aliases
+          rm -f /c/Users/*/AppData/Local/Microsoft/WindowsApps/python*.exe
+          # -- END PYTHON PURGE --
+
           (
             echo "$_pythonx64/Scripts"
             echo "$_pythonx64"
@@ -73,6 +89,33 @@ jobs:
           wait
           ln -s ../tpv-gha-nunja/gha-node20-run
 
+      - name: Eradicate all non-3.15.1 Pythons
+        shell: pwsh
+        run: |
+          # 1. Purge all other Python versions in the hosted tool cache
+          Get-ChildItem 'C:\hostedtoolcache\windows\Python' -Directory | Where-Object Name -ne '3.15.1' | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # 2. Purge PyPy cache
+          Remove-Item 'C:\hostedtoolcache\windows\PyPy*' -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # 3. Nuke Windows Store App execution aliases (prevents rogue 'python' calls from opening the Store)
+          Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\python*.exe" -Force -ErrorAction SilentlyContinue
+          
+          # 4. Nuke MSYS2 Python executables
+          Get-ChildItem -Path 'C:\msys64' -Recurse -Filter 'python.exe' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+          
+          # 5. Scrub the PATH of any Python/PyPy/MSYS64 references (except the 3.15.1 path) for future steps
+          $SafePaths = @('C:\hostedtoolcache\windows\Python\3.15.1\x64', 'C:\hostedtoolcache\windows\Python\3.15.1\x64\Scripts')
+          $CleanPathArray = ($env:PATH -split ';') | Where-Object { $_ -notmatch '(?i)Python(?!\\3\.15\.1)|PyPy|msys64' }
+          
+          # Rebuild PATH, forcefully prepending our 3.15.1 installation
+          $NewPath = ($SafePaths + $CleanPathArray) -join ';'
+          
+          # Apply path update to the current Machine environment and the GitHub Action context
+          [Environment]::SetEnvironmentVariable('PATH', $NewPath, 'Machine')
+          echo "C:\hostedtoolcache\windows\Python\3.15.1\x64" >> $env:GITHUB_PATH
+          echo "C:\hostedtoolcache\windows\Python\3.15.1\x64\Scripts" >> $env:GITHUB_PATH
+    
       - name: Pip Choco
         run: |
           set -xEuo pipefail
